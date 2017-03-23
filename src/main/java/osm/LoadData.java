@@ -20,6 +20,7 @@ import org.neo4j.gis.spatial.rtree.SpatialIndexReader;
 import org.neo4j.gis.spatial.rtree.filter.SearchFilter;
 import org.neo4j.gis.spatial.rtree.filter.SearchResults;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.api.security.AccessMode.Static;
@@ -31,6 +32,8 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
+import commons.OwnMethods;
+
 
 public class LoadData {
 
@@ -41,7 +44,7 @@ public class LoadData {
 	static String db_path = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_"+dataset+"/data/databases/graph.db";	
 	public static void main(String [] args)
 	{
-		LoadTest();
+//		LoadTest();
 //		BuildIndex();
 //		QueryTest();
 	}
@@ -50,37 +53,38 @@ public class LoadData {
 	{
 		try {
 			GraphDatabaseService database = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-		    try {
-		    	
-		    	try (Transaction tx = database.beginTx()) {
-		        SpatialDatabaseService spatialService = new SpatialDatabaseService(database);
-		        Layer layer = spatialService.getLayer(layer_name);
-//		        SpatialIndexReader spatialIndex = layer.getIndex();
+				Transaction tx = database.beginTx();
+				SpatialDatabaseService spatialService = new SpatialDatabaseService(database);
+				Layer layer = spatialService.getLayer(layer_name);
+				//		        SpatialIndexReader spatialIndex = layer.getIndex();
 
-		        LayerIndexReader spatialIndex = layer.getIndex();
+				LayerIndexReader spatialIndex = layer.getIndex();
 				System.out.println("Have " + spatialIndex.count() + " geometries in " + spatialIndex.getBoundingBox());
 
-//				Envelope bbox = new Envelope(-80.133549, -80.098067, 26.169624, 26.205106);
-				Envelope bbox = new Envelope(12.90, 13.0064074, 55.59, 55.60);
-	            
-	                List<SpatialDatabaseRecord> results = GeoPipeline
-	                    .startIntersectWindowSearch(layer, bbox)
-	                    .toSpatialDatabaseRecordList();
+				//				Envelope bbox = new Envelope(-80.133549, -80.098067, 26.169624, 26.205106);
+//				Envelope bbox = new Envelope(12.90, 13.0064074, 55.59, 55.60);
+				Envelope bbox = new Envelope(-80.133549,-80.098067,26.169624,26.205106);
+				List<SpatialDatabaseRecord> results = GeoPipeline
+						.startIntersectWindowSearch(layer, bbox)
+						.toSpatialDatabaseRecordList();
 
-	                for (SpatialDatabaseRecord record : results)
-	                {
-	                	Geometry geometry = record.getGeometry();
-	                	System.out.println(geometry.toString());
-	                }
-	                tx.success();
-	            }
-		        
-//		        SearchFilter searchQuery = new SearchIntersectWindow(layer, new Envelope(0, 0, 1, 1));
-//		        spatialIndex.searchIndex(searchQuery);
-//		    SearchResults results = searchQuery.getResults();
-		    } finally {
-		    database.shutdown();
-		    }
+				int i = 0;
+				for (SpatialDatabaseRecord record : results)
+				{
+					Geometry geometry = record.getGeometry();
+					Node node = record.getGeomNode();
+					System.out.println(geometry.toString());
+					System.out.println(node.getAllProperties());
+					OwnMethods.Print(node.getId());
+					i++;
+				}
+				tx.success();
+				OwnMethods.Print("count: " + i);
+				//		        SearchFilter searchQuery = new SearchIntersectWindow(layer, new Envelope(0, 0, 1, 1));
+				//		        spatialIndex.searchIndex(searchQuery);
+				//		    SearchResults results = searchQuery.getResults();
+
+				database.shutdown();
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();

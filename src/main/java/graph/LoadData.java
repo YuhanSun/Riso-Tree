@@ -1,17 +1,353 @@
 package graph;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.neo4j.cypher.internal.compiler.v2_3.executionplan.checkForEagerLoadCsv;
+import org.neo4j.gis.spatial.osm.OSMDataset.OSMNode;
+import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.traversal.Evaluators;
+import org.neo4j.graphdb.traversal.TraversalDescription;
+import org.neo4j.kernel.impl.api.cursor.TxAbstractNodeCursor;
+import org.neo4j.kernel.impl.util.dbstructure.DbStructureArgumentFormatter;
+import org.neo4j.register.Register.Int;
+import org.neo4j.unsafe.batchinsert.BatchInserter;
+import org.neo4j.unsafe.batchinsert.BatchInserters;
+import org.neo4j.unsafe.impl.batchimport.cache.idmapping.IdMapper;
+
+import commons.*;
+import commons.Labels.GraphLabel;
+import commons.Labels.GraphRel;
+import commons.Labels.OSMRelation;
+import commons.Labels.RTreeRel;
+import osm.OSM_Utility;
 
 public class LoadData {
 
+	static String dataset = "Gowalla";
+	static Config config = new Config();
+	static String version = config.GetNeo4jVersion();
+	static String db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
+	static String map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
+	static String graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
+//		LoadNonSpatialEntity();
+//		GetSpatialNodeMap();
+//		LoadGraphEdges();
+//		setRTreeID();
+//		setProperty_Test();
+//		check();
+//		CalculateCount();
+//		getRTreeMap();
+//		get_Geometry_OSMID_Map();
 	}
 	
-	public static void LoadNonSpatialEntity(String entity_path, String db_path)
+	
+	/**
+	 * get map for geometry pos id to graph id
+	 */
+	public static void get_Geometry_OSMID_Map()
 	{
-		ArrayList<Entity>
+		try {
+			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+			Iterable<Node> geometry_nodes = OSM_Utility.getAllGeometries(databaseService, dataset);
+			Map<Object, Object> map = new TreeMap<>();
+			for ( Node node : geometry_nodes)
+			{
+				Long geom_id = node.getId();OwnMethods.Print(geom_id);
+				long osm_id = (long) node.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING)
+						.getStartNode().getProperty("node_osm_id");
+				map.put(geom_id, osm_id);
+			}
+			String map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/geom_osmid_map.txt", dataset);
+			OwnMethods.WriteMap(map_path, true, map);
+			tx.success();
+			databaseService.shutdown();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public static void getRTreeMap()
+	{
+		try {
+			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+			Node rtree_root_node = OSM_Utility.getRTreeRoot(databaseService, dataset);
+			TraversalDescription td = databaseService.traversalDescription()
+					.depthFirst()
+					.relationships( RTreeRel.RTREE_CHILD, Direction.OUTGOING )
+					.evaluator( Evaluators.includeWhereLastRelationshipTypeIs( RTreeRel.RTREE_CHILD ) );
+			Iterable<Node> rtree_nodes = td.traverse( rtree_root_node ).nodes();
+			
+			Map<Object, Object> rtree_map = new TreeMap<Object, Object>();
+			rtree_map.put(0, rtree_root_node.getId());
+			
+			for ( Node node : rtree_nodes)
+				rtree_map.put(node.getProperty("rtree_id"), node.getId());
+			
+			String rtree_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/rtree_map.txt", dataset);
+			OwnMethods.WriteMap(rtree_map_path, true, rtree_map);
+			
+			tx.success();
+			databaseService.shutdown();
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public static void CalculateCount()
+	{
+		try {
+			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+			
+			Iterable<Node> geometry_nodes = OSM_Utility.getAllGeometries(databaseService, dataset);
+			Set<Node> set = new HashSet<Node>();
+			for ( Node node : geometry_nodes)
+			{
+				Node parent = node.getSingleRelationship(RTreeRel.RTREE_REFERENCE, Direction.INCOMING).getStartNode();
+				if(parent != null)
+				{
+					if(parent.hasProperty("count"))
+						parent.setProperty("count", (int)parent.getProperty("count") + 1);
+					else
+						parent.setProperty("count", 1);
+					set.add(parent);
+				}
+			}
+			
+			Set<Node> next_level_set = new HashSet<Node>();
+			
+			while (set.isEmpty() ==  false)
+			{
+				for (Node node : set)
+				{
+					Relationship relationship = node.getSingleRelationship(RTreeRel.RTREE_CHILD, Direction.INCOMING);
+					if ( relationship != null)
+					{
+						Node parent = relationship.getStartNode();
+						if(parent.hasProperty("count"))
+							parent.setProperty("count", (int)parent.getProperty("count") + (int)node.getProperty("count"));
+						else
+							parent.setProperty("count", (int)node.getProperty("count"));
+						next_level_set.add(parent);
+					}
+				}
+				
+				set = next_level_set;
+				next_level_set = new HashSet<Node>();
+			}
+			
+			tx.success();
+			tx.close();
+			databaseService.shutdown();
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public static void check()
+	{
+		try {
+			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+			Node check_node = databaseService.getNodeById(3849874);
+			OwnMethods.Print(check_node.getAllProperties());
+			
+			tx.success();
+			tx.close();
+			databaseService.shutdown();
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public static void setProperty_Test()
+	{
+		try {
+			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+			Node test_node = databaseService.createNode(Label.label("Test"));
+			test_node.setProperty("test", "test");
+			
+			tx.success();
+			tx.close();
+			databaseService.shutdown();
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public static void setRTreeID()
+	{
+		try {
+			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+//			Node rtree_root_node = databaseService.getNodeById(3849874);
+			Node rtree_root_node = OSM_Utility.getRTreeRoot(databaseService, dataset);
+			Queue<Node> queue = new LinkedList<Node>();
+			queue.add(rtree_root_node);
+			int cur_id = 0;
+			
+			while ( queue.isEmpty() == false)
+			{
+				Node node = queue.poll();
+				
+				Node working_node = databaseService.getNodeById(node.getId());
+				working_node.setProperty("rtree_id", cur_id);
+//				tx.success();
+//				tx.close();
+//				OwnMethods.Print(node.getId());
+//				OwnMethods.Print(node.getAllProperties());
+				cur_id++;
+				
+//				tx = databaseService.beginTx();
+				Iterable<Relationship> edges = node.getRelationships(RTreeRel.RTREE_CHILD, Direction.OUTGOING);
+				for ( Relationship edge : edges)
+					queue.add(edge.getEndNode());
+//				tx.success();
+			}
+			tx.success();
+			tx.close();
+			databaseService.shutdown();
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public static void LoadGraphEdges()
+	{
+		BatchInserter inserter = null;
+		try {
+			Map<String, String> id_map = OwnMethods.ReadMap(map_path);
+			Map<String, String> config = new HashMap<String, String>();
+			config.put("dbms.pagecache.memory", "6g");
+			inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
+			
+			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+			for (int i = 0; i < graph.size(); i++)
+			{
+				ArrayList<Integer> neighbors = graph.get(i);
+				int start_neo4j_id = Integer.parseInt(id_map.get(String.valueOf(i)));
+				for (int j = 0; j < neighbors.size(); j++)
+				{
+					int neighbor = neighbors.get(j);
+					if ( i < neighbor )
+					{
+						int end_neo4j_id = Integer.parseInt(id_map.get(String.valueOf(neighbor)));
+						inserter.createRelationship(start_neo4j_id, end_neo4j_id, GraphRel.GRAPH_LINK, null);
+					}
+				}
+			}
+			inserter.shutdown();
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		finally {
+			if(!inserter.equals(null))
+				inserter.shutdown();
+		}
+	}
+	
+	public static void GetSpatialNodeMap()
+	{
+		Map<Object, Object> id_map = new TreeMap<Object, Object>();
+		
+		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+		Node osm_node = OSM_Utility.getOSMDatasetNode(databaseService, dataset);
+		Transaction tx = databaseService.beginTx();
+		try {
+			Iterable<Node> spatial_nodes = OSM_Utility.getAllPointNodes(databaseService, osm_node);
+			for (Node point : spatial_nodes)
+			{
+				long entity_id = (Long) point.getProperty("node_osm_id");
+				long neo4j_id = point.getId();
+				id_map.put(entity_id, neo4j_id);
+			}
+			tx.success();
+			databaseService.shutdown();
+			
+			OwnMethods.WriteMap(map_path, true, id_map);
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public static void LoadNonSpatialEntity()
+	{
+		String entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+		LoadNonSpatialEntity(entity_path, db_path, map_path);
+	}
+	
+	
+	public static void LoadNonSpatialEntity(String entity_path, String db_path, String map_path)
+	{
+		try {
+			ArrayList<Entity> entities = OwnMethods.ReadEntity(entity_path);
+			Map<Object, Object> id_map = new TreeMap<Object, Object>();
+			
+			Map<String, String> config = new HashMap<String, String>();
+			config.put("dbms.pagecache.memory", "6g");
+			BatchInserter inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
+			
+			for (int i = 0; i < entities.size(); i++)
+			{
+				Entity entity = entities.get(i);
+				if(entity.IsSpatial == false)
+				{
+					Map<String, Object> properties = new HashMap<String, Object>();
+					properties.put("id", i);
+					Long pos_id = inserter.createNode(properties, GraphLabel.GRAPH_0);
+					id_map.put((long) i, pos_id);
+				}
+			}
+			inserter.shutdown();
+			
+			OwnMethods.WriteMap(map_path, true, id_map);
+			
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
 	}
 
 }
