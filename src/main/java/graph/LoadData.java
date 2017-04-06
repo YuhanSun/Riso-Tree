@@ -89,6 +89,10 @@ public class LoadData {
 		}
 	}
 	
+	/**
+	 * map each rtree_id to pos_id
+	 * output file is a map format
+	 */
 	public static void getRTreeMap()
 	{
 		try {
@@ -119,6 +123,11 @@ public class LoadData {
 		}
 	}
 	
+	/**
+	 * calculate count of spatial vertices 
+	 * enclosed by the MBR for each non-leaf 
+	 * R-Tree node.
+	 */
 	public static void CalculateCount()
 	{
 		try {
@@ -208,6 +217,11 @@ public class LoadData {
 		}
 	}
 	
+	/**
+	 * set each R-tree non-leaf node a unique id 
+	 * which starts from root with id 0
+	 * follow a bfs sequence
+	 */
 	public static void setRTreeID()
 	{
 		try {

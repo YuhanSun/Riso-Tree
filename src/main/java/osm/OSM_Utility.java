@@ -1,8 +1,11 @@
 package osm;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.neo4j.cypher.internal.compiler.v3_1.codegen.setStaticField;
 import org.neo4j.gis.spatial.Layer;
 import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
@@ -126,6 +129,19 @@ public class OSM_Utility {
 				.relationships( RTreeRel.RTREE_REFERENCE, Direction.OUTGOING )
 				.evaluator( Evaluators.includeWhereLastRelationshipTypeIs( RTreeRel.RTREE_REFERENCE ) );
 		return td.traverse( rtree_root_node ).nodes();
+	}
+	
+	public static Set<Node> getRTreeNonleafDeepestLevelNodes(GraphDatabaseService databaseService, String layer_name) 
+	{
+		Set<Node> nodes = new HashSet<Node>(); 
+		Iterable<Node> geometry_nodes = OSM_Utility.getAllGeometries(databaseService, dataset);
+		for ( Node node : geometry_nodes)
+		{
+			Node parent = node.getSingleRelationship(RTreeRel.RTREE_REFERENCE, Direction.INCOMING).getStartNode();
+			if(parent != null)
+				nodes.add(parent);
+		}
+		return nodes;
 	}
 	
 	static String dataset = "Gowalla";

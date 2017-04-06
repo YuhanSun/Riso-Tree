@@ -34,17 +34,22 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import commons.OwnMethods;
 
-
+/**
+ * load spatial entity into osm layer and 
+ * build the R-tree index
+ * @author yuhansun
+ *
+ */
 public class LoadData {
 
-	static String dataset = "Gowalla";
+	static String dataset = "foursquare";
 	static String osm_filepath = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/"+dataset+"/entity.osm";
 //	static String osm_filepath = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/test/map2.osm";
 	static String layer_name = dataset;
 	static String db_path = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_"+dataset+"/data/databases/graph.db";	
 	public static void main(String [] args)
 	{
-//		LoadTest();
+		LoadTest();
 //		BuildIndex();
 //		QueryTest();
 	}
