@@ -32,7 +32,12 @@ import commons.Labels.*;
 
 public class OSM_Utility {
 	
-
+	/**
+	 * (osm_root:OSMLabel.ReferenceNode)-[:OSM]->(osm_node{name:osm_name})
+	 * @param db
+	 * @param osm_name
+	 * @return osm_node with given osm_name
+	 */
 	public static Node getOSMDatasetNode(GraphDatabaseService db, String osm_name)
 	{
 		Transaction tx = db.beginTx();
@@ -61,6 +66,12 @@ public class OSM_Utility {
 		return null;
 	}
 	
+	/**
+	 * (osm_node)-[:USERS]->()-[:OSM_USER]->()<-[:USER]-(changeset)
+	 * @param db
+	 * @param osm_node
+	 * @return all changeset nodes
+	 */
 	public static Iterable<Node> getAllChangesetNodes(GraphDatabaseService db, Node osm_node)
 	{
 		TraversalDescription td = db.traversalDescription()
@@ -72,6 +83,12 @@ public class OSM_Utility {
 		return td.traverse( osm_node ).nodes();
 	}
 	
+	/**
+	 * (osm_node)-[:USERS]->()-[:OSM_USER]->()<-[:USER]-(changeset)<-[:CHANGESET]-(osm_object)
+	 * @param db
+	 * @param osm_node
+	 * @return	all osm_objects that belong to the osm_node
+	 */
 	public static Iterable<Node> getAllPointNodes(GraphDatabaseService db, Node osm_node) 
 	{
 		TraversalDescription td = db.traversalDescription()
@@ -84,6 +101,12 @@ public class OSM_Utility {
 		return td.traverse( osm_node ).nodes();
 	}
 	
+	/**
+	 * spatial range query
+	 * @param layer	layer to be queried
+	 * @param bbox	input spatial range
+	 * @return	all the objects within bbox
+	 */
 	public static List<SpatialDatabaseRecord> RangeQuery(Layer layer, Envelope bbox)
 	{
 		List<SpatialDatabaseRecord> results = GeoPipeline
@@ -92,6 +115,12 @@ public class OSM_Utility {
 		return results;
 	}
 	
+	/**
+	 * (:ReferenceNode{name:spatial_root}) -[:LAYER]-> (return{layer:layer_name}) -[:RTREE_ROOT]-> (return)
+	 * @param databaseService
+	 * @param layer_name
+	 * @return	r-tree root node given layer_name
+	 */
 	public static Node getRTreeRoot(GraphDatabaseService databaseService, String layer_name)
 	{
 		try
@@ -119,6 +148,12 @@ public class OSM_Utility {
 		return null;
 	}
 	
+	/**
+	 * Get all geometries in RTree. It traverses to leaf node of the r-tree
+	 * @param databaseService
+	 * @param layer_name
+	 * @return	all geometries for an r-tree layer name
+	 */
 	public static Iterable<Node> getAllGeometries(GraphDatabaseService databaseService, String layer_name) 
 	{
 		Node rtree_root_node = getRTreeRoot(databaseService, layer_name);
@@ -131,6 +166,12 @@ public class OSM_Utility {
 		return td.traverse( rtree_root_node ).nodes();
 	}
 	
+	/**
+	 * Get the deepest non-leaf level of an r-tree
+	 * @param databaseService
+	 * @param layer_name
+	 * @return
+	 */
 	public static Set<Node> getRTreeNonleafDeepestLevelNodes(GraphDatabaseService databaseService, String layer_name) 
 	{
 		Set<Node> nodes = new HashSet<Node>(); 
