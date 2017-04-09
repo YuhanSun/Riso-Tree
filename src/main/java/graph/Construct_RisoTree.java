@@ -5,21 +5,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.management.relation.Relation;
+
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.traversal.Evaluators;
+import org.neo4j.graphdb.traversal.TraversalDescription;
 
 import commons.Config;
 import commons.Labels;
 import commons.OwnMethods;
+import commons.Labels.OSMRelation;
 import commons.Labels.RTreeRel;
 import osm.OSM_Utility;
 
@@ -36,10 +45,103 @@ public class Construct_RisoTree {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Construct();
+//		Construct();
+		ClearNL();
 	}
 
-	public static void Construct()
+//	public static void Construct()
+//	{
+//		try {
+//			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+//			Map<String, String> map_str = OwnMethods.ReadMap(geo_id_map_path );
+//			Map<Long, Long> map = new HashMap<>();
+//			Set<Entry<String, String >> set = map_str.entrySet();
+//			for (Entry<String, String> entry : set)
+//			{
+//				Long key = Long.parseLong(entry.getKey());
+//				Long value = Long.parseLong(entry.getValue());
+//				map.put(key, value);
+//			}
+//			
+//			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+//			Transaction tx = dbservice.beginTx();
+//			
+//			Set<Node> cur_level_nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset); 
+//			for ( Node node : cur_level_nodes)
+//			{
+//				TreeSet<Integer> NL = new TreeSet<>();
+//				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_REFERENCE);
+//				for ( Relationship rel : rels)
+//				{
+//					Node child  = rel.getEndNode();
+//					long pos_id = child.getId();
+//					long graph_id = map.get(pos_id);
+//					if(graph_id > Integer.MAX_VALUE)
+//						throw new Exception("graph id out of int range!");
+//					int id = (int) graph_id;
+//					for (int neighbor : graph.get(id))
+//						NL.add(neighbor);
+//				}
+//				int[] NL_array = new int[NL.size()];
+//				int i = 0;
+//				Iterator<Integer> iterator = NL.iterator();
+//				while(iterator.hasNext())
+//				{
+//					NL_array[i] = iterator.next();
+//					i++;
+//				}
+//				node.setProperty("NL_1_list", NL_array);
+//			}
+//			
+//			Set<Node> next_level_nodes = new HashSet<>();
+//			while (cur_level_nodes.isEmpty() ==  false)
+//			{
+//				for (Node node : cur_level_nodes)
+//				{
+//					Relationship relationship = node.getSingleRelationship(RTreeRel.RTREE_CHILD, Direction.INCOMING);
+//					if ( relationship != null)
+//					{
+//						Node parent = relationship.getStartNode();
+//						next_level_nodes.add(parent);
+//					}
+//				}
+//				
+//				for ( Node node : next_level_nodes)
+//				{
+//					TreeSet<Integer> NL = new TreeSet<>();
+//					Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_CHILD);
+//					for ( Relationship rel : rels)
+//					{
+//						Node child  = rel.getEndNode();
+//						int[] child_NL_list = (int[]) child.getProperty("NL_1_list");
+//						for ( int neighbor : child_NL_list)
+//							NL.add(neighbor);
+//					}
+//					int[] NL_array = new int[NL.size()];
+//					int i = 0;
+//					Iterator<Integer> iterator = NL.iterator();
+//					while(iterator.hasNext())
+//					{
+//						NL_array[i] = iterator.next();
+//						i++;
+//					}
+//					node.setProperty("NL_1_list", NL_array);
+//				}
+//				
+//				cur_level_nodes = next_level_nodes;
+//				next_level_nodes = new HashSet<Node>();
+//			}
+//			tx.success();
+//			tx.close();
+//			
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//			e.printStackTrace();
+//		}
+//		
+//	}
+	
+	public static void Construct(int hop_num, ArrayList<Integer> labels)
 	{
 		try {
 			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
@@ -129,6 +231,43 @@ public class Construct_RisoTree {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public static void ClearNL()
+	{
+		String clear_property_name = "NL_1_list";
+		String replace_property_name = "NL_1_0_list";
+		try {
+			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = dbservice.beginTx();
+			
+			Node rtree_root_node = OSM_Utility.getRTreeRoot(dbservice, dataset);
+			
+			Queue<Node> queue = new LinkedList<>();
+			queue.add(rtree_root_node);
+			while ( queue.isEmpty() == false)
+			{
+				Node node = queue.poll();
+				if(node.hasProperty(clear_property_name))
+				{
+					int[] property = (int[]) node.removeProperty(clear_property_name);
+					node.setProperty(replace_property_name, property);
+				}
+				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
+				for (Relationship rel : rels)
+				{
+					Node neighbor = rel.getEndNode();
+					queue.add(neighbor);
+				}
+			}
+			
+			tx.success();
+			tx.close();
+			dbservice.shutdown();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 	}
 	
 }
