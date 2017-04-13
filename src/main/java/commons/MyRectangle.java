@@ -6,6 +6,14 @@ public class MyRectangle {
     public double max_x;
     public double max_y;
 
+    public MyRectangle(double[] bbox)
+    {
+    	this.min_x = bbox[0];
+    	this.min_y = bbox[1];
+    	this.max_x = bbox[2];
+    	this.max_y = bbox[3];
+    }
+    
     public MyRectangle(double p_min_x, double p_min_y, double p_max_x, double p_max_y) {
         this.min_x = p_min_x;
         this.min_y = p_min_y;
