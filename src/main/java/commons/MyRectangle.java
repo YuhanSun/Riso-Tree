@@ -40,4 +40,28 @@ public class MyRectangle {
     	string += ", " + Double.toString(max_y) + ")";
     	return string;
     }
+    
+    public double area()
+    {
+    	return (max_x - min_x) * (max_y - min_y);
+    }
+    
+    /**
+     * return intersect rectangle given an input rectangle
+     * min_x = max_x is considered to be a valid rectangle with zero area
+     * @param rectangle	the input rectangle
+     * @return	the intersect rectangle. null means no intersection
+     */
+    public MyRectangle intersect(MyRectangle rectangle)
+    {
+    	double left = Math.max(this.min_x, rectangle.min_x);
+    	double right = Math.min(this.max_x, rectangle.max_x);
+    	double bottom = Math.max(this.min_y, rectangle.min_y);
+    	double top = Math.min(this.max_y, rectangle.max_y);
+    	
+    	if(left <= right && bottom <= top)
+    		return new MyRectangle(left, bottom, right, top);
+    	else
+    		return null;
+    }
 }
