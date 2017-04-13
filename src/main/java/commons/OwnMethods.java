@@ -52,11 +52,35 @@ import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 public class OwnMethods {
 	
 	/**
+	 * read integer arraylist
+	 * @param path
+	 * @return
+	 */
+	public static ArrayList<Integer> readIntegerArray(String path)
+	{
+		String line = null;
+		ArrayList<Integer> arrayList = new ArrayList<Integer>();
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(path)));
+			while ( (line = reader.readLine()) != null )
+			{
+				int x = Integer.parseInt(line);
+				arrayList.add(x);
+			}
+			reader.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return arrayList;
+	}
+	
+	/**
 	 * Read map from file
 	 * @param filename
 	 * @return
 	 */
-	public static Map<String, String>ReadMap(String filename)
+	public static HashMap<String, String>ReadMap(String filename)
 	{
 		try {
 			HashMap<String, String> map = new HashMap<String, String>();
@@ -73,7 +97,7 @@ public class OwnMethods {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
-		OwnMethods.Print("something in ReadMap(" + filename + ")");
+		OwnMethods.Print("nothing in ReadMap(" + filename + ")");
 		return null;
 	}
 	
@@ -414,7 +438,7 @@ public class OwnMethods {
     public static ArrayList<ArrayList<Integer>> ReadGraph(String graph_path) {
         ArrayList<ArrayList<Integer>> graph = null;
         BufferedReader reader = null;
-        String str = null;
+        String str = "";
         try {
             reader = new BufferedReader(new FileReader(new File(graph_path)));
             str = reader.readLine();
@@ -438,6 +462,7 @@ public class OwnMethods {
             }
         }
         catch (Exception e) {
+        	OwnMethods.Print(str);
             e.printStackTrace();
         }
         return graph;
