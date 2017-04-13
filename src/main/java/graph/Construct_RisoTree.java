@@ -262,7 +262,7 @@ public class Construct_RisoTree {
 					
 					for ( int label : labels)
 					{
-						NL_list.put(label, new TreeSet<>());
+						NL_list.put(label, new TreeSet<Integer>());
 						property_name_map.put(label, String.format("NL_%d_%d_list", max_hop_num, label));
 					}
 					
@@ -353,7 +353,7 @@ public class Construct_RisoTree {
 				
 				HashMap<Integer, ArrayList<Integer>> NL_list = new HashMap<>();
 				for ( int label : labels)
-					NL_list.put(label, new ArrayList<>(line_count));
+					NL_list.put(label, new ArrayList<Integer>(line_count));
 
 				for ( int i = 0; i < line_count; i++)
 				{
@@ -515,7 +515,7 @@ public class Construct_RisoTree {
 			{
 				HashMap<Integer, TreeSet<Integer>> NL = new HashMap<>();
 				for (int i = 0; i < labels.size(); i++)
-					NL.put(labels.get(i), new TreeSet<>());
+					NL.put(labels.get(i), new TreeSet<Integer>());
 				
 				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_REFERENCE);
 				for ( Relationship rel : rels)
@@ -568,7 +568,7 @@ public class Construct_RisoTree {
 				{
 					HashMap<Integer, TreeSet<Integer>> NL = new HashMap<>();
 					for (int i = 0; i < labels.size(); i++)
-						NL.put(labels.get(i), new TreeSet<>());
+						NL.put(labels.get(i), new TreeSet<Integer>());
 					Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_CHILD);
 					for ( Relationship rel : rels)
 					{
