@@ -9,8 +9,8 @@ public class MyRectangle {
     public MyRectangle(double[] bbox)
     {
     	this.min_x = bbox[0];
-    	this.min_y = bbox[1];
-    	this.max_x = bbox[2];
+    	this.max_x = bbox[1];
+    	this.min_y = bbox[2];
     	this.max_y = bbox[3];
     }
     

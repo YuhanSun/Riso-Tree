@@ -204,8 +204,8 @@ public class LoadData {
 		try {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
-			Node test_node = databaseService.createNode(Label.label("Test"));
-			test_node.setProperty("test", "test");
+//			Node test_node = databaseService.createNode(Label.label("Test"));
+//			test_node.setProperty("test", "test");
 			
 			tx.success();
 			tx.close();

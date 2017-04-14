@@ -480,15 +480,15 @@ public class Utility {
      * for the cypher query for profile or explain with given query graph
      * @param query_Graph
      * @param limit
-     * @param Profile_Or_Explain	set to 1 if profile, -1 if Explain, otherwise 0
+     * @param Explain_Or_Profile	set to 1 if profile, -1 if Explain, otherwise 0
      * @return
      */
-	public static String FormCypherQuery(Query_Graph query_Graph, int limit, int Profile_Or_Explain,  String lon_name, String lat_name)
+	public static String FormCypherQuery(Query_Graph query_Graph, int limit, int Explain_Or_Profile,  String lon_name, String lat_name)
 	{
 		String query = "";
-		if(Profile_Or_Explain == 1)
+		if(Explain_Or_Profile == 1)
 			query += "profile match ";
-		else if (Profile_Or_Explain == -1) {
+		else if (Explain_Or_Profile == -1) {
 			query += "explain match ";
 		}
 		else {
