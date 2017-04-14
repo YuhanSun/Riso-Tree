@@ -82,11 +82,17 @@ public class Construct_RisoTree {
 		try {
 			Transaction tx = dbservice.beginTx();
 			Node root = OSM_Utility.getRTreeRoot(dbservice, dataset);
-			Queue<Node> queue = new LinkedList<Node>(); 
-			queue.add(root);
+			long rootID = root.getId();
+			tx.success();
+			tx.close();
+			
+			Queue<Long> queue = new LinkedList<Long>(); 
+			queue.add(rootID);
 			while ( queue.isEmpty() == false)
 			{
-				Node node = queue.poll();
+				tx = dbservice.beginTx();
+				Long pos = queue.poll();
+				Node node = dbservice.getNodeById(pos);
 				int rtree_id = (int) node.getProperty("rtree_id");
 				for ( int i = 1; i <= max_hop_num; i++)
 				{
@@ -110,11 +116,10 @@ public class Construct_RisoTree {
 				}
 				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
 				for ( Relationship relationship : rels)
-					queue.add(relationship.getEndNode());
+					queue.add(relationship.getEndNode().getId());
+				tx.success();
+				tx.close();
 			}
-			
-			tx.success();
-			tx.close();
 			dbservice.shutdown();
 		} catch (Exception e) {
 			// TODO: handle exception
