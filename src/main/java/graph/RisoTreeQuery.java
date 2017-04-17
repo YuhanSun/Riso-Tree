@@ -145,7 +145,7 @@ public class RisoTreeQuery {
 				
 				//<spa_id, overlap_nodes_list>
 //				HashMap<Integer, LinkedList<Node>> overlap_MBR_list = new HashMap<>();
-				LinkedList<Node>overlap_MBR_list = new LinkedList<>(); 
+				LinkedList<Node>overlap_MBR_list = new LinkedList<>(); //just support one spatial predicate
 				
 				Iterator<Node> iterator = cur_list.iterator();
 				while(iterator.hasNext())
@@ -155,6 +155,7 @@ public class RisoTreeQuery {
 					{
 						double[] bbox = (double[]) node.getProperty("bbox");
 						MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
+						OwnMethods.Print(MBR);
 						double MBR_area = MBR.area();
 						
 						int spa_count = (int) node.getProperty("count");
@@ -224,27 +225,29 @@ public class RisoTreeQuery {
 					return null;
 				}
 				
+				//construct the NL_list with the highest selectivity
 				long start1 = System.currentTimeMillis();
 //				if ( min_NL_card < min_spa_card)
-//				{
-//					String property_name = NL_list_propertyname.get(min_NL_spa_id).get(min_NL_neighbor_id);
-//					
-//					HashSet<Integer> min_NL_list = new HashSet<Integer>();
-////					NL_list.put(min_NL_spa_id, new HashMap<Integer, HashSet<Integer>>());
-////					NL_list.get(min_NL_spa_id).put(min_NL_neighbor_id, new HashSet<Integer>());
-//					for ( Node node : overlap_MBR_list)
-//					{
-//						int[] NL_list_label = ( int[] ) node.getProperty(property_name);
-//						for ( int node_id : NL_list_label)
-//							min_NL_list.add(node_id);
-//					}
-//					OwnMethods.Print(String.format("min_NL_list size is %d", min_NL_list.size()));
-//					if ( min_NL_list.size() < min_spa_card)
-//					{
-//						OwnMethods.Print("NL_list is smaller");
-//					}
-//				}
-//				OwnMethods.Print(String.format("NL_serialize time: %d", System.currentTimeMillis() - start1));
+				{
+					String property_name = NL_list_propertyname.get(min_NL_spa_id).get(min_NL_neighbor_id);
+					
+					HashSet<Integer> min_NL_list = new HashSet<Integer>();
+//					NL_list.put(min_NL_spa_id, new HashMap<Integer, HashSet<Integer>>());
+//					NL_list.get(min_NL_spa_id).put(min_NL_neighbor_id, new HashSet<Integer>());
+					for ( Node node : overlap_MBR_list)
+					{
+						int[] NL_list_label = ( int[] ) node.getProperty(property_name);
+						for ( int node_id : NL_list_label)
+							min_NL_list.add(node_id);
+					}
+					OwnMethods.Print(String.format("min_NL_list size is %d", min_NL_list.size()));
+					if ( min_NL_list.size() < min_spa_card)
+					{
+						OwnMethods.Print("NL_list is smaller");
+						
+					}
+				}
+				OwnMethods.Print(String.format("NL_serialize time: %d", System.currentTimeMillis() - start1));
 				
 				OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
 				
@@ -294,7 +297,7 @@ public class RisoTreeQuery {
 	static String version = config.GetNeo4jVersion();
 //	static String db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
 //	static String querygraph_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph.txt";
-	static String db_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\Gowalla\\neo4j-community-3.1.1_Gowalla\\data\\databases\\graph.db";
+	static String db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
 	static String querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
 
 	public static void main(String[] args) {
@@ -302,8 +305,11 @@ public class RisoTreeQuery {
 		int query_id = 5;
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		Query_Graph query_Graph = queryGraphs.get(query_id);
-//		query_Graph.spa_predicate[1] = new MyRectangle(-84.468680, 33.879658, -84.428434, 33.919904);
-		query_Graph.spa_predicate[1] = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);
+		query_Graph.spa_predicate[1] = new MyRectangle(-84.468680, 33.879658, -84.428434, 33.919904);//100
+//		query_Graph.spa_predicate[1] = new MyRectangle(9.523183, 46.839041, 9.541593, 46.857451);//100
+//		query_Graph.spa_predicate[1] = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);/10,000
+//		query_Graph.spa_predicate[1] = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);//100,000
+//		query_Graph.spa_predicate[1] = new MyRectangle(-179.017757, -135.408325, 207.362849, 250.972281);//1,000,000
 //		query_Graph.spa_predicate[1] = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);
 //		query_Graph.spa_predicate[3] = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);
 		
