@@ -103,12 +103,15 @@ public class Construct_RisoTree {
 						{
 							int[] NL_list_label = ( int[]) node.getProperty(property_name);
 							String label_name = String.format("%d_NL_%d_%d_list", rtree_id, i, label);
+//							OwnMethods.Print(label_name);
 							Label sub_label = DynamicLabel.label(label_name);
 							for ( int id : NL_list_label)
 							{
 								int pos_id = graph_node_map.get(id);
 								Node graph_node = dbservice.getNodeById(pos_id);
 								graph_node.addLabel(sub_label);
+//								OwnMethods.Print(graph_node.getAllProperties());
+//								break;
 							}
 						}
 					}
@@ -118,6 +121,7 @@ public class Construct_RisoTree {
 					queue.add(relationship.getEndNode().getId());
 				tx.success();
 				tx.close();
+//				break;
 			}
 			dbservice.shutdown();
 		} catch (Exception e) {
