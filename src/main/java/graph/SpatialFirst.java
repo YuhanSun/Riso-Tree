@@ -23,6 +23,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import osm.OSM_Utility;
 import commons.Config;
 import commons.Labels.OSMRelation;
+import commons.Labels;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
@@ -36,6 +37,7 @@ public class SpatialFirst {
 	public Config config = new Config();
 	public String lon_name = config.GetLongitudePropertyName();
 	public String lat_name = config.GetLatitudePropertyName();
+	public String graphLinkLabelName = Labels.GraphRel.GRAPH_LINK.name();
 
 	//query statistics
 	public long range_query_time;
@@ -91,7 +93,7 @@ public class SpatialFirst {
 				OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
 
 				int located_in_count = 0;
-				if( overlap_MBR_list.isEmpty() == false && next_list.isEmpty())
+				if( next_list.isEmpty())
 				{
 					LinkedList<Node> result = new LinkedList<Node>(); 
 					start = System.currentTimeMillis();
@@ -149,7 +151,7 @@ public class SpatialFirst {
 			{
 				int neighbor = query_Graph.graph.get(i).get(j);
 				if(neighbor > i)
-					query += String.format(",(a%d)--(a%d)", i, neighbor);
+					query += String.format(",(a%d)-[:%s]-(a%d)", i, graphLinkLabelName, neighbor);
 			}
 		}
 
