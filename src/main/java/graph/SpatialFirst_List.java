@@ -3,14 +3,9 @@ package graph;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Queue;
-import java.util.TreeSet;
 
-import org.geotools.data.shapefile.dbf.DbaseFileReader.Row;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
@@ -22,7 +17,9 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import osm.OSM_Utility;
+
 import commons.Config;
+import commons.Labels;
 import commons.Labels.OSMRelation;
 import commons.MyRectangle;
 import commons.OwnMethods;
@@ -33,11 +30,13 @@ public class SpatialFirst_List {
 
 	public GraphDatabaseService dbservice;
 	public String dataset;
+	public long[] graph_pos_map_list;
 
 	public Config config = new Config();
 	public String lon_name = config.GetLongitudePropertyName();
 	public String lat_name = config.GetLatitudePropertyName();
 	public int MAX_HOPNUM = config.getMaxHopNum();
+	public String graphLinkLabelName = Labels.GraphRel.GRAPH_LINK.name();
 
 	//query statistics
 	public long range_query_time;
@@ -46,10 +45,11 @@ public class SpatialFirst_List {
 	public long result_count;
 	public long page_hit_count;
 
-	public SpatialFirst_List(String db_path, String p_dataset)
+	public SpatialFirst_List(String db_path, String p_dataset, long[] p_graph_pos_map)
 	{
 		dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		dataset = p_dataset;
+		graph_pos_map_list = p_graph_pos_map;
 	}
 
 	public void shutdown()
@@ -112,6 +112,12 @@ public class SpatialFirst_List {
 		return minhop_index;
 	}
 
+	/**
+	 * only returns the deepest non-leaf rtree nodes
+	 * @param root_node
+	 * @param query_rectangle
+	 * @return
+	 */
 	public LinkedList<Node> rangeQuery(Node root_node, MyRectangle query_rectangle)
 	{
 		try {
@@ -145,31 +151,10 @@ public class SpatialFirst_List {
 						throw new Exception(String.format("node %d does not has \"bbox\" property", node));
 				}
 
-				OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
+//				OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
 
-				int located_in_count = 0;
-				if( overlap_MBR_list.isEmpty() == false && next_list.isEmpty())
-				{
-					LinkedList<Node> result = new LinkedList<Node>(); 
-					start = System.currentTimeMillis();
-					for ( Node node : overlap_MBR_list)
-						for ( Relationship relationship : node.getRelationships(
-								Direction.OUTGOING, RTreeRelationshipTypes.RTREE_REFERENCE))
-						{
-							Node geom = relationship.getEndNode();
-							double[] bbox = (double[]) geom.getProperty("bbox");
-							MyRectangle bbox_rect = new MyRectangle(bbox);
-							if ( query_rectangle.intersect(bbox_rect) != null)
-							{
-								result.add(geom);
-								located_in_count++;
-							}
-						}
-					level_index++;
-					OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
-					OwnMethods.Print(String.format("Located in nodes: %d", located_in_count));
-					return result;
-				}
+				if ( next_list.isEmpty())
+					return overlap_MBR_list;
 
 				cur_list = next_list;
 				level_index++;
@@ -180,7 +165,21 @@ public class SpatialFirst_List {
 		return null;
 	}
 
-	public String formSubgraphQuery(Query_Graph query_Graph, int limit, int Explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates, int pos, long id)
+	/**
+	 * for the cypher query
+	 * @param query_Graph
+	 * @param limit	-1 is no limit
+	 * @param Explain_Or_Profile	-1 is Explain; 1 is Profile; the rest is nothing 
+	 * @param spa_predicates	spatial predicates except the min_pos spatial predicate 
+	 * @param pos	query graph node id with the trigger spatial predicate
+	 * @param id	corresponding spatial graph node id (neo4j pos id)
+	 * @param NL_hopnum	shrunk query node <query_graph_id, hop_num> 
+	 * @param node	the rtree node stores NL_list information
+	 * @return
+	 */
+	public String formSubgraphQuery(Query_Graph query_Graph, int limit, int Explain_Or_Profile,
+			HashMap<Integer, MyRectangle> spa_predicates, int pos, long id, 
+			HashMap<Integer, Integer> NL_hopnum, Node node)
 	{
 		String query = "";
 		if(Explain_Or_Profile == 1)
@@ -206,7 +205,7 @@ public class SpatialFirst_List {
 			{
 				int neighbor = query_Graph.graph.get(i).get(j);
 				if(neighbor > i)
-					query += String.format(",(a%d)--(a%d)", i, neighbor);
+					query += String.format(",(a%d)-[:%s]-(a%d)", i, graphLinkLabelName, neighbor);
 			}
 		}
 
@@ -217,11 +216,23 @@ public class SpatialFirst_List {
 		{
 			MyRectangle qRect = spa_predicates.get(key);
 			query += String.format(" %f <= a%d.%s <= %f ", qRect.min_x, key, lon_name, qRect.max_x);
-			query += String.format("and %f <= a%d.%s <= %f", qRect.min_y, key, lat_name, qRect.max_y);
+			query += String.format("and %f <= a%d.%s <= %f and", qRect.min_y, key, lat_name, qRect.max_y);
 		} 
 
 		//id
-		query += String.format(" and id(a%d) in [%d]", pos, id);
+		query += String.format(" id(a%d) in [%d]", pos, id);
+		
+		//NL_id_list
+		for ( int key : NL_hopnum.keySet())
+		{
+			String id_list_property_name = String.format("NL_%d_%d_list", NL_hopnum.get(key), query_Graph.label_list[key]);
+			int[] graph_id_list = (int[]) node.getProperty(id_list_property_name);
+			ArrayList<Long> pos_id_list = new ArrayList<Long>(graph_id_list.length);
+			for ( int i = 0; i < graph_id_list.length; i++)
+				pos_id_list.add(graph_pos_map_list[graph_id_list[i]]);
+			query += String.format(" and id(a%d) in %s", key, pos_id_list.toString());
+		}
+			
 		//return
 		query += " return id(a0)";
 		for(int i = 1; i<query_Graph.graph.size(); i++)
@@ -270,41 +281,67 @@ public class SpatialFirst_List {
 				}
 			spa_predicates.remove(min_pos, min_queryRectangle);
 			
+			//query vertex to be shrunk <id, hop_num>
+			//calculated from the min_pos
 			HashMap<Integer, Integer> NL_hopnum = new HashMap<Integer, Integer>();
 			for (int i = 0; i < query_Graph.graph.size(); i++)
-				if ( min_hop[min_pos][i] <= MAX_HOPNUM)
+				if ( min_hop[min_pos][i] <= MAX_HOPNUM && min_hop[min_pos][i] > 0)
 					NL_hopnum.put(i, min_hop[min_pos][i]);
 
 			long start_1 = System.currentTimeMillis();
 			Node rootNode = OSM_Utility.getRTreeRoot(dbservice, dataset);
 			LinkedList<Node> rangeQueryResult = this.rangeQuery(rootNode, min_queryRectangle);
 			range_query_time = System.currentTimeMillis() - start_1;
-
-			for (Node geom: rangeQueryResult)
+			
+			int located_in_count = 0;
+			for ( Node rtree_node : rangeQueryResult)
 			{
 				start_1 = System.currentTimeMillis();
-				Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
-				long id = node.getId();
-				String query = formSubgraphQuery(query_Graph, limit, 1, spa_predicates, min_pos, id);
+				Iterable<Relationship> rels = rtree_node.getRelationships(
+						Direction.OUTGOING, RTreeRelationshipTypes.RTREE_REFERENCE);
+				range_query_time += System.currentTimeMillis() - start_1;
 				
-				Result result = dbservice.execute(query);
-				get_iterator_time += System.currentTimeMillis() - start_1;
-				
-				start_1 = System.currentTimeMillis();
-				while( result.hasNext())
+				for ( Relationship relationship : rels)
 				{
-					result.next();
-					//					Map<String, Object> row = result.next();
-					//					String str = row.toString();
-					//					OwnMethods.Print(row.toString());
+					start_1 = System.currentTimeMillis();
+					Node geom = relationship.getEndNode();
+					double[] bbox = (double[]) geom.getProperty("bbox");
+					MyRectangle bbox_rect = new MyRectangle(bbox);
+					if ( min_queryRectangle.intersect(bbox_rect) != null)
+					{
+						located_in_count++;
+						Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
+						long id = node.getId();
+						range_query_time += System.currentTimeMillis() - start_1;
+						
+						start_1 = System.currentTimeMillis();
+						String query = formSubgraphQuery(query_Graph, limit, 1, spa_predicates, min_pos,
+								id, NL_hopnum, rtree_node);
+						
+						Result result = dbservice.execute(query);
+						get_iterator_time += System.currentTimeMillis() - start_1;
+						
+						start_1 = System.currentTimeMillis();
+						while( result.hasNext())
+						{
+							result.next();
+							//					Map<String, Object> row = result.next();
+							//					String str = row.toString();
+							//					OwnMethods.Print(row.toString());
+						}
+						iterate_time += System.currentTimeMillis() - start_1;
+						
+						ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+						ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
+						result_count += profile.getRows();
+						page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+					}
+					else {
+						range_query_time += System.currentTimeMillis() - start_1;
+					}
 				}
-				iterate_time += System.currentTimeMillis() - start_1;
-				
-				ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-				ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
-				result_count += profile.getRows();
-				page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
 			}
+
 			tx.success();
 			tx.close();
 //			OwnMethods.Print(String.format("result size: %d", result_count));
@@ -336,15 +373,38 @@ public class SpatialFirst_List {
 	public static void formSubgraphQueryTest()
 	{
 		try {
-			SpatialFirst spatialFirst = new SpatialFirst(db_path_test, dataset_test);
+			HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
+			long[] graph_pos_map_list_test = new long[graph_pos_map.size()];
+			for ( String key_str : graph_pos_map.keySet())
+			{
+				int key = Integer.parseInt(key_str);
+				int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
+				graph_pos_map_list_test[key] = pos_id;
+			}
+			
+			SpatialFirst_List spatialFirstlist = new SpatialFirst_List(db_path_test, dataset_test, graph_pos_map_list_test);
 			query_Graph.spa_predicate[1] = queryRectangle;
 
 			HashMap<Integer, MyRectangle> spa_predicates = new HashMap<Integer, MyRectangle>();
+			spa_predicates.put(3, queryRectangle);	//query id 3
+			
 			int pos = 1;
 			long id = 100;
-			String query = spatialFirst.formSubgraphQuery(query_Graph, -1, 0, spa_predicates, pos, id);
+			
+			HashMap<Integer, Integer> NL_hopnum = new HashMap<Integer, Integer>();
+//			NL_hopnum.put(0, 1);NL_hopnum.put(2, 2);	//query id 5
+			NL_hopnum.put(1, 1); NL_hopnum.put(2, 2);	//query id 3
+			
+			Transaction tx = spatialFirstlist.dbservice.beginTx();
+			
+			Node node = spatialFirstlist.dbservice.getNodeById(3846573);
+			
+			String query = spatialFirstlist.formSubgraphQuery(query_Graph, -1, 1, spa_predicates, pos, id, NL_hopnum, node);
 			OwnMethods.Print(query);
-			spatialFirst.dbservice.shutdown();
+			
+			tx.success();
+			tx.close();
+			spatialFirstlist.dbservice.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -352,16 +412,31 @@ public class SpatialFirst_List {
 
 	public static void subgraphMatchQueryTest()
 	{
-		SpatialFirst spatialFirst = new SpatialFirst(db_path_test, dataset_test);
-		query_Graph.spa_predicate[1] = queryRectangle;
+		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
+		long[] graph_pos_map_list_test = new long[graph_pos_map.size()];
+		for ( String key_str : graph_pos_map.keySet())
+		{
+			int key = Integer.parseInt(key_str);
+			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
+			graph_pos_map_list_test[key] = pos_id;
+		}
+		
+		SpatialFirst_List spatialFirstlist = new SpatialFirst_List(db_path_test, dataset_test, graph_pos_map_list_test);
+		query_Graph.spa_predicate[1] = queryRectangle;	//query id 5
+		
+		//query id 3
+//		query_Graph.spa_predicate[0] = queryRectangle;
+//		query_Graph.spa_predicate[3] = queryRectangle;
 
-		spatialFirst.query(query_Graph, -1);
-		spatialFirst.shutdown();
+		spatialFirstlist.query(query_Graph, -1);
+		OwnMethods.Print(spatialFirstlist.result_count);
+		spatialFirstlist.shutdown();
 	}
 
 	static String dataset_test = "Gowalla";
 	static String db_path_test = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\neo4j-community-3.1.1_%s\\data\\databases\\graph.db", dataset_test, dataset_test);
 	static String querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
+	static String graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset_test + "\\node_map.txt";
 	static int query_id = 5;
 	static ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 	static Query_Graph query_Graph = queryGraphs.get(query_id);
@@ -373,8 +448,8 @@ public class SpatialFirst_List {
 
 	public static void main(String[] args) {
 		//		rangeQueryTest();
-		//		formSubgraphQueryTest();
-//		subgraphMatchQueryTest();
+//				formSubgraphQueryTest();
+		subgraphMatchQueryTest();
 	}
 
 }
