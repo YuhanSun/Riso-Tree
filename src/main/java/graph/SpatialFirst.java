@@ -162,11 +162,11 @@ public class SpatialFirst {
 		{
 			MyRectangle qRect = spa_predicates.get(key);
 			query += String.format(" %f <= a%d.%s <= %f ", qRect.min_x, key, lon_name, qRect.max_x);
-			query += String.format("and %f <= a%d.%s <= %f", qRect.min_y, key, lat_name, qRect.max_y);
+			query += String.format("and %f <= a%d.%s <= %f and", qRect.min_y, key, lat_name, qRect.max_y);
 		} 
 
 		//id
-		query += String.format(" and id(a%d) in [%d]", pos, id);
+		query += String.format(" id(a%d) in [%d]", pos, id);
 		//return
 		query += " return id(a0)";
 		for(int i = 1; i<query_Graph.graph.size(); i++)
