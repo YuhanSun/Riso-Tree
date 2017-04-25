@@ -16,6 +16,8 @@ public class Config
 	private String Rect_miny_name = "miny";
 	private String Rect_maxx_name = "maxx";
 	private String Rect_maxy_name = "maxy";
+	
+	private int MAX_HOPNUM = 2;
 
 	public String GetServerRoot() {
 		return SERVER_ROOT_URI;
@@ -42,5 +44,10 @@ public class Config
 	public String GetNeo4jVersion()
 	{
 		return neo4j_version;
+	}
+	
+	public int getMaxHopNum()
+	{
+		return MAX_HOPNUM;
 	}
 }
