@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import commons.*;
+import commons.Config.system;
 import graph.*;
 
 public class Experiment {
@@ -11,11 +12,17 @@ public class Experiment {
 	static String dataset = "Gowalla";
 	static Config config = new Config();
 	static String version = config.GetNeo4jVersion();
-//	static String db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
-//	static String querygraph_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph.txt";
-	static String db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
-	static String querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
-	static String graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map.txt";
+	static system systemName = config.getSystemName();
+	
+	//ubuntu path
+	static String db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
+	static String querygraph_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph.txt";
+	static String graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map.txt";
+	
+	//windows path
+//	static String db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
+//	static String querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
+//	static String graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map.txt";
 
 	static boolean TEST_FORMAT = false;
 	
@@ -34,10 +41,13 @@ public class Experiment {
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		Query_Graph query_Graph = queryGraphs.get(query_id);
 		
-//		String result_detail_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API.txt", dataset, query_id);
-//		String result_avg_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API_avg.txt", dataset, query_id);
-		String result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_%d_API.txt", dataset, query_id);
-		String result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_%d_API_avg.txt", dataset, query_id);
+		//ubuntu
+		String result_detail_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API.txt", dataset, query_id);
+		String result_avg_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API_avg.txt", dataset, query_id);
+		
+		//windows
+//		String result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_%d_API.txt", dataset, query_id);
+//		String result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_%d_API_avg.txt", dataset, query_id);
 		
 		String write_line = String.format("%s\t%d\n", dataset, limit);
 		if(!TEST_FORMAT)
@@ -55,8 +65,8 @@ public class Experiment {
 		while ( name_suffix <= 200)
 		{
 			double selectivity = name_suffix / 1000000.0;
-//			String queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
-			String queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+			String queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+//			String queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
 			
 			write_line = selectivity + "\n" + head_line;
 			if(!TEST_FORMAT)
@@ -144,11 +154,19 @@ public class Experiment {
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		Query_Graph query_Graph = queryGraphs.get(query_id);
 		
-//		String result_detail_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API.txt", dataset, query_id);
-//		String result_avg_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API_avg.txt", dataset, query_id);
-		String result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_%d_API.txt", dataset, query_id);
-		String result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_%d_API_avg.txt", dataset, query_id);
-		
+		String result_detail_path = null, result_avg_path = null;
+		switch(systemName)
+		{
+		case Ubuntu:
+			result_detail_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API.txt", dataset, query_id);
+			result_avg_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API_avg.txt", dataset, query_id);
+			break;
+		case Windows:
+			result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_%d_API.txt", dataset, query_id);
+			result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_%d_API_avg.txt", dataset, query_id);
+			break;
+		}
+
 		String write_line = String.format("%s\t%d\n", dataset, limit);
 		if(!TEST_FORMAT)
 		{
@@ -165,8 +183,15 @@ public class Experiment {
 		while ( name_suffix <= 200)
 		{
 			double selectivity = name_suffix / 1000000.0;
-//			String queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
-			String queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+			String queryrect_path = null;
+			switch (systemName) {
+			case Ubuntu:
+				queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				break;
+			case Windows:
+				queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+				break;
+			}
 			
 			write_line = selectivity + "\n" + head_line;
 			if(!TEST_FORMAT)
