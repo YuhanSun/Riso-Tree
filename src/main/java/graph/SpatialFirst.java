@@ -28,6 +28,7 @@ import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Utility;
+import commons.Config.system;
 
 public class SpatialFirst {
 
@@ -186,7 +187,7 @@ public class SpatialFirst {
 			iterate_time = 0;
 			result_count = 0;
 			page_hit_count = 0;
-			
+
 			long start = System.currentTimeMillis();
 			Transaction tx = dbservice.beginTx();
 
@@ -224,10 +225,10 @@ public class SpatialFirst {
 				Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
 				long id = node.getId();
 				String query = formSubgraphQuery(query_Graph, limit, 1, spa_predicates, min_pos, id);
-				
+
 				Result result = dbservice.execute(query);
 				get_iterator_time += System.currentTimeMillis() - start_1;
-				
+
 				start_1 = System.currentTimeMillis();
 				while( result.hasNext())
 				{
@@ -237,7 +238,7 @@ public class SpatialFirst {
 					//					OwnMethods.Print(row.toString());
 				}
 				iterate_time += System.currentTimeMillis() - start_1;
-				
+
 				ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
 				ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
 				result_count += profile.getRows();
@@ -245,8 +246,8 @@ public class SpatialFirst {
 			}
 			tx.success();
 			tx.close();
-//			OwnMethods.Print(String.format("result size: %d", result_count));
-//			OwnMethods.Print(String.format("time: %d", System.currentTimeMillis() - start));
+			//			OwnMethods.Print(String.format("result size: %d", result_count));
+			//			OwnMethods.Print(String.format("time: %d", System.currentTimeMillis() - start));
 			//			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -297,22 +298,51 @@ public class SpatialFirst {
 		spatialFirst.shutdown();
 	}
 
+	//for test
 	static String dataset_test = "Gowalla";
-	static String db_path_test = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\neo4j-community-3.1.1_%s\\data\\databases\\graph.db", dataset_test, dataset_test);
-	static String querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
-	static int query_id = 5;
-	static ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
-	static Query_Graph query_Graph = queryGraphs.get(query_id);
-	static MyRectangle queryRectangle = new MyRectangle(-80.119514, 26.183659, -80.112102, 26.191071);//10
-	//	static MyRectangle queryRectangle = new MyRectangle(-84.468680, 33.879658, -84.428434, 33.919904);//100
-	//	static MyRectangle queryRectangle = new MyRectangle(-80.200353, 26.102820, -80.031263, 26.271910);//1000
-	//	static MyRectangle queryRectangle = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);//10000
-	//	static MyRectangle queryRectangle = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);//100000
+	static String db_path_test;
+	static String querygraph_path;
+	static String graph_pos_map_path;
+	static int query_id;
+	static ArrayList<Query_Graph> queryGraphs;
+	static Query_Graph query_Graph;
+	static MyRectangle queryRectangle;
+
+	public static void initVariablesForTest()
+	{
+		dataset_test = "Gowalla";
+		
+		Config config = new Config();
+		system systemName = config.getSystemName();
+		String neo4jVersion = config.GetNeo4jVersion(); 
+		switch (config.getSystemName()) {
+		case Ubuntu:
+			db_path_test = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", neo4jVersion, dataset_test);
+			querygraph_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph.txt";
+			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset_test + "/node_map.txt";
+			break;
+		case Windows:
+			db_path_test = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset_test, neo4jVersion, dataset_test);
+			querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
+			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset_test + "\\node_map.txt";
+		default:
+			break;
+		}
+		query_id = 5;
+		queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		query_Graph = queryGraphs.get(query_id);
+		queryRectangle = new MyRectangle(-80.119514, 26.183659, -80.112102, 26.191071);//10
+		//	static MyRectangle queryRectangle = new MyRectangle(-84.468680, 33.879658, -84.428434, 33.919904);//100
+		//	static MyRectangle queryRectangle = new MyRectangle(-80.200353, 26.102820, -80.031263, 26.271910);//1000
+		//	static MyRectangle queryRectangle = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);//10000
+		//	static MyRectangle queryRectangle = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);//100000
+		
+	}
 
 	public static void main(String[] args) {
 		//		rangeQueryTest();
 		//		formSubgraphQueryTest();
-//		subgraphMatchQueryTest();
+		//		subgraphMatchQueryTest();
 	}
 
 }
