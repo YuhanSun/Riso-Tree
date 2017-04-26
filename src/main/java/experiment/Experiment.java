@@ -41,13 +41,17 @@ public class Experiment {
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		Query_Graph query_Graph = queryGraphs.get(query_id);
 		
-		//ubuntu
-		String result_detail_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API.txt", dataset, query_id);
-		String result_avg_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API_avg.txt", dataset, query_id);
-		
-		//windows
-//		String result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_%d_API.txt", dataset, query_id);
-//		String result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_%d_API_avg.txt", dataset, query_id);
+		String result_detail_path = null, result_avg_path = null;
+		switch (systemName) {
+		case Ubuntu:
+			result_detail_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/spa_first_list_%d_API.txt", dataset, query_id);
+			result_avg_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/spa_first_list_%d_API_avg.txt", dataset, query_id);
+			break;
+		case Windows:
+			result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_%d_API.txt", dataset, query_id);
+			result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_%d_API_avg.txt", dataset, query_id);
+			break;
+		}
 		
 		String write_line = String.format("%s\t%d\n", dataset, limit);
 		if(!TEST_FORMAT)
@@ -62,11 +66,19 @@ public class Experiment {
 		
 		int name_suffix = 1;
 		int times = 10;
-		while ( name_suffix <= 200)
+		while ( name_suffix <= 20)
 		{
 			double selectivity = name_suffix / 1000000.0;
-			String queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
-//			String queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+			
+			String queryrect_path = null;
+			switch (systemName) {
+			case Ubuntu:
+				queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				break;
+			case Windows:
+				queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+				break;
+			}
 			
 			write_line = selectivity + "\n" + head_line;
 			if(!TEST_FORMAT)
@@ -142,6 +154,8 @@ public class Experiment {
 			
 			name_suffix *= times;
 		}
+		OwnMethods.WriteFile(result_detail_path, true, "\n");
+		OwnMethods.WriteFile(result_avg_path, true, "\n");
 	}
 	
 	public static void SpatialFirst(int query_id)
@@ -158,8 +172,8 @@ public class Experiment {
 		switch(systemName)
 		{
 		case Ubuntu:
-			result_detail_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API.txt", dataset, query_id);
-			result_avg_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/experiment_result/%s/spa_first_%d_API_avg.txt", dataset, query_id);
+			result_detail_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/spa_first_%d_API.txt", dataset, query_id);
+			result_avg_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/spa_first_%d_API_avg.txt", dataset, query_id);
 			break;
 		case Windows:
 			result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_%d_API.txt", dataset, query_id);
@@ -259,6 +273,8 @@ public class Experiment {
 			
 			name_suffix *= times;
 		}
+		OwnMethods.WriteFile(result_detail_path, true, "\n");
+		OwnMethods.WriteFile(result_avg_path, true, "\n");
 	}
 
 }
