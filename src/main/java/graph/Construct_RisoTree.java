@@ -17,6 +17,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.neo4j.cypher.internal.frontend.v2_3.perty.recipe.Pretty.nest;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
@@ -30,6 +31,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Labels;
 import commons.OwnMethods;
+import commons.Config.system;
 import commons.Labels.RTreeRel;
 import osm.OSM_Utility;
 
@@ -46,8 +48,10 @@ public class Construct_RisoTree {
 	static String label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
 	static String graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
 	
+	static String log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
+	
 	static int max_hop_num = 2;
-	static ArrayList<Integer> labels = new ArrayList<>(Arrays.asList(0, 1));
+	static ArrayList<Integer> labels = new ArrayList<>(Arrays.asList(0, 1));//all labels in the graph
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -63,7 +67,101 @@ public class Construct_RisoTree {
 //		generateNL_size();
 //		NL_size_Check();
 //		set_Spatial_Label();
-		set_NL_list_label(max_hop_num, labels);
+//		set_NL_list_label(max_hop_num, labels);
+		set_NL_list_label_DeepestNonLeaf(max_hop, labels);
+	}
+	
+	public static void set_NL_list_label_DeepestNonLeaf(int max_hop_num, ArrayList<Integer> labels)
+	{
+		HashMap<String, String> map = OwnMethods.ReadMap(graph_node_map_path); 
+		HashMap<Integer, Integer> graph_node_map = new HashMap<>();
+		for ( String key : map.keySet())
+		{
+			String value = map.get(key);
+			int graph_id = Integer.parseInt(key);
+			int pos_id = Integer.parseInt(value);
+			graph_node_map.put(graph_id, pos_id);
+		}
+		
+		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+		try {
+			Transaction tx = dbservice.beginTx();
+			
+			Set<Node> nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset);
+			Queue<Long> queue = new LinkedList<Long>(); 
+			for ( Node node : nodes) 
+				queue.add(node.getId());
+			tx.success();
+			tx.close();
+			
+			int index = 0, count = 0, commit_time = 0;
+			tx = dbservice.beginTx();
+			while ( queue.isEmpty() == false)
+			{
+				OwnMethods.Print("index:" + index);
+				OwnMethods.Print("count:" + count);
+				Long pos = queue.poll();
+				Node node = dbservice.getNodeById(pos);
+				if(count < 4250)
+				{
+					count++;
+					continue;
+				}
+				
+				int rtree_id = (int) node.getProperty("rtree_id");
+				for ( int i = 1; i <= max_hop_num; i++)
+				{
+					for ( int label : labels)
+					{
+						String property_name = String.format("NL_%d_%d_list", i, label);
+						if(node.hasProperty(property_name))
+						{
+							int[] NL_list_label = ( int[]) node.getProperty(property_name);
+							String label_name = String.format("%d_NL_%d_%d_list", rtree_id, i, label);
+//							OwnMethods.Print(label_name);
+							Label sub_label = DynamicLabel.label(label_name);
+							for ( int id : NL_list_label)
+							{
+								int pos_id = graph_node_map.get(id);
+								Node graph_node = dbservice.getNodeById(pos_id);
+								graph_node.addLabel(sub_label);
+//								OwnMethods.Print(graph_node.getAllProperties());
+//								break;
+							}
+						}
+					}
+				}
+				if(index == 19)
+				{
+					long start = System.currentTimeMillis();
+					tx.success();
+					tx.close();
+					OwnMethods.WriteFile(log_path, true, (System.currentTimeMillis() - start) + "\n");
+					index = 0; count++;
+					dbservice.shutdown();
+					
+					commit_time++;
+//					if(commit_time == 2)
+//						break;
+					
+					dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+					tx = dbservice.beginTx();
+					continue;
+				}
+				index++; count++;
+//				break;
+			}
+			if( index != 0)
+			{
+				tx.success();
+				tx.close();
+			}
+			dbservice.shutdown();
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 	}
 	
 	public static void set_NL_list_label(int max_hop_num, ArrayList<Integer> labels)
@@ -88,11 +186,23 @@ public class Construct_RisoTree {
 			
 			Queue<Long> queue = new LinkedList<Long>(); 
 			queue.add(rootID);
+			int index = 0, count = 0;
+			tx = dbservice.beginTx();
 			while ( queue.isEmpty() == false)
 			{
-				tx = dbservice.beginTx();
+				OwnMethods.Print("index:" + index);
+				OwnMethods.Print("count:" + count);
 				Long pos = queue.poll();
 				Node node = dbservice.getNodeById(pos);
+				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
+				for ( Relationship relationship : rels)
+					queue.add(relationship.getEndNode().getId());
+				if(count < 2890)
+				{
+					count++;
+					continue;
+				}
+				
 				int rtree_id = (int) node.getProperty("rtree_id");
 				for ( int i = 1; i <= max_hop_num; i++)
 				{
@@ -116,14 +226,27 @@ public class Construct_RisoTree {
 						}
 					}
 				}
-				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
-				for ( Relationship relationship : rels)
-					queue.add(relationship.getEndNode().getId());
-				tx.success();
-				tx.close();
+				if(index == 20)
+				{
+					tx.success();
+					tx.close();
+					index = 0; count++;
+					dbservice.shutdown();
+					
+					dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+					tx = dbservice.beginTx();
+					continue;
+				}
+				index++; count++;
 //				break;
 			}
-			dbservice.shutdown();
+			if( index != 0)
+			{
+				tx.success();
+				tx.close();
+				dbservice.shutdown();
+			}
+			
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
