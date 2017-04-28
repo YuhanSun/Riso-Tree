@@ -222,7 +222,8 @@ public class SpatialFirst_List {
 		} 
 
 		//id
-		query += String.format(" id(a%d) in [%d]", pos, id);
+//		query += String.format(" id(a%d) in [%d]", pos, id);
+		query += String.format(" id(a%d) = %d", pos, id);
 		
 		//NL_id_list
 		for ( int key : NL_hopnum.keySet())
