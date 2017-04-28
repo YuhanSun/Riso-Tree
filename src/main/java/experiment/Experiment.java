@@ -28,8 +28,8 @@ public class Experiment {
 	
 	public static void main(String[] args) {
 //		SpatialFirst(5);
-//		SpatialFirstList(5);
-		SpatialFirstList_Block(5);
+		SpatialFirstList(5);
+//		SpatialFirstList_Block(5);
 	}
 	
 	public static void SpatialFirstList_Block(int query_id)
@@ -192,9 +192,9 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 		
-		int name_suffix = 1;
+		int name_suffix = 1000;
 		int times = 10;
-		while ( name_suffix <= 20)
+		while ( name_suffix <= 2000)
 		{
 			double selectivity = name_suffix / 1000000.0;
 			
