@@ -233,7 +233,10 @@ public class SpatialFirst_List {
 			ArrayList<Long> pos_id_list = new ArrayList<Long>(graph_id_list.length);
 			for ( int i = 0; i < graph_id_list.length; i++)
 				pos_id_list.add(graph_pos_map_list[graph_id_list[i]]);
-			query += String.format(" and id(a%d) in %s", key, pos_id_list.toString());
+			
+			query += String.format(" and (", args);
+			query += String.format("id(a%d) = %d", args)
+//			query += String.format(" and id(a%d) in %s", key, pos_id_list.toString());
 		}
 			
 		//return
