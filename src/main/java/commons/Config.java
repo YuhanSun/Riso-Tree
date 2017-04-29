@@ -6,6 +6,10 @@ public class Config
 		Ubuntu, Windows
 	}
 	
+	public static enum Explain_Or_Profile {
+		Explain, Profile, Nothing
+	}
+	
 	public Config() 
 	{
 
@@ -16,7 +20,7 @@ public class Config
 	private String latitude_property_name = "lat";
 	
 	private String neo4j_version = "neo4j-community-3.1.1";
-	private system operatingSystem = system.Ubuntu;
+	private system operatingSystem = system.Windows;
 
 	private String Rect_minx_name = "minx";
 	private String Rect_miny_name = "miny";
