@@ -37,21 +37,47 @@ import osm.OSM_Utility;
 
 public class Construct_RisoTree {
 
-	static int max_hop = 2;
-	static String dataset = "Gowalla";
 	static Config config = new Config();
+	static String dataset = config.getDatasetName();
 	static String version = config.GetNeo4jVersion();
-	static String db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
-	static String vertex_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
-	static String graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
-	static String geo_id_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/geom_osmid_map.txt", dataset);
-	static String label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
-	static String graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
-	
-	static String log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
+	static system systemName = config.getSystemName();
+
+	static String db_path;
+	static String vertex_map_path;
+	static String graph_path;
+	static String geo_id_map_path;
+	static String label_list_path;
+	static String graph_node_map_path;
+	static String log_path;
 	
 	static int max_hop_num = 2;
-	static ArrayList<Integer> labels = new ArrayList<>(Arrays.asList(0, 1));//all labels in the graph
+	static ArrayList<Integer> labels;//all labels in the graph
+	
+	static void initParameters()
+	{
+		switch (systemName) {
+		case Ubuntu:
+			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
+			vertex_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
+			graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
+			geo_id_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/geom_osmid_map.txt", dataset);
+			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
+			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
+			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
+			break;
+		case Windows:
+			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
+			vertex_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\node_map.txt", dataset);
+			graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
+			geo_id_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/geom_osmid_map.txt", dataset);
+			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
+			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
+			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
+		default:
+			break;
+		}
+		labels = new ArrayList<>(Arrays.asList(0, 1));
+	}
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -68,7 +94,7 @@ public class Construct_RisoTree {
 //		NL_size_Check();
 //		set_Spatial_Label();
 //		set_NL_list_label(max_hop_num, labels);
-		set_NL_list_label_DeepestNonLeaf(max_hop, labels);
+		set_NL_list_label_DeepestNonLeaf(max_hop_num, labels);
 	}
 	
 	public static void set_NL_list_label_DeepestNonLeaf(int max_hop_num, ArrayList<Integer> labels)
@@ -303,7 +329,7 @@ public class Construct_RisoTree {
 				while(iterator.hasNext())	
 				{
 					Node node = iterator.next();
-					for ( int i = 1; i <= max_hop; i++)
+					for ( int i = 1; i <= max_hop_num; i++)
 					{
 						for ( int label : labels)
 						{
@@ -343,7 +369,7 @@ public class Construct_RisoTree {
 			while(cur.isEmpty() == false)
 			{
 				Node node = cur.poll();
-				for ( int i = 1; i <= max_hop; i++)
+				for ( int i = 1; i <= max_hop_num; i++)
 				{
 					for ( int label : labels)
 					{

@@ -21,6 +21,7 @@ public class Config
 	
 	private String neo4j_version = "neo4j-community-3.1.1";
 	private system operatingSystem = system.Windows;
+	private String dataset = "Gowalla_10";
 
 	private String Rect_minx_name = "minx";
 	private String Rect_miny_name = "miny";
@@ -64,5 +65,10 @@ public class Config
 	public system getSystemName()
 	{
 		return operatingSystem;
+	}
+	
+	public String getDatasetName()
+	{
+		return dataset;
 	}
 }

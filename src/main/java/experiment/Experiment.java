@@ -9,27 +9,45 @@ import graph.*;
 
 public class Experiment {
 	
-	static String dataset = "Gowalla";
-	static Config config = new Config();
-	static String version = config.GetNeo4jVersion();
-	static system systemName = config.getSystemName();
+	static String dataset;
+	static Config config;
+	static String version;
+	static system systemName;
 	
-	//ubuntu path
-	static String db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
-	static String querygraph_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph.txt";
-	static String graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map.txt";
+	static String db_path;
+	static String querygraph_path;
+	static String graph_pos_map_path;
 	
-	//windows path
-//	static String db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
-//	static String querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
-//	static String graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map.txt";
-
-	static boolean TEST_FORMAT = false;
+	static boolean TEST_FORMAT;
+	
+	public static void initializeParameters()
+	{	
+		TEST_FORMAT = false;
+	
+		dataset = "Gowalla";
+		config = new Config();
+		version = config.GetNeo4jVersion();
+		systemName = config.getSystemName();
+		
+		switch (systemName) {
+		case Ubuntu:
+			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
+			querygraph_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph.txt";
+			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map.txt";
+			break;
+		case Windows:
+			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
+			querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
+			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map.txt";
+			break;
+		}
+	}
 	
 	public static void main(String[] args) {
+		initializeParameters();
 //		SpatialFirst(5);
-		SpatialFirstList(5);
-//		SpatialFirstList_Block(5);
+//		SpatialFirstList(5);
+		SpatialFirstList_Block(5);
 	}
 	
 	public static void SpatialFirstList_Block(int query_id)
@@ -37,7 +55,7 @@ public class Experiment {
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 15;
+		int expe_count = 3;
 		
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		Query_Graph query_Graph = queryGraphs.get(query_id);
@@ -65,9 +83,9 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 		
-		int name_suffix = 1000;
+		int name_suffix = 100;
 		int times = 10;
-		while ( name_suffix <= 2000)
+		while ( name_suffix <= 200000)
 		{
 			double selectivity = name_suffix / 1000000.0;
 			
@@ -192,9 +210,9 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 		
-		int name_suffix = 1000;
+		int name_suffix = 10;
 		int times = 10;
-		while ( name_suffix <= 2000)
+		while ( name_suffix <= 20)
 		{
 			double selectivity = name_suffix / 1000000.0;
 			

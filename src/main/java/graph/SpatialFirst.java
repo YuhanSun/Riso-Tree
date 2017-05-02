@@ -58,6 +58,12 @@ public class SpatialFirst {
 		dbservice.shutdown();
 	}
 
+	/**
+	 * 
+	 * @param root_node root node of rtree
+	 * @param query_rectangle
+	 * @return a LinkedList<Node> whose elements are geometries in the rtree
+	 */
 	public LinkedList<Node> rangeQuery(Node root_node, MyRectangle query_rectangle)
 	{
 		try {
@@ -179,8 +185,9 @@ public class SpatialFirst {
 		return query;
 	}
 
-	public void query(Query_Graph query_Graph, int limit)
+	public ArrayList<Map<String, Object>> query(Query_Graph query_Graph, int limit)
 	{
+		ArrayList<Map<String, Object>> queryResult = new ArrayList<Map<String,Object>>();
 		try {
 			range_query_time = 0;
 			get_iterator_time = 0;
@@ -212,6 +219,7 @@ public class SpatialFirst {
 						min_queryRectangle = spa_predicates.get(key);
 					}
 				}
+			//the spatial predicate to trigger the query will be removed
 			spa_predicates.remove(min_pos, min_queryRectangle);
 
 			long start_1 = System.currentTimeMillis();
@@ -223,17 +231,19 @@ public class SpatialFirst {
 			{
 				start_1 = System.currentTimeMillis();
 				Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
-				long id = node.getId();
+				long id = node.getId();//neo4j pos id of graph node
 				String query = formSubgraphQuery(query_Graph, limit, 1, spa_predicates, min_pos, id);
 
 				Result result = dbservice.execute(query);
 				get_iterator_time += System.currentTimeMillis() - start_1;
 
 				start_1 = System.currentTimeMillis();
+				int cur_count = 0;
 				while( result.hasNext())
 				{
-					result.next();
-					//					Map<String, Object> row = result.next();
+					Map<String, Object> row = result.next();
+					queryResult.add(row);
+					cur_count++;
 					//					String str = row.toString();
 					//					OwnMethods.Print(row.toString());
 				}
@@ -243,16 +253,20 @@ public class SpatialFirst {
 				ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
 				result_count += profile.getRows();
 				page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+				
+				OwnMethods.Print(String.format("%d, %d", id, cur_count));//current node id and result size
 			}
 			tx.success();
 			tx.close();
-			//			OwnMethods.Print(String.format("result size: %d", result_count));
+			OwnMethods.Print(String.format("result size: %d", result_count));
+			OwnMethods.Print(String.format("located in count: %d", rangeQueryResult.size()));
 			//			OwnMethods.Print(String.format("time: %d", System.currentTimeMillis() - start));
 			//			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		//		return null;
+		
+		return queryResult;
 	}
 
 	public static void rangeQueryTest()
@@ -261,9 +275,14 @@ public class SpatialFirst {
 			SpatialFirst spatialFirst = new SpatialFirst(db_path_test, dataset_test);
 			Transaction tx = spatialFirst.dbservice.beginTx();
 			Node rootNode = OSM_Utility.getRTreeRoot(spatialFirst.dbservice, dataset_test);
-			MyRectangle query_rectangle = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);
-			LinkedList<Node> result = spatialFirst.rangeQuery(rootNode, query_rectangle);
+			LinkedList<Node> result = spatialFirst.rangeQuery(rootNode, queryRectangle);
 			OwnMethods.Print(String.format("Result size: %d", result.size()));
+			for ( Node node : result)
+			{
+				Node graph_node = node.getSingleRelationship
+						(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
+				OwnMethods.Print(graph_node.getId());
+			}
 			tx.success();
 			tx.close();
 			spatialFirst.dbservice.shutdown();
@@ -294,15 +313,18 @@ public class SpatialFirst {
 		SpatialFirst spatialFirst = new SpatialFirst(db_path_test, dataset_test);
 		query_Graph.spa_predicate[1] = queryRectangle;
 
-		spatialFirst.query(query_Graph, -1);
+		ArrayList<Map<String, Object>> queryResult = spatialFirst.query(query_Graph, -1);
+//		for ( Map<String, Object> row : queryResult)
+//			OwnMethods.WriteFile(log_path, true, row.toString() + "\n");
 		spatialFirst.shutdown();
 	}
 
 	//for test
-	static String dataset_test = "Gowalla";
+	static String dataset_test;
 	static String db_path_test;
 	static String querygraph_path;
 	static String graph_pos_map_path;
+	static String log_path;
 	static int query_id;
 	static ArrayList<Query_Graph> queryGraphs;
 	static Query_Graph query_Graph;
@@ -315,16 +337,18 @@ public class SpatialFirst {
 		Config config = new Config();
 		system systemName = config.getSystemName();
 		String neo4jVersion = config.GetNeo4jVersion(); 
-		switch (config.getSystemName()) {
+		switch (systemName) {
 		case Ubuntu:
 			db_path_test = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", neo4jVersion, dataset_test);
 			querygraph_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph.txt";
 			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset_test + "/node_map.txt";
+			log_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset_test + "/test.log";
 			break;
 		case Windows:
 			db_path_test = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset_test, neo4jVersion, dataset_test);
 			querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
 			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset_test + "\\node_map.txt";
+			log_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset_test + "\\test.log";
 		default:
 			break;
 		}
@@ -340,9 +364,11 @@ public class SpatialFirst {
 	}
 
 	public static void main(String[] args) {
-		//		rangeQueryTest();
-		//		formSubgraphQueryTest();
-		//		subgraphMatchQueryTest();
+		
+		initVariablesForTest();
+//				rangeQueryTest();
+//				formSubgraphQueryTest();
+				subgraphMatchQueryTest();
 	}
 
 }
