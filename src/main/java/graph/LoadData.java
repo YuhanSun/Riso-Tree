@@ -75,7 +75,7 @@ public class LoadData {
 			for ( Node node : geometry_nodes)
 			{
 				Long geom_id = node.getId();OwnMethods.Print(geom_id);
-				long osm_id = (long) node.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING)
+				long osm_id = (Long) node.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING)
 						.getStartNode().getProperty("node_osm_id");
 				map.put(geom_id, osm_id);
 			}
@@ -142,7 +142,7 @@ public class LoadData {
 				if(parent != null)
 				{
 					if(parent.hasProperty("count"))
-						parent.setProperty("count", (int)parent.getProperty("count") + 1);
+						parent.setProperty("count", (Integer)parent.getProperty("count") + 1);
 					else
 						parent.setProperty("count", 1);
 					set.add(parent);
@@ -160,9 +160,9 @@ public class LoadData {
 					{
 						Node parent = relationship.getStartNode();
 						if(parent.hasProperty("count"))
-							parent.setProperty("count", (int)parent.getProperty("count") + (int)node.getProperty("count"));
+							parent.setProperty("count", (Integer)parent.getProperty("count") + (Integer)node.getProperty("count"));
 						else
-							parent.setProperty("count", (int)node.getProperty("count"));
+							parent.setProperty("count", (Integer)node.getProperty("count"));
 						next_level_set.add(parent);
 					}
 				}

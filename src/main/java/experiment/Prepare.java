@@ -329,7 +329,7 @@ public class Prepare {
 			while(nodes.hasNext())
 			{
 				Node node = nodes.next();
-				int id = (int) node.getProperty("id");
+				int id = (Integer) node.getProperty("id");
 				Iterable<Label> labels = node.getLabels();
 				OwnMethods.Print(String.format("%d, %s", id, labels.toString()));
 			}
@@ -356,7 +356,7 @@ public class Prepare {
 				OwnMethods.Print(index);	index++;
 				Node node = nodes.next();
 //				node.removeLabel(GraphLabel.GRAPH_0);
-				int id = (int) node.getProperty("id");
+				int id = (Integer) node.getProperty("id");
 				int labelIndex = label_list.get(id);
 				String label_name = String.format("GRAPH_%d", labelIndex);
 				Label label = DynamicLabel.label(label_name);

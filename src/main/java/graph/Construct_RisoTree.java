@@ -134,7 +134,7 @@ public class Construct_RisoTree {
 					continue;
 				}
 				
-				int rtree_id = (int) node.getProperty("rtree_id");
+				int rtree_id = (Integer) node.getProperty("rtree_id");
 				for ( int i = 1; i <= max_hop_num; i++)
 				{
 					for ( int label : labels)
@@ -229,7 +229,7 @@ public class Construct_RisoTree {
 					continue;
 				}
 				
-				int rtree_id = (int) node.getProperty("rtree_id");
+				int rtree_id = (Integer) node.getProperty("rtree_id");
 				for ( int i = 1; i <= max_hop_num; i++)
 				{
 					for ( int label : labels)
@@ -334,7 +334,7 @@ public class Construct_RisoTree {
 						for ( int label : labels)
 						{
 							String NL_size_property_name = String.format("NL_%d_%d_size", i, label);
-							int size = (int) node.getProperty(NL_size_property_name);
+							int size = (Integer) node.getProperty(NL_size_property_name);
 							String line = String.format("%d %s size:%d", node.getProperty("rtree_id"), NL_size_property_name, size);
 							OwnMethods.Print(line);
 							OwnMethods.WriteFile(output_path, true, line + "\n");

@@ -473,7 +473,7 @@ public class SpatialFirst_List {
 		for ( int key : NL_hopnum.keySet())
 		{
 			String id_list_size_property_name = String.format("NL_%d_%d_size", NL_hopnum.get(key), query_Graph.label_list[key]);
-			int id_list_size = (int) node.getProperty(id_list_size_property_name);
+			int id_list_size = (Integer) node.getProperty(id_list_size_property_name);
 			if( id_list_size > 1000)
 				query = query.replaceFirst(String.format("a%d", key), String.format("a%d:GRAPH_%d", key, query_Graph.label_list[key]));
 			else {
@@ -647,7 +647,7 @@ public class SpatialFirst_List {
 		}
 	}
 
-	public static void formSubgraphQueryTest()
+	public static void formSubgraphQueryTest() throws Exception
 	{
 		try {
 			HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
@@ -694,7 +694,7 @@ public class SpatialFirst_List {
 			while(result.hasNext())
 			{
 				Map<String, Object> row = result.next();
-				long ida1 = (long) row.get("id(a0)");
+				long ida1 = (Long) row.get("id(a0)");
 				ida1_list.add(ida1);
 				count++;
 			}
@@ -707,7 +707,7 @@ public class SpatialFirst_List {
 			tx.close();
 			spatialFirstlist.dbservice.shutdown();
 		} catch (Exception e) {
-			throw e;
+			e.printStackTrace();
 		}
 	}
 

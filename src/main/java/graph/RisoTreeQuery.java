@@ -158,7 +158,7 @@ public class RisoTreeQuery {
 						OwnMethods.Print(MBR);
 						double MBR_area = MBR.area();
 						
-						int spa_count = (int) node.getProperty("count");
+						int spa_count = (Integer) node.getProperty("count");
 						for ( int key : spa_predicates.keySet())
 						{
 							MyRectangle intersect = MBR.intersect(spa_predicates.get(key)); 
@@ -177,7 +177,7 @@ public class RisoTreeQuery {
 								HashMap<Integer, Double> NL_cards_vector = NL_cards.get(key);
 								for ( int neighbor_id : NL_cards_vector.keySet())
 								{
-									int NL_label_size = (int) node.getProperty(NL_size_propertyname.get(key).get(neighbor_id));
+									int NL_label_size = (Integer) node.getProperty(NL_size_propertyname.get(key).get(neighbor_id));
 									NL_cards_vector.put(neighbor_id, (NL_cards_vector.get(neighbor_id) + ratio * NL_label_size));
 								}
 								
