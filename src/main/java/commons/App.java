@@ -22,8 +22,8 @@ import commons.Labels.OSMRelation;
 
 public class App {
 
-	static String dataset;
 	static Config config = new Config();
+	static String dataset = config.getDatasetName();
 	static String lon_name = config.GetLongitudePropertyName();
 	static String lat_name = config.GetLatitudePropertyName();
 
@@ -38,8 +38,6 @@ public class App {
 
 	public static void initVariablesForTest()
 	{
-		dataset = "Gowalla";
-		
 		system systemName = config.getSystemName();
 		String neo4jVersion = config.GetNeo4jVersion(); 
 		switch (systemName) {
@@ -58,8 +56,8 @@ public class App {
 			break;
 		}
 		query_id = 5;
-		queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
-		query_Graph = queryGraphs.get(query_id);
+//		queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+//		query_Graph = queryGraphs.get(query_id);
 //		queryRectangle = new MyRectangle(-80.115808, 26.187365, -80.115808, 26.187365);//1
 		queryRectangle = new MyRectangle(-80.119514, 26.183659, -80.112102, 26.191071);//10
 //		queryRectangle = new MyRectangle(-80.133549, 26.169624, -80.098067, 26.205106);//100
@@ -111,37 +109,46 @@ public class App {
 	
 	public static void test()
 	{
+		OwnMethods.Print(db_path);
 		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = databaseService.beginTx();
-			Node node = databaseService.getNodeById(511901);
-			Iterable<Relationship> rels = node.getRelationships(GraphRel.GRAPH_LINK, Direction.INCOMING);
-			int count = 0;
-			ArrayList<Integer> graph_ids = new ArrayList<Integer>();
-			for ( Relationship relationship : rels)
+			
+//			Node node = databaseService.getNodeById(511901);
+//			Iterable<Relationship> rels = node.getRelationships(GraphRel.GRAPH_LINK, Direction.INCOMING);
+//			int count = 0;
+//			ArrayList<Integer> graph_ids = new ArrayList<Integer>();
+//			for ( Relationship relationship : rels)
+//			{
+//				count++;
+//				Node neighbor_node = relationship.getStartNode();
+//				OwnMethods.Print(neighbor_node.getId());
+//				graph_ids.add((Integer) neighbor_node.getProperty("id"));
+//			}
+//			OwnMethods.Print(String.format("neighbor count: %d", count));
+//			
+//			int[] NL_list = (int[]) node.getSingleRelationship(OSMRelation.GEOM, Direction.OUTGOING).getEndNode()
+//			.getSingleRelationship(RTreeRelationshipTypes.RTREE_REFERENCE, Direction.INCOMING).getStartNode()
+//			.getProperty("NL_1_0_list");
+//			
+//			HashSet<Integer> NL_list_set = new HashSet<Integer>();
+//			for ( int id : NL_list)
+//				NL_list_set.add(id);
+//			
+//			for (int id : graph_ids)
+//			{
+//				if(NL_list_set.contains(id) == false)
+//					OwnMethods.WriteFile(log_path, true, id + "\n");
+//			}
+			
+			Result result = databaseService.execute("match (n) where false return n");
+			int index = 0;
+			while ( result.hasNext())
 			{
-				count++;
-				Node neighbor_node = relationship.getStartNode();
-				OwnMethods.Print(neighbor_node.getId());
-				graph_ids.add((Integer) neighbor_node.getProperty("id"));
+				index++;
+				result.next();
 			}
-			OwnMethods.Print(String.format("neighbor count: %d", count));
-			
-			int[] NL_list = (int[]) node.getSingleRelationship(OSMRelation.GEOM, Direction.OUTGOING).getEndNode()
-			.getSingleRelationship(RTreeRelationshipTypes.RTREE_REFERENCE, Direction.INCOMING).getStartNode()
-			.getProperty("NL_1_0_list");
-			
-			HashSet<Integer> NL_list_set = new HashSet<Integer>();
-			for ( int id : NL_list)
-				NL_list_set.add(id);
-			
-			for (int id : graph_ids)
-			{
-				if(NL_list_set.contains(id) == false)
-					OwnMethods.WriteFile(log_path, true, id + "\n");
-			}
-			
-			
+			OwnMethods.Print(index);
 			tx.close();
 			tx.success();
 			databaseService.shutdown();

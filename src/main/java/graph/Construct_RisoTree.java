@@ -556,98 +556,108 @@ public class Construct_RisoTree {
 		
 	}
 
-//	public static void Construct()
-//	{
-//		try {
-//			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
-//			Map<String, String> map_str = OwnMethods.ReadMap(geo_id_map_path );
-//			Map<Long, Long> map = new HashMap<>();
-//			Set<Entry<String, String >> set = map_str.entrySet();
-//			for (Entry<String, String> entry : set)
-//			{
-//				Long key = Long.parseLong(entry.getKey());
-//				Long value = Long.parseLong(entry.getValue());
-//				map.put(key, value);
-//			}
-//			
-//			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-//			Transaction tx = dbservice.beginTx();
-//			
-//			Set<Node> cur_level_nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset); 
-//			for ( Node node : cur_level_nodes)
-//			{
-//				TreeSet<Integer> NL = new TreeSet<>();
-//				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_REFERENCE);
-//				for ( Relationship rel : rels)
-//				{
-//					Node child  = rel.getEndNode();
-//					long pos_id = child.getId();
-//					long graph_id = map.get(pos_id);
-//					if(graph_id > Integer.MAX_VALUE)
-//						throw new Exception("graph id out of int range!");
-//					int id = (int) graph_id;
-//					for (int neighbor : graph.get(id))
-//						NL.add(neighbor);
-//				}
-//				int[] NL_array = new int[NL.size()];
-//				int i = 0;
-//				Iterator<Integer> iterator = NL.iterator();
-//				while(iterator.hasNext())
-//				{
-//					NL_array[i] = iterator.next();
-//					i++;
-//				}
-//				node.setProperty("NL_1_list", NL_array);
-//			}
-//			
-//			Set<Node> next_level_nodes = new HashSet<>();
-//			while (cur_level_nodes.isEmpty() ==  false)
-//			{
-//				for (Node node : cur_level_nodes)
-//				{
-//					Relationship relationship = node.getSingleRelationship(RTreeRel.RTREE_CHILD, Direction.INCOMING);
-//					if ( relationship != null)
-//					{
-//						Node parent = relationship.getStartNode();
-//						next_level_nodes.add(parent);
-//					}
-//				}
-//				
-//				for ( Node node : next_level_nodes)
-//				{
-//					TreeSet<Integer> NL = new TreeSet<>();
-//					Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_CHILD);
-//					for ( Relationship rel : rels)
-//					{
-//						Node child  = rel.getEndNode();
-//						int[] child_NL_list = (int[]) child.getProperty("NL_1_list");
-//						for ( int neighbor : child_NL_list)
-//							NL.add(neighbor);
-//					}
-//					int[] NL_array = new int[NL.size()];
-//					int i = 0;
-//					Iterator<Integer> iterator = NL.iterator();
-//					while(iterator.hasNext())
-//					{
-//						NL_array[i] = iterator.next();
-//						i++;
-//					}
-//					node.setProperty("NL_1_list", NL_array);
-//				}
-//				
-//				cur_level_nodes = next_level_nodes;
-//				next_level_nodes = new HashSet<Node>();
-//			}
-//			tx.success();
-//			tx.close();
-//			
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//			e.printStackTrace();
-//		}
-//		
-//	}
+	/**
+	 * load one hop neighbor list without distinguishing labels
+	 * the graph data will be used directly
+	 */
+	public static void Construct()
+	{
+		try {
+			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+			Map<String, String> map_str = OwnMethods.ReadMap(geo_id_map_path );
+			Map<Long, Long> map = new HashMap<>();
+			Set<Entry<String, String >> set = map_str.entrySet();
+			for (Entry<String, String> entry : set)
+			{
+				Long key = Long.parseLong(entry.getKey());
+				Long value = Long.parseLong(entry.getValue());
+				map.put(key, value);
+			}
+			
+			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = dbservice.beginTx();
+			
+			Set<Node> cur_level_nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset); 
+			for ( Node node : cur_level_nodes)
+			{
+				TreeSet<Integer> NL = new TreeSet<>();
+				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_REFERENCE);
+				for ( Relationship rel : rels)
+				{
+					Node child  = rel.getEndNode();
+					long pos_id = child.getId();
+					long graph_id = map.get(pos_id);
+					if(graph_id > Integer.MAX_VALUE)
+						throw new Exception("graph id out of int range!");
+					int id = (int) graph_id;
+					for (int neighbor : graph.get(id))
+						NL.add(neighbor);
+				}
+				int[] NL_array = new int[NL.size()];
+				int i = 0;
+				Iterator<Integer> iterator = NL.iterator();
+				while(iterator.hasNext())
+				{
+					NL_array[i] = iterator.next();
+					i++;
+				}
+				node.setProperty("NL_1_list", NL_array);
+			}
+			
+			Set<Node> next_level_nodes = new HashSet<>();
+			while (cur_level_nodes.isEmpty() ==  false)
+			{
+				for (Node node : cur_level_nodes)
+				{
+					Relationship relationship = node.getSingleRelationship(RTreeRel.RTREE_CHILD, Direction.INCOMING);
+					if ( relationship != null)
+					{
+						Node parent = relationship.getStartNode();
+						next_level_nodes.add(parent);
+					}
+				}
+				
+				for ( Node node : next_level_nodes)
+				{
+					TreeSet<Integer> NL = new TreeSet<>();
+					Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_CHILD);
+					for ( Relationship rel : rels)
+					{
+						Node child  = rel.getEndNode();
+						int[] child_NL_list = (int[]) child.getProperty("NL_1_list");
+						for ( int neighbor : child_NL_list)
+							NL.add(neighbor);
+					}
+					int[] NL_array = new int[NL.size()];
+					int i = 0;
+					Iterator<Integer> iterator = NL.iterator();
+					while(iterator.hasNext())
+					{
+						NL_array[i] = iterator.next();
+						i++;
+					}
+					node.setProperty("NL_1_list", NL_array);
+				}
+				
+				cur_level_nodes = next_level_nodes;
+				next_level_nodes = new HashSet<Node>();
+			}
+			tx.success();
+			tx.close();
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		
+	}
 	
+	/**
+	 * load two hop neighbor list from file
+	 * @param hop_num
+	 * @param labels
+	 * @param label_list
+	 */
 	public static void Construct(int hop_num, ArrayList<Integer> labels, ArrayList<Integer> label_list)
 	{
 		String source_NL_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/"+dataset+"/2hop_neighbor_spa.txt";

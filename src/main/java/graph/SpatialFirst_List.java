@@ -241,6 +241,13 @@ public class SpatialFirst_List {
 		for ( int key : NL_hopnum.keySet())
 		{
 			String id_list_property_name = String.format("NL_%d_%d_list", NL_hopnum.get(key), query_Graph.label_list[key]);
+			
+			if ( node.hasProperty(id_list_property_name) == false)
+			{
+				query = "match (n) where false return n";
+				return query;
+			}
+			
 			int[] graph_id_list = (int[]) node.getProperty(id_list_property_name);
 			ArrayList<Long> pos_id_list = new ArrayList<Long>(graph_id_list.length);
 			for ( int i = 0; i < graph_id_list.length; i++)
@@ -359,12 +366,15 @@ public class SpatialFirst_List {
 						}
 						iterate_time += System.currentTimeMillis() - start_1;
 						
-						ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-						ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
-						result_count += profile.getRows();
-//						page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+						if ( cur_count != 0)
+						{
+							ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+							ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
+							result_count += profile.getRows();
+							page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
 //						OwnMethods.Print(planDescription);
-						OwnMethods.Print(String.format("%d, %d", id, cur_count));
+							OwnMethods.Print(String.format("%d, %d", id, cur_count));
+						}
 					}
 					else {
 						range_query_time += System.currentTimeMillis() - start_1;
@@ -468,6 +478,10 @@ public class SpatialFirst_List {
 				query = query.replaceFirst(String.format("a%d", key), String.format("a%d:GRAPH_%d", key, query_Graph.label_list[key]));
 			else {
 				String id_list_property_name = String.format("NL_%d_%d_list", NL_hopnum.get(key), query_Graph.label_list[key]);
+				
+				if ( node.hasProperty(id_list_property_name) == false)
+					return "match (n) where false return n";
+				
 				int[] graph_id_list = (int[]) node.getProperty(id_list_property_name);
 				ArrayList<Long> pos_id_list = new ArrayList<Long>(graph_id_list.length);
 				for ( int i = 0; i < graph_id_list.length; i++)
@@ -582,8 +596,10 @@ public class SpatialFirst_List {
 					get_iterator_time += System.currentTimeMillis() - start_1;
 
 					start_1 = System.currentTimeMillis();
+					int cur_count = 0;
 					while( result.hasNext())
 					{
+						cur_count++;
 						result.next();
 //						Map<String, Object> row = result.next();
 //						String str = row.toString();
@@ -591,12 +607,15 @@ public class SpatialFirst_List {
 					}
 					iterate_time += System.currentTimeMillis() - start_1;
 
-					ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-					ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
-					result_count += profile.getRows();
-					page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-
+					if ( cur_count != 0)
+					{
+						ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+						ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
+						result_count += profile.getRows();
+						page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+						
 //					OwnMethods.Print(planDescription);
+					}
 				}
 			}
 

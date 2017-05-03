@@ -232,6 +232,9 @@ public class SpatialFirst {
 				start_1 = System.currentTimeMillis();
 				Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
 				long id = node.getId();//neo4j pos id of graph node
+				range_query_time += System.currentTimeMillis() - start_1;
+				
+				start_1 = System.currentTimeMillis();
 				String query = formSubgraphQuery(query_Graph, limit, 1, spa_predicates, min_pos, id);
 
 				Result result = dbservice.execute(query);
@@ -242,7 +245,7 @@ public class SpatialFirst {
 				while( result.hasNext())
 				{
 					Map<String, Object> row = result.next();
-					queryResult.add(row);
+//					queryResult.add(row);
 					cur_count++;
 					//					String str = row.toString();
 					//					OwnMethods.Print(row.toString());
