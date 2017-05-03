@@ -85,16 +85,16 @@ public class RisoTreeQuery {
 	{
 		try {
 			//<spa_id, rectangle>
-			HashMap<Integer, MyRectangle> spa_predicates = new HashMap<>();
+			HashMap<Integer, MyRectangle> spa_predicates = new HashMap<Integer, MyRectangle>();
 			
 			//<spa_id, <neighbor_id, hop_num>>
-			HashMap<Integer, HashMap<Integer, Integer>> min_hop = new HashMap<>();
+			HashMap<Integer, HashMap<Integer, Integer>> min_hop = new HashMap<Integer, HashMap<Integer, Integer>>();
 			//<spa_id, <neighbor_id, size_property_name>>
-			HashMap<Integer, HashMap<Integer, String>> NL_size_propertyname = new HashMap<>();
+			HashMap<Integer, HashMap<Integer, String>> NL_size_propertyname = new HashMap<Integer, HashMap<Integer, String>>();
 			//<spa_id, <neighbor_id, list_property_name>>
 			HashMap<Integer, HashMap<Integer, String>> NL_list_propertyname = new HashMap<Integer, HashMap<Integer,String>>();	
 			//<spa_id, <neighbor_id, NL_list>>
-			HashMap<Integer, HashMap<Integer, HashSet<Integer>>> NL_list = new HashMap<>();
+			HashMap<Integer, HashMap<Integer, HashSet<Integer>>> NL_list = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
 			
 			int[][] min_hop_array = Ini_Minhop(query_Graph);
 			
@@ -120,21 +120,21 @@ public class RisoTreeQuery {
 			OwnMethods.Print(String.format("min_hop: %s", min_hop));
 			OwnMethods.Print(String.format("NL_property: %s", NL_size_propertyname));
 					
-			LinkedList<Node> cur_list = new LinkedList<>();
+			LinkedList<Node> cur_list = new LinkedList<Node>();
 			cur_list.add(root_node);
-			LinkedList<Node> next_list = new LinkedList<>(); 
+			LinkedList<Node> next_list = new LinkedList<Node>(); 
 			
 			int level_index = 0;
 			while(cur_list.isEmpty() == false)
 			{
 				long start = System.currentTimeMillis();
 				//<spa_id, card>
-				HashMap<Integer, Double> spa_cards = new HashMap<>();
+				HashMap<Integer, Double> spa_cards = new HashMap<Integer, Double>();
 				for (int key : spa_predicates.keySet())
 					spa_cards.put(key, 0.0);
 				
 				//<spa_id, <neighbor_id, card>>
-				HashMap<Integer, HashMap<Integer, Double>> NL_cards = new HashMap<>();
+				HashMap<Integer, HashMap<Integer, Double>> NL_cards = new HashMap<Integer, HashMap<Integer, Double>>();
 				for (int spa_id : min_hop.keySet())
 				{
 					NL_cards.put(spa_id, new HashMap<Integer, Double>());
@@ -145,7 +145,7 @@ public class RisoTreeQuery {
 				
 				//<spa_id, overlap_nodes_list>
 //				HashMap<Integer, LinkedList<Node>> overlap_MBR_list = new HashMap<>();
-				LinkedList<Node>overlap_MBR_list = new LinkedList<>(); //just support one spatial predicate
+				LinkedList<Node>overlap_MBR_list = new LinkedList<Node>(); //just support one spatial predicate
 				
 				Iterator<Node> iterator = cur_list.iterator();
 				while(iterator.hasNext())
@@ -277,7 +277,7 @@ public class RisoTreeQuery {
 				}
 				
 				cur_list = next_list;
-				next_list = new LinkedList<>();
+				next_list = new LinkedList<Node>();
 				
 
 				level_index++;

@@ -67,7 +67,7 @@ public class SpatialFirst {
 	public LinkedList<Node> rangeQuery(Node root_node, MyRectangle query_rectangle)
 	{
 		try {
-			LinkedList<Node> cur_list = new LinkedList<>();
+			LinkedList<Node> cur_list = new LinkedList<Node>();
 			cur_list.add(root_node);
 
 			int level_index = 0;
@@ -75,7 +75,7 @@ public class SpatialFirst {
 			{
 				long start = System.currentTimeMillis();
 				//				OwnMethods.Print(String.format("level %d", level_index));
-				LinkedList<Node> next_list = new LinkedList<>();
+				LinkedList<Node> next_list = new LinkedList<Node>();
 				LinkedList<Node> overlap_MBR_list = new LinkedList<Node>(); 
 
 				for (Node node : cur_list)
@@ -199,7 +199,7 @@ public class SpatialFirst {
 			Transaction tx = dbservice.beginTx();
 
 			//<spa_id, rectangle>
-			HashMap<Integer, MyRectangle> spa_predicates = new HashMap<>();
+			HashMap<Integer, MyRectangle> spa_predicates = new HashMap<Integer, MyRectangle>();
 			for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
 				if(query_Graph.Has_Spa_Predicate[i])
 					spa_predicates.put(i, query_Graph.spa_predicate[i]);

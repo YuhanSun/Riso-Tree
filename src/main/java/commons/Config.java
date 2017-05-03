@@ -20,7 +20,7 @@ public class Config
 	private String latitude_property_name = "lat";
 	
 	private String neo4j_version = "neo4j-community-3.1.1";
-	private system operatingSystem = system.Windows;
+	private system operatingSystem = system.Ubuntu;
 	private String dataset = "Gowalla_100";
 
 	private String Rect_minx_name = "minx";

@@ -76,7 +76,7 @@ public class Construct_RisoTree {
 		default:
 			break;
 		}
-		labels = new ArrayList<>(Arrays.asList(0, 1));
+		labels = new ArrayList<Integer>(Arrays.asList(0, 1));
 	}
 	
 	public static void main(String[] args) {
@@ -100,7 +100,7 @@ public class Construct_RisoTree {
 	public static void set_NL_list_label_DeepestNonLeaf(int max_hop_num, ArrayList<Integer> labels)
 	{
 		HashMap<String, String> map = OwnMethods.ReadMap(graph_node_map_path); 
-		HashMap<Integer, Integer> graph_node_map = new HashMap<>();
+		HashMap<Integer, Integer> graph_node_map = new HashMap<Integer, Integer>();
 		for ( String key : map.keySet())
 		{
 			String value = map.get(key);
@@ -193,7 +193,7 @@ public class Construct_RisoTree {
 	public static void set_NL_list_label(int max_hop_num, ArrayList<Integer> labels)
 	{
 		HashMap<String, String> map = OwnMethods.ReadMap(graph_node_map_path); 
-		HashMap<Integer, Integer> graph_node_map = new HashMap<>();
+		HashMap<Integer, Integer> graph_node_map = new HashMap<Integer, Integer>();
 		for ( String key : map.keySet())
 		{
 			String value = map.get(key);
@@ -316,8 +316,8 @@ public class Construct_RisoTree {
 		try {
 			Transaction tx = dbservice.beginTx();
 			Node root = OSM_Utility.getRTreeRoot(dbservice, dataset);
-			Queue<Node> cur = new LinkedList<>();
-			Queue<Node> next = new LinkedList<>(); 
+			Queue<Node> cur = new LinkedList<Node>();
+			Queue<Node> next = new LinkedList<Node>(); 
 			cur.add(root);
 			
 			int level_index = 0;
@@ -345,7 +345,7 @@ public class Construct_RisoTree {
 						next.add(relationship.getEndNode());	
 				}
 				cur = next;
-				next = new LinkedList<>();
+				next = new LinkedList<Node>();
 			}
 			tx.success();
 			tx.close();
@@ -363,7 +363,7 @@ public class Construct_RisoTree {
 		try {
 			Transaction tx = dbservice.beginTx();
 			Node root = OSM_Utility.getRTreeRoot(dbservice, dataset);
-			Queue<Node> cur = new LinkedList<>();
+			Queue<Node> cur = new LinkedList<Node>();
 			cur.add(root);
 			
 			while(cur.isEmpty() == false)
@@ -408,14 +408,14 @@ public class Construct_RisoTree {
 			Transaction tx = dbservice.beginTx();
 			Set<Node> cur_level_nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset);
 			
-			HashSet<Node> up_level_nodes = new HashSet<>(); 
+			HashSet<Node> up_level_nodes = new HashSet<Node>(); 
 			
 			while( cur_level_nodes.isEmpty() == false)
 			{
 				for ( Node node : cur_level_nodes)
 				{
-					HashMap<Integer, TreeSet<Integer>> NL_list = new HashMap<>();
-					HashMap<Integer, String> property_name_map = new HashMap<>();
+					HashMap<Integer, TreeSet<Integer>> NL_list = new HashMap<Integer, TreeSet<Integer>>();
+					HashMap<Integer, String> property_name_map = new HashMap<Integer, String>();
 					
 					for ( int label : labels)
 					{
@@ -455,7 +455,7 @@ public class Construct_RisoTree {
 						up_level_nodes.add(relationship.getStartNode());
 				}
 				cur_level_nodes = up_level_nodes;
-				up_level_nodes = new HashSet<>();
+				up_level_nodes = new HashSet<Node>();
 			}
 			
 			tx.success();
@@ -475,7 +475,7 @@ public class Construct_RisoTree {
 		String line = "";
 		try {
 			Map<String, String> map_str = OwnMethods.ReadMap(geo_id_map_path );
-			Map<Long, Long> map = new HashMap<>();
+			Map<Long, Long> map = new HashMap<Long, Long>();
 			Set<Entry<String, String >> set = map_str.entrySet();
 			for (Entry<String, String> entry : set)
 			{
@@ -485,7 +485,7 @@ public class Construct_RisoTree {
 			}
 			
 			ArrayList<Integer> label_list = OwnMethods.readIntegerArray(label_list_path);
-			ArrayList<Integer> labels = new ArrayList<>(Arrays.asList(0,1));
+			ArrayList<Integer> labels = new ArrayList<Integer>(Arrays.asList(0,1));
 			
 			BufferedReader reader = new BufferedReader(new FileReader(new File(NL_path)));
 			line = reader.readLine();
@@ -508,7 +508,7 @@ public class Construct_RisoTree {
 				
 				int line_count = Integer.parseInt(str_list[1]);
 				
-				HashMap<Integer, ArrayList<Integer>> NL_list = new HashMap<>();
+				HashMap<Integer, ArrayList<Integer>> NL_list = new HashMap<Integer, ArrayList<Integer>>();
 				for ( int label : labels)
 					NL_list.put(label, new ArrayList<Integer>(line_count));
 
@@ -565,7 +565,7 @@ public class Construct_RisoTree {
 		try {
 			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
 			Map<String, String> map_str = OwnMethods.ReadMap(geo_id_map_path );
-			Map<Long, Long> map = new HashMap<>();
+			Map<Long, Long> map = new HashMap<Long, Long>();
 			Set<Entry<String, String >> set = map_str.entrySet();
 			for (Entry<String, String> entry : set)
 			{
@@ -580,7 +580,7 @@ public class Construct_RisoTree {
 			Set<Node> cur_level_nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset); 
 			for ( Node node : cur_level_nodes)
 			{
-				TreeSet<Integer> NL = new TreeSet<>();
+				TreeSet<Integer> NL = new TreeSet<Integer>();
 				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_REFERENCE);
 				for ( Relationship rel : rels)
 				{
@@ -604,7 +604,7 @@ public class Construct_RisoTree {
 				node.setProperty("NL_1_list", NL_array);
 			}
 			
-			Set<Node> next_level_nodes = new HashSet<>();
+			Set<Node> next_level_nodes = new HashSet<Node>();
 			while (cur_level_nodes.isEmpty() ==  false)
 			{
 				for (Node node : cur_level_nodes)
@@ -619,7 +619,7 @@ public class Construct_RisoTree {
 				
 				for ( Node node : next_level_nodes)
 				{
-					TreeSet<Integer> NL = new TreeSet<>();
+					TreeSet<Integer> NL = new TreeSet<Integer>();
 					Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_CHILD);
 					for ( Relationship rel : rels)
 					{
@@ -665,7 +665,7 @@ public class Construct_RisoTree {
 		try {
 			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(source_NL_path);
 			Map<String, String> map_str = OwnMethods.ReadMap(geo_id_map_path );
-			Map<Long, Long> map = new HashMap<>();
+			Map<Long, Long> map = new HashMap<Long, Long>();
 			Set<Entry<String, String >> set = map_str.entrySet();
 			for (Entry<String, String> entry : set)
 			{
@@ -680,7 +680,7 @@ public class Construct_RisoTree {
 			Set<Node> cur_level_nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset); 
 			for ( Node node : cur_level_nodes)
 			{
-				HashMap<Integer, TreeSet<Integer>> NL = new HashMap<>();
+				HashMap<Integer, TreeSet<Integer>> NL = new HashMap<Integer, TreeSet<Integer>>();
 				for (int i = 0; i < labels.size(); i++)
 					NL.put(labels.get(i), new TreeSet<Integer>());
 				
@@ -718,7 +718,7 @@ public class Construct_RisoTree {
 				
 			}
 			
-			Set<Node> next_level_nodes = new HashSet<>();
+			Set<Node> next_level_nodes = new HashSet<Node>();
 			while (cur_level_nodes.isEmpty() ==  false)
 			{
 				for (Node node : cur_level_nodes)
@@ -733,7 +733,7 @@ public class Construct_RisoTree {
 				
 				for ( Node node : next_level_nodes)
 				{
-					HashMap<Integer, TreeSet<Integer>> NL = new HashMap<>();
+					HashMap<Integer, TreeSet<Integer>> NL = new HashMap<Integer, TreeSet<Integer>>();
 					for (int i = 0; i < labels.size(); i++)
 						NL.put(labels.get(i), new TreeSet<Integer>());
 					Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_CHILD);
@@ -792,7 +792,7 @@ public class Construct_RisoTree {
 			
 			Node rtree_root_node = OSM_Utility.getRTreeRoot(dbservice, dataset);
 			
-			Queue<Node> queue = new LinkedList<>();
+			Queue<Node> queue = new LinkedList<Node>();
 			queue.add(rtree_root_node);
 			while ( queue.isEmpty() == false)
 			{

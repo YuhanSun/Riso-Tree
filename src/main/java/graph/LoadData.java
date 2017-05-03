@@ -71,7 +71,7 @@ public class LoadData {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
 			Iterable<Node> geometry_nodes = OSM_Utility.getAllGeometries(databaseService, dataset);
-			Map<Object, Object> map = new TreeMap<>();
+			Map<Object, Object> map = new TreeMap<Object, Object>();
 			for ( Node node : geometry_nodes)
 			{
 				Long geom_id = node.getId();OwnMethods.Print(geom_id);

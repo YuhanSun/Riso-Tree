@@ -60,12 +60,22 @@ public class Experiment {
 		initializeParameters();
 		
 		for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
-			for ( int nodeCount = 2; nodeCount <= 4; nodeCount++)
-			{
-//				SpatialFirst(nodeCount, queryIndex);
-//				SpatialFirstList_Block(nodeCount, queryIndex);
-				Neo4j_Naive(nodeCount, queryIndex);
-			}
+		{
+			if ( queryIndex == 0)
+				for ( int nodeCount = 3; nodeCount <= 4; nodeCount++)
+				{
+					SpatialFirst(nodeCount, queryIndex);
+					SpatialFirstList_Block(nodeCount, queryIndex);
+	//				Neo4j_Naive(nodeCount, queryIndex);
+				}
+			else
+				for ( int nodeCount = 2; nodeCount <= 4; nodeCount++)
+				{
+					SpatialFirst(nodeCount, queryIndex);
+					SpatialFirstList_Block(nodeCount, queryIndex);
+	//				Neo4j_Naive(nodeCount, queryIndex);
+				}
+		}
 	}
 	
 	public static void Neo4j_Naive(int nodeCount, int query_id)
@@ -73,7 +83,7 @@ public class Experiment {
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 15;
+		int expe_count = 5;
 
 		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
@@ -199,7 +209,7 @@ public class Experiment {
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 15;
+		int expe_count = 5;
 		
 		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
@@ -456,7 +466,7 @@ public class Experiment {
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 15;
+		int expe_count = 5;
 
 		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
