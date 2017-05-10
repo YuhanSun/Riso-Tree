@@ -1,10 +1,12 @@
 package experiment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import commons.*;
 import commons.Config.system;
@@ -40,7 +42,7 @@ public class Experiment {
 		}
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		initializeParameters();
 		
 //		int queryIndex = 2;
@@ -61,29 +63,36 @@ public class Experiment {
 		
 		for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
 		{
-			if ( queryIndex == 0)
-				for ( int nodeCount = 3; nodeCount <= 4; nodeCount++)
-				{
-					SpatialFirst(nodeCount, queryIndex);
-					SpatialFirstList_Block(nodeCount, queryIndex);
-	//				Neo4j_Naive(nodeCount, queryIndex);
-				}
-			else
-				for ( int nodeCount = 2; nodeCount <= 4; nodeCount++)
-				{
-					SpatialFirst(nodeCount, queryIndex);
-					SpatialFirstList_Block(nodeCount, queryIndex);
-	//				Neo4j_Naive(nodeCount, queryIndex);
-				}
+//			if ( queryIndex == 0)
+//				for ( int nodeCount = 3; nodeCount <= 4; nodeCount++)
+//				{
+////					SpatialFirst(nodeCount, queryIndex);
+////					SpatialFirstList_Block(nodeCount, queryIndex);
+//					Neo4j_Naive(nodeCount, queryIndex);
+//				}
+//			else
+//				for ( int nodeCount = 2; nodeCount <= 4; nodeCount++)
+//				{
+////					SpatialFirst(nodeCount, queryIndex);
+////					SpatialFirstList_Block(nodeCount, queryIndex);
+//					Neo4j_Naive(nodeCount, queryIndex);
+//				}
+			
+			for (int nodeCount = 2; nodeCount <= 4; nodeCount++)
+			{
+//				SpatialFirst(nodeCount, queryIndex);
+//				SpatialFirstList_Block(nodeCount, queryIndex);
+								Neo4j_Naive(nodeCount, queryIndex);
+			}
 		}
 	}
 	
-	public static void Neo4j_Naive(int nodeCount, int query_id)
+	public static void Neo4j_Naive(int nodeCount, int query_id) throws Exception
 	{
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 5;
+		int expe_count = 3;
 
 		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
@@ -155,8 +164,12 @@ public class Experiment {
 				{
 					OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
 
+					Result result = naive_Neo4j_Match.neo4j_API.graphDb.execute("match (n) where id(n) = 0 return n");
+					while( result.hasNext())
+						result.next();
+					
 					start = System.currentTimeMillis();
-					Result result = naive_Neo4j_Match.SubgraphMatch_Spa_API(query_Graph, limit);
+					result = naive_Neo4j_Match.SubgraphMatch_Spa_API(query_Graph, limit);
 					time = System.currentTimeMillis() - start;
 					time_get_iterator.add(time);
 
@@ -176,6 +189,15 @@ public class Experiment {
 					write_line = String.format("%d\t%d\t", count.get(i), time_get_iterator.get(i));
 					write_line += String.format("%d\t%d\t", time_iterate.get(i), total_time.get(i));
 					write_line += String.format("%d\n", access.get(i));
+					
+					naive_Neo4j_Match.neo4j_API.ShutDown();
+					
+					OwnMethods.ClearCache("syh19910205");
+					Thread.currentThread();
+					Thread.sleep(5000);
+					
+					naive_Neo4j_Match.neo4j_API = new Neo4j_API(db_path);
+					
 					if(!TEST_FORMAT)
 						OwnMethods.WriteFile(result_detail_path, true, write_line);
 				}
@@ -190,10 +212,10 @@ public class Experiment {
 				OwnMethods.WriteFile(result_avg_path, true, write_line);
 
 			long larger_time = Utility.Average(total_time);
-			if (larger_time * expe_count > 150 * 1000)
-				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 150.0 / 1000.0));
-			if(expe_count < 1)
-				expe_count = 1;
+//			if (larger_time * expe_count > 150 * 1000)
+//				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 150.0 / 1000.0));
+//			if(expe_count < 1)
+//				expe_count = 1;
 
 			count.clear();	time_get_iterator.clear();
 			time_iterate.clear();	total_time.clear();
@@ -201,10 +223,11 @@ public class Experiment {
 
 			name_suffix *= times;
 		}
-
+		OwnMethods.WriteFile(result_detail_path, true, "\n");
+		OwnMethods.WriteFile(result_avg_path, true, "\n");
 	}
 	
-	public static void SpatialFirstList_Block(int nodeCount, int query_id)
+	public static void SpatialFirstList_Block(int nodeCount, int query_id) throws Exception
 	{
 		long start;
 		long time;
@@ -309,6 +332,15 @@ public class Experiment {
 					if(!TEST_FORMAT)
 						OwnMethods.WriteFile(result_detail_path, true, write_line);
 				}
+				
+				spa_First_list.shutdown();
+				
+				OwnMethods.ClearCache("syh19910205");
+				Thread.currentThread();
+				Thread.sleep(5000);
+				
+				spa_First_list.dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+				
 			}
 			spa_First_list.shutdown();
 			
@@ -461,7 +493,7 @@ public class Experiment {
 		OwnMethods.WriteFile(result_avg_path, true, "\n");
 	}
 	
-	public static void SpatialFirst(int nodeCount, int query_id)
+	public static void SpatialFirst(int nodeCount, int query_id) throws Exception
 	{
 		long start;
 		long time;
@@ -557,6 +589,15 @@ public class Experiment {
 					write_line += String.format("%d\n", access.get(i));
 					if(!TEST_FORMAT)
 						OwnMethods.WriteFile(result_detail_path, true, write_line);
+					
+					spa_First.shutdown();
+					
+					
+					OwnMethods.ClearCache("syh19910205");
+					Thread.currentThread();
+					Thread.sleep(5000);
+					
+					spa_First.dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 				}
 			}
 			spa_First.shutdown();
