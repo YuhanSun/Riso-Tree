@@ -114,6 +114,27 @@ public class App {
 		try {
 			Transaction tx = databaseService.beginTx();
 			
+			String query = "profile match (a0:GRAPH_1),(a1),(a2),(a0)-[:GRAPH_LINK]-(a1),(a1)-[:GRAPH_LINK]-(a2) where "
+					+ "(id(a2)=180635 or id(a2)=214244 or id(a2)=107759 or id(a2)=100583 or id(a2)=1323461 or id(a2)=1714475 "
+					+ "or id(a2)=3042335 or id(a2)=1663727 or id(a2)=1988228 or id(a2)=3314714 or id(a2)=1719902 or id(a2)=965138 or "
+					+ "id(a2)=804401 or id(a2)=2893466 or id(a2)=1918490 or id(a2)=3287576 or id(a2)=707780 or id(a2)=1075262 or "
+					+ "id(a2)=416828 or id(a2)=395441 or id(a2)=347210 or id(a2)=582551 or id(a2)=583358 or id(a2)=579956 or "
+					+ "id(a2)=579920 or id(a2)=579935 or id(a2)=579893 or id(a2)=579908 or id(a2)=579875 or id(a2)=570875 or "
+					+ "id(a2)=570941 or id(a2)=545678 or id(a2)=463535 or id(a2)=3415136 or id(a2)=1054241 or id(a2)=667442 or "
+					+ "id(a2)=2005292 or id(a2)=3380324 or id(a2)=1162763 or id(a2)=901466 or id(a2)=878315 or id(a2)=3462917 or "
+					+ "id(a2)=1255742 or id(a2)=1411379 or id(a2)=2007287 or id(a2)=1546841 or id(a2)=3063956 or id(a2)=996926 or "
+					+ "id(a2)=3028511 or id(a2)=1327577 or id(a2)=3530930 or id(a2)=976097 or id(a2)=1569641 or id(a2)=1108790 or "
+					+ "id(a2)=1108793 or id(a2)=2944889 or id(a2)=2882807 or id(a2)=3455999 or id(a2)=928451 or id(a2)=1305677 or "
+					+ "id(a2)=2883041 or id(a2)=2883545) and ( id(a1) = 3864494 or id(a1) = 3864544 or id(a1) = 3872441 or "
+					+ "id(a1) = 3912034 or id(a1) = 3996106 ) return id(a0),id(a1),id(a2)";
+			Result result = databaseService.execute(query);
+			
+			while ( result.hasNext())
+				result.next();
+				
+			ExecutionPlanDescription executionPlanDescription = result.getExecutionPlanDescription();
+			OwnMethods.Print(executionPlanDescription);
+			
 //			Node node = databaseService.getNodeById(511901);
 //			Iterable<Relationship> rels = node.getRelationships(GraphRel.GRAPH_LINK, Direction.INCOMING);
 //			int count = 0;
@@ -141,14 +162,14 @@ public class App {
 //					OwnMethods.WriteFile(log_path, true, id + "\n");
 //			}
 			
-			Result result = databaseService.execute("match (n) where false return n");
-			int index = 0;
-			while ( result.hasNext())
-			{
-				index++;
-				result.next();
-			}
-			OwnMethods.Print(index);
+//			Result result = databaseService.execute("match (n) where false return n");
+//			int index = 0;
+//			while ( result.hasNext())
+//			{
+//				index++;
+//				result.next();
+//			}
+//			OwnMethods.Print(index);
 			tx.close();
 			tx.success();
 			databaseService.shutdown();
