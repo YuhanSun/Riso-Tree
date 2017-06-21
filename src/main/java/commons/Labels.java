@@ -7,7 +7,7 @@ import org.neo4j.kernel.api.security.AccessMode.Static;
 public class Labels {
 	
 	public static enum OSMLabel implements Label {
-		ReferenceNode
+		ReferenceNode, OSM_NODE
     }
 	
 	public static enum OSMRelation implements RelationshipType {
