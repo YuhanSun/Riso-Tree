@@ -298,6 +298,9 @@ public class LoadData {
 		}
 	}
 	
+	/**
+	 * attach spatial node (osm nodes) map to file node_map.txt
+	 */
 	public static void GetSpatialNodeMap()
 	{
 		Map<Object, Object> id_map = new TreeMap<Object, Object>();
@@ -324,12 +327,14 @@ public class LoadData {
 		}
 	}
 	
+	/**
+	 * load nonspatial graph vertices and write the map to file node_map.txt
+	 */
 	public static void LoadNonSpatialEntity()
 	{
 		String entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
 		LoadNonSpatialEntity(entity_path, db_path, map_path);
 	}
-	
 	
 	public static void LoadNonSpatialEntity(String entity_path, String db_path, String map_path)
 	{
