@@ -37,6 +37,13 @@ import commons.Config.system;
 import commons.Labels.GraphLabel;
 import commons.OwnMethods;
 
+/**
+ * convert {0,1} two labels graph to more selective graph with 10 or 100 labels
+ * for Gowalla dataset,
+ * new queries for the new grap are generated here
+ * @author yuhansun
+ *
+ */
 public class Prepare {
 
 	static Config config = new Config();
@@ -54,7 +61,7 @@ public class Prepare {
 	static String log_path;
 	
 	static int max_hop_num = 2;
-	static int nonspatial_label_count = 100;
+	static int nonspatial_label_count = 10;
 	static int nonspatial_vertex_count = 196591;
 	static int spatialVertexCount = 1280953;
 	static ArrayList<Integer> labels;//all labels in the graph
@@ -69,7 +76,7 @@ public class Prepare {
 			geo_id_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/geom_osmid_map.txt", dataset);
 			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
 			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
-			rtree_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/rtree_map.log", dataset);
+			rtree_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/rtree_map.txt", dataset);
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
 			break;
 		case Windows:
@@ -95,12 +102,12 @@ public class Prepare {
 		initParameters();
 //		generateNonspatialLabel();
 //		nonspatialLabelTest();
-//		setNewLabel();
+		setNewLabel();
 //		newLabelTest();
 //		generateRandomQueryGraph();
 //		modifyLayerName();
 //		modifyLayerNameTest();
-		generateNewNLList();
+//		generateNewNLList();
 	}
 	
 	
@@ -124,7 +131,7 @@ public class Prepare {
 	
 	/**
 	 * generate new NLList for 10 new nonspatial labels
-	 * NL_x_0_list will be utilized and removed while
+	 * NL_x_0_list will be utilized to generate new list but not removed while
 	 * NL_x_1_list will not be touched
 	 */
 	public static void generateNewNLList()
