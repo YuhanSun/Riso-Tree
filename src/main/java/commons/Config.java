@@ -19,9 +19,10 @@ public class Config
 	private String longitude_property_name = "lon";
 	private String latitude_property_name = "lat";
 	
+	//attention here, these settings change a lot
 	private String neo4j_version = "neo4j-community-3.1.1";
 	private system operatingSystem = system.Ubuntu;
-	private String dataset = "Gowalla_100";
+	private String dataset = "Gowalla_10";
 
 	private String Rect_minx_name = "minx";
 	private String Rect_miny_name = "miny";
