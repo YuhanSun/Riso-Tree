@@ -5,17 +5,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
 
-import javax.sound.sampled.Line;
-
-import org.neo4j.gis.spatial.osm.OSMLayer;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
@@ -29,7 +23,6 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import osm.OSM_Utility;
 import commons.Config;
 import commons.Entity;
-import commons.Labels.OSMLabel;
 import commons.Labels.OSMRelation;
 import commons.Query_Graph;
 import commons.Utility;
@@ -98,7 +91,6 @@ public class Prepare {
 	}
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		initParameters();
 //		generateNonspatialLabel();
 //		nonspatialLabelTest();
@@ -119,12 +111,10 @@ public class Prepare {
 			
 			Node node = dbService.getNodeById(3852215);
 			
-			
 			tx.success();
 			tx.close();
 			dbService.shutdown();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -197,7 +187,6 @@ public class Prepare {
 			tx.close();
 			dbService.shutdown();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -221,7 +210,6 @@ public class Prepare {
 			tx.close();
 			dbService.shutdown();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -250,7 +238,6 @@ public class Prepare {
 			tx.close();
 			dbService.shutdown();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -345,7 +332,6 @@ public class Prepare {
 			tx.close();
 			dbService.shutdown();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -375,7 +361,6 @@ public class Prepare {
 			dbService.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}

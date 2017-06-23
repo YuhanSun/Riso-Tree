@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -166,7 +165,6 @@ public class Utility {
 					return null;
 				}
 				int node_count = Integer.parseInt(line_list[2]);
-				int edge_count = Integer.parseInt(line_list[3]);
 				Query_Graph query_Graph = new Query_Graph(node_count);
 				for(int i = 0; i<node_count; i++)
 				{
@@ -326,7 +324,6 @@ public class Utility {
 					return null;
 				}
 				int node_count = Integer.parseInt(line_list[2]);
-				int edge_count = Integer.parseInt(line_list[3]);
 				Query_Graph query_Graph = new Query_Graph(node_count);
 				for(int i = 0; i<node_count; i++)
 				{
@@ -391,7 +388,6 @@ public class Utility {
 					return null;
 				}
 				int node_count = Integer.parseInt(line_list[2]);
-				int edge_count = Integer.parseInt(line_list[3]);
 				Query_Graph query_Graph = new Query_Graph(node_count);
 				for(int i = 0; i<node_count; i++)
 				{

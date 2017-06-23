@@ -50,7 +50,6 @@ public class Naive_Neo4j_Match {
 	}
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 
 	}
     

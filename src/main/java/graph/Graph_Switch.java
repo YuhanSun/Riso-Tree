@@ -72,7 +72,6 @@ public class Graph_Switch {
 		}
 	}
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		initParameters();
 //		transferProperty();
 		
@@ -124,7 +123,6 @@ public class Graph_Switch {
 			inserter.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			if ( inserter != null)
 				inserter.shutdown();
 			e.printStackTrace();	System.exit(-1);
@@ -156,7 +154,6 @@ public class Graph_Switch {
 			dbservice.shutdown();
 		}
 		catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			System.exit(-1);
 		}
@@ -232,7 +229,6 @@ public class Graph_Switch {
 			inserter.shutdown();
 		}
 		catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			if ( inserter != null)
 				inserter.shutdown();
@@ -277,7 +273,6 @@ public class Graph_Switch {
 			inserter.shutdown();
 		}
 		catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			if ( inserter != null)
 				inserter.shutdown();
@@ -321,7 +316,6 @@ public class Graph_Switch {
 			inserter.shutdown();
 		}
 		catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			if ( inserter != null)
 				inserter.shutdown();
@@ -381,7 +375,6 @@ public class Graph_Switch {
 			dbservice.shutdown();
 		}
 		catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			System.exit(-1);
 		}
@@ -462,7 +455,6 @@ public class Graph_Switch {
 			dbservice.shutdown();
 		}
 		catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 			System.exit(-1);
 		}

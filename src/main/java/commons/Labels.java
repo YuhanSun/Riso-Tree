@@ -2,7 +2,6 @@ package commons;
 
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.api.security.AccessMode.Static;
 
 public class Labels {
 	

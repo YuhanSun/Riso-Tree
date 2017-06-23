@@ -5,28 +5,17 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-import scala.languageFeature.postfixOps;
-import scala.reflect.api.Trees.NewExtractor;
-import scala.reflect.internal.Trees.This;
-
 import java.io.BufferedReader;
-import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.Reader;
-import java.lang.reflect.Array;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,13 +27,10 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 
-import javax.sound.sampled.Line;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import org.neo4j.cypher.internal.frontend.v2_3.perty.gen.toStringDocGen;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Result;
 import org.roaringbitmap.RoaringBitmap;
 import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 
@@ -446,7 +432,7 @@ public class OwnMethods {
             graph = new ArrayList<ArrayList<Integer>>(node_count);
             while ((str = reader.readLine()) != null) {
                 String[] l_str = str.split(",");
-                int id = Integer.parseInt(l_str[0]);
+//                int id = Integer.parseInt(l_str[0]);
                 int neighbor_count = Integer.parseInt(l_str[1]);
                 ArrayList<Integer> line = new ArrayList<Integer>(neighbor_count);
                 if (neighbor_count == 0) {

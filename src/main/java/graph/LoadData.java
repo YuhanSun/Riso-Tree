@@ -1,35 +1,25 @@
 package graph;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.neo4j.cypher.internal.compiler.v2_3.executionplan.checkForEagerLoadCsv;
-import org.neo4j.gis.spatial.osm.OSMDataset.OSMNode;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
-import org.neo4j.kernel.impl.api.cursor.TxAbstractNodeCursor;
-import org.neo4j.kernel.impl.util.dbstructure.DbStructureArgumentFormatter;
-import org.neo4j.register.Register.Int;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
-import org.neo4j.unsafe.impl.batchimport.cache.idmapping.IdMapper;
 
 import commons.*;
 import commons.Labels.GraphLabel;
@@ -48,7 +38,6 @@ public class LoadData {
 	static String graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		
 //		LoadNonSpatialEntity();
 //		GetSpatialNodeMap();
@@ -84,7 +73,6 @@ public class LoadData {
 			tx.success();
 			databaseService.shutdown();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -118,7 +106,6 @@ public class LoadData {
 			databaseService.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -176,7 +163,6 @@ public class LoadData {
 			databaseService.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -194,7 +180,6 @@ public class LoadData {
 			databaseService.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -212,7 +197,6 @@ public class LoadData {
 			databaseService.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -256,7 +240,6 @@ public class LoadData {
 			databaseService.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -289,7 +272,6 @@ public class LoadData {
 			inserter.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		finally {
@@ -322,7 +304,6 @@ public class LoadData {
 			OwnMethods.WriteMap(map_path, true, id_map);
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -363,7 +344,6 @@ public class LoadData {
 			
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		

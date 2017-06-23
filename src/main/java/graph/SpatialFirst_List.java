@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import org.neo4j.cypher.internal.compiler.v3_0.planner.logical.steps.countStorePlanner;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
@@ -342,8 +341,9 @@ public class SpatialFirst_List {
 					if ( min_queryRectangle.intersect(bbox_rect) != null)
 					{
 						located_in_count++;
-						Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
-						long id = node.getId();
+//						Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
+//						long id = node.getId();
+						long id = geom.getId();
 						range_query_time += System.currentTimeMillis() - start_1;
 						
 						start_1 = System.currentTimeMillis();
@@ -578,8 +578,9 @@ public class SpatialFirst_List {
 					if ( min_queryRectangle.intersect(bbox_rect) != null)
 					{
 						located_in_count++;
-						Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
-						long id = node.getId();
+//						Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
+//						long id = node.getId();
+						long id = geom.getId();
 						ids.add(id);
 					}
 				}
@@ -779,13 +780,13 @@ public class SpatialFirst_List {
 		case Ubuntu:
 			db_path_test = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", neo4jVersion, dataset_test);
 			querygraph_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph.txt";
-			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset_test + "/node_map.txt";
+			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset_test + "/node_map_RTree.txt";
 			log_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset_test + "/test.log";
 			break;
 		case Windows:
 			db_path_test = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset_test, neo4jVersion, dataset_test);
 			querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
-			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset_test + "\\node_map.txt";
+			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset_test + "\\node_map_RTree.txt";
 			log_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset_test + "\\test.log";
 		default:
 			break;

@@ -3,13 +3,9 @@ package graph;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 
-import org.geotools.data.shapefile.dbf.DbaseFileReader.Row;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
@@ -30,6 +26,11 @@ import commons.Query_Graph;
 import commons.Utility;
 import commons.Config.system;
 
+/**
+ * Implements the SpatialFirst approach in the paper
+ * @author yuhansun
+ *
+ */
 public class SpatialFirst {
 
 	public GraphDatabaseService dbservice;
@@ -230,8 +231,9 @@ public class SpatialFirst {
 			for (Node geom: rangeQueryResult)
 			{
 				start_1 = System.currentTimeMillis();
-				Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
-				long id = node.getId();//neo4j pos id of graph node
+//				Node node = geom.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
+//				long id = node.getId();//neo4j pos id of graph node
+				long id = geom.getId();
 				range_query_time += System.currentTimeMillis() - start_1;
 				
 				start_1 = System.currentTimeMillis();

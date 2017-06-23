@@ -17,7 +17,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.neo4j.cypher.internal.frontend.v2_3.perty.recipe.Pretty.nest;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
@@ -80,7 +79,6 @@ public class Construct_RisoTree {
 	}
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 //		Construct();
 //		ClearNL();
 //		
@@ -94,7 +92,7 @@ public class Construct_RisoTree {
 //		NL_size_Check();
 //		set_Spatial_Label();
 //		set_NL_list_label(max_hop_num, labels);
-		set_NL_list_label_DeepestNonLeaf(max_hop_num, labels);
+//		set_NL_list_label_DeepestNonLeaf(max_hop_num, labels);
 	}
 	
 	public static void set_NL_list_label_DeepestNonLeaf(int max_hop_num, ArrayList<Integer> labels)
@@ -185,7 +183,6 @@ public class Construct_RisoTree {
 			dbservice.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -274,7 +271,6 @@ public class Construct_RisoTree {
 			}
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -304,7 +300,6 @@ public class Construct_RisoTree {
 			dbservice.shutdown();
 		}
 		catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -352,7 +347,6 @@ public class Construct_RisoTree {
 			dbservice.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -396,7 +390,6 @@ public class Construct_RisoTree {
 			dbservice.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -463,7 +456,6 @@ public class Construct_RisoTree {
 			
 			dbservice.shutdown();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
@@ -548,7 +540,6 @@ public class Construct_RisoTree {
 			dbservice.shutdown();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			OwnMethods.Print(line);
 			e.printStackTrace();
 		}
@@ -646,7 +637,6 @@ public class Construct_RisoTree {
 			tx.close();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		
@@ -776,7 +766,6 @@ public class Construct_RisoTree {
 			tx.close();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 		
@@ -814,7 +803,6 @@ public class Construct_RisoTree {
 			tx.close();
 			dbservice.shutdown();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
