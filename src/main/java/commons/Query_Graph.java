@@ -1,6 +1,5 @@
 package commons;
 
-import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,6 +20,32 @@ public class Query_Graph {
 			graph.add(new ArrayList<Integer>());
 		spa_predicate = new MyRectangle[node_count];
 		Has_Spa_Predicate = new boolean[node_count];
+	}
+	
+	public Query_Graph(String string)
+	{
+		String[] lStrings = string.split("\n");
+		int nodeCount = lStrings.length;
+		label_list = new int[nodeCount];
+		graph = new ArrayList<ArrayList<Integer>>(nodeCount);
+		for ( int i = 0; i < nodeCount; i++)
+			graph.add(new ArrayList<Integer>());
+		spa_predicate = new MyRectangle[nodeCount];
+		Has_Spa_Predicate = new boolean[nodeCount];
+		
+		for ( String line : lStrings)
+		{
+			String[] lineList= line.split(" ");
+			int id = Integer.parseInt(lineList[0]);
+			label_list[id] = Integer.parseInt(lineList[1]);
+			int neighborCount = Integer.parseInt(lineList[2]);
+			for ( int i = 0; i < neighborCount; i++)
+			{
+				int neighborID = Integer.parseInt(lineList[i + 3]);
+				graph.get(id).add(neighborID);
+			}
+			Has_Spa_Predicate[id] = Boolean.valueOf(lineList[lineList.length-1]);
+		}
 	}
 	
 	@Override
@@ -61,7 +86,8 @@ public class Query_Graph {
 	
 	/**
 	 * decide whether a given query graph is the isomorphism
-	 * spatial predicate is not considered in this case
+	 * spatial predicate is not considered in this case\
+	 * very loose, consider number of labels and labels distribution
 	 * @param query_Graph
 	 * @return
 	 */
