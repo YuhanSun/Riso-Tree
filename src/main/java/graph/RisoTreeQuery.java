@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.TreeSet;
 
+import org.neo4j.cypher.internal.spi.v3_1.codegen.GeneratedMethodStructure;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
@@ -48,6 +49,11 @@ public class RisoTreeQuery {
 	public long result_count;
 	public long page_hit_count;
 	public String logPath;
+	
+	//test control variables
+	public static boolean outputLevelInfo = true;
+	public static boolean outputQuery = true;
+	public static boolean outputExecutionPlan = true;
 	
 	/**
 	 * initialize
@@ -237,8 +243,11 @@ public class RisoTreeQuery {
 			//<spa_id, <neighbor_id, NL_list>>
 			HashMap<Integer, HashMap<Integer, HashSet<Integer>>> NL_list = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
 
+			//Construct min_hop_array for the query graph
 			int[][] min_hop_array = Ini_Minhop(query_Graph);
 
+			//Construct min_hop (compact structure for min_hop_array
+			//and NL_size_propertyname and NL_list_propertyname
 			for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
 				if(query_Graph.Has_Spa_Predicate[i])
 				{
@@ -259,8 +268,11 @@ public class RisoTreeQuery {
 				}
 
 			logWriteLine = String.format("min_hop: %s\nNL_property: %s", min_hop, NL_size_propertyname);
-			OwnMethods.Print(logWriteLine);
-			OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+			if ( outputLevelInfo)
+			{
+				OwnMethods.Print(logWriteLine);
+				OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+			}
 
 			long start = System.currentTimeMillis();
 			Transaction tx = dbservice.beginTx();
@@ -292,6 +304,7 @@ public class RisoTreeQuery {
 				LinkedList<Node>overlap_MBR_list = new LinkedList<Node>(); //just support one spatial predicate
 
 				Iterator<Node> iterator = cur_list.iterator();
+				
 				while(iterator.hasNext())
 				{
 					Node node = iterator.next();
@@ -305,7 +318,9 @@ public class RisoTreeQuery {
 						int spa_count = (Integer) node.getProperty("count");
 						for ( int key : spa_predicates.keySet())
 						{
-							MyRectangle intersect = MBR.intersect(spa_predicates.get(key)); 
+							MyRectangle queryRectangle = spa_predicates.get(key);
+							
+							MyRectangle intersect = MBR.intersect(queryRectangle); 
 							if(intersect != null)
 							{
 								//								overlap_MBR_list.get(key).add(node);
@@ -336,9 +351,13 @@ public class RisoTreeQuery {
 				}
 
 				logWriteLine = String.format("level %d", level_index);
-				OwnMethods.Print(logWriteLine);
-				OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+				if ( outputLevelInfo)
+				{
+					OwnMethods.Print(logWriteLine);
+					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+				}
 
+				//find the query node with the minimum cardinality
 				double min_spa_card = Double.MAX_VALUE, min_NL_card = Double.MAX_VALUE;
 				int min_NL_spa_id = 0, min_NL_neighbor_id = 0;
 
@@ -349,8 +368,11 @@ public class RisoTreeQuery {
 						min_spa_card = spa_card;
 
 					logWriteLine = String.format("spa_card %d %f", key, spa_card);
-					OwnMethods.Print(logWriteLine);
-					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+					if ( outputLevelInfo)
+					{
+						OwnMethods.Print(logWriteLine);
+						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+					}
 
 					HashMap<Integer, Double> NL_cards_vector = NL_cards.get(key);
 					for ( int neighbor_id : NL_cards_vector.keySet())
@@ -362,14 +384,20 @@ public class RisoTreeQuery {
 							min_NL_card = NL_card;
 						}
 						logWriteLine = String.format("NL_size %d %d %s", key, neighbor_id, NL_cards_vector.get(neighbor_id).toString());
-						OwnMethods.Print(logWriteLine);
-						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+						if ( outputLevelInfo)
+						{
+							OwnMethods.Print(logWriteLine);
+							OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+						}
 					}
 				}
 
 				logWriteLine = String.format("level %d min card : %f", level_index, Math.min(min_spa_card, min_NL_card));
-				OwnMethods.Print(logWriteLine);
-				OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+				if ( outputLevelInfo)
+				{
+					OwnMethods.Print(logWriteLine);
+					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+				}
 
 				if (overlap_MBR_list.isEmpty() == true)
 				{
@@ -400,17 +428,25 @@ public class RisoTreeQuery {
 						logWriteLine += "NL_list is more selective";
 					else
 						logWriteLine += "spa predicate is more selective";
-					OwnMethods.Print(logWriteLine);
-					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+					if ( outputLevelInfo)
+					{
+						OwnMethods.Print(logWriteLine);
+						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+					}
 //				}
 					
 					logWriteLine = String.format("NL_serialize time: %d\n", System.currentTimeMillis() - start1);
 					logWriteLine += String.format("level %d time: %d\n", level_index, System.currentTimeMillis() - start);
-				OwnMethods.Print(logWriteLine);
-				OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+					if ( outputLevelInfo)
+					{
+						OwnMethods.Print(logWriteLine);
+						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+					}
 
 				range_query_time += System.currentTimeMillis() - start;
+				start = System.currentTimeMillis();
 				
+				//traverse to the second deepest level and start to form the cypher query
 //				int located_in_count = 0;
 				if( overlap_MBR_list.isEmpty() == false && next_list.isEmpty())
 				{
@@ -446,8 +482,12 @@ public class RisoTreeQuery {
 						if ( index == 500)
 						{
 							String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
-							OwnMethods.Print(query);
-							OwnMethods.WriteFile(logPath, true, query + "\n");
+							
+							if ( outputQuery)
+							{
+								OwnMethods.Print(query);
+								OwnMethods.WriteFile(logPath, true, query + "\n");
+							}
 							
 							start = System.currentTimeMillis();
 							Result result = dbservice.execute(query);
@@ -468,21 +508,33 @@ public class RisoTreeQuery {
 								ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
 								result_count += profile.getRows();
 								page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-//								OwnMethods.Print(planDescription);
+								if ( outputExecutionPlan)
+								{
+									OwnMethods.Print(planDescription);
+									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
+								}
 							}
 							index = 0; id_pos_list = new ArrayList<Long>();
 						}
 					}
 					
 					logWriteLine = "id list size: " + id_pos_list.size();
-					OwnMethods.Print(logWriteLine);
-					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+					
+					if ( outputLevelInfo)
+					{
+						OwnMethods.Print(logWriteLine);
+						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+					}
 					
 					if ( id_pos_list.size() != 0)
 					{
 						String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
-						OwnMethods.Print(query);
-						OwnMethods.WriteFile(logPath, true, query + "\n");
+						
+						if ( outputQuery)
+						{
+							OwnMethods.Print(query);
+							OwnMethods.WriteFile(logPath, true, query + "\n");
+						}
 						
 						start = System.currentTimeMillis();
 						Result result = dbservice.execute(query);
@@ -504,7 +556,11 @@ public class RisoTreeQuery {
 							result_count += profile.getRows();
 							page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
 							
-//						OwnMethods.Print(planDescription);
+							if ( outputExecutionPlan)
+							{
+								OwnMethods.Print(planDescription);
+								OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
+							}
 						}
 					}
 				}
@@ -517,7 +573,6 @@ public class RisoTreeQuery {
 			tx.close();
 
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();	System.exit(-1);
 		}
 //		return null;
@@ -578,13 +633,11 @@ public class RisoTreeQuery {
 			OwnMethods.Print(String.format("result count:%d", risoTreeQuery.result_count));
 			risoTreeQuery.dbservice.shutdown();
 		} catch (Exception e) {
-			// TODO: handle exception
 			e.printStackTrace();
 		}
 	}
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		queryTest();
 
 			//			SpatialFirst spatialFirst = new SpatialFirst(db_path, dataset);
