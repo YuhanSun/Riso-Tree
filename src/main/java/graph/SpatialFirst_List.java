@@ -29,6 +29,15 @@ import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Utility;
 
+/**
+ * Implements SpatialFirst with NL_list.
+ * Two versions are implemented, simple version and blocked version.
+ * Simple version proves to be same with SpatialFirst class approach.
+ * Blocked version is better than SpatialFirst approach. It is used in
+ * our experiment.
+ * @author yuhansun
+ *
+ */
 public class SpatialFirst_List {
 
 	public GraphDatabaseService dbservice;
