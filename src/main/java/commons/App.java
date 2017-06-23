@@ -1,8 +1,8 @@
 package commons;
 
-import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.neo4j.cypher.internal.compiler.v2_3.executionplan.ExecutionPlan;
@@ -19,6 +19,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config.system;
 import commons.Labels.GraphRel;
 import commons.Labels.OSMRelation;
+import graph.RisoTreeQuery;
 
 public class App {
 
@@ -44,13 +45,13 @@ public class App {
 		case Ubuntu:
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", neo4jVersion, dataset);
 			querygraph_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph.txt";
-			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map.txt";
+			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map_RTree.txt";
 			log_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/test.log";
 			break;
 		case Windows:
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, neo4jVersion, dataset);
 			querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
-			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map.txt";
+			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map_RTree.txt";
 			log_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\test.log";
 		default:
 			break;
@@ -58,8 +59,8 @@ public class App {
 		query_id = 5;
 //		queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 //		query_Graph = queryGraphs.get(query_id);
-//		queryRectangle = new MyRectangle(-80.115808, 26.187365, -80.115808, 26.187365);//1
-		queryRectangle = new MyRectangle(-80.119514, 26.183659, -80.112102, 26.191071);//10
+		queryRectangle = new MyRectangle(-80.115808, 26.187365, -80.115808, 26.187365);//1
+//		queryRectangle = new MyRectangle(-80.119514, 26.183659, -80.112102, 26.191071);//10
 //		queryRectangle = new MyRectangle(-80.133549, 26.169624, -80.098067, 26.205106);//100
 //		queryRectangle = new MyRectangle(-84.468680, 33.879658, -84.428434, 33.919904);//100
 //		queryRectangle = new MyRectangle(-80.200353, 26.102820, -80.031263, 26.271910);//1000
@@ -104,80 +105,112 @@ public class App {
 //		}
 		initVariablesForTest();
 //		Naive();
-		test();
+//		test();
+		Arbitary();
+	}
+	
+	public static void Arbitary()
+	{
+		OwnMethods.Print(queryRectangle.toString());
+		OwnMethods.Print(queryRectangle.area());
+		if ( queryRectangle.area() == 0.0)
+			OwnMethods.Print("true");
+		else
+			OwnMethods.Print("false");
 	}
 	
 	public static void test()
 	{
-		OwnMethods.Print(db_path);
-		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-		try {
-			Transaction tx = databaseService.beginTx();
-			
-			String query = "profile match (a0:GRAPH_1),(a1),(a2),(a0)-[:GRAPH_LINK]-(a1),(a1)-[:GRAPH_LINK]-(a2) where "
-					+ "(id(a2)=180635 or id(a2)=214244 or id(a2)=107759 or id(a2)=100583 or id(a2)=1323461 or id(a2)=1714475 "
-					+ "or id(a2)=3042335 or id(a2)=1663727 or id(a2)=1988228 or id(a2)=3314714 or id(a2)=1719902 or id(a2)=965138 or "
-					+ "id(a2)=804401 or id(a2)=2893466 or id(a2)=1918490 or id(a2)=3287576 or id(a2)=707780 or id(a2)=1075262 or "
-					+ "id(a2)=416828 or id(a2)=395441 or id(a2)=347210 or id(a2)=582551 or id(a2)=583358 or id(a2)=579956 or "
-					+ "id(a2)=579920 or id(a2)=579935 or id(a2)=579893 or id(a2)=579908 or id(a2)=579875 or id(a2)=570875 or "
-					+ "id(a2)=570941 or id(a2)=545678 or id(a2)=463535 or id(a2)=3415136 or id(a2)=1054241 or id(a2)=667442 or "
-					+ "id(a2)=2005292 or id(a2)=3380324 or id(a2)=1162763 or id(a2)=901466 or id(a2)=878315 or id(a2)=3462917 or "
-					+ "id(a2)=1255742 or id(a2)=1411379 or id(a2)=2007287 or id(a2)=1546841 or id(a2)=3063956 or id(a2)=996926 or "
-					+ "id(a2)=3028511 or id(a2)=1327577 or id(a2)=3530930 or id(a2)=976097 or id(a2)=1569641 or id(a2)=1108790 or "
-					+ "id(a2)=1108793 or id(a2)=2944889 or id(a2)=2882807 or id(a2)=3455999 or id(a2)=928451 or id(a2)=1305677 or "
-					+ "id(a2)=2883041 or id(a2)=2883545) and ( id(a1) = 3864494 or id(a1) = 3864544 or id(a1) = 3872441 or "
-					+ "id(a1) = 3912034 or id(a1) = 3996106 ) return id(a0),id(a1),id(a2)";
-			Result result = databaseService.execute(query);
-			
-			while ( result.hasNext())
-				result.next();
-				
-			ExecutionPlanDescription executionPlanDescription = result.getExecutionPlanDescription();
-			OwnMethods.Print(executionPlanDescription);
-			
-//			Node node = databaseService.getNodeById(511901);
-//			Iterable<Relationship> rels = node.getRelationships(GraphRel.GRAPH_LINK, Direction.INCOMING);
-//			int count = 0;
-//			ArrayList<Integer> graph_ids = new ArrayList<Integer>();
-//			for ( Relationship relationship : rels)
-//			{
-//				count++;
-//				Node neighbor_node = relationship.getStartNode();
-//				OwnMethods.Print(neighbor_node.getId());
-//				graph_ids.add((Integer) neighbor_node.getProperty("id"));
-//			}
-//			OwnMethods.Print(String.format("neighbor count: %d", count));
-//			
-//			int[] NL_list = (int[]) node.getSingleRelationship(OSMRelation.GEOM, Direction.OUTGOING).getEndNode()
-//			.getSingleRelationship(RTreeRelationshipTypes.RTREE_REFERENCE, Direction.INCOMING).getStartNode()
-//			.getProperty("NL_1_0_list");
-//			
-//			HashSet<Integer> NL_list_set = new HashSet<Integer>();
-//			for ( int id : NL_list)
-//				NL_list_set.add(id);
-//			
-//			for (int id : graph_ids)
-//			{
-//				if(NL_list_set.contains(id) == false)
-//					OwnMethods.WriteFile(log_path, true, id + "\n");
-//			}
-			
-//			Result result = databaseService.execute("match (n) where false return n");
-//			int index = 0;
-//			while ( result.hasNext())
-//			{
-//				index++;
-//				result.next();
-//			}
-//			OwnMethods.Print(index);
-			tx.close();
-			tx.success();
-			databaseService.shutdown();
-		}
-		catch(Exception e)
+		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
+		long[] graph_pos_map_list= new long[graph_pos_map.size()];
+		for ( String key_str : graph_pos_map.keySet())
 		{
-			e.printStackTrace();
+			int key = Integer.parseInt(key_str);
+			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
+			graph_pos_map_list[key] = pos_id;
 		}
+		RisoTreeQuery risoTreeQuery = new RisoTreeQuery(db_path, dataset, graph_pos_map_list);
+		
+		String queryGraphString = "0 1 1 1 false\n1 9 2 0 2 false\n2 1 1 1 true";
+		Query_Graph query_Graph = new Query_Graph(queryGraphString);
+		for ( int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
+		{
+			if ( query_Graph.Has_Spa_Predicate[i])
+			{
+				query_Graph.spa_predicate[i] = queryRectangle;
+			}
+		}
+		risoTreeQuery.Query(query_Graph, -1);
+		risoTreeQuery.dbservice.shutdown();
+//		OwnMethods.Print(db_path);
+//		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+//		try {
+//			Transaction tx = databaseService.beginTx();
+//			
+//			String query = "profile match (a0:GRAPH_1),(a1),(a2),(a0)-[:GRAPH_LINK]-(a1),(a1)-[:GRAPH_LINK]-(a2) where "
+//					+ "(id(a2)=180635 or id(a2)=214244 or id(a2)=107759 or id(a2)=100583 or id(a2)=1323461 or id(a2)=1714475 "
+//					+ "or id(a2)=3042335 or id(a2)=1663727 or id(a2)=1988228 or id(a2)=3314714 or id(a2)=1719902 or id(a2)=965138 or "
+//					+ "id(a2)=804401 or id(a2)=2893466 or id(a2)=1918490 or id(a2)=3287576 or id(a2)=707780 or id(a2)=1075262 or "
+//					+ "id(a2)=416828 or id(a2)=395441 or id(a2)=347210 or id(a2)=582551 or id(a2)=583358 or id(a2)=579956 or "
+//					+ "id(a2)=579920 or id(a2)=579935 or id(a2)=579893 or id(a2)=579908 or id(a2)=579875 or id(a2)=570875 or "
+//					+ "id(a2)=570941 or id(a2)=545678 or id(a2)=463535 or id(a2)=3415136 or id(a2)=1054241 or id(a2)=667442 or "
+//					+ "id(a2)=2005292 or id(a2)=3380324 or id(a2)=1162763 or id(a2)=901466 or id(a2)=878315 or id(a2)=3462917 or "
+//					+ "id(a2)=1255742 or id(a2)=1411379 or id(a2)=2007287 or id(a2)=1546841 or id(a2)=3063956 or id(a2)=996926 or "
+//					+ "id(a2)=3028511 or id(a2)=1327577 or id(a2)=3530930 or id(a2)=976097 or id(a2)=1569641 or id(a2)=1108790 or "
+//					+ "id(a2)=1108793 or id(a2)=2944889 or id(a2)=2882807 or id(a2)=3455999 or id(a2)=928451 or id(a2)=1305677 or "
+//					+ "id(a2)=2883041 or id(a2)=2883545) and ( id(a1) = 3864494 or id(a1) = 3864544 or id(a1) = 3872441 or "
+//					+ "id(a1) = 3912034 or id(a1) = 3996106 ) return id(a0),id(a1),id(a2)";
+//			Result result = databaseService.execute(query);
+//			
+//			while ( result.hasNext())
+//				result.next();
+//				
+//			ExecutionPlanDescription executionPlanDescription = result.getExecutionPlanDescription();
+//			OwnMethods.Print(executionPlanDescription);
+//			
+////			Node node = databaseService.getNodeById(511901);
+////			Iterable<Relationship> rels = node.getRelationships(GraphRel.GRAPH_LINK, Direction.INCOMING);
+////			int count = 0;
+////			ArrayList<Integer> graph_ids = new ArrayList<Integer>();
+////			for ( Relationship relationship : rels)
+////			{
+////				count++;
+////				Node neighbor_node = relationship.getStartNode();
+////				OwnMethods.Print(neighbor_node.getId());
+////				graph_ids.add((Integer) neighbor_node.getProperty("id"));
+////			}
+////			OwnMethods.Print(String.format("neighbor count: %d", count));
+////			
+////			int[] NL_list = (int[]) node.getSingleRelationship(OSMRelation.GEOM, Direction.OUTGOING).getEndNode()
+////			.getSingleRelationship(RTreeRelationshipTypes.RTREE_REFERENCE, Direction.INCOMING).getStartNode()
+////			.getProperty("NL_1_0_list");
+////			
+////			HashSet<Integer> NL_list_set = new HashSet<Integer>();
+////			for ( int id : NL_list)
+////				NL_list_set.add(id);
+////			
+////			for (int id : graph_ids)
+////			{
+////				if(NL_list_set.contains(id) == false)
+////					OwnMethods.WriteFile(log_path, true, id + "\n");
+////			}
+//			
+////			Result result = databaseService.execute("match (n) where false return n");
+////			int index = 0;
+////			while ( result.hasNext())
+////			{
+////				index++;
+////				result.next();
+////			}
+////			OwnMethods.Print(index);
+//			tx.close();
+//			tx.success();
+//			databaseService.shutdown();
+//		}
+//		catch(Exception e)
+//		{
+//			e.printStackTrace();
+//		}
 	}
 	
 	public static void Naive()
