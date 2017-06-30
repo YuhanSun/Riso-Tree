@@ -140,9 +140,8 @@ public class OSM_Utility {
 					}
 				}
 			}
-			
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 		}
 		OwnMethods.Print("getRTreeRoot return null!");
 		return null;
@@ -175,7 +174,7 @@ public class OSM_Utility {
 	public static Set<Node> getRTreeNonleafDeepestLevelNodes(GraphDatabaseService databaseService, String layer_name) 
 	{
 		Set<Node> nodes = new HashSet<Node>(); 
-		Iterable<Node> geometry_nodes = OSM_Utility.getAllGeometries(databaseService, dataset);
+		Iterable<Node> geometry_nodes = OSM_Utility.getAllGeometries(databaseService, layer_name);
 		for ( Node node : geometry_nodes)
 		{
 			Node parent = node.getSingleRelationship(RTreeRel.RTREE_REFERENCE, Direction.INCOMING).getStartNode();
@@ -185,8 +184,8 @@ public class OSM_Utility {
 		return nodes;
 	}
 	
-	static String dataset = "Gowalla";
-	static String db_path = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_"+dataset+"/data/databases/graph.db";	
+	static String dataset_test = "Gowalla";
+	static String db_path = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_"+dataset_test+"/data/databases/graph.db";	
 			
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -216,7 +215,7 @@ public class OSM_Utility {
 			 * test for range query
 			 */
 			SpatialDatabaseService spa_service = new SpatialDatabaseService(databaseService);
-			Layer layer = spa_service.getLayer(dataset);
+			Layer layer = spa_service.getLayer(dataset_test);
 			List<SpatialDatabaseRecord> results = RangeQuery(layer, new Envelope(-80.133549,-80.098067,26.169624,26.205106));
 			for (SpatialDatabaseRecord record : results)
 			{
