@@ -18,18 +18,19 @@ public class Config
 
 	private String longitude_property_name = "lon";
 	private String latitude_property_name = "lat";
+	private String password = "syh19910205";
 	
 	//attention here, these settings change a lot
 	private String neo4j_version = "neo4j-community-3.1.1";
 	private system operatingSystem = system.Ubuntu;
-	private String dataset = "Gowalla_10";
+	private String dataset = "Gowalla";
 
 	private String Rect_minx_name = "minx";
 	private String Rect_miny_name = "miny";
 	private String Rect_maxx_name = "maxx";
 	private String Rect_maxy_name = "maxy";
 	
-	private int MAX_HOPNUM = 2;
+	private int MAX_HOPNUM = 1;
 
 	public String GetServerRoot() {
 		return SERVER_ROOT_URI;
@@ -71,5 +72,10 @@ public class Config
 	public String getDatasetName()
 	{
 		return dataset;
+	}
+	
+	public String getPassword()
+	{
+		return password;
 	}
 }
