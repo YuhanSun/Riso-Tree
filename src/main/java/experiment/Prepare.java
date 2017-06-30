@@ -43,6 +43,7 @@ public class Prepare {
 	static String dataset = config.getDatasetName();
 	static String version = config.GetNeo4jVersion();
 	static system systemName = config.getSystemName();
+	static int MAX_HOPNUM = config.getMaxHopNum();
 
 	static String db_path;
 	static String vertex_map_path;
@@ -53,7 +54,6 @@ public class Prepare {
 	static String rtree_map_path;
 	static String log_path;
 	
-	static int max_hop_num = 2;
 	static int nonspatial_label_count = 10;
 	static int nonspatial_vertex_count = 196591;
 	static int spatialVertexCount = 1280953;
@@ -94,9 +94,9 @@ public class Prepare {
 		initParameters();
 //		generateNonspatialLabel();
 //		nonspatialLabelTest();
-		setNewLabel();
+//		setNewLabel();
 //		newLabelTest();
-//		generateRandomQueryGraph();
+		generateRandomQueryGraph();
 //		modifyLayerName();
 //		modifyLayerNameTest();
 //		generateNewNLList();
@@ -146,7 +146,7 @@ public class Prepare {
 			{
 				OwnMethods.Print(key);
 				Node node = dbService.getNodeById(rtreeMap.get(key));
-				for ( int hop = 1; hop <= max_hop_num; hop++)
+				for ( int hop = 1; hop <= MAX_HOPNUM; hop++)
 				{
 					String oriNLListPropertyName = String.format("NL_%d_0_list", hop);
 					int[] oriNLList =  (int[]) node.getProperty(oriNLListPropertyName);
@@ -244,7 +244,7 @@ public class Prepare {
 	
 	public static void generateRandomQueryGraph()
 	{
-		for ( int node_count = 2; node_count < 7; node_count++)
+		for ( int node_count = 2; node_count < 4; node_count++)
 		{
 			int spa_pred_count = 1;
 			String datagraph_path = "";
