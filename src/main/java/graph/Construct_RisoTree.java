@@ -33,13 +33,20 @@ import commons.OwnMethods;
 import commons.Config.system;
 import commons.Labels.RTreeRel;
 import osm.OSM_Utility;
+import scala.collection.immutable.RedBlackTree.Tree;
 
+/**
+ * 
+ * @author yuhansun
+ *
+ */
 public class Construct_RisoTree {
 
 	static Config config = new Config();
 	static String dataset = config.getDatasetName();
 	static String version = config.GetNeo4jVersion();
 	static system systemName = config.getSystemName();
+	static int MAX_HOPNUM = config.getMaxHopNum();
 
 	static String db_path;
 	static String vertex_map_path;
@@ -49,7 +56,6 @@ public class Construct_RisoTree {
 	static String graph_node_map_path;
 	static String log_path;
 	
-	static int max_hop_num = 2;
 	static ArrayList<Integer> labels;//all labels in the graph
 	
 	static void initParameters()
@@ -59,7 +65,7 @@ public class Construct_RisoTree {
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
 			vertex_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
 			graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
-			geo_id_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/geom_osmid_map.txt", dataset);
+//			geo_id_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/geom_osmid_map.txt", dataset);
 			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
 			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
@@ -69,7 +75,7 @@ public class Construct_RisoTree {
 			vertex_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\node_map.txt", dataset);
 			graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
 			geo_id_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/geom_osmid_map.txt", dataset);
-			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
+//			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
 			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
 		default:
@@ -79,18 +85,24 @@ public class Construct_RisoTree {
 	}
 	
 	public static void main(String[] args) {
+		initParameters();
+		
 //		Construct();
 //		ClearNL();
 //		
-//		ArrayList<Integer> labels = new ArrayList<>(Arrays.asList(0, 1));
 //		ArrayList<Integer> label_list = OwnMethods.readIntegerArray(label_list_path);
-//		Construct(2, labels, label_list);
+//		String neighborListPath = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/"+dataset+"/2hop_neighbor_spa.txt";
+//		Construct(neighborListPath, 2, labels, label_list);
 		
+		//for the second hop
 //		LoadLeafNodeNList();
 //		MergeLeafNL();
-//		generateNL_size();
+		
+		generateNL_size();
 //		NL_size_Check();
 //		set_Spatial_Label();
+		
+		//set a lot of labels
 //		set_NL_list_label(max_hop_num, labels);
 //		set_NL_list_label_DeepestNonLeaf(max_hop_num, labels);
 	}
@@ -275,34 +287,7 @@ public class Construct_RisoTree {
 		}
 	}
 	
-	/**
-	 * set all spatial vertices (osm_node) with label GRAPH_1
-	 */
-	public static void set_Spatial_Label()
-	{
-		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-		try {
-			Transaction tx = dbservice.beginTx();
-			Node osm_node = OSM_Utility.getOSMDatasetNode(dbservice, dataset);OwnMethods.Print(osm_node.getAllProperties());
-			Iterable<Node> nodes = OSM_Utility.getAllPointNodes(dbservice, osm_node); 
-			for ( Node node : nodes)
-			{
-//				node.addLabel(GraphLabel.GRAPH_1);
-				OwnMethods.Print(node.getAllProperties());
-				Iterable<Label> labels = node.getLabels();
-				for ( Label label : labels)
-					OwnMethods.Print(label.toString());
-				break;
-			}
-			
-			tx.success();
-			tx.close();
-			dbservice.shutdown();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	
 	
 	public static void NL_size_Check()
 	{
@@ -324,7 +309,7 @@ public class Construct_RisoTree {
 				while(iterator.hasNext())	
 				{
 					Node node = iterator.next();
-					for ( int i = 1; i <= max_hop_num; i++)
+					for ( int i = 1; i <= MAX_HOPNUM; i++)
 					{
 						for ( int label : labels)
 						{
@@ -363,7 +348,7 @@ public class Construct_RisoTree {
 			while(cur.isEmpty() == false)
 			{
 				Node node = cur.poll();
-				for ( int i = 1; i <= max_hop_num; i++)
+				for ( int i = 1; i <= MAX_HOPNUM; i++)
 				{
 					for ( int label : labels)
 					{
@@ -394,6 +379,9 @@ public class Construct_RisoTree {
 		}
 	}
 	
+	/**
+	 * for the second hop
+	 */
 	public static void MergeLeafNL()
 	{
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
@@ -413,7 +401,7 @@ public class Construct_RisoTree {
 					for ( int label : labels)
 					{
 						NL_list.put(label, new TreeSet<Integer>());
-						property_name_map.put(label, String.format("NL_%d_%d_list", max_hop_num, label));
+						property_name_map.put(label, String.format("NL_%d_%d_list", MAX_HOPNUM, label));
 					}
 					
 					for (Relationship relationship : node.getRelationships(Direction.OUTGOING))
@@ -460,6 +448,9 @@ public class Construct_RisoTree {
 		}
 	}
 	
+	/**
+	 * for the second hop
+	 */
 	public static void LoadLeafNodeNList()
 	{
 		String NL_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/"+dataset+"/2hop_neighbor_spa.txt";
@@ -477,7 +468,7 @@ public class Construct_RisoTree {
 			}
 			
 			ArrayList<Integer> label_list = OwnMethods.readIntegerArray(label_list_path);
-			ArrayList<Integer> labels = new ArrayList<Integer>(Arrays.asList(0,1));
+//			ArrayList<Integer> labels = new ArrayList<Integer>(Arrays.asList(0,1));
 			
 			BufferedReader reader = new BufferedReader(new FileReader(new File(NL_path)));
 			line = reader.readLine();
@@ -527,7 +518,7 @@ public class Construct_RisoTree {
 							NL_array[i] = iterator.next();
 							i++;
 						}
-						String property_name = String.format("NL_%d_%d_list", max_hop_num, label);
+						String property_name = String.format("NL_%d_%d_list", MAX_HOPNUM, label);
 						node.setProperty(property_name, NL_array);
 					}
 				}
@@ -548,26 +539,23 @@ public class Construct_RisoTree {
 	}
 
 	/**
-	 * load one hop neighbor list without distinguishing labels
+	 * load first hop neighbor list without distinguishing labels
+	 * for all non-leaf nodes in the RTree
 	 * the graph data will be used directly
 	 */
 	public static void Construct()
 	{
 		try {
 			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
-			Map<String, String> map_str = OwnMethods.ReadMap(geo_id_map_path );
-			Map<Long, Long> map = new HashMap<Long, Long>();
-			Set<Entry<String, String >> set = map_str.entrySet();
-			for (Entry<String, String> entry : set)
-			{
-				Long key = Long.parseLong(entry.getKey());
-				Long value = Long.parseLong(entry.getValue());
-				map.put(key, value);
-			}
+			ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
+			HashMap<Integer, String> NLListPropertyName = new HashMap<Integer, String>();
+			for ( int label : labels)
+				NLListPropertyName.put(label, String.format("NL_1_%d_list", label));
 			
 			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = dbservice.beginTx();
 			
+			//get all the deepest non-leaf nodes
 			Set<Node> cur_level_nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset); 
 			for ( Node node : cur_level_nodes)
 			{
@@ -576,25 +564,38 @@ public class Construct_RisoTree {
 				for ( Relationship rel : rels)
 				{
 					Node child  = rel.getEndNode();
-					long pos_id = child.getId();
-					long graph_id = map.get(pos_id);
-					if(graph_id > Integer.MAX_VALUE)
-						throw new Exception("graph id out of int range!");
-					int id = (int) graph_id;
-					for (int neighbor : graph.get(id))
+					long graph_id = (Long) child.getProperty("id");
+					if ( graph_id > Integer.MAX_VALUE)
+						throw new Exception(String.format("graph id %d out of integer range", graph_id));
+					int graph_id_int = (int) graph_id;
+					for (int neighbor : graph.get(graph_id_int))
 						NL.add(neighbor);
 				}
-				int[] NL_array = new int[NL.size()];
-				int i = 0;
+				
+				HashMap<Integer, ArrayList<Integer>> labelID_list = new HashMap<Integer, ArrayList<Integer>>();
+				for ( int label : labels)
+					labelID_list.put(label, new ArrayList<Integer>(NL.size()));
+				
 				Iterator<Integer> iterator = NL.iterator();
 				while(iterator.hasNext())
 				{
-					NL_array[i] = iterator.next();
-					i++;
+					int neighborID = iterator.next();
+					int label = labelList.get(neighborID);
+					labelID_list.get(label).add(neighborID);
 				}
-				node.setProperty("NL_1_list", NL_array);
+				
+				for ( int label : labels)
+					if ( labelID_list.get(label).size() > 0)
+					{
+						ArrayList<Integer> neighborList = labelID_list.get(label);
+						int[] neighborArray = new int[neighborList.size()];
+						for ( int i = 0; i < neighborList.size(); i++)
+							neighborArray[i] = neighborList.get(i);
+						node.setProperty(NLListPropertyName.get(label), neighborArray);
+					}
 			}
 			
+			//upper level
 			Set<Node> next_level_nodes = new HashSet<Node>();
 			while (cur_level_nodes.isEmpty() ==  false)
 			{
@@ -610,24 +611,42 @@ public class Construct_RisoTree {
 				
 				for ( Node node : next_level_nodes)
 				{
-					TreeSet<Integer> NL = new TreeSet<Integer>();
+					HashMap<Integer, TreeSet<Integer>> labelID_neighborSet = new HashMap<Integer, TreeSet<Integer>>();
+					for ( int label : labels)
+						labelID_neighborSet.put(label, new TreeSet<Integer>());
+					
 					Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_CHILD);
 					for ( Relationship rel : rels)
 					{
 						Node child  = rel.getEndNode();
-						int[] child_NL_list = (int[]) child.getProperty("NL_1_list");
-						for ( int neighbor : child_NL_list)
-							NL.add(neighbor);
+						
+						for ( int label : labels)
+						{
+							if ( child.hasProperty(NLListPropertyName.get(label)))
+							{
+								int[] list = (int[]) child.getProperty(NLListPropertyName.get(label));
+								for ( int neighbor : list)
+									labelID_neighborSet.get(label).add(neighbor);
+							}
+						}
 					}
-					int[] NL_array = new int[NL.size()];
-					int i = 0;
-					Iterator<Integer> iterator = NL.iterator();
-					while(iterator.hasNext())
+					
+					for ( int label : labels)
 					{
-						NL_array[i] = iterator.next();
-						i++;
+						TreeSet<Integer> neighborSet = labelID_neighborSet.get(label);
+						if ( neighborSet.size() > 0)
+						{
+							int[] NL_array = new int[neighborSet.size()];
+							Iterator<Integer> iterator = neighborSet.iterator();
+							int i = 0;
+							while(iterator.hasNext())
+							{
+								NL_array[i] = iterator.next();
+								i++;
+							}
+							node.setProperty(NLListPropertyName.get(label), NL_array);
+						}
 					}
-					node.setProperty("NL_1_list", NL_array);
 				}
 				
 				cur_level_nodes = next_level_nodes;
@@ -643,17 +662,16 @@ public class Construct_RisoTree {
 	}
 	
 	/**
-	 * load two hop neighbor list from file
+	 * load specific hop neighbor list from file
 	 * @param hop_num
 	 * @param labels
 	 * @param label_list
 	 */
-	public static void Construct(int hop_num, ArrayList<Integer> labels, ArrayList<Integer> label_list)
+	public static void Construct(String neighborListPath, int hop_num, ArrayList<Integer> labels, ArrayList<Integer> label_list)
 	{
-		String source_NL_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/"+dataset+"/2hop_neighbor_spa.txt";
 		int offset = 196591;
 		try {
-			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(source_NL_path);
+			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(neighborListPath);
 			Map<String, String> map_str = OwnMethods.ReadMap(geo_id_map_path );
 			Map<Long, Long> map = new HashMap<Long, Long>();
 			Set<Entry<String, String >> set = map_str.entrySet();
@@ -771,7 +789,7 @@ public class Construct_RisoTree {
 		
 	}
 	
-	public static void ClearNL()
+	public static void ReplaceNL()
 	{
 		String clear_property_name = "NL_1_list";
 		String replace_property_name = "NL_1_0_list";
@@ -790,6 +808,41 @@ public class Construct_RisoTree {
 				{
 					int[] property = (int[]) node.removeProperty(clear_property_name);
 					node.setProperty(replace_property_name, property);
+				}
+				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
+				for (Relationship rel : rels)
+				{
+					Node neighbor = rel.getEndNode();
+					queue.add(neighbor);
+				}
+			}
+			
+			tx.success();
+			tx.close();
+			dbservice.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void ClearNL()
+	{
+		String clear_property_name = "NL_1_list";
+		try {
+			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = dbservice.beginTx();
+			
+			Node rtree_root_node = OSM_Utility.getRTreeRoot(dbservice, dataset);
+			
+			Queue<Node> queue = new LinkedList<Node>();
+			queue.add(rtree_root_node);
+			while ( queue.isEmpty() == false)
+			{
+				Node node = queue.poll();
+				if(node.hasProperty(clear_property_name))
+				{
+					int[] property = (int[]) node.removeProperty(clear_property_name);
+					OwnMethods.Print(property.toString());
 				}
 				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
 				for (Relationship rel : rels)
