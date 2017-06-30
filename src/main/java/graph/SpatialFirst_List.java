@@ -483,7 +483,7 @@ public class SpatialFirst_List {
 		{
 			String id_list_size_property_name = String.format("NL_%d_%d_size", NL_hopnum.get(key), query_Graph.label_list[key]);
 			int id_list_size = (Integer) node.getProperty(id_list_size_property_name);
-			if( id_list_size > 1000)
+			if( id_list_size > 0)	//whether to use the shrunk label
 				query = query.replaceFirst(String.format("a%d", key), String.format("a%d:GRAPH_%d", key, query_Graph.label_list[key]));
 			else {
 				String id_list_property_name = String.format("NL_%d_%d_list", NL_hopnum.get(key), query_Graph.label_list[key]);
