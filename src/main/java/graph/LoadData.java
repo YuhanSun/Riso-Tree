@@ -10,8 +10,10 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.geotools.geometry.jts.Geometries;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
@@ -24,17 +26,32 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.*;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
+import commons.Labels.OSMLabel;
 import commons.Labels.OSMRelation;
 import commons.Labels.RTreeRel;
 import osm.OSM_Utility;
 
+/**
+ * 
+ * @author yuhansun
+ *
+ */
 public class LoadData {
 
-	static String dataset = "Gowalla";
 	static Config config = new Config();
 	static String version = config.GetNeo4jVersion();
+	static String dataset = config.getDatasetName();
+	static String lon_name = config.GetLongitudePropertyName();
+	static String lat_name = config.GetLatitudePropertyName();
+	
 	static String db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
-	static String map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
+//	static String map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
+	/**
+	 * use this because osm node are not seen as spatial graph
+	 * but directly use RTree leaf node as the spatial vertices in the graph
+	 */
+	static String map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map_RTree.txt", dataset);
+	
 	static String graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
 	
 	public static void main(String[] args) {
@@ -43,16 +60,49 @@ public class LoadData {
 //		GetSpatialNodeMap();
 //		LoadGraphEdges();
 //		setRTreeID();
-//		setProperty_Test();
 //		check();
 //		CalculateCount();
 //		getRTreeMap();
 //		get_Geometry_OSMID_Map();
+		set_Spatial_Label();
 	}
 	
 	
 	/**
+	 * set all spatial vertices (osm_node) with label GRAPH_1
+	 */
+	public static void set_Spatial_Label()
+	{
+		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+		try {
+			Transaction tx = dbservice.beginTx();
+			Iterable<Node> Geometries = OSM_Utility.getAllGeometries(dbservice, dataset);
+			for ( Node node : Geometries)
+			{
+//				OwnMethods.Print(node.getAllProperties().toString());
+				node.addLabel(GraphLabel.GRAPH_1);
+				
+				
+//				OwnMethods.Print(node.getAllProperties());
+//				Iterable<Label> labels = node.getLabels();
+//				for ( Label label : labels)
+//					OwnMethods.Print(label.toString());
+//				break;
+			}
+			
+			tx.success();
+			tx.close();
+			dbservice.shutdown();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
 	 * get map for geometry pos id to graph id
+	 * but not useful in our new graph structure
+	 * because osm spatial node is not used as graph vertices
 	 */
 	public static void get_Geometry_OSMID_Map()
 	{
@@ -114,6 +164,7 @@ public class LoadData {
 	 * calculate count of spatial vertices 
 	 * enclosed by the MBR for each non-leaf 
 	 * R-Tree node.
+	 * This is important in the query algorithm
 	 */
 	public static void CalculateCount()
 	{
@@ -174,23 +225,6 @@ public class LoadData {
 			Transaction tx = databaseService.beginTx();
 			Node check_node = databaseService.getNodeById(3849874);
 			OwnMethods.Print(check_node.getAllProperties());
-			
-			tx.success();
-			tx.close();
-			databaseService.shutdown();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void setProperty_Test()
-	{
-		try {
-			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-			Transaction tx = databaseService.beginTx();
-//			Node test_node = databaseService.createNode(Label.label("Test"));
-//			test_node.setProperty("test", "test");
 			
 			tx.success();
 			tx.close();
@@ -282,23 +316,38 @@ public class LoadData {
 	
 	/**
 	 * attach spatial node (osm nodes) map to file node_map.txt
+	 * and move property from osm node to RTree leaf node,
+	 * including id and location
 	 */
 	public static void GetSpatialNodeMap()
 	{
-		Map<Object, Object> id_map = new TreeMap<Object, Object>();
-		
-		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-		Node osm_node = OSM_Utility.getOSMDatasetNode(databaseService, dataset);
-		Transaction tx = databaseService.beginTx();
 		try {
+			Map<Object, Object> id_map = new TreeMap<Object, Object>();
+			
+			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+			Node osm_node = OSM_Utility.getOSMDatasetNode(databaseService, dataset);
 			Iterable<Node> spatial_nodes = OSM_Utility.getAllPointNodes(databaseService, osm_node);
 			for (Node point : spatial_nodes)
 			{
+//				long entity_id = (Long) point.getProperty("node_osm_id");
+//				long neo4j_id = point.getId();
+				
 				long entity_id = (Long) point.getProperty("node_osm_id");
-				long neo4j_id = point.getId();
+				Relationship relationship = point.getSingleRelationship(Labels.OSMRelation.GEOM, Direction.OUTGOING);
+				Node leafNode = relationship.getEndNode();
+				long neo4j_id = leafNode.getId();
 				id_map.put(entity_id, neo4j_id);
+				
+				leafNode.setProperty("id", entity_id);
+				double lon = (Double) point.getProperty(lon_name);
+				double lat = (Double) point.getProperty(lat_name);
+				leafNode.setProperty(lon_name, lon);
+				leafNode.setProperty(lat_name, lat);
+				
 			}
 			tx.success();
+			tx.close();
 			databaseService.shutdown();
 			
 			OwnMethods.WriteMap(map_path, true, id_map);
