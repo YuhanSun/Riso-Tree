@@ -263,8 +263,8 @@ public class SpatialFirst {
 			}
 			tx.success();
 			tx.close();
-			OwnMethods.Print(String.format("result size: %d", result_count));
-			OwnMethods.Print(String.format("located in count: %d", rangeQueryResult.size()));
+//			OwnMethods.Print(String.format("result size: %d", result_count));
+//			OwnMethods.Print(String.format("located in count: %d", rangeQueryResult.size()));
 			//			OwnMethods.Print(String.format("time: %d", System.currentTimeMillis() - start));
 			//			return result;
 		} catch (Exception e) {
