@@ -221,6 +221,376 @@ public class RisoTreeQuery {
 		return query;
 	}
 	
+//	/**
+//	 * Does not consider condition that area of query rectangle is 0.
+//	 * If so, such function cannot make the correct dicision.
+//	 * @param query_Graph
+//	 * @param limit
+//	 */
+//	public void Query(Query_Graph query_Graph, int limit)
+//	{
+//		try {
+//			range_query_time = 0;
+//			get_iterator_time = 0;
+//			iterate_time = 0;
+//			result_count = 0;
+//			page_hit_count = 0;
+//			String logWriteLine = "";
+//			
+//			//<spa_id, rectangle>
+//			HashMap<Integer, MyRectangle> spa_predicates = new HashMap<Integer, MyRectangle>();
+//
+//			//<spa_id, <neighbor_id, hop_num>>
+//			HashMap<Integer, HashMap<Integer, Integer>> min_hop = new HashMap<Integer, HashMap<Integer, Integer>>();
+//			//<spa_id, <neighbor_id, size_property_name>>
+//			HashMap<Integer, HashMap<Integer, String>> NL_size_propertyname = new HashMap<Integer, HashMap<Integer, String>>();
+//			//<spa_id, <neighbor_id, list_property_name>>
+//			HashMap<Integer, HashMap<Integer, String>> NL_list_propertyname = new HashMap<Integer, HashMap<Integer,String>>();	
+//			//<spa_id, <neighbor_id, NL_list>>
+//			HashMap<Integer, HashMap<Integer, HashSet<Integer>>> NL_list = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
+//
+//			//Construct min_hop_array for the query graph
+//			int[][] min_hop_array = Ini_Minhop(query_Graph);
+//
+//			//Construct min_hop (compact structure for min_hop_array
+//			//and NL_size_propertyname and NL_list_propertyname
+//			for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
+//				if(query_Graph.Has_Spa_Predicate[i])
+//				{
+//					spa_predicates.put(i, query_Graph.spa_predicate[i]);
+//					min_hop.put(i, new HashMap<Integer, Integer>());
+//					NL_size_propertyname.put(i, new HashMap<Integer, String>());
+//					NL_list_propertyname.put(i, new HashMap<Integer, String>());
+//					for ( int j = 0; j < min_hop_array[i].length; j++)
+//					{
+//						if(min_hop_array[i][j] <= MAX_HOPNUM && min_hop_array[i][j] != -1)
+//						{
+//							min_hop.get(i).put(j, min_hop_array[i][j]);
+//							int label = query_Graph.label_list[j];
+//							NL_size_propertyname.get(i).put(j, String.format("NL_%d_%d_size", min_hop_array[i][j], label));
+//							NL_list_propertyname.get(i).put(j, String.format("NL_%d_%d_list", min_hop_array[i][j], label));
+//						}
+//					}
+//				}
+//
+//			logWriteLine = String.format("min_hop: %s\nNL_property: %s", min_hop, NL_size_propertyname);
+//			if ( outputLevelInfo)
+//			{
+//				OwnMethods.Print(logWriteLine);
+//				OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+//			}
+//
+//			long start = System.currentTimeMillis();
+//			Transaction tx = dbservice.beginTx();
+//			LinkedList<Node> cur_list = new LinkedList<Node>();
+//			Node root_node =  OSM_Utility.getRTreeRoot(dbservice, dataset);
+//			cur_list.add(root_node);
+//			LinkedList<Node> next_list = new LinkedList<Node>(); 
+//
+//			int level_index = 0;
+//			while(cur_list.isEmpty() == false)
+//			{
+//				//<spa_id, card>
+//				HashMap<Integer, Double> spa_cards = new HashMap<Integer, Double>();
+//				for (int key : spa_predicates.keySet())
+//					spa_cards.put(key, 0.0);
+//
+//				//<spa_id, <neighbor_id, card>>
+//				HashMap<Integer, HashMap<Integer, Double>> NL_cards = new HashMap<Integer, HashMap<Integer, Double>>();
+//				for (int spa_id : min_hop.keySet())
+//				{
+//					NL_cards.put(spa_id, new HashMap<Integer, Double>());
+//					HashMap<Integer, Integer> min_hop_vector = min_hop.get(spa_id);
+//					for ( int neighbor_pos : min_hop_vector.keySet())
+//						NL_cards.get(spa_id).put(neighbor_pos, 0.0);	
+//				}
+//
+//				//<spa_id, overlap_nodes_list>
+//				//				HashMap<Integer, LinkedList<Node>> overlap_MBR_list = new HashMap<>();
+//				LinkedList<Node>overlap_MBR_list = new LinkedList<Node>(); //just support one spatial predicate
+//
+//				Iterator<Node> iterator = cur_list.iterator();
+//				
+//				while(iterator.hasNext())
+//				{
+//					Node node = iterator.next();
+//					if(node.hasProperty("bbox"))
+//					{
+//						double[] bbox = (double[]) node.getProperty("bbox");
+//						MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
+////						OwnMethods.Print(MBR);
+//						double MBR_area = MBR.area();
+//
+//						int spa_count = (Integer) node.getProperty("count");
+//						for ( int key : spa_predicates.keySet())
+//						{
+//							MyRectangle queryRectangle = spa_predicates.get(key);
+//							
+//							MyRectangle intersect = MBR.intersect(queryRectangle); 
+//							if(intersect != null)
+//							{
+//								//								overlap_MBR_list.get(key).add(node);
+//								overlap_MBR_list.add(node);
+//
+//								double ratio;
+//								if(MBR_area == 0)
+//									ratio = 1;
+//								else
+//									ratio = intersect.area() / MBR_area;
+//								spa_cards.put(key, (spa_cards.get(key) + ratio * spa_count));
+//
+//								HashMap<Integer, Double> NL_cards_vector = NL_cards.get(key);
+//								for ( int neighbor_id : NL_cards_vector.keySet())
+//								{
+//									int NL_label_size = (Integer) node.getProperty(NL_size_propertyname.get(key).get(neighbor_id));
+//									NL_cards_vector.put(neighbor_id, (NL_cards_vector.get(neighbor_id) + ratio * NL_label_size));
+//								}
+//
+//								Iterable<Relationship> rels = node.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
+//								for ( Relationship relationship : rels)
+//									next_list.add(relationship.getEndNode());
+//							}
+//						}
+//					}
+//					else
+//						throw new Exception(String.format("node %d does not has \"bbox\" property", node));
+//				}
+//
+//				logWriteLine = String.format("level %d", level_index);
+//				if ( outputLevelInfo)
+//				{
+//					OwnMethods.Print(logWriteLine);
+//					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+//				}
+//
+//				//find the query node with the minimum cardinality
+//				double min_spa_card = Double.MAX_VALUE, min_NL_card = Double.MAX_VALUE;
+//				int min_NL_spa_id = 0, min_NL_neighbor_id = 0;
+//
+//				//now spa_cards has only one key
+//				for (int key : spa_cards.keySet())
+//				{
+//					double spa_card = spa_cards.get(key);
+//					if(spa_card < min_spa_card)
+//						min_spa_card = spa_card;
+//
+//					logWriteLine = String.format("spa_card %d %f", key, spa_card);
+//					if ( outputLevelInfo)
+//					{
+//						OwnMethods.Print(logWriteLine);
+//						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+//					}
+//
+//					HashMap<Integer, Double> NL_cards_vector = NL_cards.get(key);
+//					for ( int neighbor_id : NL_cards_vector.keySet())
+//					{
+//						double NL_card = NL_cards_vector.get(neighbor_id);
+//						if(NL_card < min_NL_card)
+//						{
+//							min_NL_spa_id = key;	min_NL_neighbor_id = neighbor_id;
+//							min_NL_card = NL_card;
+//						}
+//						logWriteLine = String.format("NL_size %d %d %s", key, neighbor_id, NL_cards_vector.get(neighbor_id).toString());
+//						if ( outputLevelInfo)
+//						{
+//							OwnMethods.Print(logWriteLine);
+//							OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+//						}
+//					}
+//				}
+//
+//				logWriteLine = String.format("level %d min card : %f", level_index, Math.min(min_spa_card, min_NL_card));
+//				if ( outputLevelInfo)
+//				{
+//					OwnMethods.Print(logWriteLine);
+//					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+//				}
+//
+//				if (overlap_MBR_list.isEmpty() == true)
+//				{
+//					OwnMethods.Print("No result satisfy the query.");
+//					return;
+//				}
+//
+//				//construct the NL_list with the highest selectivity
+//				long start1 = System.currentTimeMillis();
+//				//				if ( min_NL_card < min_spa_card)
+////				{
+//					String property_name = NL_list_propertyname.get(min_NL_spa_id).get(min_NL_neighbor_id);
+//
+//					HashSet<Integer> min_NL_list = new HashSet<Integer>();
+//					//					NL_list.put(min_NL_spa_id, new HashMap<Integer, HashSet<Integer>>());
+//					//					NL_list.get(min_NL_spa_id).put(min_NL_neighbor_id, new HashSet<Integer>());
+//					for ( Node node : overlap_MBR_list)
+//					{
+//						if ( node.hasProperty(property_name))
+//						{
+//							int[] NL_list_label = ( int[] ) node.getProperty(property_name);
+//							for ( int node_id : NL_list_label)
+//								min_NL_list.add(node_id);
+//						}
+//					}
+//					logWriteLine = String.format("min_NL_list size is %d\n", min_NL_list.size());
+//					if ( min_NL_list.size() < min_spa_card)
+//						logWriteLine += "NL_list is more selective";
+//					else
+//						logWriteLine += "spa predicate is more selective";
+//					if ( outputLevelInfo)
+//					{
+//						OwnMethods.Print(logWriteLine);
+//						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+//					}
+////				}
+//					
+//					logWriteLine = String.format("NL_serialize time: %d\n", System.currentTimeMillis() - start1);
+//					logWriteLine += String.format("level %d time: %d\n", level_index, System.currentTimeMillis() - start);
+//					if ( outputLevelInfo)
+//					{
+//						OwnMethods.Print(logWriteLine);
+//						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+//					}
+//
+//				range_query_time += System.currentTimeMillis() - start;
+//				start = System.currentTimeMillis();
+//				
+//				//traverse to the second deepest level and start to form the cypher query
+////				int located_in_count = 0;
+//				if( overlap_MBR_list.isEmpty() == false && next_list.isEmpty())
+//				{
+//					//get located in nodes
+////					TreeSet<Long> ids = new TreeSet<Long>(); 
+////					start = System.currentTimeMillis();
+////					for ( Node node : overlap_MBR_list)
+////						for ( Relationship relationship : node.getRelationships(
+////								Direction.OUTGOING, RTreeRelationshipTypes.RTREE_REFERENCE))
+////						{
+////							Node geom = relationship.getEndNode();
+////							double[] bbox = (double[]) geom.getProperty("bbox");
+////							MyRectangle rectangle = new MyRectangle(bbox);
+////							for ( int key : spa_predicates.keySet())
+////								if ( rectangle.intersect(spa_predicates.get(key)) != null)
+////								{
+////									ids.add(geom.getId());
+////									located_in_count++;
+////								}
+////						}
+////					OwnMethods.Print(String.format("Located in nodes: %d", located_in_count));
+////					level_index++;
+////					OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
+////					return ids;
+//					
+//					int index = 0;
+//					ArrayList<Long> id_pos_list = new ArrayList<Long>(); 
+//					for ( int id : min_NL_list)
+//					{
+//						//graph id to neo4j pos id
+//						id_pos_list.add(graph_pos_map_list[id]);
+//						index ++;
+//						if ( index == 500)
+//						{
+//							String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
+//							
+//							if ( outputQuery)
+//							{
+//								OwnMethods.Print(query);
+//								OwnMethods.WriteFile(logPath, true, query + "\n");
+//							}
+//							
+//							start = System.currentTimeMillis();
+//							Result result = dbservice.execute(query);
+//							get_iterator_time += System.currentTimeMillis() - start;
+//							
+//							start = System.currentTimeMillis();
+//							int cur_count = 0;
+//							while (result.hasNext())
+//							{
+//								cur_count++;
+//								result.next();
+//							}
+//							iterate_time += System.currentTimeMillis() - start;
+//							
+//							if (  cur_count!= 0)
+//							{
+//								ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+//								ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
+//								result_count += profile.getRows();
+//								page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+//								if ( outputExecutionPlan)
+//								{
+//									OwnMethods.Print(planDescription);
+//									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
+//								}
+//							}
+//							index = 0; id_pos_list = new ArrayList<Long>();
+//						}
+//					}
+//					
+//					logWriteLine = "id list size: " + id_pos_list.size();
+//					
+//					if ( outputLevelInfo)
+//					{
+//						OwnMethods.Print(logWriteLine);
+//						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+//					}
+//					
+//					if ( id_pos_list.size() != 0)
+//					{
+//						String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
+//						
+//						if ( outputQuery)
+//						{
+//							OwnMethods.Print(query);
+//							OwnMethods.WriteFile(logPath, true, query + "\n");
+//						}
+//						
+//						start = System.currentTimeMillis();
+//						Result result = dbservice.execute(query);
+//						get_iterator_time += System.currentTimeMillis() - start;
+//						
+//						start = System.currentTimeMillis();
+//						int cur_count = 0;
+//						while (result.hasNext())
+//						{
+//							cur_count++;
+//							result.next();
+//						}
+//						iterate_time += System.currentTimeMillis() - start;
+//						
+//						if (  cur_count!= 0)
+//						{
+//							ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+//							ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
+//							result_count += profile.getRows();
+//							page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+//							
+//							if ( outputExecutionPlan)
+//							{
+//								OwnMethods.Print(planDescription);
+//								OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
+//							}
+//						}
+//					}
+//				}
+//
+//				cur_list = next_list;
+//				next_list = new LinkedList<Node>();
+//				level_index++;
+//			}
+//			tx.success();
+//			tx.close();
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();	System.exit(-1);
+//		}
+////		return null;
+//	}
+	
+	/**
+	 * Does not consider condition that area of query rectangle is 0.
+	 * If so, such function cannot make the correct dicision.
+	 * @param query_Graph
+	 * @param limit
+	 */
 	public void Query(Query_Graph query_Graph, int limit)
 	{
 		try {
@@ -304,7 +674,7 @@ public class RisoTreeQuery {
 				LinkedList<Node>overlap_MBR_list = new LinkedList<Node>(); //just support one spatial predicate
 
 				Iterator<Node> iterator = cur_list.iterator();
-				
+
 				while(iterator.hasNext())
 				{
 					Node node = iterator.next();
@@ -312,18 +682,18 @@ public class RisoTreeQuery {
 					{
 						double[] bbox = (double[]) node.getProperty("bbox");
 						MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
-//						OwnMethods.Print(MBR);
+						//						OwnMethods.Print(MBR);
 						double MBR_area = MBR.area();
 
 						int spa_count = (Integer) node.getProperty("count");
 						for ( int key : spa_predicates.keySet())
 						{
 							MyRectangle queryRectangle = spa_predicates.get(key);
-							
+
 							MyRectangle intersect = MBR.intersect(queryRectangle); 
 							if(intersect != null)
 							{
-								//								overlap_MBR_list.get(key).add(node);
+//								overlap_MBR_list.get(key).add(node);
 								overlap_MBR_list.add(node);
 
 								double ratio;
@@ -361,6 +731,7 @@ public class RisoTreeQuery {
 				double min_spa_card = Double.MAX_VALUE, min_NL_card = Double.MAX_VALUE;
 				int min_NL_spa_id = 0, min_NL_neighbor_id = 0;
 
+				//now spa_cards has only one key
 				for (int key : spa_cards.keySet())
 				{
 					double spa_card = spa_cards.get(key);
@@ -407,8 +778,8 @@ public class RisoTreeQuery {
 
 				//construct the NL_list with the highest selectivity
 				long start1 = System.currentTimeMillis();
-				//				if ( min_NL_card < min_spa_card)
-//				{
+				if ( min_NL_card < min_spa_card)
+				{
 					String property_name = NL_list_propertyname.get(min_NL_spa_id).get(min_NL_neighbor_id);
 
 					HashSet<Integer> min_NL_list = new HashSet<Integer>();
@@ -433,8 +804,6 @@ public class RisoTreeQuery {
 						OwnMethods.Print(logWriteLine);
 						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
 					}
-//				}
-					
 					logWriteLine = String.format("NL_serialize time: %d\n", System.currentTimeMillis() - start1);
 					logWriteLine += String.format("level %d time: %d\n", level_index, System.currentTimeMillis() - start);
 					if ( outputLevelInfo)
@@ -443,56 +812,103 @@ public class RisoTreeQuery {
 						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
 					}
 
-				range_query_time += System.currentTimeMillis() - start;
-				start = System.currentTimeMillis();
-				
-				//traverse to the second deepest level and start to form the cypher query
-//				int located_in_count = 0;
-				if( overlap_MBR_list.isEmpty() == false && next_list.isEmpty())
-				{
-					//get located in nodes
-//					TreeSet<Long> ids = new TreeSet<Long>(); 
-//					start = System.currentTimeMillis();
-//					for ( Node node : overlap_MBR_list)
-//						for ( Relationship relationship : node.getRelationships(
-//								Direction.OUTGOING, RTreeRelationshipTypes.RTREE_REFERENCE))
-//						{
-//							Node geom = relationship.getEndNode();
-//							double[] bbox = (double[]) geom.getProperty("bbox");
-//							MyRectangle rectangle = new MyRectangle(bbox);
-//							for ( int key : spa_predicates.keySet())
-//								if ( rectangle.intersect(spa_predicates.get(key)) != null)
-//								{
-//									ids.add(geom.getId());
-//									located_in_count++;
-//								}
-//						}
-//					OwnMethods.Print(String.format("Located in nodes: %d", located_in_count));
-//					level_index++;
-//					OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
-//					return ids;
-					
-					int index = 0;
-					ArrayList<Long> id_pos_list = new ArrayList<Long>(); 
-					for ( int id : min_NL_list)
+					range_query_time += System.currentTimeMillis() - start;
+					start = System.currentTimeMillis();
+
+					//traverse to the second deepest level and start to form the cypher query
+					//				int located_in_count = 0;
+					if( overlap_MBR_list.isEmpty() == false && next_list.isEmpty())
 					{
-						//graph id to neo4j pos id
-						id_pos_list.add(graph_pos_map_list[id]);
-						index ++;
-						if ( index == 500)
+						//get located in nodes
+						//					TreeSet<Long> ids = new TreeSet<Long>(); 
+						//					start = System.currentTimeMillis();
+						//					for ( Node node : overlap_MBR_list)
+						//						for ( Relationship relationship : node.getRelationships(
+						//								Direction.OUTGOING, RTreeRelationshipTypes.RTREE_REFERENCE))
+						//						{
+						//							Node geom = relationship.getEndNode();
+						//							double[] bbox = (double[]) geom.getProperty("bbox");
+						//							MyRectangle rectangle = new MyRectangle(bbox);
+						//							for ( int key : spa_predicates.keySet())
+						//								if ( rectangle.intersect(spa_predicates.get(key)) != null)
+						//								{
+						//									ids.add(geom.getId());
+						//									located_in_count++;
+						//								}
+						//						}
+						//					OwnMethods.Print(String.format("Located in nodes: %d", located_in_count));
+						//					level_index++;
+						//					OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
+						//					return ids;
+
+						int index = 0;
+						ArrayList<Long> id_pos_list = new ArrayList<Long>(); 
+						for ( int id : min_NL_list)
+						{
+							//graph id to neo4j pos id
+							id_pos_list.add(graph_pos_map_list[id]);
+							index ++;
+							if ( index == 500)
+							{
+								String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
+
+								if ( outputQuery)
+								{
+									OwnMethods.Print(query);
+									OwnMethods.WriteFile(logPath, true, query + "\n");
+								}
+
+								start = System.currentTimeMillis();
+								Result result = dbservice.execute(query);
+								get_iterator_time += System.currentTimeMillis() - start;
+
+								start = System.currentTimeMillis();
+								int cur_count = 0;
+								while (result.hasNext())
+								{
+									cur_count++;
+									result.next();
+								}
+								iterate_time += System.currentTimeMillis() - start;
+
+								if (  cur_count!= 0)
+								{
+									ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+									ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
+									result_count += profile.getRows();
+									page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+									if ( outputExecutionPlan)
+									{
+										OwnMethods.Print(planDescription);
+										OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
+									}
+								}
+								index = 0; id_pos_list = new ArrayList<Long>();
+							}
+						}
+
+						logWriteLine = "id list size: " + id_pos_list.size();
+
+						if ( outputLevelInfo)
+						{
+							OwnMethods.Print(logWriteLine);
+							OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+						}
+
+						if ( id_pos_list.size() != 0)
 						{
 							String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
-							
+
 							if ( outputQuery)
 							{
 								OwnMethods.Print(query);
 								OwnMethods.WriteFile(logPath, true, query + "\n");
 							}
-							
+
 							start = System.currentTimeMillis();
 							Result result = dbservice.execute(query);
 							get_iterator_time += System.currentTimeMillis() - start;
-							
+
 							start = System.currentTimeMillis();
 							int cur_count = 0;
 							while (result.hasNext())
@@ -501,68 +917,26 @@ public class RisoTreeQuery {
 								result.next();
 							}
 							iterate_time += System.currentTimeMillis() - start;
-							
+
 							if (  cur_count!= 0)
 							{
 								ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
 								ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
 								result_count += profile.getRows();
 								page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+
 								if ( outputExecutionPlan)
 								{
 									OwnMethods.Print(planDescription);
 									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
 								}
 							}
-							index = 0; id_pos_list = new ArrayList<Long>();
 						}
 					}
+				}
+				else
+				{
 					
-					logWriteLine = "id list size: " + id_pos_list.size();
-					
-					if ( outputLevelInfo)
-					{
-						OwnMethods.Print(logWriteLine);
-						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
-					}
-					
-					if ( id_pos_list.size() != 0)
-					{
-						String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
-						
-						if ( outputQuery)
-						{
-							OwnMethods.Print(query);
-							OwnMethods.WriteFile(logPath, true, query + "\n");
-						}
-						
-						start = System.currentTimeMillis();
-						Result result = dbservice.execute(query);
-						get_iterator_time += System.currentTimeMillis() - start;
-						
-						start = System.currentTimeMillis();
-						int cur_count = 0;
-						while (result.hasNext())
-						{
-							cur_count++;
-							result.next();
-						}
-						iterate_time += System.currentTimeMillis() - start;
-						
-						if (  cur_count!= 0)
-						{
-							ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-							ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
-							result_count += profile.getRows();
-							page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-							
-							if ( outputExecutionPlan)
-							{
-								OwnMethods.Print(planDescription);
-								OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
-							}
-						}
-					}
 				}
 
 				cur_list = next_list;
