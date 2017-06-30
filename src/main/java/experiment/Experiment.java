@@ -18,6 +18,7 @@ public class Experiment {
 	static String dataset = config.getDatasetName();
 	static String version = config.GetNeo4jVersion();
 	static system systemName = config.getSystemName();
+	static String password = config.getPassword();
 	
 	static String db_path;
 	static String querygraphDir;
@@ -32,12 +33,12 @@ public class Experiment {
 		case Ubuntu:
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
 			querygraphDir = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph/%s/", dataset);
-			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map.txt";
+			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map_RTree.txt";
 			break;
 		case Windows:
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
 			querygraphDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph\\%s\\", dataset);
-			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map.txt";
+			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map_RTree.txt";
 			break;
 		}
 	}
@@ -45,46 +46,200 @@ public class Experiment {
 	public static void main(String[] args) throws Exception {
 		initializeParameters();
 		
-//		int queryIndex = 2;
-//		SpatialFirst(queryIndex);
-//		SpatialFirstList(queryIndex);
+		Neo4j_Naive(2, 0);
+		Neo4j_Naive(3, 0);
+		Neo4j_Naive(3, 1);
 		
-//		SpatialFirst(2, queryIndex);
-//		SpatialFirstList_Block(2, queryIndex);
-//		
-//		SpatialFirst(3, queryIndex);
-//		SpatialFirstList_Block(3, queryIndex);
+		SpatialFirst(2, 0);
+		SpatialFirst(3, 0);
+		SpatialFirst(3, 1);
 		
-//		SpatialFirst(4, queryIndex);
-//		SpatialFirstList_Block(4, queryIndex);
+		SpatialFirstList_Block(2, 0);
+		SpatialFirstList_Block(3, 0);
+		SpatialFirstList_Block(3, 1);
 		
-//		dataset = "Gowalla_100";
-		initializeParameters();
+//		for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
+////		int queryIndex = 0;
+//		{
+////			if ( queryIndex == 0)
+////				for ( int nodeCount = 3; nodeCount <= 4; nodeCount++)
+////				{
+//////					SpatialFirst(nodeCount, queryIndex);
+//////					SpatialFirstList_Block(nodeCount, queryIndex);
+////					Neo4j_Naive(nodeCount, queryIndex);
+////				}
+////			else
+////				for ( int nodeCount = 2; nodeCount <= 4; nodeCount++)
+////				{
+//////					SpatialFirst(nodeCount, queryIndex);
+//////					SpatialFirstList_Block(nodeCount, queryIndex);
+////					Neo4j_Naive(nodeCount, queryIndex);
+////				}
+//
 		
-		for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
-		{
-//			if ( queryIndex == 0)
-//				for ( int nodeCount = 3; nodeCount <= 4; nodeCount++)
-//				{
-////					SpatialFirst(nodeCount, queryIndex);
-////					SpatialFirstList_Block(nodeCount, queryIndex);
-//					Neo4j_Naive(nodeCount, queryIndex);
-//				}
-//			else
-//				for ( int nodeCount = 2; nodeCount <= 4; nodeCount++)
-//				{
-////					SpatialFirst(nodeCount, queryIndex);
-////					SpatialFirstList_Block(nodeCount, queryIndex);
-//					Neo4j_Naive(nodeCount, queryIndex);
-//				}
-			
-			for (int nodeCount = 2; nodeCount <= 4; nodeCount++)
-			{
+		
+//			for (int nodeCount = 2; nodeCount <= 4; nodeCount++)
+////			int nodeCount = 4;
+//			{
+//				Neo4j_Naive(nodeCount, queryIndex);
 //				SpatialFirst(nodeCount, queryIndex);
 //				SpatialFirstList_Block(nodeCount, queryIndex);
-								Neo4j_Naive(nodeCount, queryIndex);
-			}
+//				risoTreeQuery(nodeCount, queryIndex);
+//			}
+//		}
+	}
+	
+	/**
+	 * use RisoTree and graph first approach
+	 * @param nodeCount
+	 * @param query_id
+	 * @throws Exception
+	 */
+	public static void risoTreeQuery(int nodeCount, int query_id) throws Exception
+	{
+		long start;
+		long time;
+		int limit = -1;
+		int expe_count = 5;
+		
+		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
+		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		Query_Graph query_Graph = queryGraphs.get(query_id);
+		
+		String result_detail_path = null, result_avg_path = null;
+		switch (systemName) {
+		case Ubuntu:
+			result_detail_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/risotree_%d_%d.txt", dataset, nodeCount, query_id);
+			result_avg_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/risotree_%d_%d_avg.txt", dataset, nodeCount, query_id);
+//			result_detail_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/risotree_%d_%d_test.txt", dataset, nodeCount, query_id);
+//			result_avg_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/risotree_%d_%d_avg_test.txt", dataset, nodeCount, query_id);
+			break;
+		case Windows:
+			result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\risotree_%d_%d.txt", dataset, nodeCount, query_id);
+			result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\risotree_%d_%d_avg.txt.txt", dataset, nodeCount, query_id);
+			break;
 		}
+		
+		String write_line = String.format("%s\t%d\n", dataset, limit);
+		if(!TEST_FORMAT)
+		{
+			OwnMethods.WriteFile(result_detail_path, true, write_line);
+			OwnMethods.WriteFile(result_avg_path, true, write_line);
+		}
+		
+		String head_line = "count\trange_time\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
+		if(!TEST_FORMAT)
+			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
+		
+		int name_suffix = 1;
+		int times = 10;
+		while ( name_suffix <= 2000)
+		{
+			double selectivity = name_suffix / 1000000.0;
+			
+			String queryrect_path = null;
+			switch (systemName) {
+			case Ubuntu:
+				queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				break;
+			case Windows:
+				queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+				break;
+			}
+			
+			write_line = selectivity + "\n" + head_line;
+			if(!TEST_FORMAT)
+				OwnMethods.WriteFile(result_detail_path, true, write_line);
+			
+			ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+			HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
+			long[] graph_pos_map_list= new long[graph_pos_map.size()];
+			for ( String key_str : graph_pos_map.keySet())
+			{
+				int key = Integer.parseInt(key_str);
+				int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
+				graph_pos_map_list[key] = pos_id;
+			}
+			RisoTreeQuery risoTreeQuery = new RisoTreeQuery(db_path, dataset, graph_pos_map_list);
+			
+			ArrayList<Long> range_query_time = new ArrayList<Long>();
+			ArrayList<Long> time_get_iterator = new ArrayList<Long>();
+			ArrayList<Long> time_iterate = new ArrayList<Long>();
+			ArrayList<Long> total_time = new ArrayList<Long>();
+			ArrayList<Long> count = new ArrayList<Long>();
+			ArrayList<Long> access = new ArrayList<Long>();
+			
+			for ( int i = 0; i < expe_count; i++)
+			{
+				MyRectangle rectangle = queryrect.get(i);
+				if ( rectangle.area() == 0.0)
+				{
+					double delta = Math.pow(0.1, 10);
+					rectangle = new MyRectangle(rectangle.min_x - delta, rectangle.min_y - delta,
+							rectangle.max_x + delta, rectangle.max_y + delta);
+				}
+				
+				query_Graph.spa_predicate = new MyRectangle[query_Graph.graph.size()];
+				
+				//only handle query with one spatial predicate
+				int j = 0;
+				for (  ; j < query_Graph.graph.size(); j++)
+					if(query_Graph.Has_Spa_Predicate[j])
+						break;
+				query_Graph.spa_predicate[j] = rectangle;
+				
+				if(!TEST_FORMAT)
+				{
+					OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+					
+					start = System.currentTimeMillis();
+					risoTreeQuery.Query(query_Graph, -1);
+					time = System.currentTimeMillis() - start;
+					
+					time_get_iterator.add(risoTreeQuery.get_iterator_time);
+					time_iterate.add(risoTreeQuery.iterate_time);
+					total_time.add(time);
+					count.add(risoTreeQuery.result_count);
+					access.add(risoTreeQuery.page_hit_count);
+					range_query_time.add(risoTreeQuery.range_query_time);
+					
+					write_line = String.format("%d\t%d\t", count.get(i), range_query_time.get(i));
+					write_line += String.format("%d\t", time_get_iterator.get(i));
+					write_line += String.format("%d\t%d\t", time_iterate.get(i), total_time.get(i));
+					write_line += String.format("%d\n", access.get(i));
+					if(!TEST_FORMAT)
+						OwnMethods.WriteFile(result_detail_path, true, write_line);
+				}
+				
+				risoTreeQuery.dbservice.shutdown();
+				
+				OwnMethods.ClearCache(password);
+				Thread.currentThread();
+				Thread.sleep(5000);
+				
+				risoTreeQuery.dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+				
+			}
+			risoTreeQuery.dbservice.shutdown();
+			
+			write_line = String.valueOf(selectivity) + "\t";
+			write_line += String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
+			write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+			write_line += String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
+			write_line += String.format("%d\n", Utility.Average(access));
+			if(!TEST_FORMAT)
+				OwnMethods.WriteFile(result_avg_path, true, write_line);
+			
+//			long larger_time = Utility.Average(total_time);
+//			if (larger_time * expe_count > 450 * 1000)
+//				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 450.0 / 1000.0));
+//			if(expe_count < 1)
+//				expe_count = 1;
+			
+			name_suffix *= times;
+		}
+		OwnMethods.WriteFile(result_detail_path, true, "\n");
+		OwnMethods.WriteFile(result_avg_path, true, "\n");
 	}
 	
 	public static void Neo4j_Naive(int nodeCount, int query_id) throws Exception
@@ -92,7 +247,7 @@ public class Experiment {
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 3;
+		int expe_count = 5;
 
 		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
@@ -192,7 +347,7 @@ public class Experiment {
 					
 					naive_Neo4j_Match.neo4j_API.ShutDown();
 					
-					OwnMethods.ClearCache("syh19910205");
+					OwnMethods.ClearCache(password);
 					Thread.currentThread();
 					Thread.sleep(5000);
 					
@@ -203,6 +358,7 @@ public class Experiment {
 				}
 			}
 			naive_Neo4j_Match.neo4j_API.ShutDown();
+			OwnMethods.ClearCache(password);
 
 			write_line = String.valueOf(selectivity) + "\t";
 			write_line += String.format("%d\t%d\t", Utility.Average(count), Utility.Average(time_get_iterator));
@@ -211,7 +367,7 @@ public class Experiment {
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, write_line);
 
-			long larger_time = Utility.Average(total_time);
+//			long larger_time = Utility.Average(total_time);
 //			if (larger_time * expe_count > 150 * 1000)
 //				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 150.0 / 1000.0));
 //			if(expe_count < 1)
@@ -227,6 +383,12 @@ public class Experiment {
 		OwnMethods.WriteFile(result_avg_path, true, "\n");
 	}
 	
+	/**
+	 * use SpatialFirst_List class and block query
+	 * @param nodeCount
+	 * @param query_id
+	 * @throws Exception
+	 */
 	public static void SpatialFirstList_Block(int nodeCount, int query_id) throws Exception
 	{
 		long start;
@@ -335,7 +497,7 @@ public class Experiment {
 				
 				spa_First_list.shutdown();
 				
-				OwnMethods.ClearCache("syh19910205");
+				OwnMethods.ClearCache(password);
 				Thread.currentThread();
 				Thread.sleep(5000);
 				
@@ -343,6 +505,7 @@ public class Experiment {
 				
 			}
 			spa_First_list.shutdown();
+			OwnMethods.ClearCache(password);
 			
 			write_line = String.valueOf(selectivity) + "\t";
 			write_line += String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
@@ -352,11 +515,11 @@ public class Experiment {
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, write_line);
 			
-			long larger_time = Utility.Average(total_time);
-			if (larger_time * expe_count > 450 * 1000)
-				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 450.0 / 1000.0));
-			if(expe_count < 1)
-				expe_count = 1;
+//			long larger_time = Utility.Average(total_time);
+//			if (larger_time * expe_count > 450 * 1000)
+//				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 450.0 / 1000.0));
+//			if(expe_count < 1)
+//				expe_count = 1;
 			
 			name_suffix *= times;
 		}
@@ -364,7 +527,14 @@ public class Experiment {
 		OwnMethods.WriteFile(result_avg_path, true, "\n");
 	}
 	
-	public static void SpatialFirstList(int query_id)
+	/**
+	 * Use SpatialFirst_List class and non-block query.
+	 * Same performance with simple SpatialFirst approach.
+	 * So not recorded in the experiment.
+	 * @param query_id
+	 * @throws InterruptedException 
+	 */
+	public static void SpatialFirstList(int query_id) throws InterruptedException
 	{
 		long start;
 		long time;
@@ -470,8 +640,14 @@ public class Experiment {
 					if(!TEST_FORMAT)
 						OwnMethods.WriteFile(result_detail_path, true, write_line);
 				}
+				spa_First_list.shutdown();
+				OwnMethods.ClearCache(password);
+				Thread.currentThread();
+				Thread.sleep(5000);
+				spa_First_list.dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			}
 			spa_First_list.shutdown();
+			OwnMethods.ClearCache(password);
 			
 			write_line = String.valueOf(selectivity) + "\t";
 			write_line += String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
@@ -493,6 +669,13 @@ public class Experiment {
 		OwnMethods.WriteFile(result_avg_path, true, "\n");
 	}
 	
+	
+	/**
+	 * use SpatialFirst
+	 * @param nodeCount
+	 * @param query_id
+	 * @throws Exception
+	 */
 	public static void SpatialFirst(int nodeCount, int query_id) throws Exception
 	{
 		long start;
@@ -592,8 +775,7 @@ public class Experiment {
 					
 					spa_First.shutdown();
 					
-					
-					OwnMethods.ClearCache("syh19910205");
+					OwnMethods.ClearCache(password);
 					Thread.currentThread();
 					Thread.sleep(5000);
 					
@@ -601,6 +783,7 @@ public class Experiment {
 				}
 			}
 			spa_First.shutdown();
+			OwnMethods.ClearCache(password);
 
 			write_line = String.valueOf(selectivity) + "\t";
 			write_line += String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
@@ -610,11 +793,11 @@ public class Experiment {
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, write_line);
 
-			long larger_time = Utility.Average(total_time);
-			if (larger_time * expe_count > 450 * 1000)
-				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 450.0 / 1000.0));
-			if(expe_count < 1)
-				expe_count = 1;
+//			long larger_time = Utility.Average(total_time);
+//			if (larger_time * expe_count > 450 * 1000)
+//				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 450.0 / 1000.0));
+//			if(expe_count < 1)
+//				expe_count = 1;
 
 			name_suffix *= times;
 		}
