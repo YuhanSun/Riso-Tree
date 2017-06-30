@@ -259,7 +259,7 @@ public class SpatialFirst {
 				result_count += profile.getRows();
 				page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
 				
-				OwnMethods.Print(String.format("%d, %d", id, cur_count));//current node id and result size
+//				OwnMethods.Print(String.format("%d, %d", id, cur_count));//current node id and result size
 			}
 			tx.success();
 			tx.close();
