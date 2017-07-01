@@ -24,6 +24,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 import commons.*;
+import commons.Config.system;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.OSMLabel;
@@ -39,32 +40,51 @@ import osm.OSM_Utility;
 public class LoadData {
 
 	static Config config = new Config();
+	static system systemName = config.getSystemName();
 	static String version = config.GetNeo4jVersion();
 	static String dataset = config.getDatasetName();
 	static String lon_name = config.GetLongitudePropertyName();
 	static String lat_name = config.GetLatitudePropertyName();
 	
-	static String db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
-//	static String map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
-	/**
-	 * use this because osm node are not seen as spatial graph
-	 * but directly use RTree leaf node as the spatial vertices in the graph
-	 */
-	static String map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map_RTree.txt", dataset);
+	static String db_path, map_path, graph_path;
 	
-	static String graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
+	
+	static void initParameters()
+	{
+		switch (systemName) {
+		case Ubuntu:
+			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
+//			static String map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
+			/**
+			 * use this because osm node are not seen as spatial graph
+			 * but directly use RTree leaf node as the spatial vertices in the graph
+			 */
+			map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map_RTree.txt", dataset);
+			graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
+//			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
+			break;
+		case Windows:
+			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
+//			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
+		default:
+			break;
+		}
+	}
 	
 	public static void main(String[] args) {
+		initParameters();
 		
 //		LoadNonSpatialEntity();
-//		GetSpatialNodeMap();
-//		LoadGraphEdges();
-//		setRTreeID();
-//		check();
-//		CalculateCount();
-//		getRTreeMap();
-//		get_Geometry_OSMID_Map();
+		GetSpatialNodeMap();
+		
 		set_Spatial_Label();
+		LoadGraphEdges();
+		setRTreeID();
+//		check();
+		CalculateCount();
+		getRTreeMap();
+		
+//		get_Geometry_OSMID_Map();
 	}
 	
 	
@@ -95,7 +115,7 @@ public class LoadData {
 			dbservice.shutdown();
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();	System.exit(-1);
 		}
 	}
 	
@@ -156,7 +176,7 @@ public class LoadData {
 			databaseService.shutdown();
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();	System.exit(-1);
 		}
 	}
 	
@@ -214,7 +234,7 @@ public class LoadData {
 			databaseService.shutdown();
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();	System.exit(-1);
 		}
 	}
 	
@@ -274,7 +294,7 @@ public class LoadData {
 			databaseService.shutdown();
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();	System.exit(-1);
 		}
 	}
 	
@@ -306,11 +326,7 @@ public class LoadData {
 			inserter.shutdown();
 			
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		finally {
-			if(!inserter.equals(null))
-				inserter.shutdown();
+			e.printStackTrace();	System.exit(-1);
 		}
 	}
 	
@@ -328,11 +344,23 @@ public class LoadData {
 			Transaction tx = databaseService.beginTx();
 			Node osm_node = OSM_Utility.getOSMDatasetNode(databaseService, dataset);
 			Iterable<Node> spatial_nodes = OSM_Utility.getAllPointNodes(databaseService, osm_node);
+			ArrayList<Long> ids = new ArrayList<Long>();
 			for (Node point : spatial_nodes)
 			{
 //				long entity_id = (Long) point.getProperty("node_osm_id");
 //				long neo4j_id = point.getId();
-				
+				long id = point.getId();
+				ids.add(id);
+			}
+			tx.success();
+			tx.close();
+			
+			tx = databaseService.beginTx();
+			for ( int i = 0; i < ids.size(); i++)
+			{
+				OwnMethods.Print(i);
+				long id = ids.get(i);
+				Node point = databaseService.getNodeById(id);
 				long entity_id = (Long) point.getProperty("node_osm_id");
 				Relationship relationship = point.getSingleRelationship(Labels.OSMRelation.GEOM, Direction.OUTGOING);
 				Node leafNode = relationship.getEndNode();
@@ -344,16 +372,19 @@ public class LoadData {
 				double lat = (Double) point.getProperty(lat_name);
 				leafNode.setProperty(lon_name, lon);
 				leafNode.setProperty(lat_name, lat);
-				
+				if ( i % 10000 == 0)
+				{
+					tx.success();	tx.close();
+					tx = databaseService.beginTx();
+				}
 			}
-			tx.success();
-			tx.close();
+			tx.success();	tx.close();
 			databaseService.shutdown();
 			
 			OwnMethods.WriteMap(map_path, true, id_map);
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();	System.exit(-1);
 		}
 	}
 	
@@ -363,6 +394,7 @@ public class LoadData {
 	public static void LoadNonSpatialEntity()
 	{
 		String entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+		OwnMethods.Print(String.format("LoadNonSpatialEntity\n from %s to %s", entity_path, db_path));
 		LoadNonSpatialEntity(entity_path, db_path, map_path);
 	}
 	
@@ -390,12 +422,8 @@ public class LoadData {
 			inserter.shutdown();
 			
 			OwnMethods.WriteMap(map_path, true, id_map);
-			
-			
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();	System.exit(-1);
 		}
-		
 	}
-
 }
