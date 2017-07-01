@@ -29,6 +29,7 @@ import java.util.Set;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
+import org.neo4j.cypher.internal.compiler.v2_3.commands.StartItem;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.Node;
 import org.roaringbitmap.RoaringBitmap;
@@ -36,6 +37,20 @@ import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 
 
 public class OwnMethods {
+	
+	public static void getLabelListFromEntity(String entityPath, String labelListPath)
+	{
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		ArrayList<Integer> labelList = new ArrayList<Integer>(entities.size());
+		for ( Entity entity : entities)
+		{
+			if ( entity.IsSpatial)
+				labelList.add(1);
+			else
+				labelList.add(0);
+		}
+		OwnMethods.WriteArray(labelListPath, labelList);
+	}
 	
 	/**
 	 * read integer arraylist
