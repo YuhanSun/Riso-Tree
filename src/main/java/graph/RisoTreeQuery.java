@@ -51,8 +51,8 @@ public class RisoTreeQuery {
 	public String logPath;
 	
 	//test control variables
-	public static boolean outputLevelInfo = true;
-	public static boolean outputQuery = true;
+	public static boolean outputLevelInfo = false;
+	public static boolean outputQuery = false;
 	public static boolean outputExecutionPlan = false;
 	
 	/**
@@ -935,7 +935,7 @@ public class RisoTreeQuery {
 				if( overlap_MBR_list.isEmpty() == false && next_list.isEmpty())
 				{
 					// if NL is more selective than spatial predicate
-					if ( min_NL_card < min_spa_card)
+					if ( min_NL_list.size() < min_spa_card)
 					{
 						int index = 0;
 						ArrayList<Long> id_pos_list = new ArrayList<Long>(); 
@@ -947,7 +947,6 @@ public class RisoTreeQuery {
 							if ( index == 500)
 							{
 								String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
-
 								if ( outputQuery)
 								{
 									OwnMethods.Print(query);
@@ -1035,6 +1034,7 @@ public class RisoTreeQuery {
 						//get located in nodes
 						int located_in_count = 0;
 						int levelTime = 0;
+						level_index++;
 						for ( Node node : overlap_MBR_list)
 						{
 							long start = System.currentTimeMillis();
@@ -1061,7 +1061,11 @@ public class RisoTreeQuery {
 								start = System.currentTimeMillis();
 								String query = formSubgraphQuery_ForSpatialFirst_Block(query_Graph, limit, Explain_Or_Profile.Profile, spa_predicates, minSpaID,
 										ids, min_hop.get(minSpaID), node);
-								OwnMethods.Print(query);
+								if (outputQuery)
+								{
+									OwnMethods.Print(query);
+									OwnMethods.WriteFile(logPath, true, query + "\n");
+								}
 
 								Result result = dbservice.execute(query);
 								get_iterator_time += System.currentTimeMillis() - start;
@@ -1092,15 +1096,15 @@ public class RisoTreeQuery {
 									}
 								}
 							}
-
-							if ( outputLevelInfo)
-							{
-								logWriteLine = String.format("Located in nodes: %d\n", located_in_count);
-								logWriteLine += String.format("level %d time: %d", level_index, levelTime);
-								OwnMethods.Print(logWriteLine);
-								OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
-							}						
 						}
+						if ( outputLevelInfo)
+						{
+							logWriteLine = String.format("level %d\n", level_index);
+							logWriteLine += String.format("Located in nodes: %d\n", located_in_count);
+							logWriteLine += String.format("level %d time: %d", level_index, levelTime);
+							OwnMethods.Print(logWriteLine);
+							OwnMethods.WriteFile(logPath, true, logWriteLine + "\n\n");
+						}	
 						return;
 					}
 				}
