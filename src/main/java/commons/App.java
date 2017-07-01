@@ -106,7 +106,8 @@ public class App {
 		initVariablesForTest();
 //		Naive();
 //		test();
-		Arbitary();
+//		Arbitary();
+//		generateLabelList();
 	}
 	
 	public static void Arbitary()
@@ -117,6 +118,15 @@ public class App {
 			OwnMethods.Print("true");
 		else
 			OwnMethods.Print("false");
+	}
+	
+	public static void generateLabelList()
+	{
+		String dataset = "foursquare";
+		String entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
+		String labelListPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\label.txt", dataset);
+		
+		OwnMethods.getLabelListFromEntity(entityPath, labelListPath);
 	}
 	
 	public static void test()
