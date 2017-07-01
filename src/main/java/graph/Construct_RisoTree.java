@@ -654,6 +654,7 @@ public class Construct_RisoTree {
 			}
 			tx.success();
 			tx.close();
+			dbservice.shutdown();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -782,6 +783,7 @@ public class Construct_RisoTree {
 			}
 			tx.success();
 			tx.close();
+			dbservice.shutdown();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
