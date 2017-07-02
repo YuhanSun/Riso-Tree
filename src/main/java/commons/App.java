@@ -1,25 +1,36 @@
 package commons;
 
+import java.awt.List;
 import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.geotools.map.Layer;
 import org.neo4j.cypher.internal.compiler.v2_3.executionplan.ExecutionPlan;
+import org.neo4j.gis.spatial.EditableLayer;
+import org.neo4j.gis.spatial.SimplePointLayer;
+import org.neo4j.gis.spatial.SpatialDatabaseService;
+import org.neo4j.gis.spatial.encoders.SimplePointEncoder;
+import org.neo4j.gis.spatial.rtree.RTreeIndex;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import commons.Config.system;
+import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.OSMRelation;
 import graph.RisoTreeQuery;
+import osm.OSM_Utility;
 
 public class App {
 
@@ -103,21 +114,83 @@ public class App {
 //			// TODO: handle exception
 //			e.printStackTrace();
 //		}
-		initVariablesForTest();
+//		initVariablesForTest();
 //		Naive();
 //		test();
-//		Arbitary();
+		Arbitary();
 //		generateLabelList();
 	}
 	
 	public static void Arbitary()
 	{
-		OwnMethods.Print(queryRectangle.toString());
-		OwnMethods.Print(queryRectangle.area());
-		if ( queryRectangle.area() == 0.0)
-			OwnMethods.Print("true");
-		else
-			OwnMethods.Print("false");
+		try {
+			String layerName = "test";
+			String entityPath = "D:\\Ubuntu_shared\\GeoMinHop\\data\\Gowalla\\entity.txt";
+			String dbPath = "D:\\Ubuntu_shared\\neo4j-community-3.1.1\\data\\databases\\graph.db";
+			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+			
+			SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
+			
+			Transaction tx = databaseService.beginTx();
+//			SimplePointLayer simplePointLayer = spatialDatabaseService.createSimplePointLayer(layerName);
+//			EditableLayer layer = spatialDatabaseService.getOrCreatePointLayer(layerName, "lon", "lat");
+			
+			org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
+			
+			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath); 
+			ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
+			for ( Entity entity : entities)
+			{
+				if ( entity.IsSpatial)
+				{
+					Node node = databaseService.createNode(GraphLabel.GRAPH_1);
+					node.setProperty(lon_name, entity.lon);
+					node.setProperty(lat_name, entity.lat);
+					geomNodes.add(node);
+				}
+			}
+			
+//			Node node = databaseService.createNode();
+//			node.setProperty(lon_name, 22);	node.setProperty(lat_name, 33);
+//			geomNodes.add(node);
+//			
+//			node = databaseService.createNode();
+//			node.setProperty(lon_name, 23);	node.setProperty(lat_name, 34);
+//			geomNodes.add(node);
+			
+			layer.addAll(geomNodes);
+			
+//			OwnMethods.Print(OSM_Utility.getRTreeRoot(databaseService, layerName));
+			
+//			RTreeIndex rtree = new RTreeIndex(
+//                    databaseService,
+//                    OSM_Utility.getRTreeRoot(databaseService, "test"),
+//                    new SimplePointEncoder()
+//            );
+			
+//			ResourceIterable<Node> nodes = databaseService.getAllNodes();
+//			for ( Node node1 : nodes)
+//			{
+//				OwnMethods.Print(node1);
+//				OwnMethods.Print(String.format("node label:%s", node1.getLabels().toString()));
+//				OwnMethods.Print(String.format("node property:%s", node1.getAllProperties()));
+//				
+//				Iterable<Relationship> rels = node1.getRelationships(Direction.OUTGOING);
+//				for ( Relationship relationship : rels)
+//				{
+//					OwnMethods.Print(String.format("%s, type:%s, property:%s", relationship, 
+//							relationship.getType() ,relationship.getAllProperties()));
+//				}
+//				OwnMethods.Print("\n");
+//			}
+			
+			tx.success();
+			tx.close();
+			spatialDatabaseService.getDatabase().shutdown();
+			
+		} catch (Exception e) {
+			e.printStackTrace();	System.exit(-1);
+		}
 	}
 	
 	public static void generateLabelList()
