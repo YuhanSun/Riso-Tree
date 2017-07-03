@@ -26,10 +26,10 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import org.neo4j.cypher.internal.compiler.v2_3.commands.StartItem;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.Node;
 import org.roaringbitmap.RoaringBitmap;
@@ -37,6 +37,37 @@ import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 
 
 public class OwnMethods {
+	
+	/**
+	 * generic function
+	 * @param entities
+	 * @param center_id_path
+	 * @param experimentCount
+	 */
+	public static void generateQueryRectangleCenterID(ArrayList<Entity> entities, String center_id_path, int experimentCount) 
+	{
+		try {
+			TreeSet<Integer> center_ids_set = new TreeSet<Integer>();
+			ArrayList<Integer> center_ids_list = new ArrayList<Integer>();
+			Random random = new Random();
+			do {
+				int center_id = (int)(random.nextDouble() * (double)entities.size());
+				if (!((Entity)entities.get((int)center_id)).IsSpatial || !center_ids_set.add(center_id)) continue;
+				center_ids_list.add(center_id);
+			} while (center_ids_set.size() != experimentCount);
+			OwnMethods.WriteFile((String)center_id_path, (boolean)false, (String)"");
+			Iterator iterator = center_ids_list.iterator();
+			while (iterator.hasNext()) {
+				int id = (Integer)iterator.next();
+				OwnMethods.WriteFile((String)center_id_path, (boolean)true, (String)String.format("%d\n", id));
+			}
+		}
+		catch (Exception e) {
+			// empty catch block
+			e.printStackTrace();
+		}
+	}
+
 	
 	public static void getLabelListFromEntity(String entityPath, String labelListPath)
 	{
