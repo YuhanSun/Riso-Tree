@@ -1,20 +1,25 @@
 package commons;
 
-import java.awt.List;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
-import org.geotools.map.Layer;
 import org.neo4j.cypher.internal.compiler.v2_3.executionplan.ExecutionPlan;
 import org.neo4j.gis.spatial.EditableLayer;
+import org.neo4j.gis.spatial.Layer;
 import org.neo4j.gis.spatial.SimplePointLayer;
+import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
 import org.neo4j.gis.spatial.encoders.SimplePointEncoder;
+import org.neo4j.gis.spatial.filter.SearchIntersectWindow;
 import org.neo4j.gis.spatial.rtree.RTreeIndex;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
+import org.neo4j.gis.spatial.rtree.SpatialIndexReader;
+import org.neo4j.gis.spatial.rtree.filter.SearchFilter;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -24,12 +29,17 @@ import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.kernel.impl.api.cursor.TxAbstractNodeCursor;
+import org.neo4j.register.Register.Int;
+
+import com.vividsolutions.jts.geom.Envelope;
 
 import commons.Config.system;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.OSMRelation;
 import graph.RisoTreeQuery;
+import graph.SpatialFirst;
 import osm.OSM_Utility;
 
 public class App {
@@ -117,11 +127,75 @@ public class App {
 //		initVariablesForTest();
 //		Naive();
 //		test();
-		Arbitary();
+//		batchRTreeInsert();
 //		generateLabelList();
+		rangeQueryCompare();
 	}
 	
-	public static void Arbitary()
+	/**
+	 * compare the  range query time of my method and
+	 * GeoPipe defined in SpatialFirst class
+	 */
+	public static void rangeQueryCompare()
+	{
+		String layerName = "test";
+		String dataset = "Gowalla";
+//		String entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
+//		String dbPath = "D:\\Ubuntu_shared\\neo4j-community-3.1.1\\data\\databases\\graph.db";
+//		String queryRectanglePath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\query_1.txt", dataset);
+		
+		String entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+		String dbPath = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1/data/databases/graph.db";
+		String queryRectanglePath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/query_1.txt", dataset);
+	    try {
+	    	GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+			SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
+	        Layer layer = spatialDatabaseService.getLayer(layerName);
+	        
+	        ArrayList<MyRectangle> queryRectangles = OwnMethods.ReadQueryRectangle(queryRectanglePath);
+	        long timeGeoPipe = 0, timeMyMethod = 0;
+	        
+	        long start = System.currentTimeMillis();
+	        Transaction tx = databaseService.beginTx();
+	        for ( MyRectangle queryRectangle : queryRectangles)
+	        {
+	        	Envelope envelope = new Envelope(queryRectangle.min_x, queryRectangle.min_y, queryRectangle.max_x, queryRectangle.max_y);
+	        	List<SpatialDatabaseRecord> results = OSM_Utility.RangeQuery(layer, envelope);
+	        	for ( SpatialDatabaseRecord record : results)
+	        	{
+	        		record.getGeomNode();
+	        	}
+	        }
+	        tx.success();
+	        tx.close();
+	        timeGeoPipe += System.currentTimeMillis();
+	        
+	        start = System.currentTimeMillis();
+	        tx = databaseService.beginTx();
+	        Node root = OSM_Utility.getRTreeRoot(databaseService, layerName);
+	        for ( MyRectangle queryRectangle : queryRectangles)
+	        {
+	        	LinkedList<Node> results = SpatialFirst.rangeQuery(root, queryRectangle);
+	        	for ( Node node : results)
+	        		node.getId();
+	        }
+	        tx.success();
+	        tx.close();
+	        timeMyMethod += System.currentTimeMillis() - start;
+	        
+	        databaseService.shutdown();
+	        
+	        OwnMethods.Print(String.format("GeoPipe Time:%d", timeGeoPipe));
+	        OwnMethods.Print(String.format("MyMethod Time:%d", timeMyMethod));
+	    }
+	    catch(Exception e)
+	    {
+	    	e.printStackTrace();
+	    }
+	}
+	
+	
+	public static void batchRTreeInsert()
 	{
 		try {
 			String layerName = "test";
