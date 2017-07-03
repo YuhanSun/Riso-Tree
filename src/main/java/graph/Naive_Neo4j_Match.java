@@ -132,9 +132,9 @@ public class Naive_Neo4j_Match {
 			}
 		
 		//return
-		query += " return a0";
+		query += " return id(a0)";
 		for(i = 1; i<query_Graph.graph.size(); i++)
-			query += String.format(",a%d", i);
+			query += String.format(",id(a%d)", i);
 		
 		if(limit != -1)
 			query += String.format(" limit %d", limit);
