@@ -23,8 +23,11 @@ public class Experiment {
 	static String db_path;
 	static String querygraphDir;
 	static String graph_pos_map_path;
+	static String entityPath;
 	
 	static boolean TEST_FORMAT;
+	
+	static int spaCount;
 	
 	public static void initializeParameters()
 	{	
@@ -34,17 +37,22 @@ public class Experiment {
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
 			querygraphDir = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph/%s/", dataset);
 			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map_RTree.txt";
+			entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
 			break;
 		case Windows:
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
 			querygraphDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph\\%s\\", dataset);
 			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map_RTree.txt";
+			entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
 			break;
 		}
 	}
 	
 	public static void main(String[] args) throws Exception {
 		initializeParameters();
+		
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		spaCount = OwnMethods.GetSpatialEntityCount(entities);
 		
 		Neo4j_Naive(2, 0);
 		Neo4j_Naive(3, 0);
@@ -57,6 +65,10 @@ public class Experiment {
 		SpatialFirstList_Block(2, 0);
 		SpatialFirstList_Block(3, 0);
 		SpatialFirstList_Block(3, 1);
+		
+		risoTreeQuery(2, 0);
+		risoTreeQuery(3, 0);
+		risoTreeQuery(3, 1);
 		
 //		for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
 ////		int queryIndex = 0;
@@ -131,11 +143,11 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 		
-		int name_suffix = 1;
+		double selectivity = 0.0001;
 		int times = 10;
-		while ( name_suffix <= 2000)
+		while ( selectivity <= 0.2)
 		{
-			double selectivity = name_suffix / 1000000.0;
+			int name_suffix = (int) (selectivity * spaCount);
 			
 			String queryrect_path = null;
 			switch (systemName) {
@@ -236,7 +248,7 @@ public class Experiment {
 //			if(expe_count < 1)
 //				expe_count = 1;
 			
-			name_suffix *= times;
+			selectivity *= times;
 		}
 		OwnMethods.WriteFile(result_detail_path, true, "\n");
 		OwnMethods.WriteFile(result_avg_path, true, "\n");
@@ -282,11 +294,11 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 
-		int name_suffix = 1;
+		double selectivity = 0.0001;
 		int times = 10;
-		while ( name_suffix <= 2000)
+		while ( selectivity <= 0.2)
 		{
-			double selectivity = name_suffix / 1000000.0;
+			int name_suffix = (int) (selectivity * spaCount);
 			
 			String queryrect_path = null;
 			switch (systemName) {
@@ -377,7 +389,7 @@ public class Experiment {
 			time_iterate.clear();	total_time.clear();
 			access.clear();
 
-			name_suffix *= times;
+			selectivity *= times;
 		}
 		OwnMethods.WriteFile(result_detail_path, true, "\n");
 		OwnMethods.WriteFile(result_avg_path, true, "\n");
@@ -423,11 +435,11 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 		
-		int name_suffix = 1;
+		double selectivity = 0.0001;
 		int times = 10;
-		while ( name_suffix <= 2000)
+		while ( selectivity <= 0.2)
 		{
-			double selectivity = name_suffix / 1000000.0;
+			int name_suffix = (int) (selectivity * spaCount);
 			
 			String queryrect_path = null;
 			switch (systemName) {
@@ -521,7 +533,7 @@ public class Experiment {
 //			if(expe_count < 1)
 //				expe_count = 1;
 			
-			name_suffix *= times;
+			selectivity *= times;
 		}
 		OwnMethods.WriteFile(result_detail_path, true, "\n");
 		OwnMethods.WriteFile(result_avg_path, true, "\n");
@@ -569,11 +581,11 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 		
-		int name_suffix = 1000;
+		double selectivity = 0.0001;
 		int times = 10;
-		while ( name_suffix <= 2000)
+		while ( selectivity <= 0.2)
 		{
-			double selectivity = name_suffix / 1000000.0;
+			int name_suffix = (int) (selectivity * spaCount);
 			
 			String queryrect_path = null;
 			switch (systemName) {
@@ -663,7 +675,7 @@ public class Experiment {
 			if(expe_count < 1)
 				expe_count = 1;
 			
-			name_suffix *= times;
+			selectivity *= times;
 		}
 		OwnMethods.WriteFile(result_detail_path, true, "\n");
 		OwnMethods.WriteFile(result_avg_path, true, "\n");
@@ -711,11 +723,11 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 
-		int name_suffix = 1;
+		double selectivity = 0.0001;
 		int times = 10;
-		while ( name_suffix <= 2000)
+		while ( selectivity <= 0.2)
 		{
-			double selectivity = name_suffix / 1000000.0;
+			int name_suffix = (int) (selectivity * spaCount);
 			String queryrect_path = null;
 			switch (systemName) {
 			case Ubuntu:
@@ -799,7 +811,7 @@ public class Experiment {
 //			if(expe_count < 1)
 //				expe_count = 1;
 
-			name_suffix *= times;
+			selectivity *= times;
 		}
 		OwnMethods.WriteFile(result_detail_path, true, "\n");
 		OwnMethods.WriteFile(result_avg_path, true, "\n");
