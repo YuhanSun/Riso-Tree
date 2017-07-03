@@ -65,7 +65,7 @@ public class SpatialFirst {
 	 * @param query_rectangle
 	 * @return a LinkedList<Node> whose elements are geometries in the rtree
 	 */
-	public LinkedList<Node> rangeQuery(Node root_node, MyRectangle query_rectangle)
+	public static LinkedList<Node> rangeQuery(Node root_node, MyRectangle query_rectangle)
 	{
 		try {
 			LinkedList<Node> cur_list = new LinkedList<Node>();
