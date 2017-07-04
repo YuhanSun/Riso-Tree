@@ -87,38 +87,6 @@ public class LoadData {
 //		get_Geometry_OSMID_Map();
 	}
 	
-	
-	/**
-	 * set all spatial vertices (osm_node) with label GRAPH_1
-	 */
-	public static void set_Spatial_Label()
-	{
-		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-		try {
-			Transaction tx = dbservice.beginTx();
-			Iterable<Node> Geometries = OSM_Utility.getAllGeometries(dbservice, dataset);
-			for ( Node node : Geometries)
-			{
-//				OwnMethods.Print(node.getAllProperties().toString());
-				node.addLabel(GraphLabel.GRAPH_1);
-				
-				
-//				OwnMethods.Print(node.getAllProperties());
-//				Iterable<Label> labels = node.getLabels();
-//				for ( Label label : labels)
-//					OwnMethods.Print(label.toString());
-//				break;
-			}
-			
-			tx.success();
-			tx.close();
-			dbservice.shutdown();
-		}
-		catch (Exception e) {
-			e.printStackTrace();	System.exit(-1);
-		}
-	}
-	
 	/**
 	 * get map for geometry pos id to graph id
 	 * but not useful in our new graph structure
@@ -331,6 +299,37 @@ public class LoadData {
 	}
 	
 	/**
+	 * set all spatial vertices (osm_node) with label GRAPH_1
+	 */
+	public static void set_Spatial_Label()
+	{
+		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+		try {
+			Transaction tx = dbservice.beginTx();
+			Iterable<Node> Geometries = OSM_Utility.getAllGeometries(dbservice, dataset);
+			for ( Node node : Geometries)
+			{
+//				OwnMethods.Print(node.getAllProperties().toString());
+				node.addLabel(GraphLabel.GRAPH_1);
+				
+				
+//				OwnMethods.Print(node.getAllProperties());
+//				Iterable<Label> labels = node.getLabels();
+//				for ( Label label : labels)
+//					OwnMethods.Print(label.toString());
+//				break;
+			}
+			
+			tx.success();
+			tx.close();
+			dbservice.shutdown();
+		}
+		catch (Exception e) {
+			e.printStackTrace();	System.exit(-1);
+		}
+	}
+	
+	/**
 	 * attach spatial node (osm nodes) map to file node_map.txt
 	 * and move property from osm node to RTree leaf node,
 	 * including id and location
@@ -389,7 +388,8 @@ public class LoadData {
 	}
 	
 	/**
-	 * load nonspatial graph vertices and write the map to file node_map.txt
+	 * Load non-spatial graph vertices and write the map to file node_map.txt
+	 * All non-spatial vertices are with label GRAPH_0
 	 */
 	public static void LoadNonSpatialEntity()
 	{
@@ -398,6 +398,13 @@ public class LoadData {
 		LoadNonSpatialEntity(entity_path, db_path, map_path);
 	}
 	
+	/**
+	 * Load non-spatial graph vertices and write the map to map_path
+	 * All non-spatial vertices are with label GRAPH_0 
+	 * @param entity_path
+	 * @param db_path
+	 * @param map_path
+	 */
 	public static void LoadNonSpatialEntity(String entity_path, String db_path, String map_path)
 	{
 		try {

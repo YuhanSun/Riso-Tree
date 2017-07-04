@@ -34,7 +34,7 @@ import commons.Config.system;
 import osm.OSM_Utility;
 
 /**
- * the class switch spatial vertices in the graph to leaf nodes in R-tree
+ * this class switch spatial vertices in the graph to leaf nodes in R-tree
  * in order to avoid one level of graph traversal from R-tree leaf node to osm nodes
  * So the GRAPH_1 label will be transferred among nodes and
  * GRAPH_LINK relationships will be transferred as well
