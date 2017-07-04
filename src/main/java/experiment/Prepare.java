@@ -20,6 +20,12 @@ import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
+import com.vividsolutions.jts.index.strtree.STRtree;
+
 import osm.OSM_Utility;
 import commons.Config;
 import commons.Entity;
@@ -33,7 +39,7 @@ import commons.OwnMethods;
 /**
  * convert {0,1} two labels graph to more selective graph with 10 or 100 labels
  * for Gowalla dataset,
- * new queries for the new grap are generated here
+ * new queries for the new graph are generated here
  * @author yuhansun
  *
  */
@@ -48,6 +54,7 @@ public class Prepare {
 	static String db_path;
 	static String vertex_map_path;
 	static String graph_path;
+	static String entityPath;
 	static String geo_id_map_path;
 	static String label_list_path;
 	static String graph_node_map_path;
@@ -55,8 +62,8 @@ public class Prepare {
 	static String log_path;
 	
 	static int nonspatial_label_count = 10;
-	static int nonspatial_vertex_count = 196591;
-	static int spatialVertexCount = 1280953;
+	static int nonspatial_vertex_count;
+	static int spatialVertexCount;
 	static ArrayList<Integer> labels;//all labels in the graph
 	
 	static void initParameters()
@@ -66,6 +73,7 @@ public class Prepare {
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
 			vertex_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
 			graph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
+			entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
 			geo_id_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/geom_osmid_map.txt", dataset);
 			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
 			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
@@ -76,6 +84,7 @@ public class Prepare {
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
 			vertex_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\node_map.txt", dataset);
 			graph_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\graph.txt", dataset);
+			entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
 			geo_id_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\geom_osmid_map.txt", dataset);
 			label_list_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\label.txt", dataset);
 			graph_node_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\node_map.txt", dataset);
@@ -84,6 +93,11 @@ public class Prepare {
 		default:
 			break;
 		}
+		
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		spatialVertexCount = OwnMethods.GetSpatialEntityCount(entities);
+		nonspatial_vertex_count = entities.size() - spatialVertexCount;
+		
 //		labels = new ArrayList<>(Arrays.asList(0, 1));
 		labels = new ArrayList<Integer>(nonspatial_label_count);
 		for ( int i = 0; i < nonspatial_label_count; i++)
@@ -92,13 +106,22 @@ public class Prepare {
 	
 	public static void main(String[] args) {
 		initParameters();
+		
 //		generateNonspatialLabel();
 //		nonspatialLabelTest();
+		
+//		String oldDataset = "Yelp";
+//		modifyLayerName(oldDataset);
+//		modifyLayerNameTest();
+		
 //		setNewLabel();
 //		newLabelTest();
+		
 		generateRandomQueryGraph();
-//		modifyLayerName();
-//		modifyLayerNameTest();
+//		generateQueryRectangleCenterID();
+		
+		
+		
 //		generateNewNLList();
 	}
 	
@@ -215,15 +238,17 @@ public class Prepare {
 	}
 	
 	/**
-	 * change the layername to new layername
+	 * Change the layername to new layername
+	 * including layer property in RTree layer
+	 * and name property in OSM data 
 	 */
-	public static void modifyLayerName()
+	public static void modifyLayerName(String oldDataset)
 	{
 		try {
 			GraphDatabaseService dbService= new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = dbService.beginTx();
 			
-			Node root = OSM_Utility.getRTreeRoot(dbService, "Gowalla");
+			Node root = OSM_Utility.getRTreeRoot(dbService, oldDataset);
 			OwnMethods.Print(root.getAllProperties());
 			Node layer_node = root.getSingleRelationship(RTreeRelationshipTypes.RTREE_ROOT, Direction.INCOMING)
 					.getStartNode();
@@ -242,33 +267,95 @@ public class Prepare {
 		}
 	}
 	
+	public static void generateQueryRectangleForSelectivity()
+	{
+		try {
+			int experiment_count = 100;
+			String entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+			ArrayList<Entity> entities = OwnMethods.ReadEntity((String)entity_path);
+			int spa_count = OwnMethods.GetSpatialEntityCount(entities);
+			STRtree stRtree = OwnMethods.ConstructSTRee(entities);
+
+			String center_id_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/%s_centerids.txt", dataset, dataset);
+			ArrayList<Integer> center_ids = OwnMethods.ReadCenterID(center_id_path);
+			ArrayList<Integer> final_center_ids = OwnMethods.GetRandom_NoDuplicate(center_ids, experiment_count);
+
+			double selectivity = 0.0001;
+			while ( selectivity < 0.2)
+			{
+				int name_suffix = (int) (selectivity * spa_count);
+				String output_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				String write_line = "";
+				for (int id : final_center_ids)
+				{
+					double lon = entities.get(id).lon;
+					double lat = entities.get(id).lat;
+					GeometryFactory factory = new GeometryFactory();
+					Point center = factory.createPoint(new Coordinate(lon, lat));
+					Object[] result = stRtree.kNearestNeighbour(center.getEnvelopeInternal(),
+							new GeometryFactory().toGeometry(center.getEnvelopeInternal()),
+							new GeometryItemDistance(), name_suffix);
+					double radius = 0.0;
+					for (Object object : result)
+					{
+						Point point = (Point) object;
+						double dist = center.distance(point);
+						if(dist > radius)
+							radius = dist;
+					}
+					double a = Math.sqrt(Math.PI) * radius;
+					double minx = center.getX() - a / 2;
+					double miny = center.getY() - a / 2;
+					double maxx = center.getX() + a / 2;
+					double maxy = center.getY() + a / 2;
+
+					write_line = String.format("%f\t%f\t%f\t%f\n", minx, miny, maxx, maxy);
+					OwnMethods.WriteFile(output_path, true, write_line);
+				}
+				selectivity *= 10;
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+	
+	public static void generateQueryRectangleCenterID()
+	{
+		String entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entity_path);
+		
+		String center_id_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/%s_centerids.txt", dataset, dataset);
+		OwnMethods.generateQueryRectangleCenterID(entities, center_id_path, 500);
+	}
+	
+	/**
+	 * Generate the query graph for the experiment
+	 */
 	public static void generateRandomQueryGraph()
 	{
 		for ( int node_count = 2; node_count < 4; node_count++)
 		{
 			int spa_pred_count = 1;
-			String datagraph_path = "";
 			String querygraph_path = "";
-			String entity_path = "";
 			switch (systemName) {
 			case Ubuntu:
-				datagraph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
-				querygraph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph/%d.txt", node_count);
-				entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+				querygraph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/"
+						+ "query/query_graph/%s/%d.txt", dataset, node_count);
 				break;
 			case Windows:
-				datagraph_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\graph.txt", dataset);
-				querygraph_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph\\%s\\%d.txt", dataset, node_count);
-				entity_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
+				querygraph_path = String.format("D:\\Ubuntu_shared\\GeoMinHop"
+						+ "\\query\\query_graph\\%s\\%d.txt", dataset, node_count);
 			}
 			
-			ArrayList<ArrayList<Integer>> datagraph = OwnMethods.ReadGraph(datagraph_path);
-			ArrayList<Entity> entities = OwnMethods.ReadEntity(entity_path);
+			ArrayList<ArrayList<Integer>> datagraph = OwnMethods.ReadGraph(graph_path);
+			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 			ArrayList<Integer> labels = OwnMethods.readIntegerArray(label_list_path);
 			
-//			OwnMethods.Print(datagraph.size());
-//			OwnMethods.Print(entities.size());
-//			OwnMethods.Print(labels.size());
+			OwnMethods.Print(datagraph.size());
+			OwnMethods.Print(entities.size());
+			OwnMethods.Print(labels.size());
 			
 			ArrayList<Query_Graph> query_Graphs = new ArrayList<Query_Graph>(10);
 			while ( query_Graphs.size() != 10)
@@ -385,6 +472,10 @@ public class Prepare {
 		}
 	}
 	
+	/**
+	 * generate new label.txt
+	 * for entities that non-spatial vertices are all before spatial
+	 */
 	public static void generateNonspatialLabel()
 	{
 		try {
