@@ -26,8 +26,11 @@ public class Experiment {
 	static String entityPath;
 	
 	static boolean TEST_FORMAT;
+	static double startSelectivity = 0.000001;
+	static double endSelectivity = 0.002;
 	
 	static int spaCount;
+	
 	
 	public static void initializeParameters()
 	{	
@@ -54,21 +57,23 @@ public class Experiment {
 		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 		spaCount = OwnMethods.GetSpatialEntityCount(entities);
 		
+		//experiment for original dataset
+		//with only two labels
 		Neo4j_Naive(2, 0);
-		Neo4j_Naive(3, 0);
-		Neo4j_Naive(3, 1);
-		
+//		Neo4j_Naive(3, 0);
+//		Neo4j_Naive(3, 1);
+//		
 		SpatialFirst(2, 0);
-		SpatialFirst(3, 0);
-		SpatialFirst(3, 1);
-		
+//		SpatialFirst(3, 0);
+//		SpatialFirst(3, 1);
+//		
 		SpatialFirstList_Block(2, 0);
-		SpatialFirstList_Block(3, 0);
-		SpatialFirstList_Block(3, 1);
-		
+//		SpatialFirstList_Block(3, 0);
+//		SpatialFirstList_Block(3, 1);
+//		
 		risoTreeQuery(2, 0);
-		risoTreeQuery(3, 0);
-		risoTreeQuery(3, 1);
+//		risoTreeQuery(3, 0);
+//		risoTreeQuery(3, 1);
 		
 //		for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
 ////		int queryIndex = 0;
@@ -143,9 +148,9 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 		
-		double selectivity = 0.0001;
+		double selectivity = startSelectivity;
 		int times = 10;
-		while ( selectivity <= 0.2)
+		while ( selectivity <= endSelectivity)
 		{
 			int name_suffix = (int) (selectivity * spaCount);
 			
@@ -294,9 +299,9 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 
-		double selectivity = 0.0001;
+		double selectivity = startSelectivity;
 		int times = 10;
-		while ( selectivity <= 0.2)
+		while ( selectivity <= endSelectivity)
 		{
 			int name_suffix = (int) (selectivity * spaCount);
 			
@@ -435,9 +440,9 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 		
-		double selectivity = 0.0001;
+		double selectivity = startSelectivity;
 		int times = 10;
-		while ( selectivity <= 0.2)
+		while ( selectivity <= endSelectivity)
 		{
 			int name_suffix = (int) (selectivity * spaCount);
 			
@@ -581,9 +586,9 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 		
-		double selectivity = 0.0001;
+		double selectivity = startSelectivity;
 		int times = 10;
-		while ( selectivity <= 0.2)
+		while ( selectivity <= endSelectivity)
 		{
 			int name_suffix = (int) (selectivity * spaCount);
 			
@@ -723,9 +728,9 @@ public class Experiment {
 		if(!TEST_FORMAT)
 			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 
-		double selectivity = 0.0001;
+		double selectivity = startSelectivity;
 		int times = 10;
-		while ( selectivity <= 0.2)
+		while ( selectivity <= endSelectivity)
 		{
 			int name_suffix = (int) (selectivity * spaCount);
 			String queryrect_path = null;
