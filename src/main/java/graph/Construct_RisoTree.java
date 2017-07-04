@@ -57,6 +57,7 @@ public class Construct_RisoTree {
 	static String log_path;
 	
 	static ArrayList<Integer> labels;//all labels in the graph
+	static int nonspatial_label_count = 10;
 	
 	static void initParameters()
 	{
@@ -81,13 +82,18 @@ public class Construct_RisoTree {
 		default:
 			break;
 		}
-		labels = new ArrayList<Integer>(Arrays.asList(0, 1));
+//		labels = new ArrayList<Integer>(Arrays.asList(0, 1));
+		
+		labels = new ArrayList<Integer>(1 + nonspatial_label_count);
+		labels.add(1);
+		for ( int i = 0; i < nonspatial_label_count; i++)
+			labels.add(i + 2);
 	}
 	
 	public static void main(String[] args) {
 		initParameters();
 		
-//		Construct();
+		Construct();
 //		ClearNL();
 //		
 //		ArrayList<Integer> label_list = OwnMethods.readIntegerArray(label_list_path);
@@ -338,6 +344,7 @@ public class Construct_RisoTree {
 	
 	public static void generateNL_size()
 	{
+		OwnMethods.Print("Calculate NL size\n");
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
@@ -539,12 +546,13 @@ public class Construct_RisoTree {
 	}
 
 	/**
-	 * load first hop neighbor list without distinguishing labels
+	 * load first hop neighbor list with distinguishing labels
 	 * for all non-leaf nodes in the RTree
 	 * the graph data will be used directly
 	 */
 	public static void Construct()
 	{
+		OwnMethods.Print("Construct the first hop NL list\n");
 		try {
 			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
 			ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
@@ -668,7 +676,8 @@ public class Construct_RisoTree {
 	 * @param labels
 	 * @param label_list
 	 */
-	public static void Construct(String neighborListPath, int hop_num, ArrayList<Integer> labels, ArrayList<Integer> label_list)
+	public static void Construct(String neighborListPath, int hop_num, ArrayList<Integer> labels, 
+			ArrayList<Integer> label_list)
 	{
 		int offset = 196591;
 		try {
