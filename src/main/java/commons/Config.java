@@ -23,7 +23,7 @@ public class Config
 	//attention here, these settings change a lot
 	private String neo4j_version = "neo4j-community-3.1.1";
 	private system operatingSystem = system.Ubuntu;
-	private String dataset = "Gowalla";
+	private String dataset = "Gowalla_100";
 
 	private String Rect_minx_name = "minx";
 	private String Rect_miny_name = "miny";
@@ -31,6 +31,7 @@ public class Config
 	private String Rect_maxy_name = "maxy";
 	
 	private int MAX_HOPNUM = 1;
+	private int nonspatial_label_count = 100;
 
 	public String GetServerRoot() {
 		return SERVER_ROOT_URI;
@@ -77,5 +78,10 @@ public class Config
 	public String getPassword()
 	{
 		return password;
+	}
+	
+	public int getNonSpatialLabelCount()
+	{
+		return nonspatial_label_count;
 	}
 }

@@ -47,6 +47,7 @@ public class Construct_RisoTree {
 	static String version = config.GetNeo4jVersion();
 	static system systemName = config.getSystemName();
 	static int MAX_HOPNUM = config.getMaxHopNum();
+	static int nonspatial_label_count = config.getNonSpatialLabelCount();
 
 	static String db_path;
 	static String vertex_map_path;
@@ -57,7 +58,6 @@ public class Construct_RisoTree {
 	static String log_path;
 	
 	static ArrayList<Integer> labels;//all labels in the graph
-	static int nonspatial_label_count = 10;
 	
 	static void initParameters()
 	{
@@ -665,7 +665,7 @@ public class Construct_RisoTree {
 			dbservice.shutdown();
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();	System.exit(-1);
 		}
 		
 	}

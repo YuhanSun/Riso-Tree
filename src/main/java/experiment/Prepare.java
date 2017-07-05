@@ -50,6 +50,7 @@ public class Prepare {
 	static String version = config.GetNeo4jVersion();
 	static system systemName = config.getSystemName();
 	static int MAX_HOPNUM = config.getMaxHopNum();
+	static int nonspatial_label_count = config.getNonSpatialLabelCount();
 
 	static String db_path;
 	static String vertex_map_path;
@@ -61,7 +62,6 @@ public class Prepare {
 	static String rtree_map_path;
 	static String log_path;
 	
-	static int nonspatial_label_count = 10;
 	static int nonspatial_vertex_count;
 	static int spatialVertexCount;
 	static ArrayList<Integer> labels;//all labels in the graph
@@ -110,14 +110,14 @@ public class Prepare {
 //		generateNonspatialLabel();
 //		nonspatialLabelTest();
 		
-//		String oldDataset = "Yelp";
-//		modifyLayerName(oldDataset);
-//		modifyLayerNameTest();
+		String oldDataset = "Gowalla";
+		modifyLayerName(oldDataset);
+		modifyLayerNameTest();
 		
 //		setNewLabel();
 //		newLabelTest();
 		
-		generateRandomQueryGraph();
+//		generateRandomQueryGraph();
 //		generateQueryRectangleCenterID();
 		
 		
