@@ -26,8 +26,11 @@ public class Experiment {
 	static String entityPath;
 	
 	static boolean TEST_FORMAT;
+	static int experimentCount = 3;
 	static double startSelectivity = 0.000001;
 	static double endSelectivity = 0.002;
+//	static double startSelectivity = 0.0001;
+//	static double endSelectivity = 0.2;
 	
 	static int spaCount;
 	
@@ -59,21 +62,37 @@ public class Experiment {
 		
 		//experiment for original dataset
 		//with only two labels
-		Neo4j_Naive(2, 0);
+//		Neo4j_Naive(2, 0);
 //		Neo4j_Naive(3, 0);
 //		Neo4j_Naive(3, 1);
 //		
-		SpatialFirst(2, 0);
+//		SpatialFirst(2, 0);
 //		SpatialFirst(3, 0);
 //		SpatialFirst(3, 1);
 //		
-		SpatialFirstList_Block(2, 0);
+//		SpatialFirstList_Block(2, 0);
 //		SpatialFirstList_Block(3, 0);
 //		SpatialFirstList_Block(3, 1);
 //		
-		risoTreeQuery(2, 0);
+//		risoTreeQuery(2, 0);
 //		risoTreeQuery(3, 0);
 //		risoTreeQuery(3, 1);
+		
+		//with more than two labels
+		Neo4j_Naive(2, 0);
+		SpatialFirst(2, 0);
+		SpatialFirstList_Block(2, 0);
+		risoTreeQuery(2, 0);
+		
+		Neo4j_Naive(3, 0);
+		SpatialFirst(3, 0);
+		SpatialFirstList_Block(3, 0);
+		risoTreeQuery(3, 0);
+		
+		Neo4j_Naive(3, 1);
+		SpatialFirst(3, 1);
+		SpatialFirstList_Block(3, 1);
+		risoTreeQuery(3, 1);
 		
 //		for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
 ////		int queryIndex = 0;
@@ -117,7 +136,6 @@ public class Experiment {
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 5;
 		
 		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
@@ -186,7 +204,7 @@ public class Experiment {
 			ArrayList<Long> count = new ArrayList<Long>();
 			ArrayList<Long> access = new ArrayList<Long>();
 			
-			for ( int i = 0; i < expe_count; i++)
+			for ( int i = 0; i < experimentCount; i++)
 			{
 				MyRectangle rectangle = queryrect.get(i);
 				if ( rectangle.area() == 0.0)
@@ -264,7 +282,6 @@ public class Experiment {
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 5;
 
 		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
@@ -321,7 +338,7 @@ public class Experiment {
 
 			ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
 			Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
-			for ( int i = 0; i < expe_count; i++)
+			for ( int i = 0; i < experimentCount; i++)
 			{
 				MyRectangle rectangle = queryrect.get(i);
 				query_Graph.spa_predicate = new MyRectangle[query_Graph.graph.size()];
@@ -411,7 +428,6 @@ public class Experiment {
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 5;
 		
 		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
@@ -478,7 +494,7 @@ public class Experiment {
 			ArrayList<Long> count = new ArrayList<Long>();
 			ArrayList<Long> access = new ArrayList<Long>();
 			
-			for ( int i = 0; i < expe_count; i++)
+			for ( int i = 0; i < experimentCount; i++)
 			{
 				MyRectangle rectangle = queryrect.get(i);
 				query_Graph.spa_predicate = new MyRectangle[query_Graph.graph.size()];
@@ -556,7 +572,6 @@ public class Experiment {
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 5;
 		int nodeCount = 4;
 		
 		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
@@ -624,7 +639,7 @@ public class Experiment {
 			ArrayList<Long> count = new ArrayList<Long>();
 			ArrayList<Long> access = new ArrayList<Long>();
 			
-			for ( int i = 0; i < expe_count; i++)
+			for ( int i = 0; i < experimentCount; i++)
 			{
 				MyRectangle rectangle = queryrect.get(i);
 				query_Graph.spa_predicate = new MyRectangle[query_Graph.graph.size()];
@@ -675,10 +690,10 @@ public class Experiment {
 				OwnMethods.WriteFile(result_avg_path, true, write_line);
 			
 			long larger_time = Utility.Average(total_time);
-			if (larger_time * expe_count > 450 * 1000)
-				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 450.0 / 1000.0));
-			if(expe_count < 1)
-				expe_count = 1;
+			if (larger_time * experimentCount > 450 * 1000)
+				experimentCount = (int) (experimentCount * 0.5 / (larger_time * experimentCount / 450.0 / 1000.0));
+			if(experimentCount < 1)
+				experimentCount = 1;
 			
 			selectivity *= times;
 		}
@@ -698,7 +713,6 @@ public class Experiment {
 		long start;
 		long time;
 		int limit = -1;
-		int expe_count = 5;
 
 		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
@@ -757,7 +771,7 @@ public class Experiment {
 			ArrayList<Long> count = new ArrayList<Long>();
 			ArrayList<Long> access = new ArrayList<Long>();
 
-			for ( int i = 0; i < expe_count; i++)
+			for ( int i = 0; i < experimentCount; i++)
 			{
 				MyRectangle rectangle = queryrect.get(i);
 				query_Graph.spa_predicate = new MyRectangle[query_Graph.graph.size()];
