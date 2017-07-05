@@ -535,29 +535,30 @@ public class OwnMethods {
         ArrayList<Entity> entities = null;
         BufferedReader reader = null;
         String str = null;
+        long id = 0;
         try {
             reader = new BufferedReader(new FileReader(new File(entity_path)));
             str = reader.readLine();
             int node_count = Integer.parseInt(str);
             entities = new ArrayList<Entity>(node_count);
-            int id = 0;
             while ((str = reader.readLine()) != null) {
                 Entity entity;
                 String[] str_l = str.split(",");
                 int flag = Integer.parseInt(str_l[1]);
                 if (flag == 0) {
-                    entity = new Entity();
+                    entity = new Entity(id);
                     entities.add(entity);
                 } else {
-                    entity = new Entity(Double.parseDouble(str_l[2]), Double.parseDouble(str_l[3]));
+                    entity = new Entity(id, Double.parseDouble(str_l[2]), Double.parseDouble(str_l[3]));
                     entities.add(entity);
                 }
                 ++id;
             }
             reader.close();
         }
-        catch (Exception node_count) {
-            // empty catch block
+        catch (Exception e) {
+            OwnMethods.Print(String.format("error happens in entity id %d", id));
+            e.printStackTrace();	System.exit(-1);
         }
         return entities;
     }
