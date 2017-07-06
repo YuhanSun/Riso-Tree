@@ -29,8 +29,6 @@ import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.kernel.impl.api.cursor.TxAbstractNodeCursor;
-import org.neo4j.register.Register.Int;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
@@ -131,7 +129,21 @@ public class App {
 //		test();
 //		batchRTreeInsert();
 //		generateLabelList();
-		rangeQueryCompare();
+//		rangeQueryCompare();
+		graphCompare();
+	}
+	
+	private static void graphCompare()
+	{
+		String graphPath1 = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
+		String graphPath2 = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph_entity_newformat.txt", dataset);
+		
+		ArrayList<ArrayList<Integer>> graph1 = OwnMethods.ReadGraph(graphPath1);
+		ArrayList<ArrayList<Integer>> graph2 = OwnMethods.ReadGraph(graphPath2);
+		
+		for ( int i = 0; i < graph1.size(); i++)
+			if ( graph1.get(i).size() != graph2.get(i).size())
+				OwnMethods.Print(String.format("line %d different!", i));
 	}
 	
 	private static void selectivityTest() 
