@@ -113,9 +113,6 @@ public class Prepare {
 	public static void main(String[] args) {
 		initParameters();
 		
-		generateNonspatialLabel();
-		nonspatialLabelTest();
-		
 //		String oldDataset = "Gowalla";
 //		modifyLayerName(oldDataset);
 //		modifyLayerNameTest();
@@ -125,8 +122,7 @@ public class Prepare {
 		
 //		generateRandomQueryGraph();
 //		generateQueryRectangleCenterID();
-		
-		
+//		generateQueryRectangleCenterID()
 		
 //		generateNewNLList();
 	}
@@ -457,51 +453,4 @@ public class Prepare {
 			e.printStackTrace();
 		}
 	}
-	
-	public static void nonspatialLabelTest()
-	{
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(new File(label_list_path)));
-			ArrayList<Integer> statis = new ArrayList<Integer>(Collections.nCopies(nonspatial_label_count, 0));
-			String line = "";
-			for ( int i = 0; i < nonspatial_vertex_count; i++)
-			{
-				line = reader.readLine();
-				int label = Integer.parseInt(line);
-				int index = label - 2;
-				statis.set(index, statis.get(index) + 1);
-			}
-			for ( int count : statis)
-				OwnMethods.Print(count);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * generate new label.txt
-	 * for entities that non-spatial vertices are all before spatial
-	 */
-	public static void generateNonspatialLabel()
-	{
-		try {
-			FileWriter writer = new FileWriter(new File(label_list_path), true);
-			Random random = new Random();
-			for ( int i = 0; i < nonspatial_vertex_count; i++)
-			{
-				int label = random.nextInt(nonspatial_label_count);
-				label += 2;
-				writer.write(label + "\n");
-			}
-			
-			for ( int i = 0; i < spatialVertexCount; i++)
-				writer.write("1\n");
-			
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-
 }

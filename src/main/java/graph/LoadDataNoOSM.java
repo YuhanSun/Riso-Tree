@@ -1,10 +1,16 @@
 package graph;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -39,9 +45,12 @@ public class LoadDataNoOSM {
 	static String dataset = config.getDatasetName();
 	static String lon_name = config.GetLongitudePropertyName();
 	static String lat_name = config.GetLatitudePropertyName();
+	static int nonspatial_label_count = config.getNonSpatialLabelCount();
 	
 	static String dbPath, entityPath, mapPath, graphPath, labelListPath;
 	
+	static int nonspatial_vertex_count;
+	static int spatialVertexCount;
 	
 	static void initParameters()
 	{
@@ -68,14 +77,25 @@ public class LoadDataNoOSM {
 		default:
 			break;
 		}
+		
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		spatialVertexCount = OwnMethods.GetSpatialEntityCount(entities);
+		nonspatial_vertex_count = entities.size() - spatialVertexCount;
 	}
 	
 	public static void main(String[] args) {
 		initParameters();
 		
 		batchRTreeInsert();
+
+		if ( nonspatial_label_count == 1)
+			generateLabelList();
+		else
+		{
+			generateNonspatialLabel();
+			nonspatialLabelTest();
+		}
 		
-		generateLabelList();
 		LoadNonSpatialEntity();
 		
 		GetSpatialNodeMap();
@@ -241,6 +261,51 @@ public class LoadDataNoOSM {
 			inserter.shutdown();
 			OwnMethods.WriteMap(mapPath, true, id_map);
 		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void nonspatialLabelTest()
+	{
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(labelListPath)));
+			ArrayList<Integer> statis = new ArrayList<Integer>(Collections.nCopies(nonspatial_label_count, 0));
+			String line = "";
+			for ( int i = 0; i < nonspatial_vertex_count; i++)
+			{
+				line = reader.readLine();
+				int label = Integer.parseInt(line);
+				int index = label - 2;
+				statis.set(index, statis.get(index) + 1);
+			}
+			for ( int count : statis)
+				OwnMethods.Print(count);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * generate new label.txt
+	 * for entities that non-spatial vertices are all before spatial
+	 */
+	public static void generateNonspatialLabel()
+	{
+		try {
+			FileWriter writer = new FileWriter(new File(labelListPath), true);
+			Random random = new Random();
+			for ( int i = 0; i < nonspatial_vertex_count; i++)
+			{
+				int label = random.nextInt(nonspatial_label_count);
+				label += 2;
+				writer.write(label + "\n");
+			}
+			
+			for ( int i = 0; i < spatialVertexCount; i++)
+				writer.write("1\n");
+			
+			writer.close();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
