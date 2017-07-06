@@ -3,6 +3,7 @@ package commons;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -16,6 +17,7 @@ import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
 import org.neo4j.gis.spatial.encoders.SimplePointEncoder;
 import org.neo4j.gis.spatial.filter.SearchIntersectWindow;
+import org.neo4j.gis.spatial.pipes.GeoPipeFlow;
 import org.neo4j.gis.spatial.rtree.RTreeIndex;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.gis.spatial.rtree.SpatialIndexReader;
@@ -124,13 +126,14 @@ public class App {
 //			// TODO: handle exception
 //			e.printStackTrace();
 //		}
-//		initVariablesForTest();
+		initVariablesForTest();
 //		Naive();
 //		test();
 //		batchRTreeInsert();
 //		generateLabelList();
 //		rangeQueryCompare();
-		graphCompare();
+		rangeQueryCountCompare();
+//		graphCompare();
 	}
 	
 	private static void graphCompare()
@@ -166,6 +169,69 @@ public class App {
 	}
 	
 	/**
+	 * compare the  range query result count of my method and
+	 * GeoPipe defined in SpatialFirst class
+	 */
+	public static void rangeQueryCountCompare()
+	{
+		String layerName = dataset;
+		String queryRectanglePath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_1.txt", dataset);
+//		String queryRectanglePath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_1.txt", dataset);
+	    try {
+	    	OwnMethods.Print(db_path);
+	    	GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
+	        Layer layer = spatialDatabaseService.getLayer(layerName);
+	        
+	        ArrayList<MyRectangle> queryRectangles = OwnMethods.ReadQueryRectangle(queryRectanglePath);
+	        long timeGeoPipe = 0, timeMyMethod = 0, countGeoPipe = 0, countMyMethod = 0;
+	        
+	        Transaction tx = databaseService.beginTx();
+	        Node root = OSM_Utility.getRTreeRoot(databaseService, layerName);
+	        for ( MyRectangle queryRectangle : queryRectangles)
+	        {
+	        	Envelope envelope = new Envelope(queryRectangle.min_x, queryRectangle.max_x, queryRectangle.min_y, queryRectangle.max_y);
+	        	List<SpatialDatabaseRecord> resultGeoPipe = OSM_Utility.RangeQuery(layer, envelope);
+	        	
+	        	LinkedList<Node> resultMyMethod = SpatialFirst.rangeQuery(root, queryRectangle);
+	        	
+	        	if ( resultGeoPipe.size() != resultMyMethod.size())
+	        	{
+	        		OwnMethods.Print(queryRectangle);
+	        		OwnMethods.Print(String.format("GeoPile count:%d", resultGeoPipe.size()));
+	        		OwnMethods.Print(String.format("MyMethod count:%d", resultMyMethod.size()));
+	        		
+	        		OwnMethods.Print("GeoPipe result:");
+	        		for ( SpatialDatabaseRecord record : resultGeoPipe)
+		        	{
+	        			Node node = record.getGeomNode();
+	        			OwnMethods.Print(node);
+		        		double[] bbox = (double[]) node.getProperty("bbox");
+		        		OwnMethods.Print(Arrays.toString(bbox));
+		        	}
+	        		
+	        		OwnMethods.Print("MyMethod result:");
+	        		for (Node node : resultMyMethod)
+	        		{
+	        			OwnMethods.Print(node);
+	        			double[] bbox = (double[]) node.getProperty("bbox");
+		        		OwnMethods.Print(Arrays.toString(bbox));
+	        		}
+	        		break;
+	        	}
+	        }
+	        tx.success();
+	        tx.close();
+	        
+	        databaseService.shutdown();
+	    }
+	    catch(Exception e)
+	    {
+	    	e.printStackTrace();	System.exit(-1);
+	    }
+	}
+	
+	/**
 	 * compare the  range query time of my method and
 	 * GeoPipe defined in SpatialFirst class
 	 */
@@ -179,6 +245,7 @@ public class App {
 //		String dbPath = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1/data/databases/graph.db";
 //		String queryRectanglePath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_1.txt", dataset);
 	    try {
+	    	OwnMethods.Print(db_path);
 	    	GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 	        Layer layer = spatialDatabaseService.getLayer(layerName);
@@ -190,7 +257,7 @@ public class App {
 	        Transaction tx = databaseService.beginTx();
 	        for ( MyRectangle queryRectangle : queryRectangles)
 	        {
-	        	Envelope envelope = new Envelope(queryRectangle.min_x, queryRectangle.min_y, queryRectangle.max_x, queryRectangle.max_y);
+	        	Envelope envelope = new Envelope(queryRectangle.min_x, queryRectangle.max_x, queryRectangle.min_y, queryRectangle.max_y);
 	        	List<SpatialDatabaseRecord> results = OSM_Utility.RangeQuery(layer, envelope);
 	        	for ( SpatialDatabaseRecord record : results)
 	        	{
