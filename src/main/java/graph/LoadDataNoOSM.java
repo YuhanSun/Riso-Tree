@@ -84,25 +84,32 @@ public class LoadDataNoOSM {
 	}
 	
 	public static void main(String[] args) {
-		initParameters();
 		
-		batchRTreeInsert();
-
-		if ( nonspatial_label_count == 1)
-			generateLabelList();
-		else
-		{
-			generateNonspatialLabel();
-			nonspatialLabelTest();
+		try {
+			initParameters();
+			
+			batchRTreeInsert();
+			
+			if ( nonspatial_label_count == 1)
+				generateLabelList();
+			else
+			{
+				generateNonspatialLabel();
+				nonspatialLabelTest();
+			}
+			
+			LoadNonSpatialEntity();
+			
+			GetSpatialNodeMap();
+			
+			LoadGraphEdges();
+			
+			CalculateCount();
+			
+		} catch (Exception e) {
+			e.printStackTrace();	System.exit(-1);
 		}
 		
-		LoadNonSpatialEntity();
-		
-		GetSpatialNodeMap();
-		
-		LoadGraphEdges();
-		
-		CalculateCount();
 	}
 	
 	/**
@@ -274,6 +281,9 @@ public class LoadDataNoOSM {
 			while ( ( line = reader.readLine()) != null)
 			{
 				int label = Integer.parseInt(line);
+				//if the entity is a spatial one
+				if (label == 1)
+					continue;
 				int index = label - 2;
 				statis.set(index, statis.get(index) + 1);
 			}
@@ -281,7 +291,7 @@ public class LoadDataNoOSM {
 			for ( int count : statis)
 				OwnMethods.Print(count);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();	System.exit(-1);
 		}
 	}
 	
