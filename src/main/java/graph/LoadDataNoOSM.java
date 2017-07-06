@@ -30,7 +30,6 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 import commons.Config;
 import commons.Entity;
-import commons.Labels;
 import commons.OwnMethods;
 import commons.Config.system;
 import commons.Labels.GraphLabel;
@@ -49,6 +48,7 @@ public class LoadDataNoOSM {
 	
 	static String dbPath, entityPath, mapPath, graphPath, labelListPath;
 	
+	static ArrayList<Entity> entities; 
 	static int nonspatial_vertex_count;
 	static int spatialVertexCount;
 	
@@ -78,7 +78,7 @@ public class LoadDataNoOSM {
 			break;
 		}
 		
-		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		entities = OwnMethods.ReadEntity(entityPath);
 		spatialVertexCount = OwnMethods.GetSpatialEntityCount(entities);
 		nonspatial_vertex_count = entities.size() - spatialVertexCount;
 	}
@@ -271,13 +271,13 @@ public class LoadDataNoOSM {
 			BufferedReader reader = new BufferedReader(new FileReader(new File(labelListPath)));
 			ArrayList<Integer> statis = new ArrayList<Integer>(Collections.nCopies(nonspatial_label_count, 0));
 			String line = "";
-			for ( int i = 0; i < nonspatial_vertex_count; i++)
+			while ( ( line = reader.readLine()) != null)
 			{
-				line = reader.readLine();
 				int label = Integer.parseInt(line);
 				int index = label - 2;
 				statis.set(index, statis.get(index) + 1);
 			}
+			reader.close();
 			for ( int count : statis)
 				OwnMethods.Print(count);
 		} catch (Exception e) {
@@ -294,15 +294,28 @@ public class LoadDataNoOSM {
 		try {
 			FileWriter writer = new FileWriter(new File(labelListPath), true);
 			Random random = new Random();
-			for ( int i = 0; i < nonspatial_vertex_count; i++)
+			
+			for ( Entity entity : entities)
 			{
-				int label = random.nextInt(nonspatial_label_count);
-				label += 2;
-				writer.write(label + "\n");
+				if ( entity.IsSpatial)
+					writer.write("1\n");
+				else
+				{
+					int label = random.nextInt(nonspatial_label_count);
+					label += 2;
+					writer.write(label + "\n");
+				}
 			}
 			
-			for ( int i = 0; i < spatialVertexCount; i++)
-				writer.write("1\n");
+//			for ( int i = 0; i < nonspatial_vertex_count; i++)
+//			{
+//				int label = random.nextInt(nonspatial_label_count);
+//				label += 2;
+//				writer.write(label + "\n");
+//			}
+//			
+//			for ( int i = 0; i < spatialVertexCount; i++)
+//				writer.write("1\n");
 			
 			writer.close();
 		} catch (IOException e) {
