@@ -287,8 +287,15 @@ public class OwnMethods {
 			
 			int graph_size = graph.size();
 			Random random = new Random();
-			int first_node = (int) (random.nextDouble() * graph_size);
-			subgraph_ids.add(first_node);
+			while ( true)
+			{
+				int first_node = (int) (random.nextDouble() * graph_size);
+				if ( graph.get(first_node).size() != 0)
+				{
+					subgraph_ids.add(first_node);
+					break;
+				}
+			}
 			
 			while (subgraph_ids.size() < node_count)
 			{
