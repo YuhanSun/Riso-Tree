@@ -33,6 +33,8 @@ import org.neo4j.kernel.impl.api.cursor.TxAbstractNodeCursor;
 import org.neo4j.register.Register.Int;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 import commons.Config.system;
 import commons.Labels.GraphLabel;
@@ -130,6 +132,25 @@ public class App {
 //		batchRTreeInsert();
 //		generateLabelList();
 		rangeQueryCompare();
+	}
+	
+	private static void selectivityTest() 
+	{
+		String entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		STRtree stRtree = OwnMethods.ConstructSTRee(entities);
+		
+		String queryRectPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, 114);
+		ArrayList<MyRectangle> queryRectangles = OwnMethods.ReadQueryRectangle(queryRectPath);
+		
+		int index = 0, countSum = 0;
+		for ( MyRectangle rect : queryRectangles)
+		{
+			List<Point> results = stRtree.query(new Envelope(rect.min_x, rect.max_x, rect.min_y, rect.max_y));
+			OwnMethods.Print(results.size());
+			countSum += results.size();	index++;
+		}
+		OwnMethods.Print(String.format("Average selectivity:%d", countSum / index));
 	}
 	
 	/**
