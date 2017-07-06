@@ -138,22 +138,20 @@ public class App {
 	 */
 	public static void rangeQueryCompare()
 	{
-		String layerName = "test";
-		String dataset = "Gowalla";
+		String layerName = dataset;
 //		String entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
-//		String dbPath = "D:\\Ubuntu_shared\\neo4j-community-3.1.1\\data\\databases\\graph.db";
-//		String queryRectanglePath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\query_1.txt", dataset);
+		String queryRectanglePath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_1.txt", dataset);
 		
-		String entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
-		String dbPath = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1/data/databases/graph.db";
-		String queryRectanglePath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/query_1.txt", dataset);
+//		String entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+//		String dbPath = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1/data/databases/graph.db";
+//		String queryRectanglePath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_1.txt", dataset);
 	    try {
-	    	GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+	    	GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 	        Layer layer = spatialDatabaseService.getLayer(layerName);
 	        
 	        ArrayList<MyRectangle> queryRectangles = OwnMethods.ReadQueryRectangle(queryRectanglePath);
-	        long timeGeoPipe = 0, timeMyMethod = 0;
+	        long timeGeoPipe = 0, timeMyMethod = 0, countGeoPipe = 0, countMyMethod = 0;
 	        
 	        long start = System.currentTimeMillis();
 	        Transaction tx = databaseService.beginTx();
@@ -163,12 +161,13 @@ public class App {
 	        	List<SpatialDatabaseRecord> results = OSM_Utility.RangeQuery(layer, envelope);
 	        	for ( SpatialDatabaseRecord record : results)
 	        	{
-	        		record.getGeomNode();
+	        		record.getGeomNode().getId();
 	        	}
+	        	countGeoPipe += results.size();
 	        }
 	        tx.success();
 	        tx.close();
-	        timeGeoPipe += System.currentTimeMillis();
+	        timeGeoPipe += System.currentTimeMillis() - start;
 	        
 	        start = System.currentTimeMillis();
 	        tx = databaseService.beginTx();
@@ -178,6 +177,7 @@ public class App {
 	        	LinkedList<Node> results = SpatialFirst.rangeQuery(root, queryRectangle);
 	        	for ( Node node : results)
 	        		node.getId();
+	        	countMyMethod += results.size();
 	        }
 	        tx.success();
 	        tx.close();
@@ -185,12 +185,14 @@ public class App {
 	        
 	        databaseService.shutdown();
 	        
+	        OwnMethods.Print(String.format("GeoPile count:%d", countGeoPipe));
 	        OwnMethods.Print(String.format("GeoPipe Time:%d", timeGeoPipe));
+	        OwnMethods.Print(String.format("MyMethod count:%d", countMyMethod));
 	        OwnMethods.Print(String.format("MyMethod Time:%d", timeMyMethod));
 	    }
 	    catch(Exception e)
 	    {
-	    	e.printStackTrace();
+	    	e.printStackTrace();	System.exit(-1);
 	    }
 	}
 	
