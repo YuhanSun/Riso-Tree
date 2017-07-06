@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
@@ -98,21 +99,26 @@ public class Prepare {
 		spatialVertexCount = OwnMethods.GetSpatialEntityCount(entities);
 		nonspatial_vertex_count = entities.size() - spatialVertexCount;
 		
-//		labels = new ArrayList<>(Arrays.asList(0, 1));
-		labels = new ArrayList<Integer>(nonspatial_label_count);
-		for ( int i = 0; i < nonspatial_label_count; i++)
-			labels.add(i + 2);
+		if (nonspatial_label_count == 1)
+			labels = new ArrayList<Integer>(Arrays.asList(0, 1));
+		else
+		{
+			labels = new ArrayList<Integer>(1 + nonspatial_label_count);
+			labels.add(1);
+			for ( int i = 0; i < nonspatial_label_count; i++)
+				labels.add(i + 2);
+		}
 	}
 	
 	public static void main(String[] args) {
 		initParameters();
 		
-//		generateNonspatialLabel();
-//		nonspatialLabelTest();
+		generateNonspatialLabel();
+		nonspatialLabelTest();
 		
-		String oldDataset = "Gowalla";
-		modifyLayerName(oldDataset);
-		modifyLayerNameTest();
+//		String oldDataset = "Gowalla";
+//		modifyLayerName(oldDataset);
+//		modifyLayerNameTest();
 		
 //		setNewLabel();
 //		newLabelTest();
