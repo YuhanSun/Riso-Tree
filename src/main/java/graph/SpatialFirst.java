@@ -98,7 +98,7 @@ public class SpatialFirst {
 						throw new Exception(String.format("node %d does not has \"bbox\" property", node));
 				}
 
-				OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
+//				OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
 
 				int located_in_count = 0;
 				if( next_list.isEmpty())
@@ -119,8 +119,8 @@ public class SpatialFirst {
 							}
 						}
 					level_index++;
-					OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
-					OwnMethods.Print(String.format("Located in nodes: %d", located_in_count));
+//					OwnMethods.Print(String.format("level %d time: %d", level_index, System.currentTimeMillis() - start));
+//					OwnMethods.Print(String.format("Located in nodes: %d", located_in_count));
 					return result;
 				}
 
