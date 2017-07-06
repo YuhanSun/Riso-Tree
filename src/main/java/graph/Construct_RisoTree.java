@@ -576,11 +576,8 @@ public class Construct_RisoTree {
 				for ( Relationship rel : rels)
 				{
 					Node child  = rel.getEndNode();
-					long graph_id = (Long) child.getProperty("id");
-					if ( graph_id > Integer.MAX_VALUE)
-						throw new Exception(String.format("graph id %d out of integer range", graph_id));
-					int graph_id_int = (int) graph_id;
-					for (int neighbor : graph.get(graph_id_int))
+					int graph_id = (Integer) child.getProperty("id");
+					for (int neighbor : graph.get(graph_id))
 						NL.add(neighbor);
 				}
 				
