@@ -535,7 +535,7 @@ public class OwnMethods {
         ArrayList<Entity> entities = null;
         BufferedReader reader = null;
         String str = null;
-        long id = 0;
+        int id = 0;
         try {
             reader = new BufferedReader(new FileReader(new File(entity_path)));
             str = reader.readLine();

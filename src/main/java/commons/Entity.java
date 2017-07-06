@@ -6,7 +6,7 @@ public class Entity {
     public boolean IsSpatial;
     public double lon;
     public double lat;
-    public long id;
+    public int id;
 
     /**
      * Empty entity
@@ -24,7 +24,7 @@ public class Entity {
      * @param lon
      * @param lat
      */
-    Entity(long id) {
+    Entity(int id) {
         this.IsSpatial = false;
         this.lon = 0.0;
         this.lat = 0.0;
@@ -37,7 +37,7 @@ public class Entity {
      * @param lon
      * @param lat
      */
-    Entity(long id, double lon, double lat) {
+    Entity(int id, double lon, double lat) {
         this.IsSpatial = true;
         this.lon = lon;
         this.lat = lat;

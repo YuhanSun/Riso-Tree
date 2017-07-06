@@ -213,7 +213,7 @@ public class LoadDataNoOSM {
 			{
 				Node node = spatial_nodes.next();
 				long neo4jId = node.getId();
-				long graphId = (Long) node.getProperty("id");
+				int graphId = (Integer) node.getProperty("id");
 				id_map.put(graphId, neo4jId);
 			}
 			
@@ -251,11 +251,11 @@ public class LoadDataNoOSM {
 				if(entity.IsSpatial == false)
 				{
 					Map<String, Object> properties = new HashMap<String, Object>();
-					properties.put("id", i);
+					properties.put("id", entity.id);
 					int labelID = labelList.get(i);
 					Label label = DynamicLabel.label(String.format("GRAPH_%d", labelID));
 					Long pos_id = inserter.createNode(properties, label);
-					id_map.put((long) i, pos_id);
+					id_map.put(entity.id, pos_id);
 				}
 			}
 			inserter.shutdown();
