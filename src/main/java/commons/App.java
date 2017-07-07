@@ -1,33 +1,17 @@
 package commons;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.neo4j.cypher.internal.compiler.v2_3.executionplan.ExecutionPlan;
-import org.neo4j.gis.spatial.EditableLayer;
 import org.neo4j.gis.spatial.Layer;
-import org.neo4j.gis.spatial.SimplePointLayer;
 import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
-import org.neo4j.gis.spatial.encoders.SimplePointEncoder;
-import org.neo4j.gis.spatial.filter.SearchIntersectWindow;
-import org.neo4j.gis.spatial.pipes.GeoPipeFlow;
-import org.neo4j.gis.spatial.rtree.RTreeIndex;
-import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
-import org.neo4j.gis.spatial.rtree.SpatialIndexReader;
-import org.neo4j.gis.spatial.rtree.filter.SearchFilter;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -38,9 +22,6 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 import commons.Config.system;
 import commons.Labels.GraphLabel;
-import commons.Labels.GraphRel;
-import commons.Labels.OSMRelation;
-import graph.RisoTreeQuery;
 import graph.SpatialFirst;
 import osm.OSM_Utility;
 
@@ -93,39 +74,6 @@ public class App {
 	
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-//		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-//		try {
-//			Transaction tx = databaseService.beginTx();
-////			Node node =  databaseService.getNodeById(3854497);
-////			OwnMethods.Print(node.getAllProperties());
-////			double [] bbox = (double []) node.getProperty("bbox");
-////			for ( double element : bbox)
-////				OwnMethods.Print(element);
-//			
-////			String query = "explain match (a0)--(a1:GRAPH_1) where id(a0) = 0 and id(a1) = 100 or id(a1) = 99 return id(a0), id(a1)";
-////			String query = "explain match (a0:GRAPH_0)--(a1:GRAPH_1) where id(a1) = 0 and id(a0) in [100, 99] return id(a0), id(a1)";
-//			String query = "profile match (a0),(a1),(a2),(a3:GRAPH_1),(a0)-[:GRAPH_LINK]-(a1),(a0)-[:GRAPH_LINK]-(a2),(a2)-[:GRAPH_LINK]-(a3) "
-//					+ "where "
-//					+ "( (a0) = 3862270 or id(a0) = 3862405 or id(a0) = 3862972 or id(a0) = 3863090 or id(a0) = 3864161 or id(a0) = 3864483 or id(a0) = 3866373 or id(a0) = 3866930 or id(a0) = 3867109 or id(a0) = 3870775 or id(a0) = 3870782 or id(a0) = 3872073 or id(a0) = 3876108 or id(a0) = 3877181 or id(a0) = 3877687 or id(a0) = 3882003 or id(a0) = 3883648 or id(a0) = 3884513 or id(a0) = 3888202 or id(a0) = 3888550 or id(a0) = 3894723 or id(a0) = 3895932 or id(a0) = 3896578 or id(a0) = 3898198 or id(a0) = 3898199 or id(a0) = 3898206 or id(a0) = 3898207 or id(a0) = 3900017 or id(a0) = 3911759 or id(a0) = 3911761 or id(a0) = 3915250 or id(a0) = 3915309 or id(a0) = 3936035 or id(a0) = 3957555 or id(a0) = 3961782 or id(a0) = 3974508 or id(a0) = 3979574 or id(a0) = 3979635 or id(a0) = 3979636 or id(a0) = 3986952 or id(a0) = 3994423 or id(a0) = 4004213 or id(a0) = 4017232 or id(a0) = 4019530 or id(a0) = 4021875 or id(a0) = 4027265 or id(a0) = 4030003 ) "
-//					+ "and "
-//					+ "(id(a1)=248969 or id(a1)=49532 or id(a1)=1413284 or id(a1)=3175283 or id(a1)=2889917 or id(a1)=1945319 or id(a1)=1693436 or id(a1)=1025087 or id(a1)=1286387 or id(a1)=803927 or id(a1)=2958857 or id(a1)=1130051 or id(a1)=1776356 or id(a1)=852950 or id(a1)=300623 or id(a1)=323288 or id(a1)=532562 or id(a1)=519407 or id(a1)=452600 or id(a1)=494474 or id(a1)=586472 or id(a1)=614126 or id(a1)=656378 or id(a1)=653168 or id(a1)=2879882 or id(a1)=2880902 or id(a1)=1577153 or id(a1)=2959376 or id(a1)=2882405 or id(a1)=1053287 or id(a1)=2890601 or id(a1)=1817861 or id(a1)=1903928 or id(a1)=1053281 or id(a1)=2797589 or id(a1)=1578443 or id(a1)=2890925 or id(a1)=1421222 or id(a1)=1279592 or id(a1)=1568633 or id(a1)=1106021 or id(a1)=1157006 or id(a1)=2483714 or id(a1)=2229806 or id(a1)=3091283 or id(a1)=2882330 or id(a1)=657512 or id(a1)=1175312 or id(a1)=2882456 or id(a1)=1101722 or id(a1)=2948867 or id(a1)=2428133 or id(a1)=2880275 or id(a1)=2880026 or id(a1)=2784233 or id(a1)=2880440 or id(a1)=2855147 or id(a1)=1344836 or id(a1)=701171 or id(a1)=947672 or id(a1)=1369277 or id(a1)=1190870 or id(a1)=2301707) "
-//					+ "return id(a0),id(a1),id(a2),id(a3)";
-//			
-//			Result result = databaseService.execute(query);
-//			while ( result.hasNext())
-//				result.next();
-//			ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-//			OwnMethods.Print(planDescription);
-//			
-//			tx.success();
-//			tx.close();
-//			databaseService.shutdown();
-//			
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//			e.printStackTrace();
-//		}
 		initVariablesForTest();
 //		Naive();
 //		test();
@@ -195,6 +143,8 @@ public class App {
 	        	
 	        	LinkedList<Node> resultMyMethod = SpatialFirst.rangeQuery(root, queryRectangle);
 	        	
+	        	OwnMethods.Print(String.format("%d\t%d", resultGeoPipe.size(), resultMyMethod.size()));
+	        	
 	        	if ( resultGeoPipe.size() != resultMyMethod.size())
 	        	{
 	        		OwnMethods.Print(queryRectangle);
@@ -210,7 +160,7 @@ public class App {
 		        		OwnMethods.Print(Arrays.toString(bbox));
 		        	}
 	        		
-	        		OwnMethods.Print("MyMethod result:");
+	        		OwnMethods.Print("\nMyMethod result:");
 	        		for (Node node : resultMyMethod)
 	        		{
 	        			OwnMethods.Print(node);
