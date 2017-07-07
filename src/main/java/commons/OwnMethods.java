@@ -39,6 +39,27 @@ import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 public class OwnMethods {
 	
 	/**
+	 * Convert the original single directional graph to a bidirectional graph
+	 * where each edge will stored in both start and end node's adjacent list.
+	 * @param graph
+	 * @return
+	 */
+	public static ArrayList<TreeSet<Integer>> singleDirectionalToBidirectionalGraph(ArrayList<ArrayList<Integer>> graph)
+	{
+		ArrayList<TreeSet<Integer>> bidirectionalGraph = new ArrayList<TreeSet<Integer>>(graph.size());
+		for (int i = 0; i < graph.size(); i++)
+			bidirectionalGraph.add(new TreeSet<Integer>(graph.get(i)));
+		
+		for ( int i = 0; i < graph.size(); i++)
+		{
+			ArrayList<Integer> neighborList = graph.get(i);
+			for ( int neighbor : neighborList)
+				bidirectionalGraph.get(neighbor).add(i);
+		}
+		return bidirectionalGraph;
+	}
+	
+	/**
 	 * generic function
 	 * @param entities
 	 * @param center_id_path
@@ -68,7 +89,13 @@ public class OwnMethods {
 		}
 	}
 
-	
+	/**
+	 * Generate label.txt file based on entity file
+	 * The label.txt has only 0 and 1 label where
+	 * 0 is non-spatial and 1 is spatial.
+	 * @param entityPath
+	 * @param labelListPath
+	 */
 	public static void getLabelListFromEntity(String entityPath, String labelListPath)
 	{
 		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
@@ -474,6 +501,60 @@ public class OwnMethods {
 		
 	}
 	
+	
+	/**
+	 * Write a graph to a file.
+	 * @param graph
+	 * @param graphPath
+	 */
+	public static void writeGraphArrayList(ArrayList<ArrayList<Integer>> graph, String graphPath)
+	{
+		try {
+			FileWriter writer = new FileWriter(new File(graphPath));
+			writer.write(String.format("%d\n", graph.size()));	// Write node count in the graph.
+			for ( int i = 0; i < graph.size(); i++)
+			{
+				ArrayList<Integer> neighborList = graph.get(i);
+				writer.write(String.format("%d,%d", i, neighborList.size()));
+				for ( int neighbor : neighborList)
+					writer.write(String.format(",%d", neighbor));
+				writer.write("\n");
+			}
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();	System.exit(-1);
+		}
+	}
+	
+	/**
+	 * Write a graph to a file.
+	 * @param graph
+	 * @param graphPath
+	 */
+	public static void writeGraphTreeSet(ArrayList<TreeSet<Integer>> graph, String graphPath)
+	{
+		try {
+			FileWriter writer = new FileWriter(new File(graphPath));
+			writer.write(String.format("%d\n", graph.size()));	// Write node count in the graph.
+			for ( int i = 0; i < graph.size(); i++)
+			{
+				TreeSet<Integer> neighborList = graph.get(i);
+				writer.write(String.format("%d,%d", i, neighborList.size()));
+				for ( int neighbor : neighborList)
+					writer.write(String.format(",%d", neighbor));
+				writer.write("\n");
+			}
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();	System.exit(-1);
+		}
+	}
+	
+	/**
+	 * Read graph from a file.
+	 * @param graph_path
+	 * @return
+	 */
     public static ArrayList<ArrayList<Integer>> ReadGraph(String graph_path) {
         ArrayList<ArrayList<Integer>> graph = null;
         BufferedReader reader = null;
