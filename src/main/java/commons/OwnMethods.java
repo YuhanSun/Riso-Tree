@@ -326,6 +326,7 @@ public class OwnMethods {
 			
 			while (subgraph_ids.size() < node_count)
 			{
+				long start = System.currentTimeMillis();
 				int start_index = random.nextInt(subgraph_ids.size());	// pos in the subgraph_ids
 				int start_id = subgraph_ids.get(start_index);
 				ArrayList<Integer> neighbors = graph.get(start_id);
@@ -341,6 +342,20 @@ public class OwnMethods {
 				{
 					subgraph.get(start_index).add(end_id);
 					subgraph.get(end_index).add(start_id);
+				}
+				if ( System.currentTimeMillis() - start > 6000)
+				{
+					subgraph_ids = new ArrayList<Integer>(node_count);
+					while ( true)
+					{
+						int first_node = (int) (random.nextDouble() * graph_size);
+						if ( graph.get(first_node).size() != 0)
+						{
+							subgraph_ids.add(first_node);
+							break;
+						}
+					}
+					start = System.currentTimeMillis();
 				}
 			}
 			Query_Graph query_Graph = new Query_Graph(node_count);
