@@ -37,12 +37,12 @@ public class DataProcess {
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
 			break;
 		case Windows:
+			dataDirectory = "D:\\Ubuntu_shared\\GeoMinHop\\data";
 			db_path = String.format("%s\\%s\\%s_%s\\data\\databases\\graph.db", dataDirectory, dataset, version, dataset);
 			graph_path = String.format("%s\\%s\\graph.txt", dataDirectory, dataset);
 			entityPath = String.format("%s\\%s\\entity.txt", dataDirectory, dataset);
 			label_list_path = String.format("%s\\%s\\label.txt", dataDirectory, dataset);
 			log_path = String.format("%s\\%s\\set_label.log", dataDirectory, dataset);
-			dataDirectory = "D:\\Ubuntu_shared\\GeoMinHop\\data";
 		default:
 			break;
 		}
