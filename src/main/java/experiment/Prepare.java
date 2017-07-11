@@ -67,6 +67,9 @@ public class Prepare {
 	static int spatialVertexCount;
 	static ArrayList<Integer> labels;//all labels in the graph
 	
+	static double startSelectivity = 0.000001;
+	static double endSelectivity = 0.002;
+	
 	static void initParameters()
 	{
 		switch (systemName) {
@@ -122,7 +125,7 @@ public class Prepare {
 		
 //		generateRandomQueryGraph();
 //		generateQueryRectangleCenterID();
-//		generateQueryRectangleCenterID()
+		generateQueryRectangleForSelectivity();
 		
 //		generateNewNLList();
 	}
@@ -272,7 +275,7 @@ public class Prepare {
 	public static void generateQueryRectangleForSelectivity()
 	{
 		try {
-			int experiment_count = 100;
+			int experiment_count = 500;
 			String entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
 			ArrayList<Entity> entities = OwnMethods.ReadEntity((String)entity_path);
 			int spa_count = OwnMethods.GetSpatialEntityCount(entities);
@@ -282,8 +285,8 @@ public class Prepare {
 			ArrayList<Integer> center_ids = OwnMethods.ReadCenterID(center_id_path);
 			ArrayList<Integer> final_center_ids = OwnMethods.GetRandom_NoDuplicate(center_ids, experiment_count);
 
-			double selectivity = 0.0001;
-			while ( selectivity < 0.2)
+			double selectivity = startSelectivity;
+			while ( selectivity < endSelectivity)
 			{
 				int name_suffix = (int) (selectivity * spa_count);
 				String output_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
@@ -319,7 +322,7 @@ public class Prepare {
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
-			System.exit(0);
+			System.exit(-1);
 		}
 	}
 	
@@ -337,7 +340,7 @@ public class Prepare {
 	 */
 	public static void generateRandomQueryGraph()
 	{
-		for ( int node_count = 2; node_count < 4; node_count++)
+		for ( int node_count = 3; node_count < 4; node_count++)
 		{
 			int spa_pred_count = 1;
 			String querygraph_path = "";
@@ -360,7 +363,7 @@ public class Prepare {
 			OwnMethods.Print(labels.size());
 			
 			ArrayList<Query_Graph> query_Graphs = new ArrayList<Query_Graph>(10);
-			while ( query_Graphs.size() != 10)
+			while ( query_Graphs.size() != 3)
 			{
 				Query_Graph query_Graph = OwnMethods.GenerateRandomGraph(datagraph, labels, 
 						entities, node_count, spa_pred_count);
