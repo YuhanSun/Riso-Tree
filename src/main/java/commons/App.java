@@ -80,8 +80,23 @@ public class App {
 //		batchRTreeInsert();
 //		generateLabelList();
 //		rangeQueryCompare();
-		rangeQueryCountCompare();
+//		rangeQueryCountCompare();
 //		graphCompare();
+		cliqueTest();
+	}
+	
+	private static void cliqueTest()
+	{
+		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+				.newEmbeddedDatabase(new File(db_path));
+		String query = "match (a)--(b), (a)--(c), (b)--(c) return labels(a), labels(b), labels(c) limit 100";
+		Transaction tx = databaseService.beginTx();
+		Result result = databaseService.execute(query);
+		while( result.hasNext())
+			OwnMethods.Print(result.next());
+		tx.success();tx.close();
+		databaseService.shutdown();
+		
 	}
 	
 	private static void graphCompare()
