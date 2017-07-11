@@ -142,6 +142,7 @@ public class OSM_Utility {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 		OwnMethods.Print("getRTreeRoot return null!");
 		return null;
