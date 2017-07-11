@@ -67,8 +67,13 @@ public class Prepare {
 	static int spatialVertexCount;
 	static ArrayList<Integer> labels;//all labels in the graph
 	
-	static double startSelectivity = 0.000001;
-	static double endSelectivity = 0.002;
+	//for patent_20
+//	static double startSelectivity = 0.000001;
+//	static double endSelectivity = 0.002;
+	
+	//for patent_80
+	static double startSelectivity = 0.00001;
+	static double endSelectivity = 0.02;
 	
 	static void initParameters()
 	{
@@ -124,7 +129,7 @@ public class Prepare {
 //		newLabelTest();
 		
 //		generateRandomQueryGraph();
-//		generateQueryRectangleCenterID();
+		generateQueryRectangleCenterID();
 		generateQueryRectangleForSelectivity();
 		
 //		generateNewNLList();
@@ -277,7 +282,7 @@ public class Prepare {
 		try {
 			int experiment_count = 500;
 			String entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
-			ArrayList<Entity> entities = OwnMethods.ReadEntity((String)entity_path);
+			ArrayList<Entity> entities = OwnMethods.ReadEntity(entity_path);
 			int spa_count = OwnMethods.GetSpatialEntityCount(entities);
 			STRtree stRtree = OwnMethods.ConstructSTRee(entities);
 
