@@ -26,10 +26,10 @@ public class IndexSize {
 	static String dataset = config.getDatasetName();
 	static String version = config.GetNeo4jVersion();
 	static system systemName = config.getSystemName();
+	static int MAX_HOPNUM = config.getMaxHopNum();
+	static int nonspatial_label_count = config.getNonSpatialLabelCount();
 	
 	static String db_path;
-	static int max_hop_num = 2;
-	static int nonspatial_label_count = 100;
 	static ArrayList<Integer> labels;//all labels in the graph
 	
 	public static void initializeParameters()
@@ -42,9 +42,15 @@ public class IndexSize {
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
 			break;
 		}
-		labels = new ArrayList<Integer>(nonspatial_label_count);
-		for ( int i = 0; i < nonspatial_label_count; i++)
-			labels.add(i + 2);
+		if (nonspatial_label_count == 1)
+			labels = new ArrayList<Integer>(Arrays.asList(0, 1));
+		else
+		{
+			labels = new ArrayList<Integer>(1 + nonspatial_label_count);
+			labels.add(1);
+			for ( int i = 0; i < nonspatial_label_count; i++)
+				labels.add(i + 2);
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -68,7 +74,7 @@ public class IndexSize {
 				visitedNodeCount++;
 				for ( int i = 0; i < labels.size(); i++)
 					{
-						for ( int j = 1; j <= 2; j++)
+						for ( int j = 1; j <= MAX_HOPNUM; j++)
 						{
 							String NL_size_propertyname = String.format("NL_%d_%d_size", j, labels.get(i));
 							if ( node.hasProperty(NL_size_propertyname))
@@ -114,7 +120,7 @@ public class IndexSize {
 			databaseService.shutdown();
 			
 			OwnMethods.Print(String.format("visited node count: %d", visitedNodeCount));
-			OwnMethods.Print(String.format("index size:%d", size));
+			OwnMethods.Print(String.format("index size:%d", size * 4));
 			
 		} catch (Exception e) {
 			e.printStackTrace();	System.exit(-1);
@@ -138,7 +144,7 @@ public class IndexSize {
 				int spa_count = (Integer) node.getProperty("count");
 				for ( int i = 2; i < labels.size(); i++)
 					{
-						for ( int j = 1; j <= max_hop_num; j++)
+						for ( int j = 1; j <= MAX_HOPNUM; j++)
 						{
 							String NL_size_propertyname = String.format("NL_%d_%d_size", j, i);
 							if ( node.hasProperty(NL_size_propertyname))
