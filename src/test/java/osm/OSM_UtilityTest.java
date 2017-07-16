@@ -9,10 +9,13 @@ import java.util.Arrays;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.ResourceIterable;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
@@ -20,6 +23,8 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.OwnMethods;
 import commons.Config.system;
+import commons.Labels.OSMLabel;
+import commons.Labels.RTreeRel;
 
 public class OSM_UtilityTest {
 	
@@ -97,4 +102,25 @@ public class OSM_UtilityTest {
 		databaseService.shutdown();
 	}
 
+	@Test
+	public void getAllReferenceNode()
+	{
+		String layer_name = dataset;
+		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+				.newEmbeddedDatabase(new File(db_path));
+		Transaction tx = databaseService.beginTx();
+		ResourceIterator<Node> nodes = databaseService.findNodes(OSMLabel.ReferenceNode);
+		while ( nodes.hasNext())
+		{
+			Node head = nodes.next();
+			Iterable<Relationship> relationships = head.getRelationships(RTreeRel.LAYER, Direction.OUTGOING);
+			for ( Relationship relationship : relationships)
+			{
+				Node rtree_layer_node = relationship.getEndNode();
+				OwnMethods.Print(rtree_layer_node);
+				OwnMethods.Print(rtree_layer_node.getAllProperties());
+			}
+		}
+	}
+	
 }
