@@ -29,6 +29,11 @@ public class Experiment {
 	static int experimentCount = 3;
 	static double startSelectivity = 0.000001;
 	static double endSelectivity = 0.002;
+	
+	//non-spatial ratio 80
+//	static double startSelectivity = 0.00001;
+//	static double endSelectivity = 0.02;
+	
 //	static double startSelectivity = 0.0001;
 //	static double endSelectivity = 0.2;
 	
@@ -55,74 +60,103 @@ public class Experiment {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		initializeParameters();
-		
-		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
-		spaCount = OwnMethods.GetSpatialEntityCount(entities);
-		
-		//experiment for original dataset
-		//with only two labels
-//		Neo4j_Naive(2, 0);
-//		Neo4j_Naive(3, 0);
-//		Neo4j_Naive(3, 1);
-//		
-//		SpatialFirst(2, 0);
-//		SpatialFirst(3, 0);
-//		SpatialFirst(3, 1);
-//		
-//		SpatialFirstList_Block(2, 0);
-//		SpatialFirstList_Block(3, 0);
-//		SpatialFirstList_Block(3, 1);
-//		
-//		risoTreeQuery(2, 0);
-//		risoTreeQuery(3, 0);
-//		risoTreeQuery(3, 1);
-		
-		//with more than two labels
-		Neo4j_Naive(2, 0);
-		SpatialFirst(2, 0);
-		SpatialFirstList_Block(2, 0);
-		risoTreeQuery(2, 0);
-		
-		Neo4j_Naive(3, 0);
-		SpatialFirst(3, 0);
-		SpatialFirstList_Block(3, 0);
-		risoTreeQuery(3, 0);
-		
-		Neo4j_Naive(3, 1);
-		SpatialFirst(3, 1);
-		SpatialFirstList_Block(3, 1);
-		risoTreeQuery(3, 1);
-		
-//		for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
-////		int queryIndex = 0;
-//		{
-////			if ( queryIndex == 0)
-////				for ( int nodeCount = 3; nodeCount <= 4; nodeCount++)
-////				{
-//////					SpatialFirst(nodeCount, queryIndex);
-//////					SpatialFirstList_Block(nodeCount, queryIndex);
-////					Neo4j_Naive(nodeCount, queryIndex);
-////				}
-////			else
-////				for ( int nodeCount = 2; nodeCount <= 4; nodeCount++)
-////				{
-//////					SpatialFirst(nodeCount, queryIndex);
-//////					SpatialFirstList_Block(nodeCount, queryIndex);
-////					Neo4j_Naive(nodeCount, queryIndex);
-////				}
-//
-		
-		
-//			for (int nodeCount = 2; nodeCount <= 4; nodeCount++)
-////			int nodeCount = 4;
+		try {
+			initializeParameters();
+			
+			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+			spaCount = OwnMethods.GetSpatialEntityCount(entities);
+			
+			//experiment for original dataset
+			//with only two labels
+//			Neo4j_Naive(2, 0);
+//			Neo4j_Naive(3, 0);
+//			Neo4j_Naive(3, 1);
+//			
+//			SpatialFirst(2, 0);
+//			SpatialFirst(3, 0);
+//			SpatialFirst(3, 1);
+//			
+//			SpatialFirstList_Block(2, 0);
+//			SpatialFirstList_Block(3, 0);
+//			SpatialFirstList_Block(3, 1);
+//			
+//			risoTreeQuery(2, 0);
+//			risoTreeQuery(3, 0);
+//			risoTreeQuery(3, 1);
+			
+			//with more than two labels
+//			Neo4j_Naive(2, 0);
+//			SpatialFirst(2, 0);
+//			SpatialFirstList_Block(2, 0);
+//			risoTreeQuery(2, 0);
+//			
+//			Neo4j_Naive(3, 0);
+//			SpatialFirst(3, 0);
+//			SpatialFirstList_Block(3, 0);
+//			risoTreeQuery(3, 0);
+//			
+//			Neo4j_Naive(3, 1);
+//			SpatialFirst(3, 1);
+//			SpatialFirstList_Block(3, 1);
+//			risoTreeQuery(3, 1);
+			
+			//Synthetic data set
+			Neo4j_Naive(2, 0);
+			SpatialFirst(2, 0);
+			SpatialFirstList_Block(2, 0);
+			risoTreeQuery(2, 0);
+			
+			Neo4j_Naive(2, 1);
+			SpatialFirst(2, 1);
+			SpatialFirstList_Block(2, 1);
+			risoTreeQuery(2, 1);
+			
+			int nodeCount = 3;
+//			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
+			for ( int queryIndex = 0; queryIndex < 4; queryIndex++)
+			{
+				Neo4j_Naive(nodeCount, queryIndex);
+				SpatialFirst(nodeCount, queryIndex);
+				SpatialFirstList_Block(nodeCount, queryIndex);
+				risoTreeQuery(nodeCount, queryIndex);
+			}
+			
+			
+//			for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
+////			int queryIndex = 0;
 //			{
-//				Neo4j_Naive(nodeCount, queryIndex);
-//				SpatialFirst(nodeCount, queryIndex);
-//				SpatialFirstList_Block(nodeCount, queryIndex);
-//				risoTreeQuery(nodeCount, queryIndex);
+////				if ( queryIndex == 0)
+////					for ( int nodeCount = 3; nodeCount <= 4; nodeCount++)
+////					{
+//////						SpatialFirst(nodeCount, queryIndex);
+//////						SpatialFirstList_Block(nodeCount, queryIndex);
+////						Neo4j_Naive(nodeCount, queryIndex);
+////					}
+////				else
+////					for ( int nodeCount = 2; nodeCount <= 4; nodeCount++)
+////					{
+//////						SpatialFirst(nodeCount, queryIndex);
+//////						SpatialFirstList_Block(nodeCount, queryIndex);
+////						Neo4j_Naive(nodeCount, queryIndex);
+////					}
+	//
+			
+			
+//				for (int nodeCount = 2; nodeCount <= 4; nodeCount++)
+////				int nodeCount = 4;
+//				{
+//					Neo4j_Naive(nodeCount, queryIndex);
+//					SpatialFirst(nodeCount, queryIndex);
+//					SpatialFirstList_Block(nodeCount, queryIndex);
+//					risoTreeQuery(nodeCount, queryIndex);
+//				}
 //			}
-//		}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
 	}
 	
 	/**
@@ -762,6 +796,8 @@ public class Experiment {
 				OwnMethods.WriteFile(result_detail_path, true, write_line);
 
 			ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+			OwnMethods.Print(db_path);
+			OwnMethods.Print(dataset);
 			SpatialFirst spa_First = new SpatialFirst(db_path, dataset);
 
 			ArrayList<Long> range_query_time = new ArrayList<Long>();
