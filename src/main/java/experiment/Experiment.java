@@ -27,6 +27,8 @@ public class Experiment {
 	
 	static boolean TEST_FORMAT;
 	static int experimentCount = 3;
+	
+	//non-spatial ratio 20
 	static double startSelectivity = 0.000001;
 	static double endSelectivity = 0.002;
 	
@@ -113,7 +115,7 @@ public class Experiment {
 			
 			int nodeCount = 3;
 //			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
-			for ( int queryIndex = 0; queryIndex < 4; queryIndex++)
+			for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
 			{
 				Neo4j_Naive(nodeCount, queryIndex);
 				SpatialFirst(nodeCount, queryIndex);

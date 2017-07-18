@@ -516,7 +516,6 @@ public class OwnMethods {
 		
 	}
 	
-	
 	/**
 	 * Write a graph to a file.
 	 * @param graph
