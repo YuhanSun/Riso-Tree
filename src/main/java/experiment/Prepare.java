@@ -121,16 +121,16 @@ public class Prepare {
 	public static void main(String[] args) {
 		initParameters();
 		
-//		String oldDataset = "Gowalla";
+//		String oldDataset = "Patents_10_random_20";
 //		modifyLayerName(oldDataset);
 //		modifyLayerNameTest();
 		
 //		setNewLabel();
 //		newLabelTest();
 		
-//		generateRandomQueryGraph();
-		generateQueryRectangleCenterID();
-		generateQueryRectangleForSelectivity();
+		generateRandomQueryGraph();
+//		generateQueryRectangleCenterID();
+//		generateQueryRectangleForSelectivity();
 		
 //		generateNewNLList();
 	}
@@ -236,9 +236,39 @@ public class Prepare {
 					.getStartNode();
 			OwnMethods.Print(layer_node.getAllProperties());
 			
-			Node osmLayerNode = layer_node.getSingleRelationship(OSMRelation.LAYERS, Direction.INCOMING)
+			if ( layer_node.getSingleRelationship(OSMRelation.LAYERS, Direction.INCOMING) == null)
+				OwnMethods.Print("No OSM layer");
+			else
+			{
+				Node osmLayerNode = layer_node.getSingleRelationship(OSMRelation.LAYERS, Direction.INCOMING)
+						.getStartNode();
+				OwnMethods.Print(String.format("osmlayernode : %s", osmLayerNode.getAllProperties()));
+			}
+			tx.success();
+			tx.close();
+			dbService.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Change the layername to new layername
+	 * including layer property in RTree layer
+	 */
+	public static void modifyLayerName(String oldDataset)
+	{
+		try {
+			GraphDatabaseService dbService= new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			Transaction tx = dbService.beginTx();
+			
+			Node root = OSM_Utility.getRTreeRoot(dbService, oldDataset);
+			OwnMethods.Print(root.getAllProperties());
+			Node layer_node = root.getSingleRelationship(RTreeRelationshipTypes.RTREE_ROOT, Direction.INCOMING)
 					.getStartNode();
-			OwnMethods.Print(String.format("osmlayernode : %s", osmLayerNode.getAllProperties()));
+			OwnMethods.Print(layer_node.getAllProperties());
+			layer_node.setProperty("layer", dataset);
+			
 			tx.success();
 			tx.close();
 			dbService.shutdown();
@@ -252,7 +282,7 @@ public class Prepare {
 	 * including layer property in RTree layer
 	 * and name property in OSM data 
 	 */
-	public static void modifyLayerName(String oldDataset)
+	public static void modifyLayerNameOSM(String oldDataset)
 	{
 		try {
 			GraphDatabaseService dbService= new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
@@ -345,7 +375,7 @@ public class Prepare {
 	 */
 	public static void generateRandomQueryGraph()
 	{
-		for ( int node_count = 3; node_count < 4; node_count++)
+		for ( int node_count = 2; node_count < 4; node_count++)
 		{
 			int spa_pred_count = 1;
 			String querygraph_path = "";
@@ -368,7 +398,7 @@ public class Prepare {
 			OwnMethods.Print(labels.size());
 			
 			ArrayList<Query_Graph> query_Graphs = new ArrayList<Query_Graph>(10);
-			while ( query_Graphs.size() != 3)
+			while ( query_Graphs.size() != 10)
 			{
 				Query_Graph query_Graph = OwnMethods.GenerateRandomGraph(datagraph, labels, 
 						entities, node_count, spa_pred_count);
