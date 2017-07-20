@@ -30,6 +30,7 @@ public class IndexSize {
 	static int nonspatial_label_count = config.getNonSpatialLabelCount();
 	
 	static String db_path;
+	static String graphPath;
 	static ArrayList<Integer> labels;//all labels in the graph
 	
 	public static void initializeParameters()
@@ -37,9 +38,11 @@ public class IndexSize {
 		switch (systemName) {
 		case Ubuntu:
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
+			graphPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
 			break;
 		case Windows:
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
+			graphPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\graph.txt", dataset);
 			break;
 		}
 		if (nonspatial_label_count == 1)
@@ -55,10 +58,22 @@ public class IndexSize {
 	
 	public static void main(String[] args) {
 		initializeParameters();
-		calculateIndexSize();
+//		calculateIndexSize();
 //		calculateValidIndexSize();
+		graphSize();
 	}
 
+	public static void graphSize()
+	{
+		try {
+			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+			OwnMethods.Print(OwnMethods.getGraphSize(graph));
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void calculateIndexSize()
 	{
 		try {

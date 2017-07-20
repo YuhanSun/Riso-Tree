@@ -39,6 +39,19 @@ import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 public class OwnMethods {
 	
 	/**
+	 * Return graph size (bytes)
+	 * @param graph
+	 * @return
+	 */
+	public static int getGraphSize(ArrayList<ArrayList<Integer>> graph)
+	{
+		int size = 0;
+		for ( ArrayList<Integer> neighbors :  graph)
+			size += neighbors.size();
+		return size * 4;
+	}
+	
+	/**
 	 * Convert the original single directional graph to a bidirectional graph
 	 * where each edge will stored in both start and end node's adjacent list.
 	 * @param graph
