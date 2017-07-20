@@ -21,13 +21,16 @@ public class Experiment {
 	static String password = config.getPassword();
 	
 	static String db_path;
-	static String querygraphDir;
 	static String graph_pos_map_path;
 	static String entityPath;
 	
+	static String querygraphDir;
+	static String spaPredicateDir;
+	static String resultDir;
+	
 	static boolean TEST_FORMAT;
 	static int experimentCount = 3;
-	
+
 	//non-spatial ratio 20
 	static double startSelectivity = 0.000001;
 	static double endSelectivity = 0.002;
@@ -48,15 +51,19 @@ public class Experiment {
 		switch (systemName) {
 		case Ubuntu:
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
-			querygraphDir = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph/%s/", dataset);
 			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map_RTree.txt";
 			entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+			querygraphDir = String.format("/mnt/hgfs/Google_Drive/Projects/risotree/query/query_graph/%s", dataset);
+			spaPredicateDir = String.format("/mnt/hgfs/Google_Drive/Projects/risotree/query/spa_predicate/%s", dataset);
+			resultDir = String.format("/mnt/hgfs/Google_Drive/Experiment_Result/Riso-Tree/%s", dataset);
 			break;
 		case Windows:
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
-			querygraphDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph\\%s\\", dataset);
 			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map_RTree.txt";
 			entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
+			querygraphDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph\\%s", dataset);
+			spaPredicateDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s", dataset);
+			resultDir = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s", dataset);
 			break;
 		}
 	}
@@ -103,19 +110,19 @@ public class Experiment {
 //			risoTreeQuery(3, 1);
 			
 			//Synthetic data set
-			Neo4j_Naive(2, 0);
-			SpatialFirst(2, 0);
-			SpatialFirstList_Block(2, 0);
-			risoTreeQuery(2, 0);
-			
-			Neo4j_Naive(2, 1);
-			SpatialFirst(2, 1);
-			SpatialFirstList_Block(2, 1);
-			risoTreeQuery(2, 1);
+//			Neo4j_Naive(2, 0);
+//			SpatialFirst(2, 0);
+//			SpatialFirstList_Block(2, 0);
+//			risoTreeQuery(2, 0);
+//			
+//			Neo4j_Naive(2, 1);
+//			SpatialFirst(2, 1);
+//			SpatialFirstList_Block(2, 1);
+//			risoTreeQuery(2, 1);
 			
 			int nodeCount = 3;
 //			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
-			for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
+			for ( int queryIndex = 4; queryIndex < 7; queryIndex++)
 			{
 				Neo4j_Naive(nodeCount, queryIndex);
 				SpatialFirst(nodeCount, queryIndex);
@@ -173,21 +180,21 @@ public class Experiment {
 		long time;
 		int limit = -1;
 		
-		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
+		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		Query_Graph query_Graph = queryGraphs.get(query_id);
 		
 		String result_detail_path = null, result_avg_path = null;
 		switch (systemName) {
 		case Ubuntu:
-			result_detail_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/risotree_%d_%d.txt", dataset, nodeCount, query_id);
-			result_avg_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/risotree_%d_%d_avg.txt", dataset, nodeCount, query_id);
-//			result_detail_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/risotree_%d_%d_test.txt", dataset, nodeCount, query_id);
-//			result_avg_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/risotree_%d_%d_avg_test.txt", dataset, nodeCount, query_id);
+			result_detail_path = String.format("%s/risotree_%d_%d.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s/risotree_%d_%d_avg.txt", resultDir, nodeCount, query_id);
+//			result_detail_path = String.format("%s/risotree_%d_%d_test.txt", resultDir, nodeCount, query_id);
+//			result_avg_path = String.format("%s/risotree_%d_%d_avg_test.txt", resultDir, nodeCount, query_id);
 			break;
 		case Windows:
-			result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\risotree_%d_%d.txt", dataset, nodeCount, query_id);
-			result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\risotree_%d_%d_avg.txt.txt", dataset, nodeCount, query_id);
+			result_detail_path = String.format("%s\\risotree_%d_%d.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s\\risotree_%d_%d_avg.txt.txt", resultDir, nodeCount, query_id);
 			break;
 		}
 		
@@ -211,10 +218,10 @@ public class Experiment {
 			String queryrect_path = null;
 			switch (systemName) {
 			case Ubuntu:
-				queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
 				break;
 			case Windows:
-				queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+				queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
 				break;
 			}
 			
@@ -319,19 +326,19 @@ public class Experiment {
 		long time;
 		int limit = -1;
 
-		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
+		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		Query_Graph query_Graph = queryGraphs.get(query_id);
 
 		String result_detail_path = null, result_avg_path = null;
 		switch (systemName) {
 		case Ubuntu:
-			result_detail_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/neo4j_%d_%d_API.txt", dataset, nodeCount, query_id);
-			result_avg_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/neo4j_%d_%d_API_avg.txt", dataset, nodeCount, query_id);
+			result_detail_path = String.format("%s/neo4j_%d_%d_API.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s/neo4j_%d_%d_API_avg.txt", resultDir, nodeCount, query_id);
 			break;
 		case Windows:
-			result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\neo4j_%d_%d_API.txt", dataset, nodeCount, query_id);
-			result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\neo4j_%d_%d_API_avg.txt", dataset, nodeCount, query_id);
+			result_detail_path = String.format("%s\\neo4j_%d_%d_API.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s\\neo4j_%d_%d_API_avg.txt", resultDir, nodeCount, query_id);
 			break;
 		}
 
@@ -361,10 +368,10 @@ public class Experiment {
 			String queryrect_path = null;
 			switch (systemName) {
 			case Ubuntu:
-				queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
 				break;
 			case Windows:
-				queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+				queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
 				break;
 			}
 
@@ -465,19 +472,19 @@ public class Experiment {
 		long time;
 		int limit = -1;
 		
-		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
+		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		Query_Graph query_Graph = queryGraphs.get(query_id);
 		
 		String result_detail_path = null, result_avg_path = null;
 		switch (systemName) {
 		case Ubuntu:
-			result_detail_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/spa_first_list_Block_%d_%d_API.txt", dataset, nodeCount, query_id);
-			result_avg_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/spa_first_list_Block_%d_%d_API_avg.txt", dataset, nodeCount, query_id);
+			result_detail_path = String.format("%s/spa_first_list_Block_%d_%d_API.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s/spa_first_list_Block_%d_%d_API_avg.txt", resultDir, nodeCount, query_id);
 			break;
 		case Windows:
-			result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_Block_%d_%d_API.txt", dataset, nodeCount, query_id);
-			result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_Block_%d_%d_API_avg.txt", dataset, nodeCount, query_id);
+			result_detail_path = String.format("%s\\spa_first_list_Block_%d_%d_API.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s\\spa_first_list_Block_%d_%d_API_avg.txt", resultDir, nodeCount, query_id);
 			break;
 		}
 		
@@ -501,10 +508,10 @@ public class Experiment {
 			String queryrect_path = null;
 			switch (systemName) {
 			case Ubuntu:
-				queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
 				break;
 			case Windows:
-				queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+				queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
 				break;
 			}
 			
@@ -610,19 +617,19 @@ public class Experiment {
 		int limit = -1;
 		int nodeCount = 4;
 		
-		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
+		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		Query_Graph query_Graph = queryGraphs.get(query_id);
 		
 		String result_detail_path = null, result_avg_path = null;
 		switch (systemName) {
 		case Ubuntu:
-			result_detail_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/spa_first_list_%d_API.txt", dataset, query_id);
-			result_avg_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/spa_first_list_%d_API_avg.txt", dataset, query_id);
+			result_detail_path = String.format("%s/spa_first_list_%d_API.txt", resultDir, query_id);
+			result_avg_path = String.format("%s/spa_first_list_%d_API_avg.txt", resultDir, query_id);
 			break;
 		case Windows:
-			result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_%d_API.txt", dataset, query_id);
-			result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_list_%d_API_avg.txt", dataset, query_id);
+			result_detail_path = String.format("%s\\spa_first_list_%d_API.txt", resultDir, query_id);
+			result_avg_path = String.format("%s\\spa_first_list_%d_API_avg.txt", resultDir, query_id);
 			break;
 		}
 		
@@ -646,10 +653,10 @@ public class Experiment {
 			String queryrect_path = null;
 			switch (systemName) {
 			case Ubuntu:
-				queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
 				break;
 			case Windows:
-				queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+				queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
 				break;
 			}
 			
@@ -750,7 +757,7 @@ public class Experiment {
 		long time;
 		int limit = -1;
 
-		String querygraph_path = String.format("%s%d.txt", querygraphDir, nodeCount);
+		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		Query_Graph query_Graph = queryGraphs.get(query_id);
 
@@ -758,12 +765,12 @@ public class Experiment {
 		switch(systemName)
 		{
 		case Ubuntu:
-			result_detail_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/spa_first_%d_%d_API.txt", dataset, nodeCount, query_id);
-			result_avg_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/spa_first_%d_%d_API_avg.txt", dataset, nodeCount, query_id);
+			result_detail_path = String.format("%s/spa_first_%d_%d_API.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s/spa_first_%d_%d_API_avg.txt", resultDir, nodeCount, query_id);
 			break;
 		case Windows:
-			result_detail_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_%d_%d_API.txt", dataset, nodeCount, query_id);
-			result_avg_path = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\spa_first_%d_%d_API_avg.txt", dataset, nodeCount, query_id);
+			result_detail_path = String.format("%s\\spa_first_%d_%d_API.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s\\spa_first_%d_%d_API_avg.txt", resultDir, nodeCount, query_id);
 			break;
 		}
 
@@ -786,10 +793,10 @@ public class Experiment {
 			String queryrect_path = null;
 			switch (systemName) {
 			case Ubuntu:
-				queryrect_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
 				break;
 			case Windows:
-				queryrect_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_%d.txt", dataset, name_suffix);
+				queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
 				break;
 			}
 
