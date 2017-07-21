@@ -52,7 +52,46 @@ public class PerformanceTest {
 		initializeParameters();
 //		getLabel();
 //		patternMatch();
-		profileQuery();
+//		profileQuery();
+		profilePredicate();
+	}
+	
+	public static void profilePredicate()
+	{
+		try {
+			GraphDatabaseService databaseService = new GraphDatabaseFactory()
+					.newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+//			String query = "profile match (a1:GRAPH_1) where 856.877643 <= a1.lon <= 857.751571 "
+////					+ "and 886.156102 <= a1.lat <= 887.030030 return a1";
+//					+ "return a1";
+			
+			String query = "profile match (a1:GRAPH_1) where 856.877643 <= a1.lon "
+//					+ "and 886.156102 <= a1.lat <= 887.030030 return a1";
+					+ "return a1";
+			
+			long start = System.currentTimeMillis();
+			Result result = databaseService.execute(query);
+			long getIteratorTime = System.currentTimeMillis() - start;
+			long start1 = System.currentTimeMillis();
+			float count = 0;
+			while(result.hasNext())
+			{
+				Map<String, Object> row = result.next();
+				count++;
+			}
+			long iteratorTime = System.currentTimeMillis() - start1;
+			
+			long time = System.currentTimeMillis() - start;
+			OwnMethods.Print(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
+			
+			ExecutionPlanDescription description = result.getExecutionPlanDescription();
+			OwnMethods.Print(description);
+			
+			tx.success();	tx.close();	databaseService.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void profileQuery()
@@ -68,7 +107,11 @@ public class PerformanceTest {
 //				String query = "profile match (a1:GRAPH_1)--(a2:GRAPH_1) where 841.540442 <= a1.lon <= 873.088772 "
 //						+ "and 870.818901 <= a1.lat <= 902.367231 return id(a1), id(a2)";			
 				
-				String query = "profile match (a1:GRAPH_1)--(a2:GRAPH_1), (a1:GRAPH_1)--(a3:GRAPH_1), (a2:GRAPH_1)--(a3:GRAPH_1)"
+//				String query = "profile match (a1:GRAPH_1)--(a2:GRAPH_1), (a1:GRAPH_1)--(a3:GRAPH_1), (a2:GRAPH_1)--(a3:GRAPH_1)"
+//						+ " where 856.877643 <= a1.lon <= 857.751571 "
+//						+ "and 886.156102 <= a1.lat <= 887.030030 return id(a1), id(a2), id(a3)";
+				
+				String query = "profile match (a1:GRAPH_1), (a2:GRAPH_22), (a3:GRAPH_64), (a1)--(a2), (a1)--(a3), (a2)--(a3)"
 						+ " where 856.877643 <= a1.lon <= 857.751571 "
 						+ "and 886.156102 <= a1.lat <= 887.030030 return id(a1), id(a2), id(a3)";
 				
