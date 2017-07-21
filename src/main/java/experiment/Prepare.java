@@ -68,12 +68,15 @@ public class Prepare {
 	static ArrayList<Integer> labels;//all labels in the graph
 	
 	//for patent_20
-//	static double startSelectivity = 0.000001;
-//	static double endSelectivity = 0.002;
+	static double startSelectivity = 0.000001;
+	static double endSelectivity = 0.002;
 	
 	//for patent_80
-	static double startSelectivity = 0.00001;
-	static double endSelectivity = 0.02;
+//	static double startSelectivity = 0.00001;
+//	static double endSelectivity = 0.02;
+	
+	static String queryDir;
+	static String center_id_path;
 	
 	static void initParameters()
 	{
@@ -88,6 +91,8 @@ public class Prepare {
 			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
 			rtree_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/rtree_map.txt", dataset);
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
+			queryDir = "/mnt/hgfs/Google_Drive/Projects/risotree/query";
+			center_id_path = String.format("%s/spa_predicate/%s/%s_centerids.txt", queryDir, dataset, dataset);
 			break;
 		case Windows:
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
@@ -99,6 +104,8 @@ public class Prepare {
 			graph_node_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\node_map.txt", dataset);
 			rtree_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\rtree_map.txt", dataset);
 			log_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\set_label.log", dataset);
+			queryDir = "D:\\Google_Drive\\Projects\\risotree\\query";
+			center_id_path = String.format("%s\\spa_predicate\\%s\\%s_centerids.txt", queryDir, dataset, dataset);
 		default:
 			break;
 		}
@@ -311,12 +318,10 @@ public class Prepare {
 	{
 		try {
 			int experiment_count = 500;
-			String entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
-			ArrayList<Entity> entities = OwnMethods.ReadEntity(entity_path);
+			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 			int spa_count = OwnMethods.GetSpatialEntityCount(entities);
 			STRtree stRtree = OwnMethods.ConstructSTRee(entities);
 
-			String center_id_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/%s_centerids.txt", dataset, dataset);
 			ArrayList<Integer> center_ids = OwnMethods.ReadCenterID(center_id_path);
 			ArrayList<Integer> final_center_ids = OwnMethods.GetRandom_NoDuplicate(center_ids, experiment_count);
 
@@ -325,6 +330,15 @@ public class Prepare {
 			{
 				int name_suffix = (int) (selectivity * spa_count);
 				String output_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				
+				switch(systemName)
+				{
+				case Ubuntu:
+					output_path = String.format("%s/spa_predicate/%s/queryrect_%d.txt", queryDir, dataset, name_suffix);
+				case Windows:
+					output_path = String.format("%s\\spa_predicate\\%s\\queryrect_%d.txt", queryDir, dataset, name_suffix);
+				}
+				
 				String write_line = "";
 				for (int id : final_center_ids)
 				{
@@ -366,7 +380,6 @@ public class Prepare {
 		String entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
 		ArrayList<Entity> entities = OwnMethods.ReadEntity(entity_path);
 		
-		String center_id_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/%s_centerids.txt", dataset, dataset);
 		OwnMethods.generateQueryRectangleCenterID(entities, center_id_path, 500);
 	}
 	
@@ -375,18 +388,17 @@ public class Prepare {
 	 */
 	public static void generateRandomQueryGraph()
 	{
-		for ( int node_count = 2; node_count < 4; node_count++)
+//		for ( int node_count = 2; node_count < 4; node_count++)
+		int node_count = 10;
 		{
 			int spa_pred_count = 1;
 			String querygraph_path = "";
 			switch (systemName) {
 			case Ubuntu:
-				querygraph_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/"
-						+ "query/query_graph/%s/%d.txt", dataset, node_count);
+				querygraph_path = String.format("%s/query_graph/%s/%d.txt", queryDir, dataset, node_count);
 				break;
 			case Windows:
-				querygraph_path = String.format("D:\\Ubuntu_shared\\GeoMinHop"
-						+ "\\query\\query_graph\\%s\\%d.txt", dataset, node_count);
+				querygraph_path = String.format("%s\\query_graph\\%s\\%d.txt", queryDir, dataset, node_count);
 			}
 			
 			ArrayList<ArrayList<Integer>> datagraph = OwnMethods.ReadGraph(graph_path);
