@@ -31,12 +31,78 @@ import java.util.TreeSet;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import org.neo4j.graphdb.ExecutionPlanDescription;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.roaringbitmap.RoaringBitmap;
 import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 
 
 public class OwnMethods {
+	
+	/**
+	 * Load hmbr from file to database.
+	 * @param hmbrPath
+	 * @param datbasePath
+	 * @param graphNeo4jIDMap
+	 * @param rectCornerName
+	 */
+	public static void loadHMBR(String hmbrPath, String datbasePath, 
+			ArrayList<Long> graphNeo4jIDMap, String [] rectCornerName)
+	{
+		BufferedReader reader = null;
+		GraphDatabaseService databaseService = null;
+		String minx_name = rectCornerName[0];
+		String miny_name = rectCornerName[1];
+		String maxx_name = rectCornerName[2];
+		String maxy_name = rectCornerName[3];
+		try {
+			databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(datbasePath));
+			Transaction tx = databaseService.beginTx();
+			reader = new BufferedReader(new FileReader(new File(hmbrPath)));
+			String line = reader.readLine();
+			int hopNum = Integer.parseInt(line.split(",")[1]);
+			
+			int nodeGraphID = 0;
+			while ( (line = reader.readLine()) != null)
+			{
+				String [] list_hmbr = line.split(";");
+				for ( int j = 0; j < hopNum; j++)
+				{
+					long nodeNeo4jID = graphNeo4jIDMap.get(nodeGraphID);
+					Node node = databaseService.getNodeById(nodeNeo4jID);
+					String start = list_hmbr[j].substring(0, 2);
+					if(start.equals("1") == true)
+					{
+						String rect = list_hmbr[j].substring(3, list_hmbr[j].length()-1);
+						String[] liString = rect.split(",");
+						double minx = Double.parseDouble(liString[0]);
+						double miny = Double.parseDouble(liString[1]);
+						double maxx = Double.parseDouble(liString[2]);
+						double maxy = Double.parseDouble(liString[3]);
+						node.setProperty(String.format("HMBR_%d_%s", j + 1, minx_name), minx);
+						node.setProperty(String.format("HMBR_%d_%s", j + 1, miny_name), miny);
+						node.setProperty(String.format("HMBR_%d_%s", j + 1, maxx_name), maxx);
+						node.setProperty(String.format("HMBR_%d_%s", j + 1, maxy_name), maxy);
+					}
+					else
+					{
+						node.setProperty(String.format("HMBR_%d_%s", j + 1, minx_name), -181.0);
+						node.setProperty(String.format("HMBR_%d_%s", j + 1, miny_name), -91.0);
+						node.setProperty(String.format("HMBR_%d_%s", j + 1, maxx_name), 181.0);
+						node.setProperty(String.format("HMBR_%d_%s", j + 1, maxy_name), 90.0);
+					}
+				}
+			}
+			tx.success();
+			tx.close();
+			databaseService.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();	
+			System.exit(-1);
+		}
+	}
 	
 	/**
 	 * Return graph size (bytes)
