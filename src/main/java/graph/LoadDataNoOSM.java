@@ -46,7 +46,7 @@ public class LoadDataNoOSM {
 	static String lat_name = config.GetLatitudePropertyName();
 	static int nonspatial_label_count = config.getNonSpatialLabelCount();
 	
-	static String dbPath, entityPath, mapPath, graphPath, labelListPath;
+	static String dbPath, entityPath, mapPath, graphPath, labelListPath, hmbrPath;
 	
 	static ArrayList<Entity> entities; 
 	static int nonspatial_vertex_count;
@@ -66,6 +66,7 @@ public class LoadDataNoOSM {
 			 */
 			mapPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map_RTree.txt", dataset);
 			graphPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
+			hmbrPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/HMBR.txt", dataset);
 			break;
 		case Windows:
 			dbPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", 
@@ -74,6 +75,7 @@ public class LoadDataNoOSM {
 			labelListPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\label.txt", dataset);
 			mapPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\node_map_RTree.txt", dataset);
 			graphPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\graph.txt", dataset);
+			hmbrPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\HMBR.txt", dataset);
 		default:
 			break;
 		}
@@ -88,28 +90,41 @@ public class LoadDataNoOSM {
 		try {
 			initParameters();
 			
-			batchRTreeInsert();
+//			batchRTreeInsert();
+//			
+//			if ( nonspatial_label_count == 1)
+//				generateLabelList();
+//			else
+//			{
+//				generateNonspatialLabel();
+//				nonspatialLabelTest();
+//			}
+//			
+//			LoadNonSpatialEntity();
+//			
+//			GetSpatialNodeMap();
+//			
+//			LoadGraphEdges();
+//			
+//			CalculateCount();
 			
-			if ( nonspatial_label_count == 1)
-				generateLabelList();
-			else
-			{
-				generateNonspatialLabel();
-				nonspatialLabelTest();
-			}
-			
-			LoadNonSpatialEntity();
-			
-			GetSpatialNodeMap();
-			
-			LoadGraphEdges();
-			
-			CalculateCount();
+			loadHMBR();
 			
 		} catch (Exception e) {
 			e.printStackTrace();	System.exit(-1);
 		}
 		
+	}
+	
+	public static void loadHMBR()
+	{
+		HashMap<String, String> mapStr = OwnMethods.ReadMap(mapPath);
+		ArrayList<Long> graphNeo4jIDMap = new ArrayList<Long>();
+		for (String keyStr : mapStr.keySet())
+			graphNeo4jIDMap.add(Long.parseLong(mapStr.get(keyStr)));
+		
+		Config config = new Config();
+		OwnMethods.loadHMBR(hmbrPath, dbPath, graphNeo4jIDMap, config.GetRectCornerName());
 	}
 	
 	/**
