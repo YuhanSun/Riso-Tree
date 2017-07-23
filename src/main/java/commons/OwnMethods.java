@@ -62,17 +62,21 @@ public class OwnMethods {
 			Transaction tx = databaseService.beginTx();
 			reader = new BufferedReader(new FileReader(new File(hmbrPath)));
 			String line = reader.readLine();
-			int hopNum = Integer.parseInt(line.split(",")[1]);
+			String [] lineList = line.split(",");
+			int nodeCount = Integer.parseInt(lineList[0]);
+			int hopNum = Integer.parseInt(lineList[1]);
 			
-			int nodeGraphID = 0;
-			while ( (line = reader.readLine()) != null)
+			for ( int nodeGraphID = 0; nodeGraphID < nodeCount; nodeGraphID++)
 			{
+				OwnMethods.Print(nodeGraphID);
+				line = reader.readLine();
 				String [] list_hmbr = line.split(";");
 				for ( int j = 0; j < hopNum; j++)
 				{
 					long nodeNeo4jID = graphNeo4jIDMap.get(nodeGraphID);
 					Node node = databaseService.getNodeById(nodeNeo4jID);
-					String start = list_hmbr[j].substring(0, 2);
+					String start = list_hmbr[j].substring(0, 1);
+					OwnMethods.Print(start);
 					if(start.equals("1") == true)
 					{
 						String rect = list_hmbr[j].substring(3, list_hmbr[j].length()-1);
@@ -85,7 +89,16 @@ public class OwnMethods {
 						node.setProperty(String.format("HMBR_%d_%s", j + 1, miny_name), miny);
 						node.setProperty(String.format("HMBR_%d_%s", j + 1, maxx_name), maxx);
 						node.setProperty(String.format("HMBR_%d_%s", j + 1, maxy_name), maxy);
+						OwnMethods.Print("set");
 					}
+				}
+				if ( nodeGraphID % 100000 == 0)
+				{
+					tx.success();
+					tx.close();
+					databaseService.shutdown();
+					databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(datbasePath));
+					tx = databaseService.beginTx();
 				}
 			}
 			tx.success();
