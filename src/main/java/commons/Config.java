@@ -26,7 +26,8 @@ public class Config
 	private String dataset = "foursquare";
 	
 	private int MAX_HOPNUM = 1;
-	private int nonspatial_label_count = 1;
+	private int MAX_HMBR_HOPNUM = 3;
+	private int nonspatial_label_count = 2;
 
 	private String Rect_minx_name = "minx";
 	private String Rect_miny_name = "miny";
@@ -64,6 +65,11 @@ public class Config
 	public int getMaxHopNum()
 	{
 		return MAX_HOPNUM;
+	}
+	
+	public int getMaxHMBRHopNum()
+	{
+		return MAX_HMBR_HOPNUM;
 	}
 	
 	public system getSystemName()
