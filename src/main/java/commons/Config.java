@@ -11,7 +11,12 @@ public class Config
 	}
 	
 	public static enum Datasets {
-		Patents_100_random_80;
+		Patents_100_random_80, Patents_100_random_20, 
+		Patents_10_random_20,Patents_10_random_80,
+		Patents_1_random_80,Patents_1_random_20,
+		foursquare, foursquare_10, foursquare_100,
+		Gowalla, Gowalla_10, Gowalla_100,
+		Yelp, Yelp_10, Yelp_100,
 	}
 	
 	public Config() 
