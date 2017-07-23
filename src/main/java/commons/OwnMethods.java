@@ -86,13 +86,6 @@ public class OwnMethods {
 						node.setProperty(String.format("HMBR_%d_%s", j + 1, maxx_name), maxx);
 						node.setProperty(String.format("HMBR_%d_%s", j + 1, maxy_name), maxy);
 					}
-					else
-					{
-						node.setProperty(String.format("HMBR_%d_%s", j + 1, minx_name), -181.0);
-						node.setProperty(String.format("HMBR_%d_%s", j + 1, miny_name), -91.0);
-						node.setProperty(String.format("HMBR_%d_%s", j + 1, maxx_name), 181.0);
-						node.setProperty(String.format("HMBR_%d_%s", j + 1, maxy_name), 90.0);
-					}
 				}
 			}
 			tx.success();
