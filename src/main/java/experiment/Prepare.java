@@ -88,7 +88,7 @@ public class Prepare {
 			entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
 			geo_id_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/geom_osmid_map.txt", dataset);
 			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
-			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
+			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map_RTree.txt", dataset);
 			rtree_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/rtree_map.txt", dataset);
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
 			queryDir = "/mnt/hgfs/Google_Drive/Projects/risotree/query";
@@ -101,7 +101,7 @@ public class Prepare {
 			entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
 			geo_id_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\geom_osmid_map.txt", dataset);
 			label_list_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\label.txt", dataset);
-			graph_node_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\node_map.txt", dataset);
+			graph_node_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\node_map_RTree.txt", dataset);
 			rtree_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\rtree_map.txt", dataset);
 			log_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\set_label.log", dataset);
 			queryDir = "D:\\Google_Drive\\Projects\\risotree\\query";
@@ -135,13 +135,13 @@ public class Prepare {
 //		setNewLabel();
 //		newLabelTest();
 		
-		generateRandomQueryGraph();
+//		generateRandomQueryGraph();
 //		generateQueryRectangleCenterID();
 //		generateQueryRectangleForSelectivity();
 		
 //		generateNewNLList();
+		
 	}
-	
 	
 	public static void newNLListTest()
 	{
