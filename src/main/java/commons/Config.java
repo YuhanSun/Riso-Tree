@@ -10,6 +10,10 @@ public class Config
 		Explain, Profile, Nothing
 	}
 	
+	public static enum Datasets {
+		Patents_100_random_80;
+	}
+	
 	public Config() 
 	{
 
@@ -22,12 +26,12 @@ public class Config
 	
 	//attention here, these settings change a lot
 	private String neo4j_version = "neo4j-community-3.1.1";
-	private system operatingSystem = system.Windows;
-	private String dataset = "foursquare";
+	private system operatingSystem = system.Ubuntu;
+	private String dataset = Datasets.Patents_100_random_80.name();
 	
 	private int MAX_HOPNUM = 1;
 	private int MAX_HMBR_HOPNUM = 3;
-	private int nonspatial_label_count = 2;
+	private int nonspatial_label_count = 100;
 
 	private String Rect_minx_name = "minx";
 	private String Rect_miny_name = "miny";
