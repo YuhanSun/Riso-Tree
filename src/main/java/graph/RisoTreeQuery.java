@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.TreeSet;
 
@@ -60,6 +61,7 @@ public class RisoTreeQuery {
 	public static boolean outputLevelInfo = false;
 	public static boolean outputQuery = false;
 	public static boolean outputExecutionPlan = false;
+	public static boolean outputResult = true;
 	
 	/**
 	 * initialize
@@ -968,7 +970,9 @@ public class RisoTreeQuery {
 								while (result.hasNext())
 								{
 									cur_count++;
-									result.next();
+									Map<String, Object> row = result.next();
+									if (outputResult)
+										OwnMethods.Print(row);
 								}
 								iterate_time += System.currentTimeMillis() - start;
 
@@ -1014,7 +1018,9 @@ public class RisoTreeQuery {
 							while (result.hasNext())
 							{
 								cur_count++;
-								result.next();
+								Map<String, Object> row = result.next();
+								if (outputResult)
+									OwnMethods.Print(row);
 							}
 							iterate_time += System.currentTimeMillis() - start;
 
@@ -1081,10 +1087,9 @@ public class RisoTreeQuery {
 								while( result.hasNext())
 								{
 									cur_count++;
-									result.next();
-									//								Map<String, Object> row = result.next();
-									//								String str = row.toString();
-									//								OwnMethods.Print(row.toString());
+									Map<String, Object> row = result.next();
+									if (outputResult)
+										OwnMethods.Print(row);
 								}
 								iterate_time += System.currentTimeMillis() - start;
 
@@ -1213,7 +1218,7 @@ public class RisoTreeQuery {
 			for ( int queryNodeID = 0; queryNodeID < query_Graph.graph.size(); queryNodeID++)
 			{
 				int minhop = min_hop_array[key][queryNodeID];
-				if ( minhop <= MAX_HMBRHOPNUM)
+				if ( minhop <= MAX_HMBRHOPNUM && minhop != -1)
 				{
 					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, minx_name, cur_rect.max_x);
 					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, miny_name, cur_rect.max_y);
@@ -1332,7 +1337,7 @@ public class RisoTreeQuery {
 			for ( int queryNodeID = 0; queryNodeID < query_Graph.graph.size(); queryNodeID++)
 			{
 				int minhop = min_hop_array[key][queryNodeID];
-				if ( minhop <= MAX_HMBRHOPNUM)
+				if ( minhop <= MAX_HMBRHOPNUM && minhop != -1)
 				{
 					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, minx_name, cur_rect.max_x);
 					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, miny_name, cur_rect.max_y);
