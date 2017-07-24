@@ -32,12 +32,12 @@ public class Experiment {
 	static int experimentCount = 3;
 
 	//non-spatial ratio 20
-	static double startSelectivity = 0.000001;
-	static double endSelectivity = 0.002;
+//	static double startSelectivity = 0.000001;
+//	static double endSelectivity = 0.002;
 	
 	//non-spatial ratio 80
-//	static double startSelectivity = 0.00001;
-//	static double endSelectivity = 0.02;
+	static double startSelectivity = 0.00001;
+	static double endSelectivity = 0.02;
 	
 //	static double startSelectivity = 0.0001;
 //	static double endSelectivity = 0.2;
@@ -61,8 +61,8 @@ public class Experiment {
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
 			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map_RTree.txt";
 			entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
-			querygraphDir = String.format("D:\\Google_Drive\\Projects\\risotree\\query\\query_graph\\%s", dataset);
-			spaPredicateDir = String.format("D:\\Google_Drive\\Projects\\risotree\\query\\spa_predicate\\%s", dataset);
+			querygraphDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph\\%s", dataset);
+			spaPredicateDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s", dataset);
 			resultDir = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s", dataset);
 			break;
 		}
@@ -114,20 +114,27 @@ public class Experiment {
 //			SpatialFirst(2, 0);
 //			SpatialFirstList_Block(2, 0);
 //			risoTreeQuery(2, 0);
+//			risoTreeQuery_HMBR(2, 0);
 //			
 //			Neo4j_Naive(2, 1);
 //			SpatialFirst(2, 1);
 //			SpatialFirstList_Block(2, 1);
 //			risoTreeQuery(2, 1);
+//			risoTreeQuery_HMBR(2, 1);
 			
-			int nodeCount = 3;
+			int nodeCount = 10;
+			
 //			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
-			for ( int queryIndex = 4; queryIndex < 7; queryIndex++)
+//			for (int k = 0; k < 0100;k ++)
 			{
-				Neo4j_Naive(nodeCount, queryIndex);
-				SpatialFirst(nodeCount, queryIndex);
-				SpatialFirstList_Block(nodeCount, queryIndex);
-				risoTreeQuery(nodeCount, queryIndex);
+				for ( int queryIndex = 0; queryIndex < 1; queryIndex++)
+				{
+//					Neo4j_Naive(nodeCount, queryIndex);
+//					SpatialFirst(nodeCount, queryIndex);
+//					SpatialFirstList_Block(nodeCount, queryIndex);
+					risoTreeQuery(nodeCount, queryIndex);
+					risoTreeQuery_HMBR(nodeCount, queryIndex);
+				}
 			}
 			
 			
@@ -165,7 +172,158 @@ public class Experiment {
 			e.printStackTrace();
 			System.exit(-1);
 		}
+	}
+	
+	/**
+	 * use RisoTree and graph first approach
+	 * @param nodeCount
+	 * @param query_id
+	 * @throws Exception
+	 */
+	public static void risoTreeQuery_HMBR(int nodeCount, int query_id) throws Exception
+	{
+		long start;
+		long time;
+		int limit = -1;
 		
+		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
+		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		Query_Graph query_Graph = queryGraphs.get(query_id);
+		
+		String result_detail_path = null, result_avg_path = null;
+		switch (systemName) {
+		case Ubuntu:
+			result_detail_path = String.format("%s/risotree_HMBR_%d_%d.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s/risotree_HMBR_%d_%d_avg.txt", resultDir, nodeCount, query_id);
+//			result_detail_path = String.format("%s/risotree_%d_%d_test.txt", resultDir, nodeCount, query_id);
+//			result_avg_path = String.format("%s/risotree_%d_%d_avg_test.txt", resultDir, nodeCount, query_id);
+			break;
+		case Windows:
+			result_detail_path = String.format("%s\\risotree_HMBR_%d_%d.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s\\risotree_HMBR_%d_%d_avg.txt.txt", resultDir, nodeCount, query_id);
+			break;
+		}
+		
+		String write_line = String.format("%s\t%d\n", dataset, limit);
+		if(!TEST_FORMAT)
+		{
+			OwnMethods.WriteFile(result_detail_path, true, write_line);
+			OwnMethods.WriteFile(result_avg_path, true, write_line);
+		}
+		
+		String head_line = "count\trange_time\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
+		if(!TEST_FORMAT)
+			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
+		
+		double selectivity = startSelectivity;
+		int times = 10;
+		while ( selectivity <= endSelectivity)
+		{
+			int name_suffix = (int) (selectivity * spaCount);
+			
+			String queryrect_path = null;
+			switch (systemName) {
+			case Ubuntu:
+				queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
+				break;
+			case Windows:
+				queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
+				break;
+			}
+			
+			write_line = selectivity + "\n" + head_line;
+			if(!TEST_FORMAT)
+				OwnMethods.WriteFile(result_detail_path, true, write_line);
+			
+			ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+			HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
+			long[] graph_pos_map_list= new long[graph_pos_map.size()];
+			for ( String key_str : graph_pos_map.keySet())
+			{
+				int key = Integer.parseInt(key_str);
+				int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
+				graph_pos_map_list[key] = pos_id;
+			}
+			RisoTreeQuery risoTreeQuery = new RisoTreeQuery(db_path, dataset, graph_pos_map_list);
+			
+			ArrayList<Long> range_query_time = new ArrayList<Long>();
+			ArrayList<Long> time_get_iterator = new ArrayList<Long>();
+			ArrayList<Long> time_iterate = new ArrayList<Long>();
+			ArrayList<Long> total_time = new ArrayList<Long>();
+			ArrayList<Long> count = new ArrayList<Long>();
+			ArrayList<Long> access = new ArrayList<Long>();
+			
+			for ( int i = 0; i < experimentCount; i++)
+			{
+				MyRectangle rectangle = queryrect.get(i);
+				if ( rectangle.area() == 0.0)
+				{
+					double delta = Math.pow(0.1, 10);
+					rectangle = new MyRectangle(rectangle.min_x - delta, rectangle.min_y - delta,
+							rectangle.max_x + delta, rectangle.max_y + delta);
+				}
+				
+				query_Graph.spa_predicate = new MyRectangle[query_Graph.graph.size()];
+				
+				//only handle query with one spatial predicate
+				int j = 0;
+				for (  ; j < query_Graph.graph.size(); j++)
+					if(query_Graph.Has_Spa_Predicate[j])
+						break;
+				query_Graph.spa_predicate[j] = rectangle;
+				
+				if(!TEST_FORMAT)
+				{
+					OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+					
+					start = System.currentTimeMillis();
+					risoTreeQuery.QueryHMBR(query_Graph, -1);
+					time = System.currentTimeMillis() - start;
+					
+					time_get_iterator.add(risoTreeQuery.get_iterator_time);
+					time_iterate.add(risoTreeQuery.iterate_time);
+					total_time.add(time);
+					count.add(risoTreeQuery.result_count);
+					access.add(risoTreeQuery.page_hit_count);
+					range_query_time.add(risoTreeQuery.range_query_time);
+					
+					write_line = String.format("%d\t%d\t", count.get(i), range_query_time.get(i));
+					write_line += String.format("%d\t", time_get_iterator.get(i));
+					write_line += String.format("%d\t%d\t", time_iterate.get(i), total_time.get(i));
+					write_line += String.format("%d\n", access.get(i));
+					if(!TEST_FORMAT)
+						OwnMethods.WriteFile(result_detail_path, true, write_line);
+				}
+				
+				risoTreeQuery.dbservice.shutdown();
+				
+				OwnMethods.ClearCache(password);
+				Thread.currentThread();
+				Thread.sleep(5000);
+				
+				risoTreeQuery.dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+				
+			}
+			risoTreeQuery.dbservice.shutdown();
+			
+			write_line = String.valueOf(selectivity) + "\t";
+			write_line += String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
+			write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+			write_line += String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
+			write_line += String.format("%d\n", Utility.Average(access));
+			if(!TEST_FORMAT)
+				OwnMethods.WriteFile(result_avg_path, true, write_line);
+			
+//			long larger_time = Utility.Average(total_time);
+//			if (larger_time * expe_count > 450 * 1000)
+//				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 450.0 / 1000.0));
+//			if(expe_count < 1)
+//				expe_count = 1;
+			
+			selectivity *= times;
+		}
+		OwnMethods.WriteFile(result_detail_path, true, "\n");
+		OwnMethods.WriteFile(result_avg_path, true, "\n");
 	}
 	
 	/**
