@@ -49,7 +49,7 @@ public class OwnMethods {
 	 * @param rectCornerName
 	 */
 	public static void loadHMBR(String hmbrPath, String datbasePath, 
-			ArrayList<Long> graphNeo4jIDMap, String [] rectCornerName)
+			Map<Integer, Long> graphNeo4jIDMap, String [] rectCornerName)
 	{
 		BufferedReader reader = null;
 		GraphDatabaseService databaseService = null;
