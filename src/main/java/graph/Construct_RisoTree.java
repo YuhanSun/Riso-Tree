@@ -386,7 +386,7 @@ public class Construct_RisoTree {
 			dbservice.shutdown();
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();	System.exit(-1);
 		}
 	}
 	
