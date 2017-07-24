@@ -74,7 +74,8 @@ public class RisoTreeQuery {
 		dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		dataset = p_dataset;
 		graph_pos_map_list =  p_graph_pos_map;
-		logPath = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/query.log", dataset);
+//		logPath = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/query.log", dataset);
+		logPath = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\query.log", dataset);
 	}
 
 	public static int[][] Ini_Minhop(Query_Graph query_Graph)
@@ -1331,21 +1332,21 @@ public class RisoTreeQuery {
 		query += ")\n";
 		
 		//HMBR
-		for ( int key : spa_predicates.keySet())
-		{
-			MyRectangle cur_rect = spa_predicates.get(key);
-			for ( int queryNodeID = 0; queryNodeID < query_Graph.graph.size(); queryNodeID++)
-			{
-				int minhop = min_hop_array[key][queryNodeID];
-				if ( minhop <= MAX_HMBRHOPNUM && minhop != -1)
-				{
-					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, minx_name, cur_rect.max_x);
-					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, miny_name, cur_rect.max_y);
-					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxx_name, cur_rect.min_x);
-					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxy_name, cur_rect.min_y);
-				}
-			}
-		}
+//		for ( int key : spa_predicates.keySet())
+//		{
+//			MyRectangle cur_rect = spa_predicates.get(key);
+//			for ( int queryNodeID = 0; queryNodeID < query_Graph.graph.size(); queryNodeID++)
+//			{
+//				int minhop = min_hop_array[key][queryNodeID];
+//				if ( minhop <= MAX_HMBRHOPNUM && minhop != -1)
+//				{
+//					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, minx_name, cur_rect.max_x);
+//					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, miny_name, cur_rect.max_y);
+//					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxx_name, cur_rect.min_x);
+//					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxy_name, cur_rect.min_y);
+//				}
+//			}
+//		}
 		
 		//NL_id_list
 //		for ( int key : NL_hopnum.keySet())
@@ -1643,7 +1644,9 @@ public class RisoTreeQuery {
 								while (result.hasNext())
 								{
 									cur_count++;
-									result.next();
+									Map<String, Object> row = result.next();
+									if ( outputResult)
+										OwnMethods.Print(row);
 								}
 								iterate_time += System.currentTimeMillis() - start;
 
@@ -1672,7 +1675,7 @@ public class RisoTreeQuery {
 
 						if ( id_pos_list.size() != 0)
 						{
-							String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
+							String query = formSubgraphQuery_HMBR(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list, min_hop_array);
 
 							if ( outputQuery)
 							{
@@ -1689,7 +1692,9 @@ public class RisoTreeQuery {
 							while (result.hasNext())
 							{
 								cur_count++;
-								result.next();
+								Map<String, Object> row = result.next();
+								if ( outputResult)
+									OwnMethods.Print(row);
 							}
 							iterate_time += System.currentTimeMillis() - start;
 
@@ -1757,10 +1762,9 @@ public class RisoTreeQuery {
 								while( result.hasNext())
 								{
 									cur_count++;
-									result.next();
-									//								Map<String, Object> row = result.next();
-									//								String str = row.toString();
-									//								OwnMethods.Print(row.toString());
+									Map<String, Object> row = result.next();
+									if ( outputResult)
+										OwnMethods.Print(row);
 								}
 								iterate_time += System.currentTimeMillis() - start;
 
