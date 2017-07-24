@@ -100,13 +100,15 @@ public class LoadDataNoOSM {
 //				nonspatialLabelTest();
 //			}
 //			
-//			LoadNonSpatialEntity();
-//			
+			LoadNonSpatialEntity();
+			
 //			GetSpatialNodeMap();
-//			
-//			LoadGraphEdges();
-//			
-//			CalculateCount();
+			
+			LoadGraphEdges();
+			
+			CalculateCount();
+			
+			Construct_RisoTree.main(null);
 			
 			loadHMBR();
 			
@@ -119,9 +121,9 @@ public class LoadDataNoOSM {
 	public static void loadHMBR()
 	{
 		HashMap<String, String> mapStr = OwnMethods.ReadMap(mapPath);
-		ArrayList<Long> graphNeo4jIDMap = new ArrayList<Long>();
+		HashMap<Integer, Long> graphNeo4jIDMap = new HashMap<Integer, Long>();
 		for (String keyStr : mapStr.keySet())
-			graphNeo4jIDMap.add(Long.parseLong(mapStr.get(keyStr)));
+			graphNeo4jIDMap.put(Integer.parseInt(keyStr), Long.parseLong(mapStr.get(keyStr)));
 		
 		Config config = new Config();
 		OwnMethods.loadHMBR(hmbrPath, dbPath, graphNeo4jIDMap, config.GetRectCornerName());
@@ -283,7 +285,7 @@ public class LoadDataNoOSM {
 			inserter.shutdown();
 			OwnMethods.WriteMap(mapPath, true, id_map);
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace();	System.exit(-1);
 		}
 	}
 	
