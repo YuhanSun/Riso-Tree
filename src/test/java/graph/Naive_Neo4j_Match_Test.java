@@ -38,8 +38,8 @@ public class Naive_Neo4j_Match_Test {
 		case Windows:
 			String dataDirectory = "D:\\Ubuntu_shared\\GeoMinHop\\data";
 			db_path = String.format("%s\\%s\\%s_%s\\data\\databases\\graph.db", dataDirectory, dataset, version, dataset);
-			querygraphDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph\\%s", dataset);
-			spaPredicateDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s", dataset);
+			querygraphDir = String.format("D:\\Google_Drive\\Projects\\risotree\\query\\query_graph\\%s", dataset);
+			spaPredicateDir = String.format("D:\\Google_Drive\\Projects\\risotree\\query\\spa_predicate\\%s", dataset);
 		default:
 			break;
 		}
@@ -52,20 +52,23 @@ public class Naive_Neo4j_Match_Test {
 	@Test
 	public void queryTest() {
 		int nodeCount = 2, query_id = 0;
-		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
-		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
-		Query_Graph query_Graph = queryGraphs.get(query_id);
-		
 		int name_suffix = 75;
-		String queryrect_path = null;
+		
+		String queryrect_path = null, querygraph_path = null;
 		switch (systemName) {
 		case Ubuntu:
+			querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
 			queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
 			break;
 		case Windows:
+			querygraph_path = String.format("%s\\%d.txt", querygraphDir, nodeCount);
 			queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
 			break;
 		}
+		
+		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		Query_Graph query_Graph = queryGraphs.get(query_id);
+		
 		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
 		MyRectangle rectangle = queryrect.get(0);
 		int j = 0;
