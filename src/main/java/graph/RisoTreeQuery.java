@@ -1332,21 +1332,21 @@ public class RisoTreeQuery {
 		query += ")\n";
 		
 		//HMBR
-//		for ( int key : spa_predicates.keySet())
-//		{
-//			MyRectangle cur_rect = spa_predicates.get(key);
-//			for ( int queryNodeID = 0; queryNodeID < query_Graph.graph.size(); queryNodeID++)
-//			{
-//				int minhop = min_hop_array[key][queryNodeID];
-//				if ( minhop <= MAX_HMBRHOPNUM && minhop != -1)
-//				{
-//					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, minx_name, cur_rect.max_x);
-//					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, miny_name, cur_rect.max_y);
-//					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxx_name, cur_rect.min_x);
-//					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxy_name, cur_rect.min_y);
-//				}
-//			}
-//		}
+		for ( int key : spa_predicates.keySet())
+		{
+			MyRectangle cur_rect = spa_predicates.get(key);
+			for ( int queryNodeID = 0; queryNodeID < query_Graph.graph.size(); queryNodeID++)
+			{
+				int minhop = min_hop_array[key][queryNodeID];
+				if ( minhop <= MAX_HMBRHOPNUM && minhop != -1)
+				{
+					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, minx_name, cur_rect.max_x);
+					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, miny_name, cur_rect.max_y);
+					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxx_name, cur_rect.min_x);
+					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxy_name, cur_rect.min_y);
+				}
+			}
+		}
 		
 		//NL_id_list
 //		for ( int key : NL_hopnum.keySet())
