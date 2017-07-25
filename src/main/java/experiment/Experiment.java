@@ -175,7 +175,149 @@ public class Experiment {
 	}
 	
 	/**
-	 * use RisoTree and graph first approach
+	 * HMBR query
+	 * @param nodeCount
+	 * @param query_id
+	 * @throws Exception
+	 */
+	public static void HMBR(int nodeCount, int query_id) throws Exception
+	{
+		long start;
+		long time;
+		int limit = -1;
+
+		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
+		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		Query_Graph query_Graph = queryGraphs.get(query_id);
+
+		String result_detail_path = null, result_avg_path = null;
+		switch (systemName) {
+		case Ubuntu:
+			result_detail_path = String.format("%s/HMBR_%d_%d_API.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s/HMBR_%d_%d_API_avg.txt", resultDir, nodeCount, query_id);
+			break;
+		case Windows:
+			result_detail_path = String.format("%s\\HMBR_%d_%d_API.txt", resultDir, nodeCount, query_id);
+			result_avg_path = String.format("%s\\HMBR_%d_%d_API_avg.txt", resultDir, nodeCount, query_id);
+			break;
+		}
+
+		ArrayList<Long> time_get_iterator = new ArrayList<Long>();
+		ArrayList<Long> time_iterate = new ArrayList<Long>();
+		ArrayList<Long> total_time = new ArrayList<Long>();
+		ArrayList<Long> count = new ArrayList<Long>();
+		ArrayList<Long> access = new ArrayList<Long>();
+
+		String write_line = String.format("%s\t%d\n", dataset, limit);
+		if(!TEST_FORMAT)
+		{
+			OwnMethods.WriteFile(result_detail_path, true, write_line);
+			OwnMethods.WriteFile(result_avg_path, true, write_line);
+		}
+
+		String head_line = "count\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
+		if(!TEST_FORMAT)
+			OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
+
+		double selectivity = startSelectivity;
+		int times = 10;
+		while ( selectivity <= endSelectivity)
+		{
+			int name_suffix = (int) (selectivity * spaCount);
+			
+			String queryrect_path = null;
+			switch (systemName) {
+			case Ubuntu:
+				queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
+				break;
+			case Windows:
+				queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
+				break;
+			}
+
+			write_line = selectivity + "\n" + head_line;
+			if(!TEST_FORMAT)
+				OwnMethods.WriteFile(result_detail_path, true, write_line);
+
+			ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+			HMBR hmbr = new HMBR(db_path);
+			for ( int i = 0; i < experimentCount; i++)
+			{
+				MyRectangle rectangle = queryrect.get(i);
+				query_Graph.spa_predicate = new MyRectangle[query_Graph.graph.size()];
+
+				int j = 0;
+				for (  ; j < query_Graph.graph.size(); j++)
+					if(query_Graph.Has_Spa_Predicate[j])
+						break;
+				query_Graph.spa_predicate[j] = rectangle;
+
+				if(!TEST_FORMAT)
+				{
+					OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+
+					start = System.currentTimeMillis();
+					Result result = hmbr.Query(query_Graph, limit);
+					time = System.currentTimeMillis() - start;
+					time_get_iterator.add(time);
+
+					start = System.currentTimeMillis();
+					while(result.hasNext())
+						result.next();
+					time = System.currentTimeMillis() - start;
+					time_iterate.add(time);
+
+					int index = time_get_iterator.size() - 1;
+					total_time.add(time_get_iterator.get(index) + time_iterate.get(index));
+
+					ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+					count.add(planDescription.getProfilerStatistics().getRows());
+					access.add(OwnMethods.GetTotalDBHits(planDescription));
+
+					write_line = String.format("%d\t%d\t", count.get(i), time_get_iterator.get(i));
+					write_line += String.format("%d\t%d\t", time_iterate.get(i), total_time.get(i));
+					write_line += String.format("%d\n", access.get(i));
+					
+					hmbr.dbservice.shutdown();
+					
+					OwnMethods.ClearCache(password);
+					Thread.currentThread();
+					Thread.sleep(5000);
+					
+					hmbr.dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+					
+					if(!TEST_FORMAT)
+						OwnMethods.WriteFile(result_detail_path, true, write_line);
+				}
+			}
+			hmbr.dbservice.shutdown();
+			OwnMethods.ClearCache(password);
+
+			write_line = String.valueOf(selectivity) + "\t";
+			write_line += String.format("%d\t%d\t", Utility.Average(count), Utility.Average(time_get_iterator));
+			write_line += String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
+			write_line += String.format("%d\n", Utility.Average(access));
+			if(!TEST_FORMAT)
+				OwnMethods.WriteFile(result_avg_path, true, write_line);
+
+//			long larger_time = Utility.Average(total_time);
+//			if (larger_time * expe_count > 150 * 1000)
+//				expe_count = (int) (expe_count * 0.5 / (larger_time * expe_count / 150.0 / 1000.0));
+//			if(expe_count < 1)
+//				expe_count = 1;
+
+			count.clear();	time_get_iterator.clear();
+			time_iterate.clear();	total_time.clear();
+			access.clear();
+
+			selectivity *= times;
+		}
+		OwnMethods.WriteFile(result_detail_path, true, "\n");
+		OwnMethods.WriteFile(result_avg_path, true, "\n");
+	}
+	
+	/**
+	 * use RisoTree query with HMBR and graph first approach
 	 * @param nodeCount
 	 * @param query_id
 	 * @throws Exception
