@@ -61,7 +61,7 @@ public class RisoTreeQuery {
 	public static boolean outputLevelInfo = false;
 	public static boolean outputQuery = false;
 	public static boolean outputExecutionPlan = false;
-	public static boolean outputResult = true;
+	public static boolean outputResult = false;
 	
 	/**
 	 * initialize
@@ -74,8 +74,8 @@ public class RisoTreeQuery {
 		dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		dataset = p_dataset;
 		graph_pos_map_list =  p_graph_pos_map;
-//		logPath = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/query.log", dataset);
-		logPath = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\query.log", dataset);
+		logPath = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/query.log", dataset);
+//		logPath = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\query.log", dataset);
 	}
 
 	public static int[][] Ini_Minhop(Query_Graph query_Graph)
@@ -1213,21 +1213,21 @@ public class RisoTreeQuery {
 		OwnMethods.Print(String.format("spa_ids size: %d", ids.size()));
 		
 		//HMBR
-		for ( int key : spa_predicates.keySet())
-		{
-			MyRectangle cur_rect = spa_predicates.get(key);
-			for ( int queryNodeID = 0; queryNodeID < query_Graph.graph.size(); queryNodeID++)
-			{
-				int minhop = min_hop_array[key][queryNodeID];
-				if ( minhop <= MAX_HMBRHOPNUM && minhop != -1)
-				{
-					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, minx_name, cur_rect.max_x);
-					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, miny_name, cur_rect.max_y);
-					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxx_name, cur_rect.min_x);
-					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxy_name, cur_rect.min_y);
-				}
-			}
-		}
+//		for ( int key : spa_predicates.keySet())
+//		{
+//			MyRectangle cur_rect = spa_predicates.get(key);
+//			for ( int queryNodeID = 0; queryNodeID < query_Graph.graph.size(); queryNodeID++)
+//			{
+//				int minhop = min_hop_array[key][queryNodeID];
+//				if ( minhop <= MAX_HMBRHOPNUM && minhop != -1)
+//				{
+//					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, minx_name, cur_rect.max_x);
+//					query += String.format(" and a%d.HMBR_%d_%s <= %f", queryNodeID, minhop, miny_name, cur_rect.max_y);
+//					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxx_name, cur_rect.min_x);
+//					query += String.format(" and a%d.HMBR_%d_%s >= %f", queryNodeID, minhop, maxy_name, cur_rect.min_y);
+//				}
+//			}
+//		}
 		
 		//NL_id_list
 		for ( int key : NL_hopnum.keySet())
