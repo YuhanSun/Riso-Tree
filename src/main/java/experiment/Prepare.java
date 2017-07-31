@@ -68,12 +68,16 @@ public class Prepare {
 	static ArrayList<Integer> labels;//all labels in the graph
 	
 	//for patent_20
-	static double startSelectivity = 0.000001;
-	static double endSelectivity = 0.002;
+//	static double startSelectivity = 0.000001;
+//	static double endSelectivity = 0.002;
 	
 	//for patent_80
 //	static double startSelectivity = 0.00001;
 //	static double endSelectivity = 0.02;
+	
+	//for switching point
+	static double startSelectivity = 0.1;
+	static double endSelectivity = 0.2;
 	
 	static String queryDir;
 	static String center_id_path;
@@ -137,7 +141,7 @@ public class Prepare {
 		
 //		generateRandomQueryGraph();
 //		generateQueryRectangleCenterID();
-//		generateQueryRectangleForSelectivity();
+		generateQueryRectangleForSelectivity();
 		
 //		generateNewNLList();
 		
@@ -318,10 +322,12 @@ public class Prepare {
 	{
 		try {
 			int experiment_count = 500;
+			OwnMethods.Print("Read entity from " + entityPath);
 			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 			int spa_count = OwnMethods.GetSpatialEntityCount(entities);
 			STRtree stRtree = OwnMethods.ConstructSTRee(entities);
 
+			OwnMethods.Print("Read center id from " + center_id_path);
 			ArrayList<Integer> center_ids = OwnMethods.ReadCenterID(center_id_path);
 			ArrayList<Integer> final_center_ids = OwnMethods.GetRandom_NoDuplicate(center_ids, experiment_count);
 
@@ -329,16 +335,19 @@ public class Prepare {
 			while ( selectivity < endSelectivity)
 			{
 				int name_suffix = (int) (selectivity * spa_count);
-				String output_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, name_suffix);
+				String output_path = null;
 				
 				switch(systemName)
 				{
 				case Ubuntu:
 					output_path = String.format("%s/spa_predicate/%s/queryrect_%d.txt", queryDir, dataset, name_suffix);
+					break;
 				case Windows:
 					output_path = String.format("%s\\spa_predicate\\%s\\queryrect_%d.txt", queryDir, dataset, name_suffix);
+					break;
 				}
 				
+				OwnMethods.Print("Write query rectangles to " + output_path);
 				String write_line = "";
 				for (int id : final_center_ids)
 				{
@@ -388,8 +397,8 @@ public class Prepare {
 	 */
 	public static void generateRandomQueryGraph()
 	{
-//		for ( int node_count = 2; node_count < 4; node_count++)
-		int node_count = 10;
+		for ( int node_count = 2; node_count < 4; node_count++)
+//		int node_count = 10;
 		{
 			int spa_pred_count = 1;
 			String querygraph_path = "";
