@@ -59,8 +59,8 @@ public class RisoTreeQuery {
 	
 	//test control variables
 	public static boolean outputLevelInfo = false;
-	public static boolean outputQuery = false;
-	public static boolean outputExecutionPlan = false;
+	public static boolean outputQuery = true;
+	public static boolean outputExecutionPlan = true;
 	public static boolean outputResult = false;
 	
 	/**
