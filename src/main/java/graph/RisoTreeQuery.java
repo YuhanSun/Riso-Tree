@@ -59,8 +59,8 @@ public class RisoTreeQuery {
 	
 	//test control variables
 	public static boolean outputLevelInfo = false;
-	public static boolean outputQuery = true;
-	public static boolean outputExecutionPlan = true;
+	public static boolean outputQuery = false;
+	public static boolean outputExecutionPlan = false;
 	public static boolean outputResult = false;
 	
 	/**
@@ -74,8 +74,8 @@ public class RisoTreeQuery {
 		dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		dataset = p_dataset;
 		graph_pos_map_list =  p_graph_pos_map;
-		logPath = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/query.log", dataset);
-//		logPath = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\query.log", dataset);
+//		logPath = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/query.log", dataset);
+		logPath = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\query.log", dataset);
 	}
 
 	public static int[][] Ini_Minhop(Query_Graph query_Graph)
@@ -192,7 +192,7 @@ public class RisoTreeQuery {
 		//id
 		query += String.format("\n(id(a%d) = %d ", pos, ids.get(0));
 		if ( ids.size() > 1)
-			for ( int i = 0; i < ids.size(); i++)
+			for ( int i = 1; i < ids.size(); i++)
 				query += String.format("or id(a%d) = %d ", pos, ids.get(i));
 		query += ")";
 		
@@ -1327,7 +1327,7 @@ public class RisoTreeQuery {
 		//id
 		query += String.format("\n(id(a%d) = %d ", pos, ids.get(0));
 		if ( ids.size() > 1)
-			for ( int i = 0; i < ids.size(); i++)
+			for ( int i = 1; i < ids.size(); i++)
 				query += String.format("or id(a%d) = %d ", pos, ids.get(i));
 		query += ")\n";
 		
