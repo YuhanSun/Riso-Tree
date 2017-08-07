@@ -93,8 +93,8 @@ public class App {
 	
 	public static void matchOnDifferentLabelCountDatabase()
 	{
-		String dbpath1 = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_Patents_2_random_80/data/databases/graph.db";
-		String dbpath2 = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_Patents_10_random_80/data/databases/graph.db";
+		String dbpath1 = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_Patents_2_random_20/data/databases/graph.db";
+		String dbpath2 = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_Patents_10_random_20/data/databases/graph.db";
 		
 		OwnMethods.ClearCache(password);
 		GraphDatabaseService databaseService = new GraphDatabaseFactory()
