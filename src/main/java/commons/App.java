@@ -11,7 +11,10 @@ import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.ResourceIterable;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
@@ -31,6 +34,7 @@ public class App {
 	static String dataset = config.getDatasetName();
 	static String lon_name = config.GetLongitudePropertyName();
 	static String lat_name = config.GetLatitudePropertyName();
+	static String password = config.getPassword();
 
 	static String db_path;
 	static String querygraph_path;
@@ -82,7 +86,56 @@ public class App {
 //		rangeQueryCompare();
 //		rangeQueryCountCompare();
 //		graphCompare();
-		cliqueTest();
+//		cliqueTest();
+//		propertyPageAccessTest();
+	}
+	
+	public static void matchOnDifferentLabelCountDatabase()
+	{
+		String dbpath1 = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_Patents_2_random_80/data/databases/graph.db";
+		String dbpath2 = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_Patents_10_random_80/data/databases/graph.db";
+		
+		OwnMethods.ClearCache(password);
+		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+				.newEmbeddedDatabase(new File(dbpath1));
+		long start = System.currentTimeMillis();
+		String query = "match (a0:GRAPH_0)-->(a1:GRAPH_1) return id(a0), id(a1)";
+		Result result = databaseService.execute(query);
+		while ( result.hasNext())
+			result.next();
+		long time = System.currentTimeMillis() - start;
+		OwnMethods.Print(time);
+		databaseService.shutdown();
+		
+		OwnMethods.ClearCache(password);
+		databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbpath1)); 
+		query  = "match (a0:GRAPH_2)-->(a1:GRAPH_1) return id(a0), id(a1)";
+		result = databaseService.execute(query);
+		while ( result.hasNext())
+			result.next();
+		time = System.currentTimeMillis() - start;
+		OwnMethods.Print(time);
+		databaseService.shutdown();
+	}
+	
+	
+	public static void propertyPageAccessTest()
+	{
+		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+				.newEmbeddedDatabase(new File(db_path));
+//		String query = "profile match (n:GRAPH_1) return id(n)";
+//		String query = "profile match (n:GRAPH_1) where 10 < n.lat < 100 return id(n)";
+//		String query = "profile match (n:GRAPH_1) where 10 < n.lon < 100 return id(n)";
+//		String query = "profile match (n:GRAPH_2) where 10 < n.HMBR_1_minx return id(n)";
+		String query = "profile match (n:GRAPH_2)--(a:GRAPH_1) where 10 < a.lat return id(n)";
+		
+		Transaction tx = databaseService.beginTx();
+		Result result = databaseService.execute(query);
+		while (result.hasNext())
+			result.next();
+		ExecutionPlanDescription description = result.getExecutionPlanDescription();
+		OwnMethods.Print(description.toString());
+		tx.success(); tx.close(); databaseService.shutdown();
 	}
 	
 	private static void cliqueTest()
@@ -345,7 +398,17 @@ public class App {
 	
 	public static void test()
 	{
-		
+		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+		Transaction tx = databaseService.beginTx();
+//		Node node = databaseService.getNodeById(3743197);
+//		Node node = databaseService.getNodeById(766033);
+//		OwnMethods.Print(node.getAllProperties());
+		ResourceIterable<Label> labels = databaseService.getAllLabels();
+		for ( Label label : labels)
+			OwnMethods.Print(label);
+		tx.success();
+		tx.close();
+		databaseService.shutdown();
 	}
 	
 	public static void Naive()
