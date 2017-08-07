@@ -88,6 +88,7 @@ public class App {
 //		graphCompare();
 //		cliqueTest();
 //		propertyPageAccessTest();
+		matchOnDifferentLabelCountDatabase();
 	}
 	
 	public static void matchOnDifferentLabelCountDatabase()
