@@ -87,35 +87,37 @@ public class App {
 //		rangeQueryCountCompare();
 //		graphCompare();
 //		cliqueTest();
-//		propertyPageAccessTest();
-		matchOnDifferentLabelCountDatabase();
+		propertyPageAccessTest();
+//		matchOnDifferentLabelCountDatabase();
 	}
 	
 	public static void matchOnDifferentLabelCountDatabase()
 	{
 		String dbpath1 = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_Patents_2_random_20/data/databases/graph.db";
-		String dbpath2 = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_Patents_10_random_20/data/databases/graph.db";
+		String dbpath2 = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1_Patents_100_random_20/data/databases/graph.db";
 		
 		OwnMethods.ClearCache(password);
 		GraphDatabaseService databaseService = new GraphDatabaseFactory()
 				.newEmbeddedDatabase(new File(dbpath1));
 		long start = System.currentTimeMillis();
-		String query = "match (a0:GRAPH_0)-->(a1:GRAPH_1) return id(a0), id(a1)";
+		String query = "profile match (a0:GRAPH_0)-->(a1:GRAPH_1) return id(a0), id(a1)";
 		Result result = databaseService.execute(query);
 		while ( result.hasNext())
 			result.next();
 		long time = System.currentTimeMillis() - start;
 		OwnMethods.Print(time);
+		OwnMethods.Print(result.getExecutionPlanDescription());
 		databaseService.shutdown();
 		
 		OwnMethods.ClearCache(password);
-		databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbpath1)); 
-		query  = "match (a0:GRAPH_2)-->(a1:GRAPH_1) return id(a0), id(a1)";
+		databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbpath2)); 
+		query  = "profile match (a0:GRAPH_2)-->(a1:GRAPH_1) return id(a0), id(a1)";
 		result = databaseService.execute(query);
 		while ( result.hasNext())
 			result.next();
 		time = System.currentTimeMillis() - start;
 		OwnMethods.Print(time);
+		OwnMethods.Print(result.getExecutionPlanDescription());
 		databaseService.shutdown();
 	}
 	
@@ -128,12 +130,12 @@ public class App {
 //		String query = "profile match (n:GRAPH_1) where 10 < n.lat < 100 return id(n)";
 //		String query = "profile match (n:GRAPH_1) where 10 < n.lon < 100 return id(n)";
 //		String query = "profile match (n:GRAPH_2) where 10 < n.HMBR_1_minx return id(n)";
-		String query = "profile match (n:GRAPH_2)--(a:GRAPH_1) where 10 < a.lat return id(n)";
+		String query = "explain match (n:GRAPH_2)--(a:GRAPH_1) where 10 < a.lat return id(n)";
 		
 		Transaction tx = databaseService.beginTx();
 		Result result = databaseService.execute(query);
-		while (result.hasNext())
-			result.next();
+//		while (result.hasNext())
+//			OwnMethods.Print(result.next());
 		ExecutionPlanDescription description = result.getExecutionPlanDescription();
 		OwnMethods.Print(description.toString());
 		tx.success(); tx.close(); databaseService.shutdown();
