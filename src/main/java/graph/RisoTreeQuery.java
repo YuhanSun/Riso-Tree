@@ -976,18 +976,14 @@ public class RisoTreeQuery {
 										OwnMethods.Print(row);
 								}
 								iterate_time += System.currentTimeMillis() - start;
-
-								if (  cur_count!= 0)
+								
+								result_count += cur_count;
+								ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+								page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+								if ( outputExecutionPlan)
 								{
-									ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-									ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
-									result_count += profile.getRows();
-									page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-									if ( outputExecutionPlan)
-									{
-										OwnMethods.Print(planDescription);
-										OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
-									}
+									OwnMethods.Print(planDescription);
+									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
 								}
 								index = 0; id_pos_list = new ArrayList<Long>();
 							}
@@ -1025,18 +1021,13 @@ public class RisoTreeQuery {
 							}
 							iterate_time += System.currentTimeMillis() - start;
 
-							if (  cur_count!= 0)
+							result_count += cur_count;
+							ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+							page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+							if ( outputExecutionPlan)
 							{
-								ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-								ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
-								result_count += profile.getRows();
-								page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-
-								if ( outputExecutionPlan)
-								{
-									OwnMethods.Print(planDescription);
-									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
-								}
+								OwnMethods.Print(planDescription);
+								OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
 							}
 						}
 						return;
@@ -1093,19 +1084,14 @@ public class RisoTreeQuery {
 										OwnMethods.Print(row);
 								}
 								iterate_time += System.currentTimeMillis() - start;
-
-								if ( cur_count != 0)
+								
+								result_count += cur_count;
+								ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+								page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+								if ( outputExecutionPlan)
 								{
-									ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-									ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
-									result_count += profile.getRows();
-									page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-
-									if ( outputExecutionPlan)
-									{
-										OwnMethods.Print(planDescription);
-										OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
-									}
+									OwnMethods.Print(planDescription);
+									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
 								}
 							}
 						}
@@ -1650,17 +1636,13 @@ public class RisoTreeQuery {
 								}
 								iterate_time += System.currentTimeMillis() - start;
 
-								if (  cur_count!= 0)
+								result_count += cur_count;
+								ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+								page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+								if ( outputExecutionPlan)
 								{
-									ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-									ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
-									result_count += profile.getRows();
-									page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-									if ( outputExecutionPlan)
-									{
-										OwnMethods.Print(planDescription);
-										OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
-									}
+									OwnMethods.Print(planDescription);
+									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
 								}
 								index = 0; id_pos_list = new ArrayList<Long>();
 							}
@@ -1698,18 +1680,13 @@ public class RisoTreeQuery {
 							}
 							iterate_time += System.currentTimeMillis() - start;
 
-							if (  cur_count!= 0)
+							result_count += cur_count;
+							ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+							page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+							if ( outputExecutionPlan)
 							{
-								ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-								ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
-								result_count += profile.getRows();
-								page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-
-								if ( outputExecutionPlan)
-								{
-									OwnMethods.Print(planDescription);
-									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
-								}
+								OwnMethods.Print(planDescription);
+								OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
 							}
 						}
 						return;
@@ -1768,18 +1745,13 @@ public class RisoTreeQuery {
 								}
 								iterate_time += System.currentTimeMillis() - start;
 
-								if ( cur_count != 0)
+								result_count += cur_count;
+								ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+								page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+								if ( outputExecutionPlan)
 								{
-									ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-									ExecutionPlanDescription.ProfilerStatistics profile = planDescription.getProfilerStatistics();
-									result_count += profile.getRows();
-									page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-
-									if ( outputExecutionPlan)
-									{
-										OwnMethods.Print(planDescription);
-										OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
-									}
+									OwnMethods.Print(planDescription);
+									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
 								}
 							}
 						}
