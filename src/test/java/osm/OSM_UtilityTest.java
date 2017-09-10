@@ -81,46 +81,58 @@ public class OSM_UtilityTest {
 	}
 
 	@Test
-	public void getRootTest()
+	public void getReferenceTest()
 	{
 		OwnMethods.Print(db_path);
 		GraphDatabaseService databaseService = new GraphDatabaseFactory()
 				.newEmbeddedDatabase(new File(db_path));
 		Transaction tx = databaseService.beginTx();
-		String layer_name = dataset;
-		OwnMethods.Print(dataset);
-		Node node = OSM_Utility.getRTreeRoot(databaseService, layer_name);
-		OwnMethods.Print(node);
-		
-//		ResourceIterable<Label> labels = databaseService.getAllLabels();
-//		for ( Label label : labels)
-//		{
-//			OwnMethods.Print(label);
-//		}
-		
-		tx.success();tx.close();
-		databaseService.shutdown();
+		ResourceIterator<Node> referenceNodes = databaseService.findNodes(OSMLabel.OSM_NODE);
+		while ( referenceNodes.hasNext())
+			OwnMethods.Print(referenceNodes.next().getAllProperties());
 	}
+	
+//	@Test
+//	public void getRootTest()
+//	{
+//		OwnMethods.Print(db_path);
+//		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+//				.newEmbeddedDatabase(new File(db_path));
+//		Transaction tx = databaseService.beginTx();
+//		String layer_name = "Patents_100_random_80";
+//		OwnMethods.Print(layer_name);
+//		Node node = OSM_Utility.getRTreeRoot(databaseService, layer_name);
+//		OwnMethods.Print(node);
+//		
+////		ResourceIterable<Label> labels = databaseService.getAllLabels();
+////		for ( Label label : labels)
+////		{
+////			OwnMethods.Print(label);
+////		}
+//		
+//		tx.success();tx.close();
+//		databaseService.shutdown();
+//	}
 
-	@Test
-	public void getAllReferenceNode()
-	{
-		String layer_name = dataset;
-		GraphDatabaseService databaseService = new GraphDatabaseFactory()
-				.newEmbeddedDatabase(new File(db_path));
-		Transaction tx = databaseService.beginTx();
-		ResourceIterator<Node> nodes = databaseService.findNodes(OSMLabel.ReferenceNode);
-		while ( nodes.hasNext())
-		{
-			Node head = nodes.next();
-			Iterable<Relationship> relationships = head.getRelationships(RTreeRel.LAYER, Direction.OUTGOING);
-			for ( Relationship relationship : relationships)
-			{
-				Node rtree_layer_node = relationship.getEndNode();
-				OwnMethods.Print(rtree_layer_node);
-				OwnMethods.Print(rtree_layer_node.getAllProperties());
-			}
-		}
-	}
+//	@Test
+//	public void getAllReferenceNode()
+//	{
+//		String layer_name = dataset;
+//		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+//				.newEmbeddedDatabase(new File(db_path));
+//		Transaction tx = databaseService.beginTx();
+//		ResourceIterator<Node> nodes = databaseService.findNodes(OSMLabel.ReferenceNode);
+//		while ( nodes.hasNext())
+//		{
+//			Node head = nodes.next();
+//			Iterable<Relationship> relationships = head.getRelationships(RTreeRel.LAYER, Direction.OUTGOING);
+//			for ( Relationship relationship : relationships)
+//			{
+//				Node rtree_layer_node = relationship.getEndNode();
+//				OwnMethods.Print(rtree_layer_node);
+//				OwnMethods.Print(rtree_layer_node.getAllProperties());
+//			}
+//		}
+//	}
 	
 }
