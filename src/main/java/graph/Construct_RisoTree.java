@@ -2,7 +2,9 @@ package graph;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,6 +14,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.management.relation.Relation;
 
 import java.util.Queue;
 import java.util.Set;
@@ -26,6 +29,9 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.register.Register.Int;
+import org.neo4j.unsafe.batchinsert.BatchInserter;
+import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 import commons.Config;
 import commons.Labels;
@@ -33,7 +39,6 @@ import commons.OwnMethods;
 import commons.Config.system;
 import commons.Labels.RTreeRel;
 import osm.OSM_Utility;
-import scala.collection.immutable.RedBlackTree.Tree;
 
 /**
  * 
@@ -56,6 +61,8 @@ public class Construct_RisoTree {
 	static String label_list_path;
 	static String graph_node_map_path;
 	static String log_path;
+	static String containIDPath;
+	static String PNPath;
 	
 	static ArrayList<Integer> labels;//all labels in the graph
 	
@@ -70,6 +77,8 @@ public class Construct_RisoTree {
 			label_list_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/label.txt", dataset);
 //			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
+			containIDPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/containID.txt", dataset);
+			PNPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/PathNeighbors.txt", dataset);
 			break;
 		case Windows:
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
@@ -79,6 +88,8 @@ public class Construct_RisoTree {
 			label_list_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\label.txt", dataset);
 //			graph_node_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\node_map.txt", dataset);
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
+			containIDPath= String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\containID.txt", dataset);
+			PNPath= String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\PathNeighbors.txt", dataset);
 		default:
 			break;
 		}
@@ -97,7 +108,13 @@ public class Construct_RisoTree {
 	public static void main(String[] args) {
 		initParameters();
 		
-		Construct();
+//		generateContainSpatialID();
+		constructPN();
+//		LoadPN();
+//		generatePNSize();
+		
+		
+//		ConstructNL();
 //		ClearNL();
 //		
 //		ArrayList<Integer> label_list = OwnMethods.readIntegerArray(label_list_path);
@@ -108,13 +125,296 @@ public class Construct_RisoTree {
 //		LoadLeafNodeNList();
 //		MergeLeafNL();
 		
-		generateNL_size();
+//		generateNL_size();
 //		NL_size_Check();
 //		set_Spatial_Label();
 		
 		//set a lot of labels
 //		set_NL_list_label(max_hop_num, labels);
 //		set_NL_list_label_DeepestNonLeaf(max_hop_num, labels);
+	}
+	
+	/**
+	 * Not used
+	 */
+	public static void generatePNSize()
+	{
+		try {
+			BufferedReader reader =  new BufferedReader(new FileReader(new File(PNPath)));
+			Map<String, String> config = new HashMap<String, String>();
+			config.put("dbms.pagecache.memory", "20g");
+			BatchInserter inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
+			
+			String line = null;
+			line = reader.readLine();
+			long nodeID = Long.parseLong(line);
+			
+			Map<String, Object> properties = new HashMap<String, Object>();
+			int count = 0;
+			while (true)
+			{
+				while ( (line = reader.readLine()) != null)
+				{
+					if (line.matches("\\d+$") == false)
+					{
+//						OwnMethods.Print(line);
+						String[] lineList = line.split(",", 2);
+						String key = lineList[0];
+						
+						String content = lineList[1];
+						String[] contentList = content.substring(1, content.length() - 1)
+								.split(", ");
+						
+						properties.put(key + "_size", contentList.length);
+					}
+					else break;
+				}
+				count++;
+				inserter.setNodeProperties(nodeID, properties);
+				if ( count == 500)
+				{
+					inserter.shutdown();
+					inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
+				}
+				
+				if ( line == null)
+					break;
+				nodeID = Long.parseLong(line);
+				OwnMethods.Print(nodeID);
+			}
+			inserter.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		/**
+		 * very slow
+		 */
+//		try {
+//			HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
+//			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));			
+//			Transaction tx = dbservice.beginTx();
+//			for ( long nodeID : containIDMap.keySet())
+//			{
+//				OwnMethods.Print(nodeID);
+//				Node node = dbservice.getNodeById(nodeID);
+//				Map<String, Object> properties = node.getAllProperties();
+//				Map<String, Object> addProperties = new HashMap<String, Object>(); 
+//				for ( String key : properties.keySet())
+//					if ( key.contains("PN") && key.contains("size") == false)
+//					{
+//						int[] pathNeighbors = (int[]) properties.get(key);
+//						addProperties.put(key + "_size", pathNeighbors.length);	
+//					}
+//				for ( String key : addProperties.keySet())
+//					node.setProperty(key, addProperties.get(key));
+//			}
+//			tx.success();
+//			tx.close();
+//			dbservice.shutdown();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+	/**
+	 * The file only contains two hop information
+	 */
+	public static void LoadPN()
+	{
+		try {
+			BufferedReader reader =  new BufferedReader(new FileReader(new File(PNPath)));
+			Map<String, String> config = new HashMap<String, String>();
+			config.put("dbms.pagecache.memory", "20g");
+			BatchInserter inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
+			
+			String line = null;
+			line = reader.readLine();
+			long nodeID = Long.parseLong(line);
+			
+			while (true)
+			{
+				Map<String, Object> properties = inserter.getNodeProperties(nodeID); 
+				while ( (line = reader.readLine()) != null)
+				{
+					if (line.matches("\\d+$") == false)
+					{
+//						OwnMethods.Print(line);
+						String[] lineList = line.split(",", 2);
+						String key = lineList[0];
+						
+						String content = lineList[1];
+						String[] contentList = content.substring(1, content.length() - 1)
+								.split(", ");
+						
+						int[] value = new int[contentList.length];
+						for ( int i = 0; i < contentList.length; i++)
+							value[i] = Integer.parseInt(contentList[i]);
+						properties.put(key, value);
+						properties.put(key + "_size", value.length);
+					}
+					else break;
+				}
+				inserter.setNodeProperties(nodeID, properties);
+				
+				if ( line == null)
+					break;
+				nodeID = Long.parseLong(line);
+				OwnMethods.Print(nodeID);
+			}
+			inserter.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void constructPN()
+	{
+		try {
+			HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
+			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+			ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
+			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			//for one hop
+			Transaction tx = dbservice.beginTx();
+			for ( long nodeId : containIDMap.keySet())
+			{
+				OwnMethods.Print(nodeId);
+				TreeSet<Integer> pathNeighbors = new TreeSet<Integer>();
+				for ( int spaID : containIDMap.get(nodeId))
+					for ( int neighborID : graph.get(spaID))
+						pathNeighbors.add(neighborID);
+				
+				HashMap<Integer, ArrayList<Integer>> pathLabelNeighbor = new HashMap<Integer, ArrayList<Integer>>();
+				for ( int neighborID : pathNeighbors)
+				{
+					int label = labelList.get(neighborID);
+					if ( pathLabelNeighbor.containsKey(label))
+						pathLabelNeighbor.get(label).add(neighborID);
+					else
+					{
+						ArrayList<Integer> arrayList = new ArrayList<Integer>();
+						arrayList.add(neighborID);
+						pathLabelNeighbor.put(label, arrayList);
+					}
+				}
+				
+				for ( int pathLabel : pathLabelNeighbor.keySet())
+				{
+					String propertyName = String.format("PN_%d", pathLabel);
+					ArrayList<Integer> arrayList = pathLabelNeighbor.get(pathLabel);
+					int [] array = new int[arrayList.size()];
+					for ( int i = 0; i < arrayList.size(); i++)
+						array[i] = arrayList.get(i);
+					
+//					dbservice.getNodeById(nodeId).setProperty(propertyName, array);
+					dbservice.getNodeById(nodeId).setProperty(propertyName + "_size", array.length);
+				}
+			}
+			tx.success();
+			tx.close();
+			
+			//more than one hop
+//			Transaction tx = dbservice.beginTx();
+//			
+//			FileWriter writer =  new FileWriter(new File(PNPath));
+//			
+//			for ( int hop = 2; hop <= MAX_HOPNUM; hop++)
+//			{
+//				String regex = "PN";
+//				for ( int i = 0; i < hop - 1; i++)
+//					regex += "_\\d+";
+//				regex += "$";
+//				
+//				for ( long nodeID : containIDMap.keySet())
+//				{
+//					OwnMethods.Print(nodeID);
+//					writer.write(nodeID + "\n");
+//					Node node = dbservice.getNodeById(nodeID);
+//					Map<String, Object> properties = node.getAllProperties();
+//					
+//					for ( String key : properties.keySet())
+//					{
+//						if ( key.matches(regex))
+//						{
+//							int[] curPathNeighbors = (int[]) properties.get(key);
+//							TreeSet<Integer> nextPathNeighbors =  new TreeSet<Integer>();
+//							for ( int curNeighborID : curPathNeighbors)
+//								for ( int id : graph.get(curNeighborID))
+//									nextPathNeighbors.add(id);
+//							
+//							HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors = new HashMap<Integer, ArrayList<Integer>>();
+//							for ( int neighborID : nextPathNeighbors)
+//							{
+//								int label = labelList.get(neighborID);
+//								if ( pathLabelNeighbors.containsKey(label))
+//									pathLabelNeighbors.get(label).add(neighborID);
+//								else
+//								{
+//									ArrayList<Integer> arrayList = new ArrayList<Integer>();
+//									arrayList.add(neighborID);
+//									pathLabelNeighbors.put(label, arrayList);
+//								}
+//							}
+//							
+//							
+//							
+//							for ( int pathLabel : pathLabelNeighbors.keySet())
+//							{
+//								String propertyName = String.format("%s_%d", key, pathLabel);
+//								ArrayList<Integer> arrayList = pathLabelNeighbors.get(pathLabel);
+//								int [] array = new int[arrayList.size()];
+//								for ( int i = 0; i < arrayList.size(); i++)
+//									array[i] = arrayList.get(i);
+//								
+////								node.setProperty(propertyName, array);
+//								writer.write(String.format("%s,%s\n", propertyName, arrayList));
+//							}
+//						}
+//					}
+//				}
+//			}
+//			writer.close();
+//			tx.success();
+//			tx.close();
+			
+			dbservice.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void generateContainSpatialID()
+	{
+		try {
+			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			HashMap<Long, TreeSet<Integer>> containIDMap = new HashMap<Long, TreeSet<Integer>>();
+			Transaction tx = dbservice.beginTx();
+			Set<Node> nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset);
+			for (Node node : nodes)
+			{
+				long parentID = node.getId();
+				Iterable<Relationship> rels = node.getRelationships(
+						RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
+				TreeSet<Integer> containIDs = new TreeSet<Integer>();
+				for ( Relationship relationship : rels)
+				{
+					int childID = (Integer) relationship.getEndNode().getProperty("id");
+					containIDs.add(childID);
+				}
+				containIDMap.put(parentID, containIDs);
+			}
+			tx.success();
+			tx.close();
+			dbservice.shutdown();
+			
+			FileWriter writer = new FileWriter(new File(containIDPath));
+			for (long id : containIDMap.keySet())
+				writer.write(String.format("%d,%s\n", id, containIDMap.get(id).toString()));
+			writer.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void set_NL_list_label_DeepestNonLeaf(int max_hop_num, ArrayList<Integer> labels)
@@ -391,7 +691,9 @@ public class Construct_RisoTree {
 	}
 	
 	/**
-	 * for the second hop
+	 * For the second hop
+	 * Assume that the second hop NL has been built for all leaf nodes
+	 * Not used anymore, replaced by ConstructNL() for two hop 
 	 */
 	public static void MergeLeafNL()
 	{
@@ -554,7 +856,7 @@ public class Construct_RisoTree {
 	 * for all non-leaf nodes in the RTree
 	 * the graph data will be used directly
 	 */
-	public static void Construct()
+	public static void ConstructNL()
 	{
 		OwnMethods.Print("Construct the first hop NL list\n");
 		try {
@@ -677,7 +979,7 @@ public class Construct_RisoTree {
 	 * @param labels
 	 * @param label_list
 	 */
-	public static void Construct(String neighborListPath, int hop_num, ArrayList<Integer> labels, 
+	public static void ConstructNL(String neighborListPath, int hop_num, ArrayList<Integer> labels, 
 			ArrayList<Integer> label_list)
 	{
 		int offset = 196591;
@@ -871,5 +1173,35 @@ public class Construct_RisoTree {
 			e.printStackTrace();
 		}
 	}
+	
+	public static HashMap<Long, ArrayList<Integer>> readContainIDMap(String filePath)
+	{
+		HashMap<Long, ArrayList<Integer>> containIDMap = new HashMap<Long, ArrayList<Integer>>();
+		
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)));
+			String line = null;
+			while ((line = reader.readLine()) != null)
+			{
+				String [] lineList = line.split(",", 2);
+				if (lineList.length != 2)
+					throw new Exception("Contain ID Map format error at line " + line);
+				long id = Long.parseLong(lineList[0]);
+				
+				String [] idStrList = lineList[1].substring(1, lineList[1].length()-1).split(","); 
+				ArrayList<Integer> idList = new ArrayList<Integer>(idStrList.length);
+				for ( String idString : idStrList)
+					idList.add(Integer.parseInt(idString.trim()));
+				
+				containIDMap.put(id, idList);
+			}
+			return containIDMap;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return containIDMap;
+	}
+	
 	
 }
