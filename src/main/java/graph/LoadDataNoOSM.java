@@ -37,6 +37,11 @@ import commons.Labels.GraphRel;
 import commons.Labels.RTreeRel;
 import osm.OSM_Utility;
 
+/**
+ * latest load class
+ * @author ysun138
+ *
+ */
 public class LoadDataNoOSM {
 	static Config config = new Config();
 	static system systemName = config.getSystemName();
@@ -99,18 +104,18 @@ public class LoadDataNoOSM {
 //				generateNonspatialLabel();
 //				nonspatialLabelTest();
 //			}
-//			
+			
 			LoadNonSpatialEntity();
 			
-//			GetSpatialNodeMap();
+			GetSpatialNodeMap();
 			
 			LoadGraphEdges();
 			
 			CalculateCount();
-			
-			Construct_RisoTree.main(null);
-			
-			loadHMBR();
+//			
+//			Construct_RisoTree.main(null);
+//			
+//			loadHMBR();
 			
 		} catch (Exception e) {
 			e.printStackTrace();	System.exit(-1);
@@ -314,7 +319,7 @@ public class LoadDataNoOSM {
 	
 	/**
 	 * generate new label.txt
-	 * for entities that non-spatial vertices are all before spatial
+	 * for entities that non-spatial vertices
 	 */
 	public static void generateNonspatialLabel()
 	{
@@ -350,6 +355,11 @@ public class LoadDataNoOSM {
 		}
 	}
 	
+	/**
+	 * Used if there is only one non-spatial label.
+	 * Label will generated based on Entity.
+	 * Spatial will be 1 and non-spatial will 0.
+	 */
 	public static void generateLabelList()
 	{
 		OwnMethods.Print("Generate the label list based on entity file\n");
