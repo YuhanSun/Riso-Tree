@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Stack;
 
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
@@ -24,9 +25,7 @@ import commons.Labels;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
-import commons.Utility;
 import commons.Config.Explain_Or_Profile;
-import commons.Config.system;
 import osm.OSM_Utility;
 
 public class RisoTreeQueryPN {
@@ -131,21 +130,88 @@ public class RisoTreeQueryPN {
 		return minhop_index;
 	}
 	
-	public HashMap<Integer, ArrayList<String>> recognizePaths(Query_Graph queryGraph)
+	private void traverse(boolean[] visited, HashMap<Integer, HashSet<String>> paths, 
+			Stack<Integer> stack, Query_Graph queryGraph)
 	{
-		HashMap<Integer, ArrayList<String>> paths =  new HashMap<Integer, ArrayList<String>>();
+		if ( stack.size() <= MAX_HOPNUM)
+		{
+			int top = stack.peek();
+			
+			if ( stack.size() >= 2)
+			{
+				String path = "PN";
+				for ( int i = 1; i < stack.size(); i++)
+				{
+					int id = stack.get(i);
+					path += String.format("_%d", queryGraph.label_list[id]);
+					if (paths.containsKey(top))
+						paths.get(top).add(path);
+					else
+					{
+						paths.put(top, new HashSet<String>());
+						paths.get(top).add(path);
+					}
+				}
+			}
+			
+			ArrayList<Integer> topNeighbors = queryGraph.graph.get(top);
+			for ( int i = 0; i < topNeighbors.size(); i++)
+			{
+				int neighbor = topNeighbors.get(i);
+				if ( visited[neighbor] == false)
+				{
+					stack.push(neighbor);
+					visited[neighbor] = true;
+					traverse(visited, paths, stack, queryGraph);
+				}
+				if (i == topNeighbors.size() - 1)
+				{
+					stack.pop();
+					visited[top] = false;
+				}
+			}
+		}
+		else if ( stack.size() == MAX_HOPNUM + 1)
+		{
+			String path = "PN";
+			for ( int i = 1; i < stack.size(); i++)
+			{
+				int id = stack.get(i);
+				path += String.format("_%d", queryGraph.label_list[id]);
+			}
+			int top = stack.pop();
+			visited[top] = false;
+			if (paths.containsKey(top))
+				paths.get(top).add(path);
+			else
+			{
+				paths.put(top, new HashSet<String>());
+				paths.get(top).add(path);
+			}
+			return;
+		}
+	}
+	
+	public HashMap<Integer, HashMap<Integer, HashSet<String>>> recognizePaths(Query_Graph queryGraph)
+	{
+		HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap =  new HashMap<Integer, HashMap<Integer, HashSet<String>>>();
 		for ( int i = 0; i < queryGraph.graph.size(); i++)
 		{
 			if ( queryGraph.spa_predicate[i] != null)
 			{
-				for ( int hop = 1; hop <= MAX_HOPNUM; hop++)
-				{
-					
-				}
+				HashMap<Integer, HashSet<String>> paths = new HashMap<Integer, HashSet<String>>();
+				boolean[] visited = new boolean[queryGraph.graph.size()];
+				for ( int j = 0; j < visited.length; j++)
+					visited[j] = false;
+				Stack<Integer> stack = new Stack<Integer>();
+				stack.push(i);
+				visited[i] = true;
+				traverse(visited, paths, stack, queryGraph);
+				spaPathsMap.put(i, paths);
 			}
 		}
 		
-		return paths;
+		return spaPathsMap;
 	}
 
 	/**
@@ -748,39 +814,41 @@ public class RisoTreeQueryPN {
 			//with regard to each query node with spatial predicate
 			HashMap<Integer, HashMap<Integer, Integer>> min_hop = new HashMap<Integer, HashMap<Integer, Integer>>();
 			//<spa_id, <neighbor_id, size_property_name>>
-			HashMap<Integer, HashMap<Integer, String>> NL_size_propertyname = new HashMap<Integer, HashMap<Integer, String>>();
+			HashMap<Integer, HashMap<Integer, HashSet<String>>> PN_size_propertyname = new HashMap<Integer, HashMap<Integer, HashSet<String>>>();
 			//<spa_id, <neighbor_id, list_property_name>>
-			HashMap<Integer, HashMap<Integer, String>> NL_list_propertyname = new HashMap<Integer, HashMap<Integer,String>>();	
+			HashMap<Integer, HashMap<Integer, HashSet<String>>> PN_list_propertyname = new HashMap<Integer, HashMap<Integer,HashSet<String>>>();	
 			//<spa_id, <neighbor_id, NL_list>>
-			HashMap<Integer, HashMap<Integer, HashSet<Integer>>> NL_list = new HashMap<Integer, HashMap<Integer, HashSet<Integer>>>();
+
+			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
 
 			//Construct min_hop_array for the query graph
-			int[][] min_hop_array = Ini_Minhop(query_Graph);
-
+//			int[][] min_hop_array = Ini_Minhop(query_Graph);
+			
 			//Construct min_hop (compact structure for min_hop_array
 			//and NL_size_propertyname and NL_list_propertyname
 			for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
 				if(query_Graph.Has_Spa_Predicate[i])
-				{
 					spa_predicates.put(i, query_Graph.spa_predicate[i]);
-					min_hop.put(i, new HashMap<Integer, Integer>());
-					NL_size_propertyname.put(i, new HashMap<Integer, String>());
-					NL_list_propertyname.put(i, new HashMap<Integer, String>());
-					for ( int j = 0; j < min_hop_array[i].length; j++)
+			
+			for ( int spaID : spaPathsMap.keySet())
+			{
+				PN_size_propertyname.put(spaID, new HashMap<Integer, HashSet<String>>());
+				PN_list_propertyname.put(spaID, new HashMap<Integer, HashSet<String>>());
+				for ( int neighborID : spaPathsMap.get(spaID).keySet())
+				{
+					PN_size_propertyname.get(spaID).put(neighborID, new HashSet<String>());
+					PN_list_propertyname.get(spaID).put(neighborID, new HashSet<String>());
+					for ( String PNName : spaPathsMap.get(spaID).get(neighborID))
 					{
-						if(min_hop_array[i][j] <= MAX_HOPNUM && min_hop_array[i][j] != -1)
-						{
-							min_hop.get(i).put(j, min_hop_array[i][j]);
-							int label = query_Graph.label_list[j];
-							NL_size_propertyname.get(i).put(j, String.format("NL_%d_%d_size", min_hop_array[i][j], label));
-							NL_list_propertyname.get(i).put(j, String.format("NL_%d_%d_list", min_hop_array[i][j], label));
-						}
+						PN_size_propertyname.get(spaID).get(neighborID).add(PNName + "_size");
+						PN_list_propertyname.get(spaID).get(neighborID).add(PNName);
+						
 					}
 				}
-
+			}
 			if ( outputLevelInfo)
 			{
-				logWriteLine = String.format("min_hop: %s\nNL_property: %s", min_hop, NL_size_propertyname);
+				logWriteLine = String.format("min_hop: %s\nNL_property: %s", min_hop, PN_size_propertyname);
 				OwnMethods.Print(logWriteLine);
 				OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
 			}
@@ -795,20 +863,6 @@ public class RisoTreeQueryPN {
 			while(cur_list.isEmpty() == false)
 			{
 				long startLevel = System.currentTimeMillis();// for the level time
-				//<spa_id, card>
-				HashMap<Integer, Double> spa_cards = new HashMap<Integer, Double>();
-				for (int key : spa_predicates.keySet())
-					spa_cards.put(key, 0.0);
-
-				//<spa_id, <neighbor_id, card>>
-				HashMap<Integer, HashMap<Integer, Double>> NL_cards = new HashMap<Integer, HashMap<Integer, Double>>();
-				for (int spa_id : min_hop.keySet())
-				{
-					NL_cards.put(spa_id, new HashMap<Integer, Double>());
-					HashMap<Integer, Integer> min_hop_vector = min_hop.get(spa_id);
-					for ( int neighbor_pos : min_hop_vector.keySet())
-						NL_cards.get(spa_id).put(neighbor_pos, 0.0);	
-				}
 
 				//<spa_id, overlap_nodes_list>
 				//				HashMap<Integer, LinkedList<Node>> overlap_MBR_list = new HashMap<>();
@@ -823,9 +877,7 @@ public class RisoTreeQueryPN {
 						double[] bbox = (double[]) node.getProperty("bbox");
 						MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
 						//						OwnMethods.Print(MBR);
-						double MBR_area = MBR.area();
 
-						int spa_count = (Integer) node.getProperty("count");
 						for ( int key : spa_predicates.keySet())
 						{
 							MyRectangle queryRectangle = spa_predicates.get(key);
@@ -836,23 +888,6 @@ public class RisoTreeQueryPN {
 								//all overlapped nodes
 								//								overlap_MBR_list.get(key).add(node);
 								overlap_MBR_list.add(node);
-
-								//calculate overlapped ratio compared to the MBR area
-								double ratio;
-								if(MBR_area == 0)
-									ratio = 1;
-								else
-									ratio = intersect.area() / MBR_area;
-								//estimate spatial predicate cardinality
-								spa_cards.put(key, (spa_cards.get(key) + ratio * spa_count));
-
-								//estimate NL cardinality
-								HashMap<Integer, Double> NL_cards_vector = NL_cards.get(key);
-								for ( int neighbor_id : NL_cards_vector.keySet())
-								{
-									int NL_label_size = (Integer) node.getProperty(NL_size_propertyname.get(key).get(neighbor_id));
-									NL_cards_vector.put(neighbor_id, (NL_cards_vector.get(neighbor_id) + ratio * NL_label_size));
-								}
 
 								//record the next level tree nodes
 								Iterable<Relationship> rels = node.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
@@ -872,92 +907,159 @@ public class RisoTreeQueryPN {
 					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
 				}
 
-				//find the query node with the minimum cardinality
-				double min_spa_card = Double.MAX_VALUE, min_NL_card = Double.MAX_VALUE;
-				int minSpaID = 0;//the spatial predicate with minimum cardinality
-				int min_NL_spa_id = 0, min_NL_neighbor_id = 0;//min NL spatial id and neighbor id
-
-				//now spa_cards has only one key
-				for (int key : spa_cards.keySet())
-				{
-					double spa_card = spa_cards.get(key);
-					if(spa_card < min_spa_card)
-					{
-						minSpaID = key;
-						min_spa_card = spa_card;
-					}
-
-					if ( outputLevelInfo)
-					{
-						logWriteLine = String.format("spa_card %d %f", key, spa_card);
-						OwnMethods.Print(logWriteLine);
-						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
-					}
-
-					HashMap<Integer, Double> NL_cards_vector = NL_cards.get(key);
-					for ( int neighbor_id : NL_cards_vector.keySet())
-					{
-						double NL_card = NL_cards_vector.get(neighbor_id);
-						if(NL_card < min_NL_card)
-						{
-							min_NL_spa_id = key;	min_NL_neighbor_id = neighbor_id;
-							min_NL_card = NL_card;
-						}
-						if ( outputLevelInfo)
-						{
-							logWriteLine = String.format("NL_size %d %d %s", key, neighbor_id, NL_cards_vector.get(neighbor_id).toString());
-							OwnMethods.Print(logWriteLine);
-							OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
-						}
-					}
-				}
-
-				if ( outputLevelInfo)
-				{
-					logWriteLine = String.format("level %d min card : %f", level_index, Math.min(min_spa_card, min_NL_card));
-					OwnMethods.Print(logWriteLine);
-					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
-				}
-
 				if (overlap_MBR_list.isEmpty() == true)
 				{
 					OwnMethods.Print("No result satisfy the query.");
 					return;
 				}
 
-				// construct the NL_list with the highest selectivity
-				long start1 = System.currentTimeMillis();
-				String minPropertyName = NL_list_propertyname.get(min_NL_spa_id).get(min_NL_neighbor_id);
-
-				HashSet<Integer> min_NL_list = new HashSet<Integer>();
-//				NL_list.put(min_NL_spa_id, new HashMap<Integer, HashSet<Integer>>());
-//				NL_list.get(min_NL_spa_id).put(min_NL_neighbor_id, new HashSet<Integer>());
-				for ( Node node : overlap_MBR_list)
-				{
-					if ( node.hasProperty(minPropertyName))
-					{
-						int[] NL_list_label = ( int[] ) node.getProperty(minPropertyName);
-						for ( int node_id : NL_list_label)
-							min_NL_list.add(node_id);
-					}
-				}
-				if ( outputLevelInfo)
-				{
-					logWriteLine = String.format("min_NL_list size is %d\n", min_NL_list.size());
-					if ( min_NL_list.size() < min_spa_card)
-						logWriteLine += "NL_list is more selective\n";
-					else
-						logWriteLine += "spa predicate is more selective\n";
-					logWriteLine += String.format("NL_serialize time: %d\n", System.currentTimeMillis() - start1);
-					logWriteLine += String.format("level %d time: %d\n", level_index, System.currentTimeMillis() - startLevel);
-					OwnMethods.Print(logWriteLine);
-					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
-				}
 				range_query_time += System.currentTimeMillis() - startLevel;
 				
 				//traverse to the second deepest level and start to form the cypher query
 				if( overlap_MBR_list.isEmpty() == false && next_list.isEmpty())
 				{
+					//<spa_id, card>
+					HashMap<Integer, Double> spa_cards = new HashMap<Integer, Double>();
+					for (int key : spa_predicates.keySet())
+						spa_cards.put(key, 0.0);
+
+					//<spa_id, <neighbor_id, card>>
+					HashMap<Integer, HashMap<Integer, HashMap<String, Double>>> NL_cards = 
+							new HashMap<Integer, HashMap<Integer, HashMap<String, Double>>>();
+					for (int spa_id : PN_size_propertyname.keySet())
+					{
+						NL_cards.put(spa_id, new HashMap<Integer, HashMap<String, Double>>());
+						for ( int neighborID : PN_size_propertyname.get(spa_id).keySet())
+						{
+							NL_cards.get(spa_id).put(neighborID, new HashMap<String, Double>());
+							for ( String propertyName : PN_size_propertyname.get(spa_id).get(neighborID))
+								NL_cards.get(spa_id).get(neighborID).put(propertyName, 0.0);
+						}
+					}
+					
+					
+					for ( Node node : overlap_MBR_list)
+					{
+						double[] bbox = (double[]) node.getProperty("bbox");
+						MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
+						//						OwnMethods.Print(MBR);
+						double MBR_area = MBR.area();
+						int spa_count = (Integer) node.getProperty("count");
+						
+						for ( int key : spa_predicates.keySet())
+						{
+							MyRectangle queryRectangle = spa_predicates.get(key);
+
+							MyRectangle intersect = MBR.intersect(queryRectangle); 
+							//calculate overlapped ratio compared to the MBR area
+							double ratio;
+							if(MBR_area == 0)
+								ratio = 1;
+							else
+								ratio = intersect.area() / MBR_area;
+							//estimate spatial predicate cardinality
+							spa_cards.put(key, (spa_cards.get(key) + ratio * spa_count));
+	
+							//estimate NL cardinality
+//							HashMap<Integer, Double> NL_cards_vector = NL_cards.get(key);
+//							for ( int neighbor_id : NL_cards_vector.keySet())
+//							{
+//								int NL_label_size = (Integer) node.getProperty(PN_size_propertyname.get(key).get(neighbor_id));
+//								NL_cards_vector.put(neighbor_id, (NL_cards_vector.get(neighbor_id) + ratio * NL_label_size));
+//							}
+							for ( int neighborID : NL_cards.get(key).keySet())
+								for ( String propertyName : NL_cards.get(key).get(neighborID).keySet())
+								{
+									OwnMethods.Print(propertyName);
+									if ( node.hasProperty(propertyName))
+									{
+										int PNSize = (Integer) node.getProperty(propertyName);
+										NL_cards.get(key).get(neighborID).put(propertyName, 
+												NL_cards.get(key).get(neighborID).get(propertyName) + ratio * PNSize);
+									}
+								}
+						}
+					}
+					
+					//find the query node with the minimum cardinality
+					double min_spa_card = Double.MAX_VALUE, min_NL_card = Double.MAX_VALUE;
+					int minSpaID = 0;//the spatial predicate with minimum cardinality
+					int min_NL_spa_id = 0, min_NL_neighbor_id = 0;//min NL spatial id and neighbor id
+					String minPNListPropertyname = "", minPNSizePropertyname = "";
+
+					//now spa_cards has only one key
+					for (int key : spa_cards.keySet())
+					{
+						double spa_card = spa_cards.get(key);
+						if(spa_card < min_spa_card)
+						{
+							minSpaID = key;
+							min_spa_card = spa_card;
+						}
+	
+						if ( outputLevelInfo)
+						{
+							logWriteLine = String.format("spa_card %d %f", key, spa_card);
+							OwnMethods.Print(logWriteLine);
+							OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+						}
+	
+//						HashMap<Integer, Double> NL_cards_vector = NL_cards.get(key);
+						for ( int neighbor_id : PN_list_propertyname.get(key).keySet())
+							for (String properName : PN_list_propertyname.get(key).get(neighbor_id))
+							{
+								double card = NL_cards.get(key).get(neighbor_id).get(properName+"_size");
+								if(card < min_NL_card)
+								{
+									min_NL_spa_id = key;	min_NL_neighbor_id = neighbor_id;
+									min_NL_card = card;
+									minPNListPropertyname = properName;
+									minPNSizePropertyname = properName += "_size";
+								}
+								if ( outputLevelInfo)
+								{
+									logWriteLine = String.format("%d %d %s %s estimate size:", key, neighbor_id, properName, card);
+									OwnMethods.Print(logWriteLine);
+									OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+								}
+							}
+					}
+					
+					
+
+					if ( outputLevelInfo)
+					{
+						logWriteLine = String.format("level %d min card : %f", level_index, Math.min(min_spa_card, min_NL_card));
+						OwnMethods.Print(logWriteLine);
+						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+					}
+					
+					// construct the NL_list with the highest selectivity
+					long start1 = System.currentTimeMillis();
+	
+					HashSet<Integer> min_NL_list = new HashSet<Integer>();
+					for ( Node node : overlap_MBR_list)
+					{
+						if ( node.hasProperty(minPNListPropertyname))
+						{
+							int[] NL_list_label = ( int[] ) node.getProperty(minPNListPropertyname);
+							for ( int node_id : NL_list_label)
+								min_NL_list.add(node_id);
+						}
+					}
+					if ( outputLevelInfo)
+					{
+						logWriteLine = String.format("min_NL_list size is %d\n", min_NL_list.size());
+						if ( min_NL_list.size() < min_spa_card)
+							logWriteLine += "NL_list is more selective\n";
+						else
+							logWriteLine += "spa predicate is more selective\n";
+						logWriteLine += String.format("NL_serialize time: %d\n", System.currentTimeMillis() - start1);
+						logWriteLine += String.format("level %d time: %d\n", level_index, System.currentTimeMillis() - startLevel);
+						OwnMethods.Print(logWriteLine);
+						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
+					}
+					
 					// if NL is more selective than spatial predicate
 					if ( min_NL_list.size() < min_spa_card)
 					{
@@ -1816,101 +1918,101 @@ public class RisoTreeQueryPN {
 //		return null;
 	}
 	
-	public static void queryTest()
-	{
-		String db_path = "", querygraphDir = "", querygraph_path = "", graph_pos_map_path = "", log_path = "";
-		int queryNodeCount = 3;
-		int query_id = 0;
-		Config config = new Config();
-		String dataset = config.getDatasetName();
-		system systemName = config.getSystemName();
-		String neo4jVersion = config.GetNeo4jVersion(); 
-		switch (systemName) {
-		case Ubuntu:
-			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", neo4jVersion, dataset);
-			querygraphDir = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph/%s/", dataset);
-			querygraph_path = String.format("%s%d.txt", querygraphDir, queryNodeCount);
-			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map.txt";
-			log_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/test.log";
-			break;
-		case Windows:
-			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, neo4jVersion, dataset);
-			querygraphDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph\\%s\\", dataset);
-			querygraph_path = String.format("%s%d.txt", querygraphDir, queryNodeCount);
-			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map.txt";
-			log_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\test.log";
-		default:
-			break;
-		}
-		
-		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
-		Query_Graph query_Graph = queryGraphs.get(query_id);
-		query_Graph.spa_predicate[2] = new MyRectangle(-84.521118, 33.827220, -84.375996, 33.972342);//1000, 2
-//		query_Graph.spa_predicate[2] = new MyRectangle(-84.468680, 33.879658, -84.428434, 33.919904);//100
-		//		query_Graph.spa_predicate[1] = new MyRectangle(9.523183, 46.839041, 9.541593, 46.857451);//100
-		//		query_Graph.spa_predicate[1] = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);/10,000
-		//		query_Graph.spa_predicate[1] = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);//100,000
-		//		query_Graph.spa_predicate[1] = new MyRectangle(-179.017757, -135.408325, 207.362849, 250.972281);//1,000,000
-		//		query_Graph.spa_predicate[1] = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);
-		//		query_Graph.spa_predicate[3] = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);
-		
-		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
-		long[] graph_pos_map_list= new long[graph_pos_map.size()];
-		for ( String key_str : graph_pos_map.keySet())
-		{
-			int key = Integer.parseInt(key_str);
-			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
-			graph_pos_map_list[key] = pos_id;
-		}
-
-		try {
-			RisoTreeQuery risoTreeQuery = new RisoTreeQuery(db_path, dataset, graph_pos_map_list);
-			long start = System.currentTimeMillis();
-			risoTreeQuery.Query(query_Graph, -1);
-			OwnMethods.Print("Time:" + (System.currentTimeMillis() - start));
-			OwnMethods.Print(String.format("result count:%d", risoTreeQuery.result_count));
-			risoTreeQuery.dbservice.shutdown();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void main(String[] args) {
-		queryTest();
-
-			//			SpatialFirst spatialFirst = new SpatialFirst(db_path, dataset);
-			//			TreeSet<Long> result2 = spatialFirst.Query(query_Graph);
-			//			spatialFirst.shutdown();
-			//			
-			//			LinkedList<Long> counter1 = new LinkedList<Long>();
-			//			for ( long id : result1)
-			//				if(result2.contains(id) == false)
-			//					counter1.add(id);
-			//			
-			//			for ( long id : counter1)
-			//				OwnMethods.Print(id);
-			//			OwnMethods.Print(counter1.size());
-
-			//			LinkedList<Long> counter2 = new LinkedList<Long>();
-			//			for ( long id : result2)
-			//				if(result1.contains(id) == false)
-			//					counter2.add(id);
-			//			
-			//			for ( long id : counter2)
-			//				OwnMethods.Print(id);
-			//			OwnMethods.Print(counter2.size());
-
-			//			dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-			//			tx = dbservice.beginTx();
-			//			for ( long id : counter1)
-			//			{
-			//				double[] bbox = (double[])dbservice.getNodeById(id).getProperty("bbox");
-			//				MyRectangle rectangle = new MyRectangle(bbox);
-			////				for ( double element : bbox)
-			////					OwnMethods.Print(element);
-			//				OwnMethods.Print(rectangle.toString());
-			////				break;
-			//			}
-	}
+//	public static void queryTest()
+//	{
+//		String db_path = "", querygraphDir = "", querygraph_path = "", graph_pos_map_path = "", log_path = "";
+//		int queryNodeCount = 3;
+//		int query_id = 0;
+//		Config config = new Config();
+//		String dataset = config.getDatasetName();
+//		system systemName = config.getSystemName();
+//		String neo4jVersion = config.GetNeo4jVersion(); 
+//		switch (systemName) {
+//		case Ubuntu:
+//			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", neo4jVersion, dataset);
+//			querygraphDir = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph/%s/", dataset);
+//			querygraph_path = String.format("%s%d.txt", querygraphDir, queryNodeCount);
+//			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map.txt";
+//			log_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/test.log";
+//			break;
+//		case Windows:
+//			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, neo4jVersion, dataset);
+//			querygraphDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph\\%s\\", dataset);
+//			querygraph_path = String.format("%s%d.txt", querygraphDir, queryNodeCount);
+//			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map.txt";
+//			log_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\test.log";
+//		default:
+//			break;
+//		}
+//		
+//		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+//		Query_Graph query_Graph = queryGraphs.get(query_id);
+//		query_Graph.spa_predicate[2] = new MyRectangle(-84.521118, 33.827220, -84.375996, 33.972342);//1000, 2
+////		query_Graph.spa_predicate[2] = new MyRectangle(-84.468680, 33.879658, -84.428434, 33.919904);//100
+//		//		query_Graph.spa_predicate[1] = new MyRectangle(9.523183, 46.839041, 9.541593, 46.857451);//100
+//		//		query_Graph.spa_predicate[1] = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);/10,000
+//		//		query_Graph.spa_predicate[1] = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);//100,000
+//		//		query_Graph.spa_predicate[1] = new MyRectangle(-179.017757, -135.408325, 207.362849, 250.972281);//1,000,000
+//		//		query_Graph.spa_predicate[1] = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);
+//		//		query_Graph.spa_predicate[3] = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);
+//		
+//		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
+//		long[] graph_pos_map_list= new long[graph_pos_map.size()];
+//		for ( String key_str : graph_pos_map.keySet())
+//		{
+//			int key = Integer.parseInt(key_str);
+//			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
+//			graph_pos_map_list[key] = pos_id;
+//		}
+//
+//		try {
+//			RisoTreeQuery risoTreeQuery = new RisoTreeQuery(db_path, dataset, graph_pos_map_list);
+//			long start = System.currentTimeMillis();
+//			risoTreeQuery.Query(query_Graph, -1);
+//			OwnMethods.Print("Time:" + (System.currentTimeMillis() - start));
+//			OwnMethods.Print(String.format("result count:%d", risoTreeQuery.result_count));
+//			risoTreeQuery.dbservice.shutdown();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+//	
+//	public static void main(String[] args) {
+//		queryTest();
+//
+//			//			SpatialFirst spatialFirst = new SpatialFirst(db_path, dataset);
+//			//			TreeSet<Long> result2 = spatialFirst.Query(query_Graph);
+//			//			spatialFirst.shutdown();
+//			//			
+//			//			LinkedList<Long> counter1 = new LinkedList<Long>();
+//			//			for ( long id : result1)
+//			//				if(result2.contains(id) == false)
+//			//					counter1.add(id);
+//			//			
+//			//			for ( long id : counter1)
+//			//				OwnMethods.Print(id);
+//			//			OwnMethods.Print(counter1.size());
+//
+//			//			LinkedList<Long> counter2 = new LinkedList<Long>();
+//			//			for ( long id : result2)
+//			//				if(result1.contains(id) == false)
+//			//					counter2.add(id);
+//			//			
+//			//			for ( long id : counter2)
+//			//				OwnMethods.Print(id);
+//			//			OwnMethods.Print(counter2.size());
+//
+//			//			dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+//			//			tx = dbservice.beginTx();
+//			//			for ( long id : counter1)
+//			//			{
+//			//				double[] bbox = (double[])dbservice.getNodeById(id).getProperty("bbox");
+//			//				MyRectangle rectangle = new MyRectangle(bbox);
+//			////				for ( double element : bbox)
+//			////					OwnMethods.Print(element);
+//			//				OwnMethods.Print(rectangle.toString());
+//			////				break;
+//			//			}
+//	}
 
 }
