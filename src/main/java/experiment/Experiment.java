@@ -29,7 +29,7 @@ public class Experiment {
 	static String resultDir;
 	
 	static boolean TEST_FORMAT;
-	static int experimentCount = 2;
+	static int experimentCount = 1;
 
 	//non-spatial ratio 20
 //	static double startSelectivity = 0.000001;
@@ -128,8 +128,9 @@ public class Experiment {
 //			risoTreeQuery(2, 1);
 //			risoTreeQuery_HMBR(2, 1);
 			
-			int nodeCount = 15;
+//			int nodeCount = 15;
 			
+			for (int nodeCount = 5; nodeCount <= 35; nodeCount+=5)
 //			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
 			for (int k = 0; k < 1;k ++)
 			{
@@ -144,11 +145,11 @@ public class Experiment {
 //					risoTreeQueryPN(nodeCount, queryIndex);
 //					risoTreeQueryPN(5, queryIndex);
 //					risoTreeQueryPN(7, queryIndex);
-					risoTreeQueryPN(10, queryIndex);
+//					risoTreeQueryPN(10, queryIndex);
 //					risoTreeQueryPN(15, queryIndex);
 //					risoTreeQueryPN(20, queryIndex);
 //					risoTreeQueryPN(25, queryIndex);
-					risoTreeQueryPN(30, queryIndex);
+//					risoTreeQueryPN(30, queryIndex);
 				}
 			}
 			
