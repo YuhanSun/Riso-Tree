@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.management.relation.RelationType;
+
 import org.neo4j.gis.spatial.Layer;
 import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
@@ -13,6 +15,7 @@ import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
@@ -87,8 +90,17 @@ public class App {
 //		rangeQueryCountCompare();
 //		graphCompare();
 //		cliqueTest();
-		propertyPageAccessTest();
+//		propertyPageAccessTest();
 //		matchOnDifferentLabelCountDatabase();
+		getAllLabels();
+//		restartNeo4jJava();
+	}
+	
+	public static void restartNeo4jJava()
+	{
+		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+				.newEmbeddedDatabase(new File(db_path));
+		databaseService.shutdown();
 	}
 	
 	public static void matchOnDifferentLabelCountDatabase()
@@ -399,8 +411,11 @@ public class App {
 		OwnMethods.getLabelListFromEntity(entityPath, labelListPath);
 	}
 	
-	public static void test()
+	public static void getAllLabels()
 	{
+//		db_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\foursquare\\"
+//				+ "neo4j-community-3.1.1_foursquare_backup\\data\\databases\\graph.db";;
+		OwnMethods.Print("db path:"+db_path);
 		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		Transaction tx = databaseService.beginTx();
 //		Node node = databaseService.getNodeById(3743197);
@@ -409,6 +424,11 @@ public class App {
 		ResourceIterable<Label> labels = databaseService.getAllLabels();
 		for ( Label label : labels)
 			OwnMethods.Print(label);
+		
+		ResourceIterable<RelationshipType> relationTypes = databaseService.getAllRelationshipTypes();
+		for (RelationshipType type : relationTypes)
+			OwnMethods.Print(type);
+		
 		tx.success();
 		tx.close();
 		databaseService.shutdown();
