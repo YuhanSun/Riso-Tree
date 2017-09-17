@@ -430,17 +430,18 @@ public class OwnMethods {
 				}
 				if ( System.currentTimeMillis() - start > 6000)
 				{
-					subgraph_ids = new ArrayList<Integer>(node_count);
-					while ( true)
-					{
-						int first_node = (int) (random.nextDouble() * graph_size);
-						if ( graph.get(first_node).size() != 0)
-						{
-							subgraph_ids.add(first_node);
-							break;
-						}
-					}
-					start = System.currentTimeMillis();
+//					subgraph_ids = new ArrayList<Integer>(node_count);
+//					while ( true)
+//					{
+//						int first_node = (int) (random.nextDouble() * graph_size);
+//						if ( graph.get(first_node).size() != 0)
+//						{
+//							subgraph_ids.add(first_node);
+//							break;
+//						}
+//					}
+//					start = System.currentTimeMillis();
+					return GenerateRandomGraph(graph, labels, entities, node_count, spa_pred_count);
 				}
 			}
 			Query_Graph query_Graph = new Query_Graph(node_count);
@@ -475,7 +476,8 @@ public class OwnMethods {
 						int neighbor_index = subgraph_ids.indexOf(neighbor);
 						if(neighbor_index == -1)
 						{
-							OwnMethods.Print(neighbor + " in "+ neighbors +" does not exist");
+							OwnMethods.Print(neighbor + " in "+ id +"'s neighbors " + neighbors +" does not exist");
+							OwnMethods.Print("All the ids in the subgraph are" + subgraph_ids);
 							throw new Exception("neighbors does not exist in subgraph_ids");
 						}
 						else
