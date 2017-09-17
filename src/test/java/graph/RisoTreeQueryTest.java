@@ -17,7 +17,7 @@ import commons.Query_Graph;
 import commons.Utility;
 import commons.Config.system;
 
-public class RisoTreeTest {
+public class RisoTreeQueryTest {
 
 	static Config config = new Config();
 	static String dataset = config.getDatasetName();
@@ -27,10 +27,10 @@ public class RisoTreeTest {
 	static String db_path, graph_pos_map_path;
 	static String querygraphDir, spaPredicateDir;
 	
-	static int nodeCount = 35, query_id = 0;
-	static int name_suffix = 7;
-//	static int name_suffix = 7549;//0.1
-//	static int name_suffix = 75495;//0.1
+	static int nodeCount = 7, query_id = 0;
+//	static int name_suffix = 75;
+//	static int name_suffix = 7549;//0.01
+	static int name_suffix = 75495;//0.1
 	static String queryrect_path = null, querygraph_path = null;
 	
 	@BeforeClass
@@ -87,6 +87,7 @@ public class RisoTreeTest {
 		risoTreeQuery.Query(query_Graph, -1);
 		OwnMethods.Print("Result count:" + risoTreeQuery.result_count);
 		OwnMethods.Print("Page access:" + risoTreeQuery.page_hit_count);
+		OwnMethods.Print("range query time:" + risoTreeQuery.range_query_time);
 		OwnMethods.Print("get iterator time:" + risoTreeQuery.get_iterator_time);
 		OwnMethods.Print("iterate time:" + risoTreeQuery.iterate_time);
 		
