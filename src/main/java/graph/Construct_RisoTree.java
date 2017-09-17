@@ -109,8 +109,8 @@ public class Construct_RisoTree {
 		initParameters();
 		
 //		generateContainSpatialID();
-		constructPN();
-//		LoadPN();
+//		constructPN();
+		LoadPN();
 //		generatePNSize();
 		
 		
@@ -267,6 +267,13 @@ public class Construct_RisoTree {
 		}
 	}
 	
+	/**
+	 * One hop is directly loaded into db.
+	 * Two hops is constructed based on one hop loaded, 
+	 * and it is written to file for future batchinsert.
+	 * Such function has to be run separately for one hop
+	 * and two hops.
+	 */
 	public static void constructPN()
 	{
 		try {
@@ -306,7 +313,7 @@ public class Construct_RisoTree {
 					for ( int i = 0; i < arrayList.size(); i++)
 						array[i] = arrayList.get(i);
 					
-//					dbservice.getNodeById(nodeId).setProperty(propertyName, array);
+					dbservice.getNodeById(nodeId).setProperty(propertyName, array);
 					dbservice.getNodeById(nodeId).setProperty(propertyName + "_size", array.length);
 				}
 			}
@@ -314,68 +321,67 @@ public class Construct_RisoTree {
 			tx.close();
 			
 			//more than one hop
-//			Transaction tx = dbservice.beginTx();
-//			
-//			FileWriter writer =  new FileWriter(new File(PNPath));
-//			
+			Transaction tx2 = dbservice.beginTx();
+			
+			FileWriter writer =  new FileWriter(new File(PNPath));
+			
 //			for ( int hop = 2; hop <= MAX_HOPNUM; hop++)
-//			{
-//				String regex = "PN";
-//				for ( int i = 0; i < hop - 1; i++)
-//					regex += "_\\d+";
-//				regex += "$";
-//				
-//				for ( long nodeID : containIDMap.keySet())
-//				{
-//					OwnMethods.Print(nodeID);
-//					writer.write(nodeID + "\n");
-//					Node node = dbservice.getNodeById(nodeID);
-//					Map<String, Object> properties = node.getAllProperties();
-//					
-//					for ( String key : properties.keySet())
-//					{
-//						if ( key.matches(regex))
-//						{
-//							int[] curPathNeighbors = (int[]) properties.get(key);
-//							TreeSet<Integer> nextPathNeighbors =  new TreeSet<Integer>();
-//							for ( int curNeighborID : curPathNeighbors)
-//								for ( int id : graph.get(curNeighborID))
-//									nextPathNeighbors.add(id);
-//							
-//							HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors = new HashMap<Integer, ArrayList<Integer>>();
-//							for ( int neighborID : nextPathNeighbors)
-//							{
-//								int label = labelList.get(neighborID);
-//								if ( pathLabelNeighbors.containsKey(label))
-//									pathLabelNeighbors.get(label).add(neighborID);
-//								else
-//								{
-//									ArrayList<Integer> arrayList = new ArrayList<Integer>();
-//									arrayList.add(neighborID);
-//									pathLabelNeighbors.put(label, arrayList);
-//								}
-//							}
-//							
-//							
-//							
-//							for ( int pathLabel : pathLabelNeighbors.keySet())
-//							{
-//								String propertyName = String.format("%s_%d", key, pathLabel);
-//								ArrayList<Integer> arrayList = pathLabelNeighbors.get(pathLabel);
-//								int [] array = new int[arrayList.size()];
-//								for ( int i = 0; i < arrayList.size(); i++)
-//									array[i] = arrayList.get(i);
-//								
-////								node.setProperty(propertyName, array);
-//								writer.write(String.format("%s,%s\n", propertyName, arrayList));
-//							}
-//						}
-//					}
-//				}
-//			}
-//			writer.close();
-//			tx.success();
-//			tx.close();
+			int hop = 2;
+			{
+				String regex = "PN";
+				for ( int i = 0; i < hop - 1; i++)
+					regex += "_\\d+";
+				regex += "$";
+				
+				for ( long nodeID : containIDMap.keySet())
+				{
+					OwnMethods.Print(nodeID);
+					writer.write(nodeID + "\n");
+					Node node = dbservice.getNodeById(nodeID);
+					Map<String, Object> properties = node.getAllProperties();
+					
+					for ( String key : properties.keySet())
+					{
+						if ( key.matches(regex))
+						{
+							int[] curPathNeighbors = (int[]) properties.get(key);
+							TreeSet<Integer> nextPathNeighbors =  new TreeSet<Integer>();
+							for ( int curNeighborID : curPathNeighbors)
+								for ( int id : graph.get(curNeighborID))
+									nextPathNeighbors.add(id);
+							
+							HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors = new HashMap<Integer, ArrayList<Integer>>();
+							for ( int neighborID : nextPathNeighbors)
+							{
+								int label = labelList.get(neighborID);
+								if ( pathLabelNeighbors.containsKey(label))
+									pathLabelNeighbors.get(label).add(neighborID);
+								else
+								{
+									ArrayList<Integer> arrayList = new ArrayList<Integer>();
+									arrayList.add(neighborID);
+									pathLabelNeighbors.put(label, arrayList);
+								}
+							}
+							
+							for ( int pathLabel : pathLabelNeighbors.keySet())
+							{
+								String propertyName = String.format("%s_%d", key, pathLabel);
+								ArrayList<Integer> arrayList = pathLabelNeighbors.get(pathLabel);
+								int [] array = new int[arrayList.size()];
+								for ( int i = 0; i < arrayList.size(); i++)
+									array[i] = arrayList.get(i);
+								
+//								node.setProperty(propertyName, array);
+								writer.write(String.format("%s,%s\n", propertyName, arrayList));
+							}
+						}
+					}
+				}
+			}
+			writer.close();
+			tx2.success();
+			tx2.close();
 			
 			dbservice.shutdown();
 		} catch (Exception e) {
