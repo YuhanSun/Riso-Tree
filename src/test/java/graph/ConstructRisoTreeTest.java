@@ -14,8 +14,11 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.ResourceIterable;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
@@ -23,6 +26,9 @@ import commons.Config;
 import commons.OwnMethods;
 import osm.OSM_Utility;
 import commons.Config.system;
+import commons.Labels;
+import commons.Labels.OSMLabel;
+import commons.Labels.RTreeRel;
 
 public class ConstructRisoTreeTest {
 
@@ -33,6 +39,7 @@ public class ConstructRisoTreeTest {
 
 	static String db_path;
 	static String containIDPath;
+	static GraphDatabaseService databaseService;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -48,33 +55,58 @@ public class ConstructRisoTreeTest {
 		default:
 			break;
 		}
+		
+		databaseService = new GraphDatabaseFactory().
+				newEmbeddedDatabase(new File(db_path));
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
+		databaseService.shutdown();
+	}
+	
+	@Test
+	public void nonLeafContentTest()
+	{
+		Transaction tx = databaseService.beginTx();
+		ResourceIterator<Node> nodes = databaseService.findNodes(Labels.GraphLabel.GRAPH_1);
+		while ( nodes.hasNext())
+		{
+			Node node =  nodes.next();
+			Node parent = node.getSingleRelationship
+					(RTreeRel.RTREE_REFERENCE, Direction.INCOMING).
+					getStartNode();
+			OwnMethods.Print(parent.getAllProperties());
+			break;
+		}
+		tx.success();
+		tx.close();
 	}
 
 	@Test
 	public void readContainIDMapTest()
 	{
-//		HashMap<Long, ArrayList<Integer>> containIDMap = Construct_RisoTree.readContainIDMap(containIDPath);
-//		for (long key : containIDMap.keySet())
-//		{
-//			OwnMethods.Print(String.format("%d:%s", key, containIDMap.get(key).toString()));
-//			break;
-//		}
+		HashMap<Long, ArrayList<Integer>> containIDMap = Construct_RisoTree.readContainIDMap(containIDPath);
+		for (long key : containIDMap.keySet())
+		{
+			OwnMethods.Print(String.format("%d:%s", key, containIDMap.get(key).toString()));
+			break;
+		}
 	}
 	
 	@Test
 	public void constructPNTest()
 	{
-//		long nodeID = 754959;
-//		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-//		Transaction tx = databaseService.beginTx();
-//		Node node = databaseService.getNodeById(nodeID);
-//		Map<String, Object> properties = node.getAllProperties();
-//		for ( String key : properties.keySet())
-//		{
+		long nodeID = 754959;
+		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+		Transaction tx = databaseService.beginTx();
+		Node node = databaseService.getNodeById(nodeID);
+		Map<String, Object> properties = node.getAllProperties();
+		for ( String key : properties.keySet())
+		{
+			if ( key.equals("count")|| key.equals("bbox"))
+				OwnMethods.Print(key);
+			
 //			if ( key.contains("PN"))
 //			{
 //				String line = String.format("%s:", key);
@@ -86,11 +118,11 @@ public class ConstructRisoTreeTest {
 //				line += "]";
 //				OwnMethods.Print(line);
 //			}
-//		}
-//		
-//		tx.success();
-//		tx.close();
-//		databaseService.shutdown();
+		}
+		
+		tx.success();
+		tx.close();
+		databaseService.shutdown();
 	}
 
 	@Test
