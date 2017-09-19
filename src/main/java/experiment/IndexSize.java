@@ -3,22 +3,26 @@ package experiment;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
+import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.traversal.TraversalDescription;
+import org.neo4j.graphdb.traversal.Traverser;
 
 import commons.Config;
-import commons.Labels;
+import commons.Entity;
 import commons.Config.system;
 import osm.OSM_Utility;
 import commons.OwnMethods;
+import graph.Construct_RisoTree;
 
 public class IndexSize {
 
@@ -29,8 +33,7 @@ public class IndexSize {
 	static int MAX_HOPNUM = config.getMaxHopNum();
 	static int nonspatial_label_count = config.getNonSpatialLabelCount();
 	
-	static String db_path;
-	static String graphPath;
+	static String db_path, graphPath, entityPath, containIDPath;
 	static ArrayList<Integer> labels;//all labels in the graph
 	
 	public static void initializeParameters()
@@ -39,10 +42,14 @@ public class IndexSize {
 		case Ubuntu:
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
 			graphPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
+			entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+			containIDPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/containID.txt", dataset);
 			break;
 		case Windows:
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
 			graphPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\graph.txt", dataset);
+			entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
+			containIDPath= String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\containID.txt", dataset);
 			break;
 		}
 		if (nonspatial_label_count == 1)
@@ -60,7 +67,10 @@ public class IndexSize {
 		initializeParameters();
 //		calculateIndexSize();
 //		calculateValidIndexSize();
-		graphSize();
+//		graphSize();
+		getRTreeSize();
+		getOneHopIndexSize();
+		getTwoHopIndexSize();
 	}
 
 	public static void graphSize()
@@ -74,6 +84,107 @@ public class IndexSize {
 		}
 	}
 	
+	/**
+	 * Read from database
+	 */
+	public static void getTwoHopIndexSize()
+	{
+		try {
+			int count = 0;//count of integers stored in each list
+			OwnMethods.Print(db_path);
+			GraphDatabaseService databaseService = new GraphDatabaseFactory()
+					.newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+			HashMap<Long, ArrayList<Integer>> containIDMap = Construct_RisoTree.readContainIDMap(containIDPath);
+			for ( long key : containIDMap.keySet())
+			{
+				Node node  = databaseService.getNodeById(key);
+				Map<String, Object> properties = node.getAllProperties();
+				for ( String propertyKey : properties.keySet())
+					if (propertyKey.matches("PN_\\d+_\\d+_size$"))
+						count += (Integer) properties.get(propertyKey);
+			}
+			OwnMethods.Print("Two hop index:" + count * 4 + " bytes");
+			tx.success();
+			tx.close();
+			databaseService.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Read from database
+	 */
+	public static void getOneHopIndexSize()
+	{
+		try {
+			int count = 0;//count of integers stored in each list
+			OwnMethods.Print(db_path);
+			GraphDatabaseService databaseService = new GraphDatabaseFactory()
+					.newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+			HashMap<Long, ArrayList<Integer>> containIDMap = Construct_RisoTree.readContainIDMap(containIDPath);
+			for ( long key : containIDMap.keySet())
+			{
+				Node node  = databaseService.getNodeById(key);
+				Map<String, Object> properties = node.getAllProperties();
+				for ( String propertyKey : properties.keySet())
+					if (propertyKey.matches("PN_\\d+_size$"))
+						count += (Integer) properties.get(propertyKey);
+			}
+			OwnMethods.Print("One hop index:" + count * 4 + " bytes");
+			tx.success();
+			tx.close();
+			databaseService.shutdown();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Use RTree non-leaf nodes count plus count of spatial entities
+	 */
+	public static void getRTreeSize()
+	{
+		try {
+			OwnMethods.Print(db_path);
+			GraphDatabaseService databaseService = new GraphDatabaseFactory()
+					.newEmbeddedDatabase(new File(db_path));
+			Transaction tx = databaseService.beginTx();
+//			long start = System.currentTimeMillis();
+			Node rootNode = OSM_Utility.getRTreeRoot(databaseService, dataset);
+//			OwnMethods.Print("start time :"+ (System.currentTimeMillis() - start));
+//			start = System.currentTimeMillis();
+			TraversalDescription td = databaseService.traversalDescription()
+					.depthFirst()
+					.relationships( RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING );
+            Traverser traverser = td.traverse( rootNode );
+            ResourceIterable<Node> nodes = traverser.nodes();
+//            OwnMethods.Print("get nodes time:" + (System.currentTimeMillis() - start));
+//            start = System.currentTimeMillis();
+            int count = 0;	//count of number of nodes
+            for ( Node node : nodes)
+            	count++;
+//            OwnMethods.Print("iterate nodes time:" + (System.currentTimeMillis() - start));
+//            OwnMethods.Print("count:"+count);
+            tx.success();
+            tx.close();
+            databaseService.shutdown();
+            
+            ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+            int spaCount = OwnMethods.GetSpatialEntityCount(entities);
+            count += spaCount;
+            OwnMethods.Print("RTree size:" + count * 5 * 4 + " bytes");
+            
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Calculate index size for NL 
+	 */
 	public static void calculateIndexSize()
 	{
 		try {
