@@ -54,8 +54,6 @@ public class LoadDataNoOSM {
 	static String dbPath, entityPath, mapPath, graphPath, labelListPath, hmbrPath;
 	
 	static ArrayList<Entity> entities; 
-	static int nonspatial_vertex_count;
-	static int spatialVertexCount;
 	
 	static void initParameters()
 	{
@@ -86,8 +84,6 @@ public class LoadDataNoOSM {
 		}
 		
 		entities = OwnMethods.ReadEntity(entityPath);
-		spatialVertexCount = OwnMethods.GetSpatialEntityCount(entities);
-		nonspatial_vertex_count = entities.size() - spatialVertexCount;
 	}
 	
 	public static void main(String[] args) {
@@ -95,23 +91,23 @@ public class LoadDataNoOSM {
 		try {
 			initParameters();
 			
-//			batchRTreeInsert();
-//			
-//			if ( nonspatial_label_count == 1)
-//				generateLabelList();
-//			else
-//			{
-//				generateNonspatialLabel();
-//				nonspatialLabelTest();
-//			}
+			batchRTreeInsert();
+			
+			if ( nonspatial_label_count == 1)
+				generateLabelList();
+			else
+			{
+				generateNonspatialLabel();
+				nonspatialLabelTest();
+			}
 			
 			LoadNonSpatialEntity();
 			
 			GetSpatialNodeMap();
 			
-			LoadGraphEdges();
+//			LoadGraphEdges();
 			
-			CalculateCount();
+//			CalculateCount();
 //			
 //			Construct_RisoTree.main(null);
 //			
@@ -230,7 +226,7 @@ public class LoadDataNoOSM {
 	 */
 	public static void GetSpatialNodeMap()
 	{
-		OwnMethods.Print("Get spatial vertices map\n");
+		OwnMethods.Print("Get spatial vertices map");
 		try {
 			Map<Object, Object> id_map = new TreeMap<Object, Object>();
 			
@@ -249,6 +245,7 @@ public class LoadDataNoOSM {
 			tx.success();	tx.close();
 			databaseService.shutdown();
 			
+			OwnMethods.Print("Write spatial node map to " + mapPath + "\n");
 			OwnMethods.WriteMap(mapPath, true, id_map);
 			
 		} catch (Exception e) {
@@ -262,7 +259,7 @@ public class LoadDataNoOSM {
 	static void LoadNonSpatialEntity() 
 	{
 		try {
-			OwnMethods.Print(String.format("LoadNonSpatialEntity\n from %s\n%s\n to %s\n", 
+			OwnMethods.Print(String.format("LoadNonSpatialEntity\n from %s\n%s\n to %s", 
 					entityPath, labelListPath, dbPath));
 			
 			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
@@ -288,6 +285,7 @@ public class LoadDataNoOSM {
 				}
 			}
 			inserter.shutdown();
+			OwnMethods.Print("Write non-spatial node map to "+mapPath+"\n");
 			OwnMethods.WriteMap(mapPath, true, id_map);
 		} catch (Exception e) {
 			e.printStackTrace();	System.exit(-1);
@@ -339,16 +337,6 @@ public class LoadDataNoOSM {
 				}
 			}
 			
-//			for ( int i = 0; i < nonspatial_vertex_count; i++)
-//			{
-//				int label = random.nextInt(nonspatial_label_count);
-//				label += 2;
-//				writer.write(label + "\n");
-//			}
-//			
-//			for ( int i = 0; i < spatialVertexCount; i++)
-//				writer.write("1\n");
-			
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -368,16 +356,17 @@ public class LoadDataNoOSM {
 
 	public static void batchRTreeInsert()
 	{
-		OwnMethods.Print("Batch insert RTree\n");
+		OwnMethods.Print("Batch insert RTree");
 		try {
 			String layerName = dataset;
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+			OwnMethods.Print("dataset:" + dataset + "\ndatabase:" + dbPath + "\n");
 			
 			SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 			
 			Transaction tx = databaseService.beginTx();
 //			SimplePointLayer simplePointLayer = spatialDatabaseService.createSimplePointLayer(layerName);
-			EditableLayer layer = spatialDatabaseService.getOrCreatePointLayer(layerName, "lon", "lat");
+			EditableLayer layer = spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
 //			org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
 			
 			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath); 
