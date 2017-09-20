@@ -75,7 +75,7 @@ public class IndexSize {
 //		calculateValidIndexSize();
 //		graphSize();
 		
-		LoadDataNoOSM.main(null);
+//		LoadDataNoOSM.main(null);
 		Construct_RisoTree.main(null);
 		getRTreeSize();
 		getOneHopIndexFromFile();
@@ -129,10 +129,9 @@ public class IndexSize {
 				if ( line == null)
 					break;
 				nodeID = Long.parseLong(line);
-				OwnMethods.Print(nodeID);
 			}
 			reader.close();
-			OwnMethods.Print("2 hop size:" + nodeID * 4 + " bytes");
+			OwnMethods.Print("2 hop size:" + count * 4 + " bytes");
 		}
 		catch(Exception e)
 		{
@@ -203,10 +202,9 @@ public class IndexSize {
 				if ( line == null)
 					break;
 				nodeID = Long.parseLong(line);
-				OwnMethods.Print(nodeID);
 			}
 			reader.close();
-			OwnMethods.Print("1 hop size:" + nodeID * 4 + " bytes");
+			OwnMethods.Print("1 hop size:" + count * 4 + " bytes");
 		}
 		catch(Exception e)
 		{
