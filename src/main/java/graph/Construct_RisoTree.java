@@ -2,7 +2,6 @@ package graph;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
@@ -14,13 +13,10 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.management.relation.Relation;
-
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -29,7 +25,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.register.Register.Int;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
@@ -78,7 +73,7 @@ public class Construct_RisoTree {
 //			graph_node_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
 			containIDPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/containID.txt", dataset);
-			PNPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/PathNeighbors.txt", dataset);
+			PNPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/PathNeighbors", dataset);
 			break;
 		case Windows:
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
@@ -89,7 +84,7 @@ public class Construct_RisoTree {
 //			graph_node_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\node_map.txt", dataset);
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
 			containIDPath= String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\containID.txt", dataset);
-			PNPath= String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\PathNeighbors.txt", dataset);
+			PNPath= String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\PathNeighbors", dataset);
 		default:
 			break;
 		}
@@ -108,9 +103,9 @@ public class Construct_RisoTree {
 	public static void main(String[] args) {
 		initParameters();
 		
-//		generateContainSpatialID();
-//		constructPN();
-		LoadPN();
+		generateContainSpatialID();
+		constructPN();
+//		LoadPN();
 //		generatePNSize();
 		
 		
@@ -281,11 +276,13 @@ public class Construct_RisoTree {
 			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
 			ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
 			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			FileWriter writer1 = new FileWriter(new File(PNPath + "_"+1));
 			//for one hop
 			Transaction tx = dbservice.beginTx();
 			for ( long nodeId : containIDMap.keySet())
 			{
 				OwnMethods.Print(nodeId);
+				writer1.write(nodeId + "\n");
 				TreeSet<Integer> pathNeighbors = new TreeSet<Integer>();
 				for ( int spaID : containIDMap.get(nodeId))
 					for ( int neighborID : graph.get(spaID))
@@ -315,19 +312,21 @@ public class Construct_RisoTree {
 					
 					dbservice.getNodeById(nodeId).setProperty(propertyName, array);
 					dbservice.getNodeById(nodeId).setProperty(propertyName + "_size", array.length);
+					writer1.write(String.format("%s,%s\n", propertyName, arrayList));
 				}
 			}
+			writer1.close();
 			tx.success();
 			tx.close();
 			
 			//more than one hop
 			Transaction tx2 = dbservice.beginTx();
 			
-			FileWriter writer =  new FileWriter(new File(PNPath));
 			
 //			for ( int hop = 2; hop <= MAX_HOPNUM; hop++)
 			int hop = 2;
 			{
+				FileWriter writer2 =  new FileWriter(new File(PNPath+"_"+hop));
 				String regex = "PN";
 				for ( int i = 0; i < hop - 1; i++)
 					regex += "_\\d+";
@@ -336,7 +335,7 @@ public class Construct_RisoTree {
 				for ( long nodeID : containIDMap.keySet())
 				{
 					OwnMethods.Print(nodeID);
-					writer.write(nodeID + "\n");
+					writer2.write(nodeID + "\n");
 					Node node = dbservice.getNodeById(nodeID);
 					Map<String, Object> properties = node.getAllProperties();
 					
@@ -373,13 +372,13 @@ public class Construct_RisoTree {
 									array[i] = arrayList.get(i);
 								
 //								node.setProperty(propertyName, array);
-								writer.write(String.format("%s,%s\n", propertyName, arrayList));
+								writer2.write(String.format("%s,%s\n", propertyName, arrayList));
 							}
 						}
 					}
 				}
+				writer2.close();
 			}
-			writer.close();
 			tx2.success();
 			tx2.close();
 			
@@ -545,7 +544,7 @@ public class Construct_RisoTree {
 				OwnMethods.Print("count:" + count);
 				Long pos = queue.poll();
 				Node node = dbservice.getNodeById(pos);
-				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
+				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRel.RTREE_CHILD);
 				for ( Relationship relationship : rels)
 					queue.add(relationship.getEndNode().getId());
 				if(count < 2890)
@@ -636,7 +635,7 @@ public class Construct_RisoTree {
 							OwnMethods.WriteFile(output_path, true, line + "\n");
 						}
 					}
-					Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
+					Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRel.RTREE_CHILD);
 					for ( Relationship relationship : rels)
 						next.add(relationship.getEndNode());	
 				}
@@ -682,7 +681,7 @@ public class Construct_RisoTree {
 							node.setProperty(NL_size_property_name, 0);
 					}
 				}
-				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
+				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRel.RTREE_CHILD);
 				for ( Relationship relationship : rels)
 					cur.add(relationship.getEndNode());
 			}
@@ -750,7 +749,7 @@ public class Construct_RisoTree {
 					
 					
 					
-					Relationship relationship = node.getSingleRelationship(RTreeRelationshipTypes.RTREE_CHILD, Direction.INCOMING);
+					Relationship relationship = node.getSingleRelationship(RTreeRel.RTREE_CHILD, Direction.INCOMING);
 					if(relationship != null)
 						up_level_nodes.add(relationship.getStartNode());
 				}
@@ -1129,7 +1128,7 @@ public class Construct_RisoTree {
 					int[] property = (int[]) node.removeProperty(clear_property_name);
 					node.setProperty(replace_property_name, property);
 				}
-				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
+				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRel.RTREE_CHILD);
 				for (Relationship rel : rels)
 				{
 					Node neighbor = rel.getEndNode();
@@ -1164,7 +1163,7 @@ public class Construct_RisoTree {
 					int[] property = (int[]) node.removeProperty(clear_property_name);
 					OwnMethods.Print(property.toString());
 				}
-				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_CHILD);
+				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRel.RTREE_CHILD);
 				for (Relationship rel : rels)
 				{
 					Node neighbor = rel.getEndNode();
