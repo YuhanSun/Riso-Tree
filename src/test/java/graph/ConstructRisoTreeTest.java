@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
@@ -58,6 +60,7 @@ public class ConstructRisoTreeTest {
 		
 		databaseService = new GraphDatabaseFactory().
 				newEmbeddedDatabase(new File(db_path));
+		OwnMethods.Print("dbpath:" + db_path);
 	}
 
 	@AfterClass
@@ -73,10 +76,21 @@ public class ConstructRisoTreeTest {
 		while ( nodes.hasNext())
 		{
 			Node node =  nodes.next();
+			OwnMethods.Print("node:"+node.getAllProperties());
 			Node parent = node.getSingleRelationship
 					(RTreeRel.RTREE_REFERENCE, Direction.INCOMING).
 					getStartNode();
 			OwnMethods.Print(parent.getAllProperties());
+			
+//			Iterable<Relationship> rels = node.getRelationships();
+//			Iterator<Relationship> iterator = rels.iterator();
+//			while (iterator.hasNext())
+//			{
+//				Relationship relationship = iterator.next();
+//				OwnMethods.Print(relationship);
+//				OwnMethods.Print(relationship.getAllProperties());
+//			}
+			
 			break;
 		}
 		tx.success();
@@ -98,7 +112,6 @@ public class ConstructRisoTreeTest {
 	public void constructPNTest()
 	{
 		long nodeID = 754959;
-		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		Transaction tx = databaseService.beginTx();
 		Node node = databaseService.getNodeById(nodeID);
 		Map<String, Object> properties = node.getAllProperties();
@@ -128,8 +141,7 @@ public class ConstructRisoTreeTest {
 	@Test
 	public void constructNLTest()
 	{
-		long nodeID = 754959;
-		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+		long nodeID = 1280979;
 		Transaction tx = databaseService.beginTx();
 		
 		Node node = databaseService.getNodeById(nodeID);
@@ -140,23 +152,24 @@ public class ConstructRisoTreeTest {
 //		Map<String, Object> properties = node.getAllProperties();
 		
 		int count = 0;
-		for ( String key : properties.keySet())
-		{
-			if ( key.contains("list"))
-			{
-				count++;
-				OwnMethods.Print(count);
-				String line = String.format("%s:", key);
-				int[] property = (int[]) properties.get(key);
-				line += "[";
-				for ( int id : property)
-					line += String.format("%d, ", id);
-				line = line.substring(0, line.length() - 2);
-				line += "]";
-				OwnMethods.Print(line);
-			}
+		OwnMethods.Print(node.getAllProperties());
+//		for ( String key : properties.keySet())
+//		{
+//			if ( key.contains("list"))
+//			{
+//				count++;
+//				OwnMethods.Print(count);
+//				String line = String.format("%s:", key);
+//				int[] property = (int[]) properties.get(key);
+//				line += "[";
+//				for ( int id : property)
+//					line += String.format("%d, ", id);
+//				line = line.substring(0, line.length() - 2);
+//				line += "]";
+//				OwnMethods.Print(line);
+//			}
 //			OwnMethods.Print(key);
-		}
+//		}
 //		OwnMethods.Print(properties);
 		
 		
