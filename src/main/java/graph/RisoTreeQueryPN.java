@@ -55,9 +55,9 @@ public class RisoTreeQueryPN {
 	public String logPath;
 	
 	//test control variables
-	public static boolean outputLevelInfo = false;
+	public static boolean outputLevelInfo = true;
 	public static boolean outputQuery = true;
-	public static boolean outputExecutionPlan = true;
+	public static boolean outputExecutionPlan = false;
 	public static boolean outputResult = false;
 	
 	/**
@@ -902,7 +902,7 @@ public class RisoTreeQueryPN {
 
 				if ( outputLevelInfo)
 				{
-					logWriteLine = String.format("level %d", level_index);
+					logWriteLine = String.format("level %d time: %d", level_index, System.currentTimeMillis() - startLevel);
 					OwnMethods.Print(logWriteLine);
 					OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
 				}
@@ -913,8 +913,6 @@ public class RisoTreeQueryPN {
 					return;
 				}
 
-				range_query_time += System.currentTimeMillis() - startLevel;
-				
 				//traverse to the second deepest level and start to form the cypher query
 				if( overlap_MBR_list.isEmpty() == false && next_list.isEmpty())
 				{
@@ -970,7 +968,6 @@ public class RisoTreeQueryPN {
 							for ( int neighborID : NL_cards.get(key).keySet())
 								for ( String propertyName : NL_cards.get(key).get(neighborID).keySet())
 								{
-									OwnMethods.Print(propertyName);
 									if ( node.hasProperty(propertyName))
 									{
 										int PNSize = (Integer) node.getProperty(propertyName);
@@ -1018,7 +1015,7 @@ public class RisoTreeQueryPN {
 								}
 								if ( outputLevelInfo)
 								{
-									logWriteLine = String.format("%d %d %s %s estimate size:", key, neighbor_id, properName, card);
+									logWriteLine = String.format("%d %d %s estimate size: %f", key, neighbor_id, properName, card);
 									OwnMethods.Print(logWriteLine);
 									OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
 								}
@@ -1047,6 +1044,9 @@ public class RisoTreeQueryPN {
 								min_NL_list.add(node_id);
 						}
 					}
+					
+					range_query_time += System.currentTimeMillis() - startLevel;
+					
 					if ( outputLevelInfo)
 					{
 						logWriteLine = String.format("min_NL_list size is %d\n", min_NL_list.size());
