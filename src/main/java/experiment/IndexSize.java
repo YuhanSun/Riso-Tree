@@ -1,13 +1,15 @@
 package experiment;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
 import java.util.Set;
 
-import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -19,10 +21,12 @@ import org.neo4j.graphdb.traversal.Traverser;
 
 import commons.Config;
 import commons.Entity;
+import commons.Labels.RTreeRel;
 import commons.Config.system;
 import osm.OSM_Utility;
 import commons.OwnMethods;
 import graph.Construct_RisoTree;
+import graph.LoadDataNoOSM;
 
 public class IndexSize {
 
@@ -33,7 +37,7 @@ public class IndexSize {
 	static int MAX_HOPNUM = config.getMaxHopNum();
 	static int nonspatial_label_count = config.getNonSpatialLabelCount();
 	
-	static String db_path, graphPath, entityPath, containIDPath;
+	static String db_path, graphPath, entityPath, containIDPath, PNPath;
 	static ArrayList<Integer> labels;//all labels in the graph
 	
 	public static void initializeParameters()
@@ -44,12 +48,14 @@ public class IndexSize {
 			graphPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
 			entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
 			containIDPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/containID.txt", dataset);
+			PNPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/PathNeighbors", dataset);
 			break;
 		case Windows:
 			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, version, dataset);
 			graphPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\graph.txt", dataset);
 			entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
 			containIDPath= String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\containID.txt", dataset);
+			PNPath= String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\PathNeighbors", dataset);
 			break;
 		}
 		if (nonspatial_label_count == 1)
@@ -68,9 +74,14 @@ public class IndexSize {
 //		calculateIndexSize();
 //		calculateValidIndexSize();
 //		graphSize();
+		
+		LoadDataNoOSM.main(null);
+		Construct_RisoTree.main(null);
 		getRTreeSize();
-		getOneHopIndexSize();
-		getTwoHopIndexSize();
+		getOneHopIndexFromFile();
+		getTwoHopIndexFromFile();
+//		getOneHopIndexSize();
+//		getTwoHopIndexSize();
 	}
 
 	public static void graphSize()
@@ -80,6 +91,51 @@ public class IndexSize {
 			OwnMethods.Print(OwnMethods.getGraphSize(graph));
 			
 		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Get 2 hop index size from file
+	 */
+	public static void getTwoHopIndexFromFile()
+	{
+		try
+		{
+			BufferedReader reader = new BufferedReader(new FileReader(new File(PNPath+"_2")));
+			String line = null;
+			line = reader.readLine();
+			long nodeID = Long.parseLong(line);
+			int count = 0;	//number of integer
+			
+			while (true)
+			{
+				while ( (line = reader.readLine()) != null)
+				{
+					if (line.matches("\\d+$") == false)
+					{
+//						OwnMethods.Print(line);
+						String[] lineList = line.split(",", 2);
+						String key = lineList[0];
+						
+						String content = lineList[1];
+						String[] contentList = content.substring(1, content.length() - 1)
+								.split(", ");
+						count += contentList.length;
+					}
+					else break;
+				}
+				
+				if ( line == null)
+					break;
+				nodeID = Long.parseLong(line);
+				OwnMethods.Print(nodeID);
+			}
+			reader.close();
+			OwnMethods.Print("2 hop size:" + nodeID * 4 + " bytes");
+		}
+		catch(Exception e)
+		{
 			e.printStackTrace();
 		}
 	}
@@ -109,6 +165,51 @@ public class IndexSize {
 			tx.close();
 			databaseService.shutdown();
 		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Get 1 hop index size from file
+	 */
+	public static void getOneHopIndexFromFile()
+	{
+		try
+		{
+			BufferedReader reader = new BufferedReader(new FileReader(new File(PNPath+"_1")));
+			String line = null;
+			line = reader.readLine();
+			long nodeID = Long.parseLong(line);
+			int count = 0;	//number of integer
+			
+			while (true)
+			{
+				while ( (line = reader.readLine()) != null)
+				{
+					if (line.matches("\\d+$") == false)
+					{
+//						OwnMethods.Print(line);
+						String[] lineList = line.split(",", 2);
+						String key = lineList[0];
+						
+						String content = lineList[1];
+						String[] contentList = content.substring(1, content.length() - 1)
+								.split(", ");
+						count += contentList.length;
+					}
+					else break;
+				}
+				
+				if ( line == null)
+					break;
+				nodeID = Long.parseLong(line);
+				OwnMethods.Print(nodeID);
+			}
+			reader.close();
+			OwnMethods.Print("1 hop size:" + nodeID * 4 + " bytes");
+		}
+		catch(Exception e)
+		{
 			e.printStackTrace();
 		}
 	}
@@ -158,7 +259,7 @@ public class IndexSize {
 //			start = System.currentTimeMillis();
 			TraversalDescription td = databaseService.traversalDescription()
 					.depthFirst()
-					.relationships( RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING );
+					.relationships( RTreeRel.RTREE_CHILD, Direction.OUTGOING );
             Traverser traverser = td.traverse( rootNode );
             ResourceIterable<Node> nodes = traverser.nodes();
 //            OwnMethods.Print("get nodes time:" + (System.currentTimeMillis() - start));
