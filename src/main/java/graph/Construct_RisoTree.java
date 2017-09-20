@@ -105,7 +105,7 @@ public class Construct_RisoTree {
 		
 		generateContainSpatialID();
 		constructPN();
-//		LoadPN();
+		LoadPN();
 //		generatePNSize();
 		
 		
@@ -217,7 +217,8 @@ public class Construct_RisoTree {
 	public static void LoadPN()
 	{
 		try {
-			BufferedReader reader =  new BufferedReader(new FileReader(new File(PNPath)));
+			int hop = 2;
+			BufferedReader reader =  new BufferedReader(new FileReader(new File(PNPath + "_" + hop)));
 			Map<String, String> config = new HashMap<String, String>();
 			config.put("dbms.pagecache.memory", "20g");
 			BatchInserter inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
@@ -363,10 +364,10 @@ public class Construct_RisoTree {
 								}
 							}
 							
-							for ( int pathLabel : pathLabelNeighbors.keySet())
+							for ( int pathEndLabel : pathLabelNeighbors.keySet())
 							{
-								String propertyName = String.format("%s_%d", key, pathLabel);
-								ArrayList<Integer> arrayList = pathLabelNeighbors.get(pathLabel);
+								String propertyName = String.format("%s_%d", key, pathEndLabel);
+								ArrayList<Integer> arrayList = pathLabelNeighbors.get(pathEndLabel);
 								int [] array = new int[arrayList.size()];
 								for ( int i = 0; i < arrayList.size(); i++)
 									array[i] = arrayList.get(i);
