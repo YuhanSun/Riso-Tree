@@ -44,12 +44,9 @@ import osm.OSM_Utility;
  */
 public class LoadDataNoOSM {
 	static Config config = new Config();
-	static system systemName = config.getSystemName();
-	static String version = config.GetNeo4jVersion();
-	static String dataset = config.getDatasetName();
-	static String lon_name = config.GetLongitudePropertyName();
-	static String lat_name = config.GetLatitudePropertyName();
-	static int nonspatial_label_count = config.getNonSpatialLabelCount();
+	static system systemName;
+	static String version, dataset, lon_name, lat_name;
+	static int nonspatial_label_count;
 	
 	static String dbPath, entityPath, mapPath, graphPath, labelListPath, hmbrPath;
 	
@@ -57,6 +54,12 @@ public class LoadDataNoOSM {
 	
 	static void initParameters()
 	{
+		systemName = config.getSystemName();
+		version = config.GetNeo4jVersion();
+		dataset = config.getDatasetName();
+		lon_name = config.GetLongitudePropertyName();
+		lat_name = config.GetLatitudePropertyName();
+		nonspatial_label_count = config.getNonSpatialLabelCount();
 		switch (systemName) {
 		case Ubuntu:
 			dbPath = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
@@ -86,6 +89,17 @@ public class LoadDataNoOSM {
 		entities = OwnMethods.ReadEntity(entityPath);
 	}
 	
+	public LoadDataNoOSM()
+	{
+		initParameters();
+	}
+	
+	public LoadDataNoOSM(Config pConfig)
+	{
+		this.config = pConfig;
+		initParameters();
+	}
+	
 	public static void main(String[] args) {
 		
 		try {
@@ -93,13 +107,13 @@ public class LoadDataNoOSM {
 			
 			batchRTreeInsert();
 			
-//			if ( nonspatial_label_count == 1)
-//				generateLabelList();
-//			else
-//			{
-//				generateNonspatialLabel();
-//				nonspatialLabelTest();
-//			}
+			if ( nonspatial_label_count == 1)
+				generateLabelList();
+			else
+			{
+				generateNonspatialLabel();
+				nonspatialLabelTest();
+			}
 			
 			LoadNonSpatialEntity();
 			
@@ -394,10 +408,9 @@ public class LoadDataNoOSM {
 		}
 	}
 	
-	public static long batchRTreeInsertTime()
+	public long batchRTreeInsertTime()
 	{
-		initParameters();
-		OwnMethods.Print("Batch insert RTree");
+		OwnMethods.Print("Get Batch insert RTree time");
 		String layerName = dataset;
 		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
 		OwnMethods.Print("dataset:" + dataset + "\ndatabase:" + dbPath + "\n");
