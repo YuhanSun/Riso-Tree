@@ -26,6 +26,7 @@ public class Config
 	{
 
 	}
+	
 	private String SERVER_ROOT_URI = "http://localhost:7474/db/data";
 
 	private String longitude_property_name = "lon";
@@ -35,17 +36,22 @@ public class Config
 	//attention here, these settings change a lot
 	private String neo4j_version = "neo4j-community-3.1.1";
 	private system operatingSystem = system.Windows;
-	private String dataset = Datasets.Gowalla_10.name();
+	private String dataset = Datasets.Gowalla_25.name();
 	
-	private int MAX_HOPNUM = 1;
+	private int MAX_HOPNUM = 2;
 	private int MAX_HMBR_HOPNUM = 3;
-	private int nonspatial_label_count = 100;
+	private int nonspatial_label_count = 25;
 
 	private String Rect_minx_name = "minx";
 	private String Rect_miny_name = "miny";
 	private String Rect_maxx_name = "maxx";
 	private String Rect_maxy_name = "maxy";
 	
+	
+	public void setDatasetName(String pName)
+	{
+		this.dataset = pName;
+	}
 
 	public String GetServerRoot() {
 		return SERVER_ROOT_URI;
