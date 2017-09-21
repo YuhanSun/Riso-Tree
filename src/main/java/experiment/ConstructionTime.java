@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import commons.Config;
+import commons.OwnMethods;
 import commons.Config.system;
+import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
 
 public class ConstructionTime {
@@ -47,8 +49,48 @@ public class ConstructionTime {
 		}
 	}
 	public static void main(String[] args) {
-		initializeParameters();
-		LoadDataNoOSM.batchRTreeInsertTime();
+//		initializeParameters();
+//		LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM();
+//		long RTreeTime = loadDataNoOSM.batchRTreeInsertTime();
+		
+		datasetConstructTime();
+		
+		
+	}
+	
+	static public void datasetConstructTime()
+	{
+		try {
+			
+		ArrayList<String> dataset_a = new ArrayList<String>(Arrays.asList(
+				Config.Datasets.Patents_100_random_80.name(), 
+				Config.Datasets.go_uniprot_100_random_80.name(),
+				Config.Datasets.Gowalla_100.name(), 
+				Config.Datasets.foursquare_100.name()));
+//			ArrayList<String> dataset_a = new ArrayList<String>(Arrays.asList(Config.Datasets.Gowalla_50.name()));
+			
+			String resultPath = "D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\constructionTime.txt";
+			for ( String dataset : dataset_a)
+			{
+				Config config = new Config();
+				config.setDatasetName(dataset);
+				LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(config);
+				long RTreeTime = loadDataNoOSM.batchRTreeInsertTime();
+				
+				Construct_RisoTree construct_RisoTree = new Construct_RisoTree(config);
+				construct_RisoTree.generateContainSpatialID();
+				ArrayList<Long> PNTime = construct_RisoTree.constructPNTime();
+				
+				String writeStr = String.format("%s\t%d\t%d\t%d\n", 
+						dataset, RTreeTime, PNTime.get(0), PNTime.get(1));
+				OwnMethods.WriteFile(resultPath, true, writeStr);
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 
 }
