@@ -2,7 +2,11 @@ package graph;
 
 import static org.junit.Assert.*;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,6 +70,79 @@ public class ConstructRisoTreeTest {
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		databaseService.shutdown();
+	}
+	
+	@Test
+	public void constructPNTimeTest()
+	{
+		Construct_RisoTree construct_RisoTree = new Construct_RisoTree();
+		ArrayList<Long> constructTime = construct_RisoTree.constructPNTime();
+		OwnMethods.Print(constructTime);
+	}
+	
+	/**
+	 * Use the written file to prove correctness 
+	 * @throws IOException
+	 */
+	@Test
+	public void constructPNTimeContentCorrectnessTest() throws IOException
+	{
+		int countTest = 100;
+		String filePath1 = "D:\\Ubuntu_shared\\GeoMinHop\\data\\Gowalla_50\\PathNeighbors_2";
+		String filePath2 = "D:\\Ubuntu_shared\\GeoMinHop\\data\\Gowalla_50\\PathNeighbors_2_backup";
+		
+		BufferedReader reader1 = new BufferedReader(new FileReader(new File(filePath1)));
+		BufferedReader reader2 = new BufferedReader(new FileReader(new File(filePath2)));
+		
+		String line1 = reader1.readLine();
+		String line2 = reader2.readLine();
+		
+		assert(line1.equals(line2));
+		
+		long nodeID1 = Long.parseLong(line1);
+		while (true)
+		{
+			OwnMethods.Print(countTest);
+			countTest--;
+			if ( countTest==0)
+				break;
+			HashMap<String, String> PN1 = new HashMap<String, String>();
+			HashMap<String, String> PN2 = new HashMap<String, String>();
+			while ( (line1 = reader1.readLine()) != null)
+			{
+				line2 = reader2.readLine();
+				if (line1.matches("\\d+$") == false)
+				{
+					String[] lineList1 = line1.split(",", 2);
+					String key1 = lineList1[0];
+					String content1 = lineList1[1];
+					PN1.put(key1, content1);
+					
+					String[] lineList2 = line1.split(",", 2);
+					String key2 = lineList2[0];
+					String content2 = lineList2[1];
+					PN2.put(key2, content2);
+				}
+				else break;
+			}
+			
+			for ( String key : PN1.keySet())
+				assert( PN1.get(key).equals(PN2.get(key)));
+			
+//			break;
+			
+//			if ( line1 == null)
+//				break;
+//			nodeID1 = Long.parseLong(line1);
+//			OwnMethods.Print(nodeID1);
+//			
+//			assert ( line1.equals(line2));
+			
+		}
+		
+		reader1.close();
+		reader2.close();
+		
 	}
 	
 	@Test
