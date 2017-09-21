@@ -29,12 +29,12 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 
 import commons.Config;
-import commons.Entity;
-import commons.OwnMethods;
 import commons.Config.system;
+import commons.Entity;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.RTreeRel;
+import commons.OwnMethods;
 import osm.OSM_Utility;
 
 /**
@@ -93,23 +93,23 @@ public class LoadDataNoOSM {
 			
 			batchRTreeInsert();
 			
-			if ( nonspatial_label_count == 1)
-				generateLabelList();
-			else
-			{
-				generateNonspatialLabel();
-				nonspatialLabelTest();
-			}
+//			if ( nonspatial_label_count == 1)
+//				generateLabelList();
+//			else
+//			{
+//				generateNonspatialLabel();
+//				nonspatialLabelTest();
+//			}
 			
 			LoadNonSpatialEntity();
 			
 			GetSpatialNodeMap();
 			
-//			LoadGraphEdges();
+			LoadGraphEdges();
 			
-//			CalculateCount();
-//			
-//			Construct_RisoTree.main(null);
+			CalculateCount();
+			
+			Construct_RisoTree.main(null);
 //			
 //			loadHMBR();
 			
@@ -392,5 +392,51 @@ public class LoadDataNoOSM {
 		} catch (Exception e) {
 			e.printStackTrace();	System.exit(-1);
 		}
+	}
+	
+	public static long batchRTreeInsertTime()
+	{
+		initParameters();
+		OwnMethods.Print("Batch insert RTree");
+		String layerName = dataset;
+		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+		OwnMethods.Print("dataset:" + dataset + "\ndatabase:" + dbPath + "\n");
+
+		SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
+
+		Transaction tx = databaseService.beginTx();
+		//			SimplePointLayer simplePointLayer = spatialDatabaseService.createSimplePointLayer(layerName);
+		EditableLayer layer = spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
+		//			org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
+
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath); 
+		ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
+		long start =  System.currentTimeMillis();
+		for ( Entity entity : entities)
+		{
+			if ( entity.IsSpatial)
+			{
+				Node node = databaseService.createNode(GraphLabel.GRAPH_1);
+				node.setProperty(lon_name, entity.lon);
+				node.setProperty(lat_name, entity.lat);
+				node.setProperty("id", entity.id);
+				geomNodes.add(node);
+			}
+		}
+		long time = System.currentTimeMillis() - start;
+		OwnMethods.Print("create node time:" + time);
+
+		start = System.currentTimeMillis();
+		layer.addAll(geomNodes);
+		long constructionTime = System.currentTimeMillis() - start;
+		OwnMethods.Print("construct RTree time:" + constructionTime);
+
+		start = System.currentTimeMillis();
+		tx.success();
+		tx.close();
+		time = System.currentTimeMillis() - start;
+		OwnMethods.Print("load into db time:" + time);
+		spatialDatabaseService.getDatabase().shutdown();
+		return constructionTime;
 	}
 }
