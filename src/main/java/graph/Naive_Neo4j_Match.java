@@ -16,7 +16,6 @@ import commons.*;
  */
 public class Naive_Neo4j_Match {
 
-	//neo4j connection
 	public String lon_name;
 	public String lat_name;
 
@@ -49,10 +48,6 @@ public class Naive_Neo4j_Match {
 		maxy_name = rect_corner_name[3];
 	}
 
-	public static void main(String[] args) {
-
-	}
-    
     /**
      * subgraph isomorphism with spatial predicate.
      * It uses java api, ensure that instance is constructed
@@ -70,14 +65,14 @@ public class Naive_Neo4j_Match {
 		return result;
 	}
     
-    public Result Explain_SubgraphMatch_Spa_API(Query_Graph query_Graph, int limit)//use neo4j query
-	{
-		String query = FormCypherQuery(query_Graph, limit, false);
-		OwnMethods.Print(query);
-		
-		Result result = neo4j_API.graphDb.execute(query);
-		return result;
-	}
+//    public Result Explain_SubgraphMatch_Spa_API(Query_Graph query_Graph, int limit)//use neo4j query
+//	{
+//		String query = FormCypherQuery(query_Graph, limit, false);
+//		OwnMethods.Print(query);
+//		
+//		Result result = neo4j_API.graphDb.execute(query);
+//		return result;
+//	}
     
     /**
      * for the cypher query for profile or explain with given query graph
