@@ -270,6 +270,118 @@ public class Construct_RisoTree {
 	 * Such function has to be run separately for one hop
 	 * and two hops.
 	 */
+	public static void constructPNTime()
+	{
+		try {
+			HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
+			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+			ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
+//			FileWriter writer1 = new FileWriter(new File(PNPath + "_"+1));
+			HashMap<Long, HashMap<String, ArrayList<Integer>>> PN = new 
+					HashMap<Long, HashMap<String, ArrayList<Integer>>>();
+			//for one hop
+			for ( long nodeId : containIDMap.keySet())
+			{
+				PN.put(nodeId, new HashMap<String, ArrayList<Integer>>());
+//				OwnMethods.Print(nodeId);
+//				writer1.write(nodeId + "\n");
+				TreeSet<Integer> pathNeighbors = new TreeSet<Integer>();
+				for ( int spaID : containIDMap.get(nodeId))
+					for ( int neighborID : graph.get(spaID))
+						pathNeighbors.add(neighborID);
+				
+				HashMap<Integer, ArrayList<Integer>> pathLabelNeighbor = new HashMap<Integer, ArrayList<Integer>>();
+				for ( int neighborID : pathNeighbors)
+				{
+					int label = labelList.get(neighborID);
+					if ( pathLabelNeighbor.containsKey(label))
+						pathLabelNeighbor.get(label).add(neighborID);
+					else
+					{
+						ArrayList<Integer> arrayList = new ArrayList<Integer>();
+						arrayList.add(neighborID);
+						pathLabelNeighbor.put(label, arrayList);
+					}
+				}
+				
+				for ( int pathLabel : pathLabelNeighbor.keySet())
+				{
+					String propertyName = String.format("PN_%d", pathLabel);
+					ArrayList<Integer> arrayList = pathLabelNeighbor.get(pathLabel);
+					PN.get(nodeId).put(propertyName, arrayList);
+//					writer1.write(String.format("%s,%s\n", propertyName, arrayList));
+				}
+			}
+//			writer1.close();
+			
+			//more than one hop
+			
+//			for ( int hop = 2; hop <= MAX_HOPNUM; hop++)
+			int hop = 2;
+			{
+				FileWriter writer2 =  new FileWriter(new File(PNPath+"_"+hop));
+//				String regex = "PN";
+//				for ( int i = 0; i < hop - 1; i++)
+//					regex += "_\\d+";
+//				regex += "$";
+				
+				for ( long nodeID : containIDMap.keySet())
+				{
+					OwnMethods.Print(nodeID);
+					writer2.write(nodeID + "\n");
+//					Node node = dbservice.getNodeById(nodeID);
+//					Map<String, Object> properties = node.getAllProperties();
+
+					for ( String key : PN.get(nodeID).keySet())
+					{
+						ArrayList<Integer> curPathNeighbors = PN.get(nodeID).get(key);
+						TreeSet<Integer> nextPathNeighbors =  new TreeSet<Integer>();
+						for ( int curNeighborID : curPathNeighbors)
+							for ( int id : graph.get(curNeighborID))
+								nextPathNeighbors.add(id);
+						
+						HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors = new HashMap<Integer, ArrayList<Integer>>();
+						for ( int neighborID : nextPathNeighbors)
+						{
+							int label = labelList.get(neighborID);
+							if ( pathLabelNeighbors.containsKey(label))
+								pathLabelNeighbors.get(label).add(neighborID);
+							else
+							{
+								ArrayList<Integer> arrayList = new ArrayList<Integer>();
+								arrayList.add(neighborID);
+								pathLabelNeighbors.put(label, arrayList);
+							}
+						}
+						
+						for ( int pathEndLabel : pathLabelNeighbors.keySet())
+						{
+							String propertyName = String.format("%s_%d", key, pathEndLabel);
+							ArrayList<Integer> arrayList = pathLabelNeighbors.get(pathEndLabel);
+							int [] array = new int[arrayList.size()];
+							for ( int i = 0; i < arrayList.size(); i++)
+								array[i] = arrayList.get(i);
+							
+//							node.setProperty(propertyName, array);
+							writer2.write(String.format("%s,%s\n", propertyName, arrayList));
+						}
+					}
+					
+				}
+				writer2.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * One hop is directly loaded into db.
+	 * Two hops is constructed based on one hop loaded, 
+	 * and it is written to file for future batchinsert.
+	 * Such function has to be run separately for one hop
+	 * and two hops.
+	 */
 	public static void constructPN()
 	{
 		try {
