@@ -145,7 +145,24 @@ public class OwnMethods {
 	}
 	
 	/**
-	 * generic function
+	 * Generate Query rectangle
+	 * spatial selectivity considering space area
+	 * center location space oriented
+	 * @param rect_size_x
+	 * @param rect_size_y
+	 * @param total_range
+	 */
+	public static MyRectangle GenerateQueryRectangle(Random r, double rect_size_x, double rect_size_y, MyRectangle total_range) 
+	{
+		double minx = r.nextDouble() * (total_range.max_x - total_range.min_x) + total_range.min_x;
+		double miny = r.nextDouble() * (total_range.max_y - total_range.min_y) + total_range.min_y;
+		return new MyRectangle(minx, miny, minx + rect_size_x, miny + rect_size_y);
+	}
+	
+	/**
+	 * Generic function for generating id of spatial vertices.
+	 * This will lead to centers generated being data-density-oriented,
+	 * which means that dense area will have more query rectangles.
 	 * @param entities
 	 * @param center_id_path
 	 * @param experimentCount
