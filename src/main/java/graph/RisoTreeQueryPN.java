@@ -195,19 +195,25 @@ public class RisoTreeQueryPN {
 	public HashMap<Integer, HashMap<Integer, HashSet<String>>> recognizePaths(Query_Graph queryGraph)
 	{
 		HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap =  new HashMap<Integer, HashMap<Integer, HashSet<String>>>();
+		
 		for ( int i = 0; i < queryGraph.graph.size(); i++)
 		{
 			if ( queryGraph.spa_predicate[i] != null)
 			{
-				HashMap<Integer, HashSet<String>> paths = new HashMap<Integer, HashSet<String>>();
-				boolean[] visited = new boolean[queryGraph.graph.size()];
-				for ( int j = 0; j < visited.length; j++)
-					visited[j] = false;
-				Stack<Integer> stack = new Stack<Integer>();
-				stack.push(i);
-				visited[i] = true;
-				traverse(visited, paths, stack, queryGraph);
-				spaPathsMap.put(i, paths);
+				if ( MAX_HOPNUM == 0)
+					spaPathsMap.put(i, new HashMap<Integer, HashSet<String>>());
+				else
+				{
+					HashMap<Integer, HashSet<String>> paths = new HashMap<Integer, HashSet<String>>();
+					boolean[] visited = new boolean[queryGraph.graph.size()];
+					for ( int j = 0; j < visited.length; j++)
+						visited[j] = false;
+					Stack<Integer> stack = new Stack<Integer>();
+					stack.push(i);
+					visited[i] = true;
+					traverse(visited, paths, stack, queryGraph);
+					spaPathsMap.put(i, paths);
+				}
 			}
 		}
 		
@@ -341,13 +347,15 @@ public class RisoTreeQueryPN {
 		}
 
 		//label
-		if ( pos == 0 || NL_hopnum.containsKey(0))
+//		if ( pos == 0 || NL_hopnum.containsKey(0))
+		if ( pos == 0)
 			query += "(a0)";
 		else
 			query += String.format("(a0:GRAPH_%d)", query_Graph.label_list[0]);
 		for(int i = 1; i < query_Graph.graph.size(); i++)
 		{
-			if ( pos == i || NL_hopnum.containsKey(i))
+//			if ( pos == i || NL_hopnum.containsKey(i))
+			if ( pos == i)
 				query += String.format(",(a%d)", i);
 			else
 				query += String.format(",(a%d:GRAPH_%d)",i, query_Graph.label_list[i]);
@@ -390,31 +398,31 @@ public class RisoTreeQueryPN {
 		OwnMethods.Print(String.format("spa_ids size: %d", ids.size()));
 		
 		//NL_id_list
-		for ( int key : NL_hopnum.keySet())
-		{
-			String id_list_size_property_name = String.format("NL_%d_%d_size", NL_hopnum.get(key), query_Graph.label_list[key]);
-			int id_list_size = (Integer) node.getProperty(id_list_size_property_name);
-			if( id_list_size > 0)	//whether to use the shrunk label
-				query = query.replaceFirst(String.format("a%d", key), String.format("a%d:GRAPH_%d", key, query_Graph.label_list[key]));
-			else {
-				String id_list_property_name = String.format("NL_%d_%d_list", NL_hopnum.get(key), query_Graph.label_list[key]);
-				
-				if ( node.hasProperty(id_list_property_name) == false)
-					return "match (n) where false return n";
-				
-				int[] graph_id_list = (int[]) node.getProperty(id_list_property_name);
-				ArrayList<Long> pos_id_list = new ArrayList<Long>(graph_id_list.length);
-				for ( int i = 0; i < graph_id_list.length; i++)
-					pos_id_list.add(graph_pos_map_list[graph_id_list[i]]);
-				
-				query += String.format(" and ( id(a%d) = %d", key, pos_id_list.get(0));
-				for ( int i = 1; i < pos_id_list.size(); i++)
-					query += String.format(" or id(a%d) = %d", key, pos_id_list.get(i));
-				query += " )\n";
-//			query += String.format(" and id(a%d) in %s\n", key, pos_id_list.toString());
-				OwnMethods.Print(String.format("%s size is %d", id_list_property_name, pos_id_list.size()));
-			}
-		}
+//		for ( int key : NL_hopnum.keySet())
+//		{
+//			String id_list_size_property_name = String.format("NL_%d_%d_size", NL_hopnum.get(key), query_Graph.label_list[key]);
+//			int id_list_size = (Integer) node.getProperty(id_list_size_property_name);
+//			if( id_list_size > 0)	//whether to use the shrunk label
+//				query = query.replaceFirst(String.format("a%d", key), String.format("a%d:GRAPH_%d", key, query_Graph.label_list[key]));
+//			else {
+//				String id_list_property_name = String.format("NL_%d_%d_list", NL_hopnum.get(key), query_Graph.label_list[key]);
+//				
+//				if ( node.hasProperty(id_list_property_name) == false)
+//					return "match (n) where false return n";
+//				
+//				int[] graph_id_list = (int[]) node.getProperty(id_list_property_name);
+//				ArrayList<Long> pos_id_list = new ArrayList<Long>(graph_id_list.length);
+//				for ( int i = 0; i < graph_id_list.length; i++)
+//					pos_id_list.add(graph_pos_map_list[graph_id_list[i]]);
+//				
+//				query += String.format(" and ( id(a%d) = %d", key, pos_id_list.get(0));
+//				for ( int i = 1; i < pos_id_list.size(); i++)
+//					query += String.format(" or id(a%d) = %d", key, pos_id_list.get(i));
+//				query += " )\n";
+////			query += String.format(" and id(a%d) in %s\n", key, pos_id_list.toString());
+//				OwnMethods.Print(String.format("%s size is %d", id_list_property_name, pos_id_list.size()));
+//			}
+//		}
 			
 		//return
 		query += " return id(a0)";
@@ -982,7 +990,7 @@ public class RisoTreeQueryPN {
 					double min_spa_card = Double.MAX_VALUE, min_NL_card = Double.MAX_VALUE;
 					int minSpaID = 0;//the spatial predicate with minimum cardinality
 					int min_NL_spa_id = 0, min_NL_neighbor_id = 0;//min NL spatial id and neighbor id
-					String minPNListPropertyname = "", minPNSizePropertyname = "";
+					String minPNListPropertyname = null, minPNSizePropertyname = "";
 
 					//now spa_cards has only one key
 					for (int key : spa_cards.keySet())
@@ -1034,23 +1042,29 @@ public class RisoTreeQueryPN {
 					// construct the NL_list with the highest selectivity
 					long start1 = System.currentTimeMillis();
 	
-					HashSet<Integer> min_NL_list = new HashSet<Integer>();
-					for ( Node node : overlap_MBR_list)
+					HashSet<Integer> min_NL_list = null;
+					int realMinPNSize = Integer.MAX_VALUE;
+					if ( minPNListPropertyname != null)
 					{
-						if ( node.hasProperty(minPNListPropertyname))
+						min_NL_list = new HashSet<Integer>();
+						for ( Node node : overlap_MBR_list)
 						{
-							int[] NL_list_label = ( int[] ) node.getProperty(minPNListPropertyname);
-							for ( int node_id : NL_list_label)
-								min_NL_list.add(node_id);
+							if ( node.hasProperty(minPNListPropertyname))
+							{
+								int[] NL_list_label = ( int[] ) node.getProperty(minPNListPropertyname);
+								for ( int node_id : NL_list_label)
+									min_NL_list.add(node_id);
+							}
 						}
+						realMinPNSize = min_NL_list.size();
 					}
 					
 					range_query_time += System.currentTimeMillis() - startLevel;
 					
 					if ( outputLevelInfo)
 					{
-						logWriteLine = String.format("min_NL_list size is %d\n", min_NL_list.size());
-						if ( min_NL_list.size() < min_spa_card)
+						logWriteLine = String.format("min_NL_list size is %d\n", realMinPNSize);
+						if ( realMinPNSize < min_spa_card)
 							logWriteLine += "NL_list is more selective\n";
 						else
 							logWriteLine += "spa predicate is more selective\n";
@@ -1061,7 +1075,7 @@ public class RisoTreeQueryPN {
 					}
 					
 					// if NL is more selective than spatial predicate
-					if ( min_NL_list.size() < min_spa_card)
+					if ( realMinPNSize < min_spa_card)
 					{
 						int index = 0;
 						ArrayList<Long> id_pos_list = new ArrayList<Long>(); 
