@@ -1078,14 +1078,17 @@ public class RisoTreeQueryPN {
 					if ( realMinPNSize < min_spa_card)
 					{
 						int index = 0;
-						ArrayList<Long> id_pos_list = new ArrayList<Long>(); 
+						ArrayList<Long> id_pos_list = new ArrayList<Long>();
+						int idIndex = 0;
 						for ( int id : min_NL_list)
 						{
+							idIndex++;
 							//graph id to neo4j pos id
 							id_pos_list.add(graph_pos_map_list[id]);
 							index ++;
 							if ( index == 500)
 							{
+								OwnMethods.Print("Executed percentage: " + idIndex/min_NL_list.size());
 								String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
 								if ( outputQuery)
 								{
@@ -1184,8 +1187,10 @@ public class RisoTreeQueryPN {
 						int located_in_count = 0;
 						int levelTime = 0;
 						level_index++;
+						int nodeIndex = 0;
 						for ( Node node : overlap_MBR_list)
 						{
+							nodeIndex++;
 							long start = System.currentTimeMillis();
 							Iterable<Relationship> rels = node.getRelationships(
 									Direction.OUTGOING, Labels.RTreeRel.RTREE_REFERENCE);
@@ -1207,6 +1212,7 @@ public class RisoTreeQueryPN {
 
 							if ( ids.size() != 0)
 							{
+								OwnMethods.Print("Execute percentage: " + nodeIndex / overlap_MBR_list.size());
 								start = System.currentTimeMillis();
 								String query = formSubgraphQuery_ForSpatialFirst_Block(query_Graph, limit, Explain_Or_Profile.Profile, spa_predicates, minSpaID,
 										ids, min_hop.get(minSpaID), node);
