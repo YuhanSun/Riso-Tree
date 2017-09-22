@@ -13,6 +13,35 @@ import java.util.HashMap;
 
 public class Utility {
 	
+	public static double earthRadius = 6371000; // meters
+	
+	public static float distFrom(float lat1, float lng1, float lat2, float lng2) {
+	    double dLat = Math.toRadians(lat2-lat1);
+	    double dLng = Math.toRadians(lng2-lng1);
+	    double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+	               Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+	               Math.sin(dLng/2) * Math.sin(dLng/2);
+	    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	    float dist = (float) (earthRadius * c);
+
+	    return dist;
+	}
+	
+	/**
+	 * Distance to delta longitude
+	 * @param dist	Unit meter
+	 * @return unit is angle
+	 */
+	public static double distToLongitude(double dist)
+	{
+		return dist / earthRadius * 180;
+	}
+	
+	public static double distToLatitude(double dist, double lon, double lat)
+	{
+		double curRadius = earthRadius * Math.cos(lat / 180 * Math.PI);
+		return dist / curRadius * 180;
+	}
 	public static long Average(ArrayList<Long> arraylist)
 	{
 		if ( arraylist .size() == 0)
