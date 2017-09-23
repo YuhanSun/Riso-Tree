@@ -81,16 +81,40 @@ public class ExperimentSpaceSelectivity {
 	public ExperimentSpaceSelectivity(Config p_Config)
 	{
 		this.config = p_Config;
+		initializeParameters();
 	}
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		initializeParameters();
+//		initializeParameters();
 //		generateQueryRectangleForSpaceSelectivityDegree();
 //		generateQueryRectangleForSpaceSelectivityMeter();
 		
-		int nodeCount = 15, queryIndex = 0;
+		int nodeCount = 10, queryIndex = 0;
 		
+		ArrayList<String> dataset_a = new ArrayList<String>(Arrays.asList(
+				Config.Datasets.Gowalla_100.name(), 
+				Config.Datasets.foursquare_100.name(),
+				Config.Datasets.Patents_100_random_80.name(), 
+				Config.Datasets.go_uniprot_100_random_80.name()));
+		
+		for ( String dataset : dataset_a)
+		{
+			Config config = new Config();
+			config.setDatasetName(dataset);
+			for ( int hopNum = 0; hopNum <= 2; hopNum++)
+			{
+				config.setMAXHOPNUM(hopNum);
+				ExperimentSpaceSelectivity experimentSpaceSelectivity = new ExperimentSpaceSelectivity(config);
+				try {
+					experimentSpaceSelectivity.risoTreeQueryPN(nodeCount, queryIndex);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();	System.exit(-1);
+				}
+			}
+			
+		}
 	}
 	
 	/**
