@@ -38,7 +38,7 @@ public class Config
 	private system operatingSystem = system.Windows;
 	private String dataset = Datasets.Gowalla_25.name();
 	
-	private int MAX_HOPNUM = 2;
+	private int MAX_HOPNUM = 0;
 	private int MAX_HMBR_HOPNUM = 3;
 	private int nonspatial_label_count = 25;
 
@@ -51,6 +51,11 @@ public class Config
 	public void setDatasetName(String pName)
 	{
 		this.dataset = pName;
+	}
+	
+	public void setMAXHOPNUM(int pMAXHOPNUM)
+	{
+		this.MAX_HOPNUM = pMAXHOPNUM;
 	}
 
 	public String GetServerRoot() {
