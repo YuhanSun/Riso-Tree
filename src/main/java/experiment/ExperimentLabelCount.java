@@ -12,7 +12,7 @@ import commons.Utility;
 import commons.Config.system;
 import scala.reflect.internal.Trees.New;
 
-public class labelCountExperiment {
+public class ExperimentLabelCount {
 
 	static Config config = new Config();
 	static system systemName = config.getSystemName();
@@ -49,7 +49,7 @@ public class labelCountExperiment {
 		try
 		{
 			initializeParameters();
-//			convertQueryGraph();
+			convertQueryGraph();
 		}
 		catch(Exception e)
 		{
@@ -66,13 +66,13 @@ public class labelCountExperiment {
 	public static void convertQueryGraph()
 	{
 		String oriDataset = Config.Datasets.Gowalla_100.name();
-		String oriQueryGraphPath = querygraphDir + oriDataset + "\\10.txt";
+		String oriQueryGraphPath = querygraphDir + oriDataset + "\\5.txt";
 //		OwnMethods.Print(query_Graphs.size());
 		for ( int labelCount : labelCountList)
 		{
 			ArrayList<Query_Graph> query_Graphs = Utility.ReadQueryGraph_Spa(oriQueryGraphPath, 10);
 			String curDataset = "Gowalla_" + labelCount;
-			String curQueryGraphPath = querygraphDir + curDataset + "\\10.txt";
+			String curQueryGraphPath = querygraphDir + curDataset + "\\5.txt";
 			
 			Random random = new Random();
 			for ( Query_Graph query_Graph : query_Graphs)
