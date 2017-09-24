@@ -99,6 +99,7 @@ public class ExperimentSpaceSelectivity {
 				Config.Datasets.go_uniprot_100_random_80.name()));
 		
 		for ( String dataset : dataset_a)
+//		String dataset = Config.Datasets.go_uniprot_100_random_80.name();
 		{
 			Config config = new Config();
 			config.setDatasetName(dataset);
@@ -332,10 +333,10 @@ public class ExperimentSpaceSelectivity {
 				String queryrect_path = null;
 				switch (systemName) {
 				case Ubuntu:
-					queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, area);
+					queryrect_path = String.format("%s_%d.txt", spaPredicateDir, area);
 					break;
 				case Windows:
-					queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, area);
+					queryrect_path = String.format("%s_%d.txt", spaPredicateDir, area);
 					break;
 				}
 				write_line = area + "\n" + head_line;
@@ -435,7 +436,7 @@ public class ExperimentSpaceSelectivity {
 	 * @param query_id
 	 * @throws Exception
 	 */
-	public static void risoTreeQueryPN(int nodeCount, int query_id) throws Exception
+	public void risoTreeQueryPN(int nodeCount, int query_id) throws Exception
 	{
 		try {
 			long start;
@@ -449,14 +450,14 @@ public class ExperimentSpaceSelectivity {
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
 			case Ubuntu:
-				result_detail_path = String.format("%s/risotree_PN_%d_%d.txt", resultDir, nodeCount, query_id);
-				result_avg_path = String.format("%s/risotree_PN_%d_%d_avg.txt", resultDir, nodeCount, query_id);
+				result_detail_path = String.format("%s/risotree_PN%d_%d_%d.txt", resultDir, MAX_HOPNUM, nodeCount, query_id);
+				result_avg_path = String.format("%s/risotree_PN%d_%d_%d_avg.txt", resultDir, MAX_HOPNUM, nodeCount, query_id);
 //				result_detail_path = String.format("%s/risotree_%d_%d_test.txt", resultDir, nodeCount, query_id);
 //				result_avg_path = String.format("%s/risotree_%d_%d_avg_test.txt", resultDir, nodeCount, query_id);
 				break;
 			case Windows:
-				result_detail_path = String.format("%s\\risotree_PN_%d_%d.txt", resultDir, nodeCount, query_id);
-				result_avg_path = String.format("%s\\risotree_PN_%d_%d_avg.txt.txt", resultDir, nodeCount, query_id);
+//				result_detail_path = String.format("%s\\risotree_PN_%d_%d.txt", resultDir, nodeCount, query_id);
+//				result_avg_path = String.format("%s\\risotree_PN_%d_%d_avg.txt.txt", resultDir, nodeCount, query_id);
 				break;
 			}
 			
@@ -491,10 +492,10 @@ public class ExperimentSpaceSelectivity {
 				String queryrect_path = null;
 				switch (systemName) {
 				case Ubuntu:
-					queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, area);
+					queryrect_path = String.format("%s_%d.txt", spaPredicateDir, area);
 					break;
 				case Windows:
-					queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, area);
+					queryrect_path = String.format("%s_%d.txt", spaPredicateDir, area);
 					break;
 				}
 				
