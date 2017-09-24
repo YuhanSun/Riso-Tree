@@ -14,11 +14,11 @@ import graph.*;
 
 public class Experiment {
 
-	Config config = new Config();
-	String dataset = config.getDatasetName();
-	String version = config.GetNeo4jVersion();
-	system systemName = config.getSystemName();
-	String password = config.getPassword();
+	Config config;
+	String dataset;
+	String version;
+	system systemName;
+	String password;
 	int MAX_HOPNUM;
 
 	String db_path;
@@ -30,15 +30,15 @@ public class Experiment {
 	String resultDir;
 
 	boolean TEST_FORMAT;
-	static int experimentCount = 1;
+	int experimentCount = 1;
 
 	//non-spatial ratio 20
 	//	static double startSelectivity = 0.000001;
 	//	static double endSelectivity = 0.002;
 
 	//non-spatial ratio 80
-	static double startSelectivity = 0.00001;
-	static double endSelectivity = 0.2;
+	double startSelectivity = 0.00001;
+	double endSelectivity = 0.2;
 
 	//for switching point detect
 	//	static double startSelectivity = 0.01;
@@ -47,8 +47,12 @@ public class Experiment {
 	//	static double startSelectivity = 0.0001;
 	//	static double endSelectivity = 0.2;
 
-	static int spaCount;
+	int spaCount;
 
+	public Experiment(Config config)
+	{
+		this.config = config;
+	}
 
 	public void initializeParameters()
 	{	
@@ -81,116 +85,30 @@ public class Experiment {
 
 	public void main(String[] args) throws Exception {
 		try {
-
-			Experiment experiment = new Experiment();
-			experiment.initializeParameters();
-
 			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 			spaCount = OwnMethods.GetSpatialEntityCount(entities);
+			Config config = new Config();
+			config.setDatasetName(Config.Datasets.foursquare.name());
+			for ( int hopNum = 0; hopNum <= 1; hopNum++)
+			{
+				config.setMAXHOPNUM(hopNum);
+				Experiment experiment = new Experiment(config);
+				experiment.initializeParameters();
+				experiment.risoTreeQueryPN(10, 0);
+			}
 
-			//experiment for original dataset
-			//with only two labels
-			//			Neo4j_Naive(2, 0);
-			//			Neo4j_Naive(3, 0);
-			//			Neo4j_Naive(3, 1);
-			//			
-			//			SpatialFirst(2, 0);
-			//			SpatialFirst(3, 0);
-			//			SpatialFirst(3, 1);
-			//			
-			//			SpatialFirstList_Block(2, 0);
-			//			SpatialFirstList_Block(3, 0);
-			//			SpatialFirstList_Block(3, 1);
-			//			
-			//			risoTreeQuery(2, 0);
-			//			risoTreeQuery(3, 0);
-			//			risoTreeQuery(3, 1);
+			
+			
 
-			//with more than two labels
-			//			Neo4j_Naive(2, 0);
-			//			SpatialFirst(2, 0);
-			//			SpatialFirstList_Block(2, 0);
-			//			risoTreeQuery(2, 0);
-			//			
-			//			Neo4j_Naive(3, 0);
-			//			SpatialFirst(3, 0);
-			//			SpatialFirstList_Block(3, 0);
-			//			risoTreeQuery(3, 0);
-			//			
-			//			Neo4j_Naive(3, 1);
-			//			SpatialFirst(3, 1);
-			//			SpatialFirstList_Block(3, 1);
-			//			risoTreeQuery(3, 1);
+//			for (int nodeCount = 5; nodeCount <= 35; nodeCount+=5)
+//				//			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
+//				for (int k = 0; k < 1;k ++)
+//				{
+//					for ( int queryIndex = 0; queryIndex < 1; queryIndex++)
+//					{
+//					}
+//				}
 
-			//Synthetic data set
-			//			Neo4j_Naive(2, 0);
-			//			SpatialFirst(2, 0);
-			//			SpatialFirstList_Block(2, 0);
-			//			risoTreeQuery(2, 0);
-			//			risoTreeQuery_HMBR(2, 0);
-			//			HMBR(2, 0);
-			//			
-			//			Neo4j_Naive(2, 1);
-			//			SpatialFirst(2, 1);
-			//			SpatialFirstList_Block(2, 1);
-			//			risoTreeQuery(2, 1);
-			//			risoTreeQuery_HMBR(2, 1);
-
-			//			int nodeCount = 15;
-
-			for (int nodeCount = 5; nodeCount <= 35; nodeCount+=5)
-				//			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
-				for (int k = 0; k < 1;k ++)
-				{
-					for ( int queryIndex = 0; queryIndex < 1; queryIndex++)
-					{
-						//					Neo4j_Naive(nodeCount, queryIndex);
-						//					SpatialFirst(nodeCount, queryIndex);
-						//					SpatialFirstList_Block(nodeCount, queryIndex);
-						//					risoTreeQuery(nodeCount, queryIndex);
-						//					risoTreeQuery_HMBR(nodeCount, queryIndex);
-						//					HMBR(nodeCount, queryIndex);
-						//					risoTreeQueryPN(nodeCount, queryIndex);
-						//					risoTreeQueryPN(5, queryIndex);
-						//					risoTreeQueryPN(7, queryIndex);
-						//					risoTreeQueryPN(10, queryIndex);
-						//					risoTreeQueryPN(15, queryIndex);
-						//					risoTreeQueryPN(20, queryIndex);
-						//					risoTreeQueryPN(25, queryIndex);
-						//					risoTreeQueryPN(30, queryIndex);
-					}
-				}
-
-
-			//			for ( int queryIndex = 0; queryIndex < 3; queryIndex++)
-			////			int queryIndex = 0;
-			//			{
-			////				if ( queryIndex == 0)
-			////					for ( int nodeCount = 3; nodeCount <= 4; nodeCount++)
-			////					{
-			//////						SpatialFirst(nodeCount, queryIndex);
-			//////						SpatialFirstList_Block(nodeCount, queryIndex);
-			////						Neo4j_Naive(nodeCount, queryIndex);
-			////					}
-			////				else
-			////					for ( int nodeCount = 2; nodeCount <= 4; nodeCount++)
-			////					{
-			//////						SpatialFirst(nodeCount, queryIndex);
-			//////						SpatialFirstList_Block(nodeCount, queryIndex);
-			////						Neo4j_Naive(nodeCount, queryIndex);
-			////					}
-			//
-
-
-			//				for (int nodeCount = 2; nodeCount <= 4; nodeCount++)
-			////				int nodeCount = 4;
-			//				{
-			//					Neo4j_Naive(nodeCount, queryIndex);
-			//					SpatialFirst(nodeCount, queryIndex);
-			//					SpatialFirstList_Block(nodeCount, queryIndex);
-			//					risoTreeQuery(nodeCount, queryIndex);
-			//				}
-			//			}
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -812,7 +730,7 @@ public class Experiment {
 		}
 	}
 
-	public  void Neo4j_Naive(int nodeCount, int query_id) throws Exception
+	public void Neo4j_Naive(int nodeCount, int query_id) throws Exception
 	{
 		try {
 			long start;
@@ -964,7 +882,7 @@ public class Experiment {
 	 * @param query_id
 	 * @throws Exception
 	 */
-	public  void SpatialFirstList_Block(int nodeCount, int query_id) throws Exception
+	public void SpatialFirstList_Block(int nodeCount, int query_id) throws Exception
 	{
 		long start;
 		long time;
@@ -1108,7 +1026,7 @@ public class Experiment {
 	 * @param query_id
 	 * @throws InterruptedException 
 	 */
-	public  void SpatialFirstList(int query_id) throws InterruptedException
+	public void SpatialFirstList(int query_id) throws InterruptedException
 	{
 		long start;
 		long time;
@@ -1249,7 +1167,7 @@ public class Experiment {
 	 * @param query_id
 	 * @throws Exception
 	 */
-	public  void SpatialFirst(int nodeCount, int query_id) throws Exception
+	public void SpatialFirst(int nodeCount, int query_id) throws Exception
 	{
 		long start;
 		long time;
