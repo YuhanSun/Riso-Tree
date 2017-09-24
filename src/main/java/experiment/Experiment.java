@@ -103,9 +103,6 @@ public class Experiment {
 				experiment.risoTreeQueryPN(10, 0);
 			}
 
-			
-			
-
 //			for (int nodeCount = 5; nodeCount <= 35; nodeCount+=5)
 //				//			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
 //				for (int k = 0; k < 1;k ++)
