@@ -23,15 +23,18 @@ public class RisoTreeQueryPNTest {
 	static String dataset = config.getDatasetName();
 	static String version = config.GetNeo4jVersion();
 	static system systemName = config.getSystemName();
+	static int MAX_HOPNUM = config.getMaxHopNum();
 
 	static String db_path, graph_pos_map_path;
 	static String querygraphDir, spaPredicateDir;
 	
-	static int nodeCount = 7, query_id = 0;
+	static int nodeCount = 5, query_id = 0;
 //	static int name_suffix = 7;
 //	static int name_suffix = 75;
 //	static int name_suffix = 7549;//0.1
-	static int name_suffix = 75495;//0.1
+	
+	
+	static int name_suffix = 1280;//Gowalla 0.001
 	static String queryrect_path = null, querygraph_path = null;
 	
 	@BeforeClass
@@ -63,27 +66,27 @@ public class RisoTreeQueryPNTest {
 	public static void tearDownAfterClass() throws Exception {
 	}
 	
-//	@Test
-//	public void recognizePathsTest()
-//	{
-//		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
-//		Query_Graph query_Graph = queryGraphs.get(query_id);
-//		
-//		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
-//		MyRectangle rectangle = queryrect.get(0);
-//		int j = 0;
-//		for (  ; j < query_Graph.graph.size(); j++)
-//			if(query_Graph.Has_Spa_Predicate[j])
-//				break;
-//		query_Graph.spa_predicate[j] = rectangle;
-//		
-//		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, null);
-//		HashMap<Integer, HashMap<Integer, HashSet<String>>> paths = risoTreeQueryPN.recognizePaths(query_Graph);
-//		for ( int key : paths.keySet())
-//			OwnMethods.Print(String.format("%d:%s", key, paths.get(key)));
-//		
-//		risoTreeQueryPN.dbservice.shutdown();
-//	}
+	@Test
+	public void recognizePathsTest()
+	{
+		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		Query_Graph query_Graph = queryGraphs.get(query_id);
+		
+		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+		MyRectangle rectangle = queryrect.get(0);
+		int j = 0;
+		for (  ; j < query_Graph.graph.size(); j++)
+			if(query_Graph.Has_Spa_Predicate[j])
+				break;
+		query_Graph.spa_predicate[j] = rectangle;
+		
+		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, null, MAX_HOPNUM);
+		HashMap<Integer, HashMap<Integer, HashSet<String>>> paths = risoTreeQueryPN.recognizePaths(query_Graph);
+		for ( int key : paths.keySet())
+			OwnMethods.Print(String.format("%d:%s", key, paths.get(key)));
+		
+		risoTreeQueryPN.dbservice.shutdown();
+	}
 	
 	@Test
 	public void queryTest() {
@@ -106,7 +109,8 @@ public class RisoTreeQueryPNTest {
 			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
 			graph_pos_map_list[key] = pos_id;
 		}
-		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list);
+		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
+				graph_pos_map_list, MAX_HOPNUM);
 		risoTreeQueryPN.Query(query_Graph, -1);
 		OwnMethods.Print("Result count:" + risoTreeQueryPN.result_count);
 		OwnMethods.Print("Page access:" + risoTreeQueryPN.page_hit_count);

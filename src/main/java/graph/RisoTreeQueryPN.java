@@ -38,7 +38,7 @@ public class RisoTreeQueryPN {
 	public String lon_name = config.GetLongitudePropertyName();
 	public String lat_name = config.GetLatitudePropertyName();
 	public String graphLinkLabelName = Labels.GraphRel.GRAPH_LINK.name();
-	public int MAX_HOPNUM = config.getMaxHopNum();
+	public int MAX_HOPNUM;
 	//HMBR
 	public int MAX_HMBRHOPNUM = config.getMaxHMBRHopNum();
 	String minx_name = config.GetRectCornerName()[0];
@@ -66,13 +66,15 @@ public class RisoTreeQueryPN {
 	 * @param p_dataset dataset name
 	 * @param p_graph_pos_map the map from graph id to neo4j pos id
 	 */
-	public RisoTreeQueryPN(String db_path, String p_dataset, long[] p_graph_pos_map)
+	public RisoTreeQueryPN(String db_path, String p_dataset, 
+			long[] p_graph_pos_map, int pMAXHOPNUM)
 	{
 		dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		dataset = p_dataset;
 		graph_pos_map_list =  p_graph_pos_map;
 //		logPath = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/query.log", dataset);
 		logPath = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\query.log", dataset);
+		MAX_HOPNUM = pMAXHOPNUM;
 	}
 
 	public static int[][] Ini_Minhop(Query_Graph query_Graph)

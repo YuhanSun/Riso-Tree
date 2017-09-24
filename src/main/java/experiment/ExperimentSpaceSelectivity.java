@@ -511,7 +511,8 @@ public class ExperimentSpaceSelectivity {
 					int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
 					graph_pos_map_list[key] = pos_id;
 				}
-				RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list);
+				RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
+						graph_pos_map_list, MAX_HOPNUM);
 				
 				ArrayList<Long> range_query_time = new ArrayList<Long>();
 				ArrayList<Long> time_get_iterator = new ArrayList<Long>();
