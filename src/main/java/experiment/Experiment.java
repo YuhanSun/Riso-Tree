@@ -37,8 +37,12 @@ public class Experiment {
 	//	static double endSelectivity = 0.002;
 
 	//non-spatial ratio 80
-	double startSelectivity = 0.00001;
-	double endSelectivity = 0.2;
+//	double startSelectivity = 0.00001;
+//	double endSelectivity = 0.2;
+	
+	//foursquare_100
+	double startSelectivity = 0.000001;
+	double endSelectivity = 0.002;
 
 	//for switching point detect
 	//	static double startSelectivity = 0.01;
@@ -52,6 +56,7 @@ public class Experiment {
 	public Experiment(Config config)
 	{
 		this.config = config;
+		initializeParameters();
 	}
 
 	public void initializeParameters()
@@ -81,14 +86,15 @@ public class Experiment {
 			resultDir = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s", dataset);
 			break;
 		}
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		spaCount = OwnMethods.GetSpatialEntityCount(entities);
 	}
 
-	public void main(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 		try {
-			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
-			spaCount = OwnMethods.GetSpatialEntityCount(entities);
+			
 			Config config = new Config();
-			config.setDatasetName(Config.Datasets.foursquare.name());
+			config.setDatasetName(Config.Datasets.foursquare_100.name());
 			for ( int hopNum = 0; hopNum <= 1; hopNum++)
 			{
 				config.setMAXHOPNUM(hopNum);
@@ -435,8 +441,8 @@ public class Experiment {
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
 			case Ubuntu:
-				result_detail_path = String.format("%s/risotree_PN_%d_%d.txt", resultDir, nodeCount, query_id);
-				result_avg_path = String.format("%s/risotree_PN_%d_%d_avg.txt", resultDir, nodeCount, query_id);
+				result_detail_path = String.format("%s/risotree_PN%d_%d_%d.txt", MAX_HOPNUM, resultDir, nodeCount, query_id);
+				result_avg_path = String.format("%s/risotree_PN%d_%d_%d_avg.txt", MAX_HOPNUM, resultDir, nodeCount, query_id);
 				//				result_detail_path = String.format("%s/risotree_%d_%d_test.txt", resultDir, nodeCount, query_id);
 				//				result_avg_path = String.format("%s/risotree_%d_%d_avg_test.txt", resultDir, nodeCount, query_id);
 				break;
