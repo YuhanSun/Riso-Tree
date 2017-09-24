@@ -1081,7 +1081,7 @@ public class RisoTreeQueryPN {
 					{
 						int index = 0;
 						ArrayList<Long> id_pos_list = new ArrayList<Long>();
-						int idIndex = 0;
+						double idIndex = 0;
 						for ( int id : min_NL_list)
 						{
 							idIndex++;
@@ -1141,6 +1141,7 @@ public class RisoTreeQueryPN {
 
 						if ( id_pos_list.size() != 0)
 						{
+							OwnMethods.Print("Executed percentage: " + idIndex/min_NL_list.size());
 							String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, spa_predicates, min_NL_neighbor_id, id_pos_list);
 
 							if ( outputQuery)
@@ -1189,7 +1190,7 @@ public class RisoTreeQueryPN {
 						int located_in_count = 0;
 						int levelTime = 0;
 						level_index++;
-						int nodeIndex = 0;
+						double nodeIndex = 0;
 						for ( Node node : overlap_MBR_list)
 						{
 							nodeIndex++;
