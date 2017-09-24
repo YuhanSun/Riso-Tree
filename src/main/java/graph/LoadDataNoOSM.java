@@ -424,6 +424,7 @@ public class LoadDataNoOSM {
 
 		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath); 
 		ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
+		int spaCount = 0;
 		long start =  System.currentTimeMillis();
 		for ( Entity entity : entities)
 		{
@@ -434,10 +435,12 @@ public class LoadDataNoOSM {
 				node.setProperty(lat_name, entity.lat);
 				node.setProperty("id", entity.id);
 				geomNodes.add(node);
+				spaCount++;
 			}
 		}
 		long time = System.currentTimeMillis() - start;
 		OwnMethods.Print("create node time:" + time);
+		OwnMethods.Print("number of spatial objects:"+spaCount);
 
 		start = System.currentTimeMillis();
 		layer.addAll(geomNodes);
