@@ -331,7 +331,9 @@ public class Construct_RisoTree {
 				//					writer1.write(String.format("%s,%s\n", propertyName, arrayList));
 			}
 		}
-		constructTime.add(System.currentTimeMillis() - start);
+		long onehopTime = System.currentTimeMillis() - start;
+		OwnMethods.Print("one hop time:" + onehopTime);
+		constructTime.add(onehopTime);
 		//			writer1.close();
 
 		//more than one hop
@@ -387,7 +389,9 @@ public class Construct_RisoTree {
 //					}
 				}
 			}
-			constructTime.add(System.currentTimeMillis() - start);
+			long twohopTime = System.currentTimeMillis() - start;
+			OwnMethods.Print("two hop time:"+twohopTime);
+			constructTime.add(twohopTime);
 			//				writer2.close();
 		}
 		return constructTime;
