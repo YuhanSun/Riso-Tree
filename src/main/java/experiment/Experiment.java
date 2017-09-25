@@ -2,6 +2,7 @@ package experiment;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.neo4j.graphdb.ExecutionPlanDescription;
@@ -14,23 +15,23 @@ import graph.*;
 
 public class Experiment {
 
-	Config config;
-	String dataset;
-	String version;
-	system systemName;
-	String password;
-	int MAX_HOPNUM;
+	public Config config;
+	public String dataset;
+	public String version;
+	public system systemName;
+	public String password;
+	public int MAX_HOPNUM;
 
-	String db_path;
-	String graph_pos_map_path;
-	String entityPath;
+	public String db_path;
+	public String graph_pos_map_path;
+	public String entityPath;
 
-	String querygraphDir;
-	String spaPredicateDir;
-	String resultDir;
+	public String querygraphDir;
+	public String spaPredicateDir;
+	public String resultDir;
 
-	boolean TEST_FORMAT;
-	int experimentCount = 1;
+	public boolean TEST_FORMAT;
+	public int experimentCount = 10;
 
 	//non-spatial ratio 20
 	//	static double startSelectivity = 0.000001;
@@ -41,8 +42,12 @@ public class Experiment {
 //	double endSelectivity = 0.2;
 	
 	//foursquare_100
-	double startSelectivity = 0.000001;
-	double endSelectivity = 0.002;
+	public double startSelectivity = 0.000001;
+	public double endSelectivity = 0.002;
+	
+	//Patents
+//	double startSelectivity = 0.00001;
+//	double endSelectivity = 0.002;
 
 	//for switching point detect
 	//	static double startSelectivity = 0.01;
@@ -51,7 +56,7 @@ public class Experiment {
 	//	static double startSelectivity = 0.0001;
 	//	static double endSelectivity = 0.2;
 
-	int spaCount;
+	public int spaCount;
 
 	public Experiment(Config config)
 	{
@@ -94,14 +99,27 @@ public class Experiment {
 		try {
 			
 			Config config = new Config();
+			
+//			ArrayList<String> dataset_a = new ArrayList<String>(Arrays.asList(
+//					Config.Datasets.Gowalla_100.name(), 
+//					Config.Datasets.foursquare_100.name(),
+//					Config.Datasets.Patents_100_random_80.name(), 
+//					Config.Datasets.go_uniprot_100_random_80.name()));
+			
 			config.setDatasetName(Config.Datasets.foursquare_100.name());
-			for ( int hopNum = 0; hopNum <= 1; hopNum++)
-			{
-				config.setMAXHOPNUM(hopNum);
-				Experiment experiment = new Experiment(config);
-				experiment.initializeParameters();
-				experiment.risoTreeQueryPN(10, 0);
-			}
+			Experiment experiment = new Experiment(config);
+			experiment.experimentCount = 3;
+			experiment.Neo4j_Naive(10, 0);
+			
+//			config.setDatasetName(Config.Datasets.foursquare_100.name());
+//			for ( int hopNum = 1; hopNum <= 2; hopNum++)
+////			int hopNum = 2;
+//			{
+//				config.setMAXHOPNUM(hopNum);
+//				Experiment experiment = new Experiment(config);
+//				experiment.initializeParameters();
+//				experiment.risoTreeQueryPN(10, 0);
+//			}
 
 //			for (int nodeCount = 5; nodeCount <= 35; nodeCount+=5)
 //				//			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
@@ -438,8 +456,8 @@ public class Experiment {
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
 			case Ubuntu:
-				result_detail_path = String.format("%s/risotree_PN%d_%d_%d.txt", MAX_HOPNUM, resultDir, nodeCount, query_id);
-				result_avg_path = String.format("%s/risotree_PN%d_%d_%d_avg.txt", MAX_HOPNUM, resultDir, nodeCount, query_id);
+				result_detail_path = String.format("%s/risotree_PN%d_%d_%d.txt", resultDir, MAX_HOPNUM, nodeCount, query_id);
+				result_avg_path = String.format("%s/risotree_PN%d_%d_%d_avg.txt", resultDir, MAX_HOPNUM, nodeCount, query_id);
 				//				result_detail_path = String.format("%s/risotree_%d_%d_test.txt", resultDir, nodeCount, query_id);
 				//				result_avg_path = String.format("%s/risotree_%d_%d_avg_test.txt", resultDir, nodeCount, query_id);
 				break;
