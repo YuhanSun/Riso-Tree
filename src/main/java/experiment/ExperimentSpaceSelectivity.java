@@ -22,29 +22,26 @@ import graph.Neo4j_API;
 import graph.RisoTreeQueryPN;
 
 public class ExperimentSpaceSelectivity {
-	static Config config = new Config();
-	static String dataset = config.getDatasetName();
-	static String version = config.GetNeo4jVersion();
-	static system systemName = config.getSystemName();
-	static String password = config.getPassword();
-	static int MAX_HOPNUM = config.getMaxHopNum();
+	public static Config config = new Config();
+	public static String dataset = config.getDatasetName();
+	public static String version = config.GetNeo4jVersion();
+	public static system systemName = config.getSystemName();
+	public static String password = config.getPassword();
+	public static int MAX_HOPNUM = config.getMaxHopNum();
 	
-	static String db_path;
-	static String graph_pos_map_path;
-	static String entityPath;
+	public static String db_path;
+	public static String graph_pos_map_path;
+	public static String entityPath;
 	
-	static String queryDir, querygraphDir;
-	static String spaPredicateDir;
-	static String resultDir;
+	public static String queryDir, querygraphDir;
+	public static String spaPredicateDir;
+	public static String resultDir;
 	
-	static boolean TEST_FORMAT;
-	static int experimentCount = 1;
-
+	public static boolean TEST_FORMAT;
+	public static int experimentCount = 20;
+	public static int areaLevel = 4;
 	
-	static int areaLevel = 4;
-	
-	static int spaCount;
-	
+	public static int spaCount;
 	
 	public static void initializeParameters()
 	{	
@@ -92,19 +89,21 @@ public class ExperimentSpaceSelectivity {
 		
 		int nodeCount = 10, queryIndex = 0;
 		
-		ArrayList<String> dataset_a = new ArrayList<String>(Arrays.asList(
-				Config.Datasets.Gowalla_100.name(), 
-				Config.Datasets.foursquare_100.name(),
-				Config.Datasets.Patents_100_random_80.name(), 
-				Config.Datasets.go_uniprot_100_random_80.name()));
+//		ArrayList<String> dataset_a = new ArrayList<String>(Arrays.asList(
+//				Config.Datasets.Gowalla_100.name(), 
+//				Config.Datasets.foursquare_100.name(),
+//				Config.Datasets.Patents_100_random_80.name(), 
+//				Config.Datasets.go_uniprot_100_random_80.name()));
 		
-		for ( String dataset : dataset_a)
-//		String dataset = Config.Datasets.go_uniprot_100_random_80.name();
+//		for ( String dataset : dataset_a)
+		String dataset = Config.Datasets.Gowalla_100.name();
 		{
 			Config config = new Config();
 			config.setDatasetName(dataset);
-			for ( int hopNum = 0; hopNum <= 2; hopNum++)
+			for ( int hopNum = 2; hopNum <= 2; hopNum++)
 			{
+				if (dataset.equals(Config.Datasets.go_uniprot_100_random_80) && hopNum == 2)
+					continue;
 				config.setMAXHOPNUM(hopNum);
 				ExperimentSpaceSelectivity experimentSpaceSelectivity = new ExperimentSpaceSelectivity(config);
 				try {
@@ -324,11 +323,15 @@ public class ExperimentSpaceSelectivity {
 			}
 			else
 			{
-				area = 10;
+				if ( dataset.equals(Config.Datasets.go_uniprot_100_random_80.name()))
+					area = 1;
+				else {
+					area = 10;
+				}
 				factor = 10;
 			}
 			
-			for ( int levelIndex = 0; levelIndex < 4; levelIndex++)
+			for ( int levelIndex = 0; levelIndex < areaLevel; levelIndex++)
 			{
 				String queryrect_path = null;
 				switch (systemName) {
@@ -478,15 +481,20 @@ public class ExperimentSpaceSelectivity {
 					dataset.equals(Config.Datasets.foursquare_100.name()))
 			{
 				area = 1;
+//				area = 125000;
 				factor = 50;
 			}
 			else
 			{
-				area = 10;
+				if ( dataset.equals(Config.Datasets.go_uniprot_100_random_80.name()))
+					area = 1;
+				else {
+					area = 10;
+				}
 				factor = 10;
 			}
 			
-			for ( int levelIndex = 0; levelIndex < 4; levelIndex++)
+			for ( int levelIndex = 0; levelIndex < areaLevel; levelIndex++)
 			{
 				
 				String queryrect_path = null;
