@@ -567,7 +567,7 @@ public class OwnMethods {
 					reader = new BufferedReader(new FileReader(file));
 					String temp = null;
 					while ((temp = reader.readLine()) != null) {
-						if ( temp.contains("\\\\"))
+						if ( temp.contains("%"))
 							continue;
 						String[] line_list = temp.split("\t");
 						MyRectangle rect = new MyRectangle(Double.parseDouble(line_list[0]), Double.parseDouble(line_list[1]), Double.parseDouble(line_list[2]), Double.parseDouble(line_list[3]));
