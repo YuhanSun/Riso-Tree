@@ -38,12 +38,14 @@ public class ExperimentSpaceSelectivity {
 	public static String resultDir;
 	
 	public static boolean TEST_FORMAT;
-	public static int experimentCount = 20;
-	public static int areaLevel = 4;
+	public static int experimentCount = 40;
+	public int areaLevel = 4;
+	public int area;
+	public static int factor;
 	
 	public static int spaCount;
 	
-	public static void initializeParameters()
+	public void initializeParameters()
 	{	
 		TEST_FORMAT = false;
 		dataset = config.getDatasetName();
@@ -72,6 +74,22 @@ public class ExperimentSpaceSelectivity {
 //			spaPredicateDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s", dataset);
 			resultDir = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\SpaceSelectivity\\%s", dataset);
 			break;
+		}
+		
+		if ( dataset.equals(Config.Datasets.Gowalla_100.name()) ||
+				dataset.equals(Config.Datasets.foursquare_100.name()))
+		{
+			area = 1;
+			factor = 50;
+		}
+		else
+		{
+			if ( dataset.equals(Config.Datasets.go_uniprot_100_random_80.name()))
+				area = 1;
+			else {
+				area = 10;
+			}
+			factor = 10;
 		}
 	}
 	
@@ -106,6 +124,8 @@ public class ExperimentSpaceSelectivity {
 					continue;
 				config.setMAXHOPNUM(hopNum);
 				ExperimentSpaceSelectivity experimentSpaceSelectivity = new ExperimentSpaceSelectivity(config);
+				experimentSpaceSelectivity.area = 2500;
+				experimentSpaceSelectivity.areaLevel = 2;
 				try {
 					experimentSpaceSelectivity.risoTreeQueryPN(nodeCount, queryIndex);
 				} catch (Exception e) {
@@ -273,7 +293,7 @@ public class ExperimentSpaceSelectivity {
 		}
 	}
 	
-	public static void Neo4j_Naive(int nodeCount, int query_id) throws Exception
+	public void Neo4j_Naive(int nodeCount, int query_id) throws Exception
 	{
 		try {
 			long start;
@@ -313,24 +333,6 @@ public class ExperimentSpaceSelectivity {
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
 
-			int area;
-			int factor;
-			if ( dataset.equals(Config.Datasets.Gowalla_100.name()) ||
-					dataset.equals(Config.Datasets.foursquare_100.name()))
-			{
-				area = 1;
-				factor = 50;
-			}
-			else
-			{
-				if ( dataset.equals(Config.Datasets.go_uniprot_100_random_80.name()))
-					area = 1;
-				else {
-					area = 10;
-				}
-				factor = 10;
-			}
-			
 			for ( int levelIndex = 0; levelIndex < areaLevel; levelIndex++)
 			{
 				String queryrect_path = null;
@@ -474,25 +476,6 @@ public class ExperimentSpaceSelectivity {
 			String head_line = "count\trange_time\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
-			
-			int area;
-			int factor;
-			if ( dataset.equals(Config.Datasets.Gowalla_100.name()) ||
-					dataset.equals(Config.Datasets.foursquare_100.name()))
-			{
-				area = 1;
-//				area = 125000;
-				factor = 50;
-			}
-			else
-			{
-				if ( dataset.equals(Config.Datasets.go_uniprot_100_random_80.name()))
-					area = 1;
-				else {
-					area = 10;
-				}
-				factor = 10;
-			}
 			
 			for ( int levelIndex = 0; levelIndex < areaLevel; levelIndex++)
 			{
