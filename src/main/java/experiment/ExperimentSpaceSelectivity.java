@@ -1,11 +1,16 @@
 package experiment;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+
+import javax.sound.sampled.Line;
+import javax.sound.sampled.LineListener;
 
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.Result;
@@ -38,7 +43,7 @@ public class ExperimentSpaceSelectivity {
 	public static String resultDir;
 	
 	public static boolean TEST_FORMAT;
-	public static int experimentCount = 40;
+	public static int experimentCount = 20;
 	public int areaLevel = 4;
 	public int area;
 	public static int factor;
@@ -101,10 +106,16 @@ public class ExperimentSpaceSelectivity {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-//		initializeParameters();
-//		generateQueryRectangleForSpaceSelectivityDegree();
-//		generateQueryRectangleForSpaceSelectivityMeter();
-		
+//		ExperimentSpaceSelectivity experimentSpaceSelectivity = new ExperimentSpaceSelectivity(new Config());
+//		experimentSpaceSelectivity.initializeParameters();
+//		experimentSpaceSelectivity.generateRandomCenterLocation();
+//		experimentSpaceSelectivity.generateQueryRectangleForSpaceSelectivityMeter();
+		Query();
+//		
+	}
+	
+	public static void Query()
+	{
 		int nodeCount = 10, queryIndex = 0;
 		
 //		ArrayList<String> dataset_a = new ArrayList<String>(Arrays.asList(
@@ -118,7 +129,7 @@ public class ExperimentSpaceSelectivity {
 		{
 			Config config = new Config();
 			config.setDatasetName(dataset);
-			for ( int hopNum = 2; hopNum <= 2; hopNum++)
+			for ( int hopNum = 0; hopNum <= 2; hopNum++)
 			{
 				if (dataset.equals(Config.Datasets.go_uniprot_100_random_80) && hopNum == 2)
 					continue;
@@ -137,11 +148,7 @@ public class ExperimentSpaceSelectivity {
 		}
 	}
 	
-	/**
-	 * Generate random position rectangles whose selectivity
-	 * are based on their region area. (Kilometer)
-	 */
-	public static void generateQueryRectangleForSpaceSelectivityMeter()
+	public void generateRandomCenterLocation()
 	{
 		ArrayList<String> dataset_a = new ArrayList<String>(Arrays.asList(
 				Config.Datasets.Patents_100_random_80.name(), 
@@ -162,22 +169,97 @@ public class ExperimentSpaceSelectivity {
 				double totalWidth = total_range.max_x - total_range.min_x;
 				double totalHeight = total_range.max_y - total_range.min_y;
 				int experiment_count = 500;
-				int experimentLevel = 4;
+				Random random = new Random();
+				String output_path = null;
+
+				switch(systemName)
+				{
+				case Ubuntu:
+					output_path = String.format("%s/spa_predicate/SpaceSelectivity/%s_centerpoint.txt", queryDir, dataset);
+					break;
+				case Windows:
+					output_path = String.format("%s\\spa_predicate\\SpaceSelectivity\\%s_centerpoint.txt", queryDir, dataset);
+					break;
+				}
+				String write_line = "";
+				for ( int k = 0; k < experiment_count; k++)
+				{
+					double centerX = random.nextDouble() * totalWidth + total_range.min_x;
+					double centerY = random.nextDouble() * totalHeight + total_range.min_y;
+					write_line += String.format("%f\t%f\n", centerX, centerY);
+				}
+				OwnMethods.WriteFile(output_path, true, write_line);
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	/**
+	 * Generate random position rectangles whose selectivity
+	 * are based on their region area. (Kilometer)
+	 */
+	public void generateQueryRectangleForSpaceSelectivityMeter()
+	{
+		ArrayList<String> dataset_a = new ArrayList<String>(Arrays.asList(
+				Config.Datasets.Patents_100_random_80.name(), 
+				Config.Datasets.go_uniprot_100_random_80.name(),
+				Config.Datasets.Gowalla_100.name(), 
+				Config.Datasets.foursquare_100.name()));
+		ArrayList<MyRectangle> totalRange_a = new ArrayList<MyRectangle>(Arrays.asList(
+				new MyRectangle(0, 0, 1000, 1000),
+				new MyRectangle(0, 0, 1000, 1000),
+				new MyRectangle(-180, -90, 180, 90),
+				new MyRectangle(-180, -90, 180, 90)));
+		try
+		{
+			for ( int i = 0; i < dataset_a.size(); i++)
+			{
+				String dataset = dataset_a.get(i);
+				MyRectangle total_range = totalRange_a.get(i);
 				
-				int area;
-				int factor;
-				if ( total_range.min_x < 0)
+				if ( dataset.equals(Config.Datasets.Gowalla_100.name()) ||
+						dataset.equals(Config.Datasets.foursquare_100.name()))
 				{
 					area = 1;
 					factor = 50;
 				}
 				else
 				{
-					area = 10;
+					if ( dataset.equals(Config.Datasets.go_uniprot_100_random_80.name()))
+						area = 1;
+					else {
+						area = 10;
+					}
 					factor = 10;
 				}
-				Random random = new Random();
-				for ( int j = 0; j < experimentLevel; j++)
+				
+				String centerPath = null;
+				switch(systemName)
+				{
+				case Ubuntu:
+					centerPath = String.format("%s/spa_predicate/SpaceSelectivity/%s_centerpoint.txt", queryDir, dataset);
+					break;
+				case Windows:
+					centerPath = String.format("%s\\spa_predicate\\SpaceSelectivity\\%s_centerpoint.txt", queryDir, dataset);
+					break;
+				}
+				
+				ArrayList<Double> lonList = new ArrayList<Double>(experimentCount); 
+				ArrayList<Double> latList = new ArrayList<Double>(experimentCount);
+				BufferedReader reader = new BufferedReader(new FileReader(new File(centerPath)));
+				String line = null;
+				while ( (line = reader.readLine()) != null)
+				{
+					String [] lineList = line.split("\t");
+					lonList.add(Double.parseDouble(lineList[0]));
+					latList.add(Double.parseDouble(lineList[1]));
+				}
+				
+				for ( int j = 0; j < areaLevel; j++)
 				{
 					String output_path = null;
 
@@ -190,10 +272,10 @@ public class ExperimentSpaceSelectivity {
 						output_path = String.format("%s\\spa_predicate\\SpaceSelectivity\\%s_%d.txt", queryDir, dataset, area);
 						break;
 					}
-					for ( int k = 0; k < experiment_count; k++)
+					for ( int k = 0; k < experimentCount; k++)
 					{
-						double centerX = random.nextDouble() * totalWidth + total_range.min_x;
-						double centerY = random.nextDouble() * totalHeight + total_range.min_y;
+						double centerX = lonList.get(k);
+						double centerY = latList.get(k);
 						String write_line = "";
 						
 						if ( total_range.min_x < 0)
@@ -218,6 +300,7 @@ public class ExperimentSpaceSelectivity {
 					}
 					area *= factor;
 				}
+				reader.close();
 			}
 		}
 		catch(Exception e)
