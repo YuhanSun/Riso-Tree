@@ -82,5 +82,29 @@ public class Naive_Neo4j_Match_Test {
 		while (result.hasNext())
 			OwnMethods.Print(result.next());
 	}
+	
+	@Test
+	public void graphOnlyQueryTest() {
+		int nodeCount = 5, query_id = 0;
+		
+		String querygraph_path = "/mnt/hgfs/Google_Drive/Projects/risotree/query/query_graph/labelCount/Gowalla_25/5.txt";
+		
+		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		Query_Graph query_Graph = queryGraphs.get(query_id);
+		
+		int j = 0;
+		for (  ; j < query_Graph.graph.size(); j++)
+			if(query_Graph.Has_Spa_Predicate[j])
+				break;
+		query_Graph.spa_predicate[j] = null;
+		query_Graph.Has_Spa_Predicate[j] = false;
+		
+		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
+		Result result = naive_Neo4j_Match.SubgraphMatch_Spa_API(query_Graph, 100);
+		while (result.hasNext())
+			OwnMethods.Print(result.next());
+		OwnMethods.Print(result.getExecutionPlanDescription());
+	}
+	
 
 }
