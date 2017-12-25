@@ -59,8 +59,8 @@ public class RisoTreeQuery {
 	
 	//test control variables
 	public static boolean outputLevelInfo = false;
-	public static boolean outputQuery = false;
-	public static boolean outputExecutionPlan = false;
+	public static boolean outputQuery = true;
+	public static boolean outputExecutionPlan = true;
 	public static boolean outputResult = false;
 	
 	/**
@@ -983,6 +983,13 @@ public class RisoTreeQuery {
 								if ( outputExecutionPlan)
 								{
 									OwnMethods.Print(planDescription);
+									
+									OwnMethods.Print("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
+									if (planDescription.hasProfilerStatistics())
+										OwnMethods.Print("cypher statistics: " + planDescription.getProfilerStatistics().getDbHits());
+									else
+										throw new Exception("planDescription has no statistics!!");
+									
 									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
 								}
 								index = 0; id_pos_list = new ArrayList<Long>();
@@ -1027,6 +1034,13 @@ public class RisoTreeQuery {
 							if ( outputExecutionPlan)
 							{
 								OwnMethods.Print(planDescription);
+								
+								OwnMethods.Print("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
+								if (planDescription.hasProfilerStatistics())
+									OwnMethods.Print("cypher statistics: " + planDescription.getProfilerStatistics().getDbHits());
+								else
+									throw new Exception("planDescription has no statistics!!");
+								
 								OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
 							}
 						}
@@ -1091,6 +1105,13 @@ public class RisoTreeQuery {
 								if ( outputExecutionPlan)
 								{
 									OwnMethods.Print(planDescription);
+									
+									OwnMethods.Print("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
+									if (planDescription.hasProfilerStatistics())
+										OwnMethods.Print("cypher statistics: " + planDescription.getProfilerStatistics().getDbHits());
+									else
+										throw new Exception("planDescription has no statistics!!");
+									
 									OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
 								}
 							}
