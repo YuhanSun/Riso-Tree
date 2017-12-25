@@ -75,9 +75,14 @@ public class Prepare {
 //	static double startSelectivity = 0.00001;
 //	static double endSelectivity = 0.02;
 	
-	//for switching point
-	static double startSelectivity = 0.1;
+	//for go_uniprot_80
+	static double startSelectivity = 0.000001;
 	static double endSelectivity = 0.2;
+	
+	
+	//for switching point
+//	static double startSelectivity = 0.1;
+//	static double endSelectivity = 0.2;
 	
 	static String queryDir;
 	static String center_id_path;
@@ -141,7 +146,8 @@ public class Prepare {
 		
 //		generateRandomQueryGraph();
 //		generateQueryRectangleCenterID();
-		generateQueryRectangleForSelectivity();
+//		generateQueryRectangleForSelectivity();
+		
 		
 //		generateNewNLList();
 		
@@ -318,6 +324,11 @@ public class Prepare {
 		}
 	}
 	
+	/**
+	 * Based on center id to generate the rectangles that 
+	 * can enclose a specific number of spatial vertices.
+	 * Their region area can be different but the same cardinality.
+	 */
 	public static void generateQueryRectangleForSelectivity()
 	{
 		try {
@@ -384,10 +395,12 @@ public class Prepare {
 		}
 	}
 	
+	/**
+	 * Generate a list of spatial vertices.
+	 */
 	public static void generateQueryRectangleCenterID()
 	{
-		String entity_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
-		ArrayList<Entity> entities = OwnMethods.ReadEntity(entity_path);
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 		
 		OwnMethods.generateQueryRectangleCenterID(entities, center_id_path, 500);
 	}
@@ -397,7 +410,7 @@ public class Prepare {
 	 */
 	public static void generateRandomQueryGraph()
 	{
-		for ( int node_count = 2; node_count < 4; node_count++)
+		for ( int node_count = 35; node_count <= 35; node_count+=5)
 //		int node_count = 10;
 		{
 			int spa_pred_count = 1;
