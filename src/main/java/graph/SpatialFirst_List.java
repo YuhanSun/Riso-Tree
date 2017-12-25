@@ -479,31 +479,31 @@ public class SpatialFirst_List {
 		OwnMethods.Print(String.format("spa_ids size: %d", ids.size()));
 		
 		//NL_id_list
-		for ( int key : NL_hopnum.keySet())
-		{
-			String id_list_size_property_name = String.format("NL_%d_%d_size", NL_hopnum.get(key), query_Graph.label_list[key]);
-			int id_list_size = (Integer) node.getProperty(id_list_size_property_name);
-			if( id_list_size > 0)	//whether to use the shrunk label
-				query = query.replaceFirst(String.format("a%d", key), String.format("a%d:GRAPH_%d", key, query_Graph.label_list[key]));
-			else {
-				String id_list_property_name = String.format("NL_%d_%d_list", NL_hopnum.get(key), query_Graph.label_list[key]);
-				
-				if ( node.hasProperty(id_list_property_name) == false)
-					return "match (n) where false return n";
-				
-				int[] graph_id_list = (int[]) node.getProperty(id_list_property_name);
-				ArrayList<Long> pos_id_list = new ArrayList<Long>(graph_id_list.length);
-				for ( int i = 0; i < graph_id_list.length; i++)
-					pos_id_list.add(graph_pos_map_list[graph_id_list[i]]);
-				
-				query += String.format(" and ( id(a%d) = %d", key, pos_id_list.get(0));
-				for ( int i = 1; i < pos_id_list.size(); i++)
-					query += String.format(" or id(a%d) = %d", key, pos_id_list.get(i));
-				query += " )\n";
-//			query += String.format(" and id(a%d) in %s\n", key, pos_id_list.toString());
-				OwnMethods.Print(String.format("%s size is %d", id_list_property_name, pos_id_list.size()));
-			}
-		}
+//		for ( int key : NL_hopnum.keySet())
+//		{
+//			String id_list_size_property_name = String.format("NL_%d_%d_size", NL_hopnum.get(key), query_Graph.label_list[key]);
+//			int id_list_size = (Integer) node.getProperty(id_list_size_property_name);
+//			if( id_list_size > 0)	//whether to use the shrunk label
+//				query = query.replaceFirst(String.format("a%d", key), String.format("a%d:GRAPH_%d", key, query_Graph.label_list[key]));
+//			else {
+//				String id_list_property_name = String.format("NL_%d_%d_list", NL_hopnum.get(key), query_Graph.label_list[key]);
+//				
+//				if ( node.hasProperty(id_list_property_name) == false)
+//					return "match (n) where false return n";
+//				
+//				int[] graph_id_list = (int[]) node.getProperty(id_list_property_name);
+//				ArrayList<Long> pos_id_list = new ArrayList<Long>(graph_id_list.length);
+//				for ( int i = 0; i < graph_id_list.length; i++)
+//					pos_id_list.add(graph_pos_map_list[graph_id_list[i]]);
+//				
+//				query += String.format(" and ( id(a%d) = %d", key, pos_id_list.get(0));
+//				for ( int i = 1; i < pos_id_list.size(); i++)
+//					query += String.format(" or id(a%d) = %d", key, pos_id_list.get(i));
+//				query += " )\n";
+////			query += String.format(" and id(a%d) in %s\n", key, pos_id_list.toString());
+//				OwnMethods.Print(String.format("%s size is %d", id_list_property_name, pos_id_list.size()));
+//			}
+//		}
 			
 		//return
 		query += " return id(a0)";
