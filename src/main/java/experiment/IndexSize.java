@@ -76,7 +76,7 @@ public class IndexSize {
 //		graphSize();
 		
 //		LoadDataNoOSM.main(null);
-		Construct_RisoTree.main(null);
+//		Construct_RisoTree.main(null);
 		getRTreeSize();
 		getOneHopIndexFromFile();
 		getTwoHopIndexFromFile();
@@ -122,6 +122,7 @@ public class IndexSize {
 						String[] contentList = content.substring(1, content.length() - 1)
 								.split(", ");
 						count += contentList.length;
+						count++;
 					}
 					else break;
 				}
@@ -157,7 +158,10 @@ public class IndexSize {
 				Map<String, Object> properties = node.getAllProperties();
 				for ( String propertyKey : properties.keySet())
 					if (propertyKey.matches("PN_\\d+_\\d+_size$"))
+					{
 						count += (Integer) properties.get(propertyKey);
+						count++;
+					}
 			}
 			OwnMethods.Print("Two hop index:" + count * 4 + " bytes");
 			tx.success();
@@ -195,6 +199,7 @@ public class IndexSize {
 						String[] contentList = content.substring(1, content.length() - 1)
 								.split(", ");
 						count += contentList.length;
+						count++;
 					}
 					else break;
 				}
@@ -230,7 +235,10 @@ public class IndexSize {
 				Map<String, Object> properties = node.getAllProperties();
 				for ( String propertyKey : properties.keySet())
 					if (propertyKey.matches("PN_\\d+_size$"))
+					{
 						count += (Integer) properties.get(propertyKey);
+						count ++;
+					}
 			}
 			OwnMethods.Print("One hop index:" + count * 4 + " bytes");
 			tx.success();
