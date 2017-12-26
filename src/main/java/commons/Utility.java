@@ -13,6 +13,44 @@ import java.util.HashMap;
 
 public class Utility {
 	
+	public static double distance(double x, double y, MyRectangle rectangle)
+	{
+		double minx = rectangle.min_x, miny = rectangle.min_y,
+				maxx = rectangle.max_x, maxy = rectangle.max_y;
+		if ( x < minx)
+		{
+			if ( y < miny)
+				return Math.sqrt((x - minx) * (x - minx) + (y - miny) * (y - miny));
+			else if ( y > maxy)
+				return Math.sqrt((x - minx) * (x - minx) + (y - maxy) * (y - maxy));
+			else
+				return minx - x;
+		}
+		else if ( x > maxx)
+		{
+			if ( y < miny)
+				return Math.sqrt((x - maxx) * (x - maxx) + (y - miny) * (y - miny));
+			else if ( y > maxy)
+				return Math.sqrt((x - maxx) * (x - maxx) + (y - maxy) * (y - maxy));
+			else
+				return x - maxx;
+		}
+		else
+		{
+			if ( y < miny)
+				return miny - y;
+			else if ( y > maxy)
+				return y - maxy;
+			else
+				return 0;
+		}
+	}
+	
+	public static double distance(Location location, MyRectangle rectangle)
+	{
+		return distance(location.x, location.y, rectangle);
+	}
+	
 	public static double earthRadius = 6371000; // meters
 	
 	public static float distFrom(float lat1, float lng1, float lat2, float lng2) {
