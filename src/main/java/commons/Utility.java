@@ -8,9 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-//import org.datasyslab.GeoGraphMatch.Label_Degree_Node;
-
-
 public class Utility {
 	
 	public static double distance(double x, double y, MyRectangle rectangle)
@@ -46,9 +43,14 @@ public class Utility {
 		}
 	}
 	
-	public static double distance(Location location, MyRectangle rectangle)
+	public static double distance(MyPoint location, MyRectangle rectangle)
 	{
 		return distance(location.x, location.y, rectangle);
+	}
+	
+	public static double distance(MyPoint l1, MyPoint l2)
+	{
+		return Math.sqrt((l1.x - l2.x) * (l1.x - l2.x) + (l1.y - l2.y) * (l1.y - l2.y)); 
 	}
 	
 	public static double earthRadius = 6371000; // meters
