@@ -31,6 +31,12 @@ import commons.Config.Explain_Or_Profile;
 import commons.Config.system;
 import osm.OSM_Utility;
 
+/**
+ * The class use NL_hopnum_label to organize neighbors.
+ * Not used any more.
+ * @author ysun138
+ *
+ */
 public class RisoTreeQuery {
 
 	public GraphDatabaseService dbservice;
