@@ -595,7 +595,7 @@ public class Experiment {
 	}
 
 	/**
-	 * use RisoTree and graph first approach
+	 * Use RisoTree and graph first approach (not used any more)
 	 * @param nodeCount
 	 * @param query_id
 	 * @throws Exception
