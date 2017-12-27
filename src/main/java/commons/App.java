@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.management.relation.RelationType;
 
+import org.neo4j.cypher.internal.frontend.v2_3.perty.print.printCommandsToString;
 import org.neo4j.gis.spatial.Layer;
 import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
@@ -15,6 +17,7 @@ import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
@@ -81,9 +84,10 @@ public class App {
 	
 	
 	public static void main(String[] args) {
+		
 		initVariablesForTest();
 //		Naive();
-//		test();
+		test();
 //		batchRTreeInsert();
 //		generateLabelList();
 //		rangeQueryCompare();
@@ -92,8 +96,71 @@ public class App {
 //		cliqueTest();
 //		propertyPageAccessTest();
 //		matchOnDifferentLabelCountDatabase();
-		getAllLabels();
+//		getAllLabels();
 //		restartNeo4jJava();
+//		getLeafStatisticalInfo();
+	}
+	
+	public static void getLeafStatisticalInfo()
+	{
+		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+				.newEmbeddedDatabase(new File(db_path));
+		Transaction tx = databaseService.beginTx();
+		Set<Node> nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(databaseService, dataset);
+		ArrayList<Integer> statistic = new ArrayList<Integer>(); 
+		for ( Node node : nodes)
+		{
+			int count = 0;
+			Iterable<String> keys = node.getPropertyKeys();
+			for ( String key : keys)
+			{
+//				if ( key.matches("PN_\\d+_\\d+_size$"))
+				if ( key.matches("PN_\\d+_\\d+$"))
+				{
+					count++;
+//					OwnMethods.Print(key);
+				}
+			}
+			statistic.add(count);
+		}
+		tx.success();
+		tx.close();
+		OwnMethods.Print(statistic);
+		databaseService.shutdown();
+		ArrayList<Integer> result = Utility.groupSum(0, 10201, statistic, 10201);
+		OwnMethods.Print(result);
+		OwnMethods.Print(statistic.size());
+	}
+	
+	public static void test()
+	{
+		double x = 2.5;
+		if (x>1)
+			if (x < 2)
+				OwnMethods.Print("branch 1");
+		else if (x > 3)
+			OwnMethods.Print("branch 2");
+		else 
+			OwnMethods.Print("branch 3");
+//		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+//				.newEmbeddedDatabase(new File(db_path));
+//		Transaction tx = databaseService.beginTx();
+////		Node node = databaseService.getNodeById(1294918);
+//		Node node = databaseService.getNodeById(7);
+//		
+//		OwnMethods.Print(node.getAllProperties());
+////		Iterable<Relationship> rels = node.getRelationships();
+////		for ( Relationship relationship : rels)
+////		{
+//////			OwnMethods.Print(relationship);
+////			Node geom = relationship.getEndNode();
+////			OwnMethods.Print(geom.getAllProperties());
+////			break;
+////		}
+//		
+//		tx.success();
+//		tx.close();
+//		databaseService.shutdown();
 	}
 	
 	public static void restartNeo4jJava()
