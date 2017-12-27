@@ -37,6 +37,7 @@ import commons.OwnMethods;
 /**
  * load spatial entity into osm layer and 
  * build the R-tree index
+ * not used any more
  * @author yuhansun
  *
  */
