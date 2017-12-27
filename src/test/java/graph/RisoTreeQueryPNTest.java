@@ -2,13 +2,20 @@ package graph;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import commons.Config;
 import commons.MyRectangle;
@@ -120,5 +127,60 @@ public class RisoTreeQueryPNTest {
 		risoTreeQueryPN.dbservice.shutdown();
 	}
 	
+	@Test
+	public void queryKNNtest()
+	{
+		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		Query_Graph query_Graph = queryGraphs.get(query_id);
+		
+		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+		MyRectangle rectangle = queryrect.get(0);
+		int j = 0;
+		for (  ; j < query_Graph.graph.size(); j++)
+			if(query_Graph.Has_Spa_Predicate[j])
+				break;
+		query_Graph.spa_predicate[j] = rectangle;
+		
+		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
+		long[] graph_pos_map_list= new long[graph_pos_map.size()];
+		for ( String key_str : graph_pos_map.keySet())
+		{
+			int key = Integer.parseInt(key_str);
+			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
+			graph_pos_map_list[key] = pos_id;
+		}
+		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
+				graph_pos_map_list, MAX_HOPNUM);
+		
+		int K = 10;
+		try
+		{
+			ArrayList<Long> resultIDs = risoTreeQueryPN.LAGAQ_KNN(query_Graph, K);
+			OwnMethods.Print(resultIDs);
+			OwnMethods.Print(risoTreeQueryPN.visit_spatial_object_count);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			risoTreeQueryPN.dbservice.shutdown();
+		}
+		finally
+		{
+			risoTreeQueryPN.dbservice.shutdown();
+		}
+	}
+	
+	@Test
+	public void checkPathsTest()
+	{
+		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+				.newEmbeddedDatabase(new File(db_path));
+		Transaction tx = databaseService.beginTx();
+		Node node = databaseService.getNodeById(1294918);
+		LinkedList<String> paths = new LinkedList<String>();
+		paths.add("PN_27_1000");
+		boolean result = RisoTreeQueryPN.checkPaths(node, paths);
+		OwnMethods.Print(result);
+	}
 
 }
