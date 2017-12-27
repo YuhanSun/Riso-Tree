@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
 
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
@@ -21,9 +22,11 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import osm.OSM_Utility;
 import commons.Config;
 import commons.Config.*;
-import commons.Config.system;
 import commons.Labels;
+import commons.MyPoint;
 import commons.Labels.OSMRelation;
+import knn.Element;
+import knn.KNNComparator;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
@@ -57,6 +60,8 @@ public class SpatialFirst_List {
 	public long iterate_time;
 	public long result_count;
 	public long page_hit_count;
+	
+	public int visit_spatial_object_count;
 
 	/**
 	 * 
@@ -766,23 +771,123 @@ public class SpatialFirst_List {
 		OwnMethods.Print(String.format("result size: %d", spatialFirstlist.result_count));
 		spatialFirstlist.shutdown();
 	}
+	
+	/**
+	 * Query function with KNN predicate.
+	 * @param query_Graph
+	 * @param K
+	 */
+	public ArrayList<Long> LAGAQ_KNN(Query_Graph query_Graph, int K)
+	{
+		visit_spatial_object_count = 0;
+		try {
+			ArrayList<Long> resultIDs = new ArrayList<Long>(); 
+			MyPoint queryLoc = null;
+			int querySpatialVertexID = 0;
+			
+			for ( int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
+			{
+				if (query_Graph.Has_Spa_Predicate[i])
+				{
+					querySpatialVertexID = i;
+					MyRectangle queryRect = query_Graph.spa_predicate[i];
+					queryLoc = new MyPoint(queryRect.min_x, queryRect.min_y);
+					break;
+				}
+			}
+				
+			Transaction tx = dbservice.beginTx();
+			Node root_node =  OSM_Utility.getRTreeRoot(dbservice, dataset);
+			
+			PriorityQueue<Element> queue = new PriorityQueue<Element>(100, new KNNComparator());
+			queue.add(new Element(root_node, 0));
+			
+			while ( resultIDs.size() < K && queue.isEmpty() == false)
+			{
+				Element element = queue.poll();
+				Node node = element.node;
+				//Tree non-leaf node
+				if ( node.hasRelationship(Labels.RTreeRel.RTREE_CHILD, Direction.OUTGOING))
+				{
+					Iterable<Relationship> rels = node.getRelationships(Labels.RTreeRel.RTREE_CHILD, 
+							Direction.OUTGOING);
+					for ( Relationship relationship : rels)
+					{
+						Node child = relationship.getEndNode();
+						double[] bbox = (double[]) child.getProperty("bbox");
+						MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
+						queue.add(new Element(child, Utility.distance(queryLoc, MBR)));
+					}
+				}
+				//tree leaf node
+				else if ( node.hasRelationship(Labels.RTreeRel.RTREE_REFERENCE, Direction.OUTGOING))
+				{
+					Iterable<Relationship> rels = node.getRelationships(Labels.RTreeRel.RTREE_REFERENCE, 
+							Direction.OUTGOING);
+					for ( Relationship relationship : rels)
+					{
+						Node geom = relationship.getEndNode();
+						Object object = geom.getProperty(lon_name);
+						if ( object == null)
+							throw new Exception(String.format("Node %d does not have %s property", 
+									geom.getId(), lon_name));
+						else
+						{
+							double lon = (Double)object;
+							double lat = (Double) geom.getProperty(lat_name);
+							queue.add(new Element(geom, Utility.distance(queryLoc, new MyPoint(lon, lat))));
+						}
+					}
+				}
+				//spatial object
+				else if (node.hasLabel(Labels.GraphLabel.GRAPH_1))
+				{
+					visit_spatial_object_count++;
+					long id = node.getId();
+					OwnMethods.Print(id);
+					String query = RisoTreeQueryPN.formQuery_KNN(query_Graph, -1, Explain_Or_Profile.Profile, 
+							querySpatialVertexID, id);
+					Result result = dbservice.execute(query);
+					if ( result.hasNext())
+					{
+						resultIDs.add(id);
+						OwnMethods.Print(String.format("%d, %f", id, element.distance));
+					}
+//					resultIDs.add(id);
+					
+				}
+				else
+					throw new Exception(String.format("Node %d does not affiliate to any type!", node.getId()));
+			}
+			
+			return resultIDs;
+			
+		}
+		catch(Exception e) {
+			e.printStackTrace(); System.exit(-1);
+		}
+		return null;
+	}
 
 	//for test
 	static String dataset_test;
 	static String db_path_test;
 	static String querygraph_path;
+	static String queryrect_path;
 	static String graph_pos_map_path;
 	static String log_path;
-	static int query_id;
+	static int query_id = 0;
 	static ArrayList<Query_Graph> queryGraphs;
 	static Query_Graph query_Graph;
 	static MyRectangle queryRectangle;
+	
+	static int nodeCount = 5;
+	static int name_suffix = 1280;
 
 	public static void initVariablesForTest()
 	{
-		dataset_test = "Gowalla";
-		
 		Config config = new Config();
+		dataset_test = config.getDatasetName();
 		system systemName = config.getSystemName();
 		String neo4jVersion = config.GetNeo4jVersion(); 
 		switch (systemName) {
@@ -793,14 +898,20 @@ public class SpatialFirst_List {
 			log_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset_test + "/test.log";
 			break;
 		case Windows:
-			db_path_test = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset_test, neo4jVersion, dataset_test);
-			querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
+//			db_path_test = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset_test, neo4jVersion, dataset_test);
+//			querygraph_path = "D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph.txt";
+//			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset_test + "\\node_map_RTree.txt";
+			String dataDirectory = "D:\\Ubuntu_shared\\GeoMinHop\\data";
+			db_path_test = String.format("%s\\%s\\%s_%s\\data\\databases\\graph.db", dataDirectory, dataset_test, neo4jVersion, dataset_test);
 			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset_test + "\\node_map_RTree.txt";
+			String querygraphDir = String.format("D:\\Google_Drive\\Projects\\risotree\\query\\query_graph\\%s", dataset_test);
+			String spaPredicateDir = String.format("D:\\Google_Drive\\Projects\\risotree\\query\\spa_predicate\\%s", dataset_test);
+			querygraph_path = String.format("%s\\%d.txt", querygraphDir, nodeCount);
+			queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
 			log_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset_test + "\\test.log";
 		default:
 			break;
 		}
-		query_id = 5;
 		queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		query_Graph = queryGraphs.get(query_id);
 //		queryRectangle = new MyRectangle(-80.115808, 26.187365, -80.115808, 26.187365);//1
@@ -811,6 +922,46 @@ public class SpatialFirst_List {
 		//queryRectangle = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);//10000
 		//queryRectangle = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);//100000
 	}
+	
+	public static void KNNTest()
+	{
+		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		Query_Graph query_Graph = queryGraphs.get(query_id);
+		
+		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+		MyRectangle rectangle = queryrect.get(0);
+		int j = 0;
+		for (  ; j < query_Graph.graph.size(); j++)
+			if(query_Graph.Has_Spa_Predicate[j])
+				break;
+		query_Graph.spa_predicate[j] = rectangle;
+		
+		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
+		long[] graph_pos_map_list= new long[graph_pos_map.size()];
+		for ( String key_str : graph_pos_map.keySet())
+		{
+			int key = Integer.parseInt(key_str);
+			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
+			graph_pos_map_list[key] = pos_id;
+		}
+		SpatialFirst_List spatialFirst_List = new SpatialFirst_List(db_path_test, dataset_test, graph_pos_map_list);
+		int K = 10;
+		try
+		{
+			ArrayList<Long> resultIDs = spatialFirst_List.LAGAQ_KNN(query_Graph, K);
+			OwnMethods.Print(resultIDs);
+			OwnMethods.Print(spatialFirst_List.visit_spatial_object_count);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			spatialFirst_List.dbservice.shutdown();
+		}
+		finally
+		{
+			spatialFirst_List.dbservice.shutdown();
+		}
+	}
 
 	public static void main(String[] args) {
 		initVariablesForTest();
@@ -818,7 +969,8 @@ public class SpatialFirst_List {
 //		rangeQueryTest();
 //		formSubgraphQueryTest();
 //		subgraphMatchQueryTest();
-		subgraphMatchQuery_Block_Test();
+//		subgraphMatchQuery_Block_Test();
+		KNNTest();
 	}
 
 }

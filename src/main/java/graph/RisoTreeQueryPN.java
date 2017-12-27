@@ -7,13 +7,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Stack;
 
-import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
+import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
@@ -22,12 +24,22 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import commons.Config;
 import commons.Labels;
+import commons.Labels.RTreeRel;
+import commons.MyPoint;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
+import commons.Utility;
 import commons.Config.Explain_Or_Profile;
+import knn.Element;
+import knn.KNNComparator;
 import osm.OSM_Utility;
 
+/**
+ * Use path neighbors to organize reachable subgraphs.
+ * @author ysun138
+ *
+ */
 public class RisoTreeQueryPN {
 
 	public GraphDatabaseService dbservice;
@@ -35,9 +47,9 @@ public class RisoTreeQueryPN {
 	public long[] graph_pos_map_list;
 	
 	public static Config config = new Config();
-	public String lon_name = config.GetLongitudePropertyName();
-	public String lat_name = config.GetLatitudePropertyName();
-	public String graphLinkLabelName = Labels.GraphRel.GRAPH_LINK.name();
+	public static String lon_name = config.GetLongitudePropertyName();
+	public static String lat_name = config.GetLatitudePropertyName();
+	public static String graphLinkLabelName = Labels.GraphRel.GRAPH_LINK.name();
 	public int MAX_HOPNUM;
 	//HMBR
 	public int MAX_HMBRHOPNUM = config.getMaxHMBRHopNum();
@@ -53,6 +65,8 @@ public class RisoTreeQueryPN {
 	public long result_count;
 	public long page_hit_count;
 	public String logPath;
+	
+	public int visit_spatial_object_count;
 	
 	//test control variables
 	public static boolean outputLevelInfo = true;
@@ -229,9 +243,7 @@ public class RisoTreeQueryPN {
 	 * @param Explain_Or_Profile
 	 * @param spa_predicates	spatial predicates except for the min_pos spatial predicate 
 	 * @param pos	query graph node id with the trigger spatial predicate
-	 * @param id	corresponding spatial graph node id (neo4j pos id)
-	 * @param NL_hopnum	shrunk query node <query_graph_id, hop_num> 
-	 * @param node	the rtree node stores NL_list information
+	 * @param ids	corresponding graph spatial vertex id (neo4j pos id)
 	 * @return
 	 */
 	public String formSubgraphQuery(Query_Graph query_Graph, int limit, Explain_Or_Profile explain_Or_Profile,
@@ -900,7 +912,7 @@ public class RisoTreeQueryPN {
 								overlap_MBR_list.add(node);
 
 								//record the next level tree nodes
-								Iterable<Relationship> rels = node.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
+								Iterable<Relationship> rels = node.getRelationships(RTreeRel.RTREE_CHILD, Direction.OUTGOING);
 								for ( Relationship relationship : rels)
 									next_list.add(relationship.getEndNode());
 							}
@@ -920,6 +932,8 @@ public class RisoTreeQueryPN {
 				if (overlap_MBR_list.isEmpty() == true)
 				{
 					OwnMethods.Print("No result satisfy the query.");
+					tx.success();
+					tx.close();
 					return;
 				}
 
@@ -1031,8 +1045,6 @@ public class RisoTreeQueryPN {
 								}
 							}
 					}
-					
-					
 
 					if ( outputLevelInfo)
 					{
@@ -1263,7 +1275,9 @@ public class RisoTreeQueryPN {
 							logWriteLine += String.format("level %d time: %d", level_index, levelTime);
 							OwnMethods.Print(logWriteLine);
 							OwnMethods.WriteFile(logPath, true, logWriteLine + "\n\n");
-						}	
+						}
+						tx.success();
+						tx.close();
 						return;
 					}
 				}
@@ -1530,6 +1544,223 @@ public class RisoTreeQueryPN {
 	}
 	
 	/**
+	 * Check a node covers all the paths
+	 * @param node It has to be a node in RisoTree. It cannot be a spatial object.
+	 * @param paths
+	 * @return
+	 */
+	public static boolean checkPaths(Node node, LinkedList<String> paths )
+	{
+		for ( String path : paths)
+		{
+			if ( node.hasProperty(path + "_size"))
+			{
+				if ( (Integer) node.getProperty(path + "_size") > 0)
+					continue;
+			}
+			else 
+			{
+				if (node.hasProperty(path))
+				{
+					int[] array = (int[]) node.getProperty(path);
+					if ( array.length > 0)
+						continue;
+				}
+				else
+					return false;
+			}
+			
+		}
+		return true;
+	}
+	
+	/**
+	 * form the cypher query for MBR block
+	 * @param query_Graph
+	 * @param limit	-1 is no limit
+	 * @param explain_Or_Profile	-1 is Explain; 1 is Profile; the rest is nothing 
+	 * @param pos	query graph node id with the trigger spatial predicate
+	 * @param id	corresponding graph spatial node id (neo4j pos id)
+	 * @return
+	 */
+	public static String formQuery_KNN(Query_Graph query_Graph, int limit, Explain_Or_Profile explain_Or_Profile, 
+			int pos, Long id)
+	{
+		String query = "";
+		switch (explain_Or_Profile) {
+		case Profile:
+			query += "profile match ";
+			break;
+		case Explain:
+			query += "explain match ";
+			break;			
+		case Nothing:
+			query += "match ";
+			break;
+		}
+
+		//label
+		if ( pos == 0)
+			query += "(a0)";
+		else
+			query += String.format("(a0:GRAPH_%d)", query_Graph.label_list[0]);
+		for(int i = 1; i < query_Graph.graph.size(); i++)
+		{
+			if ( pos == i)
+				query += String.format(",(a%d)", i);
+			else
+				query += String.format(",(a%d:GRAPH_%d)",i, query_Graph.label_list[i]);
+		}
+
+		//edge
+		for(int i = 0; i<query_Graph.graph.size(); i++)
+		{
+			for(int j = 0;j<query_Graph.graph.get(i).size();j++)
+			{
+				int neighbor = query_Graph.graph.get(i).get(j);
+				if(neighbor > i)
+					query += String.format(",(a%d)-[:%s]-(a%d)", i, graphLinkLabelName, neighbor);
+			}
+		}
+
+		query += " where\n";
+
+		//id
+		query += String.format(" (id(a%d)=%d", pos, id);
+		query += ")\n"; 
+		
+		//return
+		query += " return id(a0)";
+		for(int i = 1; i<query_Graph.graph.size(); i++)
+			query += String.format(",id(a%d)", i);
+
+		if(limit != -1)
+			query += String.format(" limit %d", limit);
+
+		return query;
+	}
+	
+	/**
+	 * Query function with KNN predicate.
+	 * @param query_Graph
+	 * @param K
+	 */
+	public ArrayList<Long> LAGAQ_KNN(Query_Graph query_Graph, int K)
+	{
+		visit_spatial_object_count = 0;
+		try {
+			ArrayList<Long> resultIDs = new ArrayList<Long>(); 
+			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
+			if ( spaPathsMap.size() != 1)
+				throw new Exception(String.format("The number of anchor vertex in the LAGAQ-KNN query is %d rather than 1!", spaPathsMap.size()));
+
+			LinkedList<String> paths = new LinkedList<String>();
+			MyPoint queryLoc = null;
+			int querySpatialVertexID = 0;
+			for ( int i : spaPathsMap.keySet())
+			{
+				querySpatialVertexID = i;
+				MyRectangle queryRect = query_Graph.spa_predicate[i];
+				queryLoc = new MyPoint(queryRect.min_x, queryRect.min_y);
+				for ( int j : spaPathsMap.get(i).keySet())
+					for ( String path : spaPathsMap.get(i).get(j))
+						paths.add(path);
+				break;
+			}
+				
+			Transaction tx = dbservice.beginTx();
+			Node root_node =  OSM_Utility.getRTreeRoot(dbservice, dataset);
+//			if ( checkPaths(root_node, paths) == false)
+//			{
+//				tx.success();
+//				tx.close();
+//				return resultIDs;
+//			}
+			
+			PriorityQueue<Element> queue = new PriorityQueue<Element>(100, new KNNComparator());
+			queue.add(new Element(root_node, 0));
+			
+			while ( resultIDs.size() < K && queue.isEmpty() == false)
+			{
+				Element element = queue.poll();
+				Node node = element.node;
+				//Tree non-leaf node
+				if ( node.hasRelationship(Labels.RTreeRel.RTREE_CHILD, Direction.OUTGOING))
+				{
+					Iterable<Relationship> rels = node.getRelationships(Labels.RTreeRel.RTREE_CHILD, 
+							Direction.OUTGOING);
+					for ( Relationship relationship : rels)
+					{
+						Node child = relationship.getEndNode();
+						if (child.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING))
+						{
+							if (checkPaths(child, paths) == false)
+							{
+								continue;
+							}
+						}
+						double[] bbox = (double[]) child.getProperty("bbox");
+						MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
+						queue.add(new Element(child, Utility.distance(queryLoc, MBR)));
+							
+					}
+				}
+				//tree leaf node
+				else if ( node.hasRelationship(Labels.RTreeRel.RTREE_REFERENCE, Direction.OUTGOING))
+				{
+					Iterable<Relationship> rels = node.getRelationships(Labels.RTreeRel.RTREE_REFERENCE, 
+							Direction.OUTGOING);
+					for ( Relationship relationship : rels)
+					{
+						Node geom = relationship.getEndNode();
+						Object object = geom.getProperty(lon_name);
+						if ( object == null)
+							throw new Exception(String.format("Node %d does not have %s property", 
+									geom.getId(), lon_name));
+						else
+						{
+							double lon = (Double)object;
+							double lat = (Double) geom.getProperty(lat_name);
+							queue.add(new Element(geom, Utility.distance(queryLoc, new MyPoint(lon, lat))));
+						}
+					}
+				}
+				//spatial object
+				else if (node.hasLabel(Labels.GraphLabel.GRAPH_1))
+				{
+					visit_spatial_object_count++;
+					long id = node.getId();
+					OwnMethods.Print(id);
+					String query = formQuery_KNN(query_Graph, -1, Explain_Or_Profile.Profile, 
+							querySpatialVertexID, id);
+					Result result = dbservice.execute(query);
+					if ( result.hasNext())
+					{
+						resultIDs.add(id);
+						OwnMethods.Print(String.format("%d, %f", id, element.distance));
+					}
+//					resultIDs.add(id);
+					
+				}
+				else
+					throw new Exception(String.format("Node %d does not affiliate to any type!", node.getId()));
+			}
+			
+			return resultIDs;
+			
+		}
+		catch(Exception e) {
+			e.printStackTrace(); System.exit(-1);
+		}
+		return null;
+	}
+	
+//	public ArrayList<Long> KNN(Query_Graph, int K)
+//	{
+//		
+//	}
+	
+	/**
 	 * Does not consider condition that area of query rectangle is 0.
 	 * If so, such function cannot make the correct dicision.
 	 * @param query_Graph
@@ -1659,7 +1890,7 @@ public class RisoTreeQueryPN {
 								}
 
 								//record the next level tree nodes
-								Iterable<Relationship> rels = node.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
+								Iterable<Relationship> rels = node.getRelationships(RTreeRel.RTREE_CHILD, Direction.OUTGOING);
 								for ( Relationship relationship : rels)
 									next_list.add(relationship.getEndNode());
 							}
