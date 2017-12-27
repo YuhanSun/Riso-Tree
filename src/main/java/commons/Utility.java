@@ -8,7 +8,35 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import knn.Element;
+
 public class Utility {
+	
+	public static ArrayList<Integer> groupSum(double min, double max, ArrayList<Integer> input, int binCount)
+	{
+		ArrayList<Integer> result = new ArrayList<Integer>(binCount);
+		for ( int i = 0; i < binCount; i++)
+			result.add(0);
+		try {
+			double interval = (max - min) / binCount;
+			
+			for ( int element : input)
+			{
+				int index = (int) (element / interval);
+				if ( index > binCount)
+					throw new Exception(String.format("Value %f is larger than max value %f", element, max));
+				else if ( index == binCount)
+					index = binCount - 1;
+				result.set(index, result.get(index) + 1);
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return result;
+	}
 	
 	public static double distance(double x, double y, MyRectangle rectangle)
 	{
