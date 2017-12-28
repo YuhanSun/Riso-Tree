@@ -106,7 +106,7 @@ public class App {
 		GraphDatabaseService databaseService = new GraphDatabaseFactory()
 				.newEmbeddedDatabase(new File(db_path));
 		Transaction tx = databaseService.beginTx();
-		Set<Node> nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(databaseService, dataset);
+		Set<Node> nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(databaseService, dataset);
 		ArrayList<Integer> statistic = new ArrayList<Integer>(); 
 		for ( Node node : nodes)
 		{
@@ -134,14 +134,6 @@ public class App {
 	
 	public static void test()
 	{
-		double x = 2.5;
-		if (x>1)
-			if (x < 2)
-				OwnMethods.Print("branch 1");
-		else if (x > 3)
-			OwnMethods.Print("branch 2");
-		else 
-			OwnMethods.Print("branch 3");
 //		GraphDatabaseService databaseService = new GraphDatabaseFactory()
 //				.newEmbeddedDatabase(new File(db_path));
 //		Transaction tx = databaseService.beginTx();
@@ -285,7 +277,7 @@ public class App {
 	        long timeGeoPipe = 0, timeMyMethod = 0, countGeoPipe = 0, countMyMethod = 0;
 	        
 	        Transaction tx = databaseService.beginTx();
-	        Node root = OSM_Utility.getRTreeRoot(databaseService, layerName);
+	        Node root = RTreeUtility.getRTreeRoot(databaseService, layerName);
 	        for ( MyRectangle queryRectangle : queryRectangles)
 	        {
 	        	Envelope envelope = new Envelope(queryRectangle.min_x, queryRectangle.max_x, queryRectangle.min_y, queryRectangle.max_y);
@@ -371,7 +363,7 @@ public class App {
 	        
 	        start = System.currentTimeMillis();
 	        tx = databaseService.beginTx();
-	        Node root = OSM_Utility.getRTreeRoot(databaseService, layerName);
+	        Node root = RTreeUtility.getRTreeRoot(databaseService, layerName);
 	        for ( MyRectangle queryRectangle : queryRectangles)
 	        {
 	        	LinkedList<Node> results = SpatialFirst.rangeQuery(root, queryRectangle);

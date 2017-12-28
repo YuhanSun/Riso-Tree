@@ -25,6 +25,7 @@ import commons.Labels.RTreeRel;
 import commons.Config.system;
 import osm.OSM_Utility;
 import commons.OwnMethods;
+import commons.RTreeUtility;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
 
@@ -260,7 +261,7 @@ public class IndexSize {
 					.newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
 //			long start = System.currentTimeMillis();
-			Node rootNode = OSM_Utility.getRTreeRoot(databaseService, dataset);
+			Node rootNode = RTreeUtility.getRTreeRoot(databaseService, dataset);
 //			OwnMethods.Print("start time :"+ (System.currentTimeMillis() - start));
 //			start = System.currentTimeMillis();
 			TraversalDescription td = databaseService.traversalDescription()
@@ -301,7 +302,7 @@ public class IndexSize {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
 			
-			Set<Node> nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(databaseService, dataset);
+			Set<Node> nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(databaseService, dataset);
 			for ( Node node: nodes)
 			{
 				visitedNodeCount++;
@@ -369,7 +370,7 @@ public class IndexSize {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
 			
-			Set<Node> nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(databaseService, dataset);
+			Set<Node> nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(databaseService, dataset);
 			for ( Node node: nodes)
 			{
 				visitedNodeCount++;

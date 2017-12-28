@@ -26,6 +26,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.Config;
 import commons.Labels;
 import commons.OwnMethods;
+import commons.RTreeUtility;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.OSMLabel;
@@ -328,7 +329,7 @@ public class Graph_Switch {
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
-			Iterable<Node> leafNodes = OSM_Utility.getAllGeometries(dbservice, dataset);
+			Iterable<Node> leafNodes = RTreeUtility.getAllGeometries(dbservice, dataset);
 			for ( Node leafNode : leafNodes)
 			{
 				Node osmNode = leafNode.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING)
@@ -406,7 +407,7 @@ public class Graph_Switch {
 			tx.close();
 			
 			tx = dbservice.beginTx();
-			Iterable<Node> leafNodes = OSM_Utility.getAllGeometries(dbservice, dataset);
+			Iterable<Node> leafNodes = RTreeUtility.getAllGeometries(dbservice, dataset);
 			for ( Node leafNode : leafNodes)
 			{
 				OwnMethods.Print(index);	index++;
@@ -431,7 +432,7 @@ public class Graph_Switch {
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
-			Iterable<Node> leafNodes = OSM_Utility.getAllGeometries(dbservice, dataset);
+			Iterable<Node> leafNodes = RTreeUtility.getAllGeometries(dbservice, dataset);
 			int index = 0;
 			for ( Node leafNode : leafNodes)
 			{

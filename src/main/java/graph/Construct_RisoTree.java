@@ -31,6 +31,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.Config;
 import commons.Labels;
 import commons.OwnMethods;
+import commons.RTreeUtility;
 import commons.Config.system;
 import commons.Labels.RTreeRel;
 import osm.OSM_Utility;
@@ -529,7 +530,7 @@ public class Construct_RisoTree {
 			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			HashMap<Long, TreeSet<Integer>> containIDMap = new HashMap<Long, TreeSet<Integer>>();
 			Transaction tx = dbservice.beginTx();
-			Set<Node> nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset);
+			Set<Node> nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset);
 			for (Node node : nodes)
 			{
 				long parentID = node.getId();
@@ -573,7 +574,7 @@ public class Construct_RisoTree {
 		try {
 			Transaction tx = dbservice.beginTx();
 			
-			Set<Node> nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset);
+			Set<Node> nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset);
 			Queue<Long> queue = new LinkedList<Long>(); 
 			for ( Node node : nodes) 
 				queue.add(node.getId());
@@ -664,7 +665,7 @@ public class Construct_RisoTree {
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
-			Node root = OSM_Utility.getRTreeRoot(dbservice, dataset);
+			Node root = RTreeUtility.getRTreeRoot(dbservice, dataset);
 			long rootID = root.getId();
 			tx.success();
 			tx.close();
@@ -745,7 +746,7 @@ public class Construct_RisoTree {
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
-			Node root = OSM_Utility.getRTreeRoot(dbservice, dataset);
+			Node root = RTreeUtility.getRTreeRoot(dbservice, dataset);
 			Queue<Node> cur = new LinkedList<Node>();
 			Queue<Node> next = new LinkedList<Node>(); 
 			cur.add(root);
@@ -792,7 +793,7 @@ public class Construct_RisoTree {
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
-			Node root = OSM_Utility.getRTreeRoot(dbservice, dataset);
+			Node root = RTreeUtility.getRTreeRoot(dbservice, dataset);
 			Queue<Node> cur = new LinkedList<Node>();
 			cur.add(root);
 			
@@ -840,7 +841,7 @@ public class Construct_RisoTree {
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
-			Set<Node> cur_level_nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset);
+			Set<Node> cur_level_nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset);
 			
 			HashSet<Node> up_level_nodes = new HashSet<Node>(); 
 			
@@ -1010,7 +1011,7 @@ public class Construct_RisoTree {
 			Transaction tx = dbservice.beginTx();
 			
 			//get all the deepest non-leaf nodes
-			Set<Node> cur_level_nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset); 
+			Set<Node> cur_level_nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset); 
 			for ( Node node : cur_level_nodes)
 			{
 				TreeSet<Integer> NL = new TreeSet<Integer>();
@@ -1138,7 +1139,7 @@ public class Construct_RisoTree {
 			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = dbservice.beginTx();
 			
-			Set<Node> cur_level_nodes = OSM_Utility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset); 
+			Set<Node> cur_level_nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(dbservice, dataset); 
 			for ( Node node : cur_level_nodes)
 			{
 				HashMap<Integer, TreeSet<Integer>> NL = new HashMap<Integer, TreeSet<Integer>>();
@@ -1251,7 +1252,7 @@ public class Construct_RisoTree {
 			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = dbservice.beginTx();
 			
-			Node rtree_root_node = OSM_Utility.getRTreeRoot(dbservice, dataset);
+			Node rtree_root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
 			
 			Queue<Node> queue = new LinkedList<Node>();
 			queue.add(rtree_root_node);
@@ -1286,7 +1287,7 @@ public class Construct_RisoTree {
 			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = dbservice.beginTx();
 			
-			Node rtree_root_node = OSM_Utility.getRTreeRoot(dbservice, dataset);
+			Node rtree_root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
 			
 			Queue<Node> queue = new LinkedList<Node>();
 			queue.add(rtree_root_node);

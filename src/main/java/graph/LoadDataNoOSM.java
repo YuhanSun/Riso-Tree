@@ -35,6 +35,7 @@ import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.RTreeRel;
 import commons.OwnMethods;
+import commons.RTreeUtility;
 import osm.OSM_Utility;
 
 /**
@@ -157,7 +158,7 @@ public class LoadDataNoOSM {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
 			Transaction tx = databaseService.beginTx();
 			
-			Iterable<Node> geometry_nodes = OSM_Utility.getAllGeometries(databaseService, dataset);
+			Iterable<Node> geometry_nodes = RTreeUtility.getAllGeometries(databaseService, dataset);
 			Set<Node> set = new HashSet<Node>();
 			for ( Node node : geometry_nodes)
 			{

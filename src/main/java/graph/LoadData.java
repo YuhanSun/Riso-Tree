@@ -97,7 +97,7 @@ public class LoadData {
 		try {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
-			Iterable<Node> geometry_nodes = OSM_Utility.getAllGeometries(databaseService, dataset);
+			Iterable<Node> geometry_nodes = RTreeUtility.getAllGeometries(databaseService, dataset);
 			Map<Object, Object> map = new TreeMap<Object, Object>();
 			for ( Node node : geometry_nodes)
 			{
@@ -124,7 +124,7 @@ public class LoadData {
 		try {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
-			Node rtree_root_node = OSM_Utility.getRTreeRoot(databaseService, dataset);
+			Node rtree_root_node = RTreeUtility.getRTreeRoot(databaseService, dataset);
 			TraversalDescription td = databaseService.traversalDescription()
 					.depthFirst()
 					.relationships( RTreeRel.RTREE_CHILD, Direction.OUTGOING )
@@ -160,7 +160,7 @@ public class LoadData {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
 			
-			Iterable<Node> geometry_nodes = OSM_Utility.getAllGeometries(databaseService, dataset);
+			Iterable<Node> geometry_nodes = RTreeUtility.getAllGeometries(databaseService, dataset);
 			Set<Node> set = new HashSet<Node>();
 			for ( Node node : geometry_nodes)
 			{
@@ -234,7 +234,7 @@ public class LoadData {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
 //			Node rtree_root_node = databaseService.getNodeById(3849874);
-			Node rtree_root_node = OSM_Utility.getRTreeRoot(databaseService, dataset);
+			Node rtree_root_node = RTreeUtility.getRTreeRoot(databaseService, dataset);
 			Queue<Node> queue = new LinkedList<Node>();
 			queue.add(rtree_root_node);
 			int cur_id = 0;
@@ -306,7 +306,7 @@ public class LoadData {
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
-			Iterable<Node> Geometries = OSM_Utility.getAllGeometries(dbservice, dataset);
+			Iterable<Node> Geometries = RTreeUtility.getAllGeometries(dbservice, dataset);
 			for ( Node node : Geometries)
 			{
 //				OwnMethods.Print(node.getAllProperties().toString());

@@ -32,6 +32,7 @@ import commons.Config;
 import commons.Entity;
 import commons.Labels.OSMRelation;
 import commons.Query_Graph;
+import commons.RTreeUtility;
 import commons.Utility;
 import commons.Config.system;
 import commons.Labels.GraphLabel;
@@ -247,7 +248,7 @@ public class Prepare {
 			GraphDatabaseService dbService= new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = dbService.beginTx();
 			
-			Node root = OSM_Utility.getRTreeRoot(dbService, dataset);
+			Node root = RTreeUtility.getRTreeRoot(dbService, dataset);
 			OwnMethods.Print(root.getAllProperties());
 			Node layer_node = root.getSingleRelationship(RTreeRelationshipTypes.RTREE_ROOT, Direction.INCOMING)
 					.getStartNode();
@@ -279,7 +280,7 @@ public class Prepare {
 			GraphDatabaseService dbService= new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = dbService.beginTx();
 			
-			Node root = OSM_Utility.getRTreeRoot(dbService, oldDataset);
+			Node root = RTreeUtility.getRTreeRoot(dbService, oldDataset);
 			OwnMethods.Print(root.getAllProperties());
 			Node layer_node = root.getSingleRelationship(RTreeRelationshipTypes.RTREE_ROOT, Direction.INCOMING)
 					.getStartNode();
@@ -305,7 +306,7 @@ public class Prepare {
 			GraphDatabaseService dbService= new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = dbService.beginTx();
 			
-			Node root = OSM_Utility.getRTreeRoot(dbService, oldDataset);
+			Node root = RTreeUtility.getRTreeRoot(dbService, oldDataset);
 			OwnMethods.Print(root.getAllProperties());
 			Node layer_node = root.getSingleRelationship(RTreeRelationshipTypes.RTREE_ROOT, Direction.INCOMING)
 					.getStartNode();

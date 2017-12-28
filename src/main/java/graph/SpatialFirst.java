@@ -23,6 +23,7 @@ import commons.Labels;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
+import commons.RTreeUtility;
 import commons.Utility;
 import commons.Config.system;
 
@@ -224,7 +225,7 @@ public class SpatialFirst {
 			spa_predicates.remove(min_pos, min_queryRectangle);
 
 			long start_1 = System.currentTimeMillis();
-			Node rootNode = OSM_Utility.getRTreeRoot(dbservice, dataset);
+			Node rootNode = RTreeUtility.getRTreeRoot(dbservice, dataset);
 			LinkedList<Node> rangeQueryResult = this.rangeQuery(rootNode, min_queryRectangle);
 			range_query_time = System.currentTimeMillis() - start_1;
 
@@ -279,7 +280,7 @@ public class SpatialFirst {
 		try	{
 			SpatialFirst spatialFirst = new SpatialFirst(db_path_test, dataset_test);
 			Transaction tx = spatialFirst.dbservice.beginTx();
-			Node rootNode = OSM_Utility.getRTreeRoot(spatialFirst.dbservice, dataset_test);
+			Node rootNode = RTreeUtility.getRTreeRoot(spatialFirst.dbservice, dataset_test);
 			LinkedList<Node> result = spatialFirst.rangeQuery(rootNode, queryRectangle);
 			OwnMethods.Print(String.format("Result size: %d", result.size()));
 			for ( Node node : result)

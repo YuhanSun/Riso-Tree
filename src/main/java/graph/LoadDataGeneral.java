@@ -23,6 +23,7 @@ import commons.Config;
 import commons.Entity;
 import commons.Labels;
 import commons.OwnMethods;
+import commons.RTreeUtility;
 import commons.Config.system;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
@@ -90,7 +91,7 @@ public class LoadDataGeneral {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
 			
-			Iterable<Node> geometry_nodes = OSM_Utility.getAllGeometries(databaseService, dataset);
+			Iterable<Node> geometry_nodes = RTreeUtility.getAllGeometries(databaseService, dataset);
 			Set<Node> set = new HashSet<Node>();
 			for ( Node node : geometry_nodes)
 			{
@@ -236,7 +237,7 @@ public class LoadDataGeneral {
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
-			Iterable<Node> Geometries = OSM_Utility.getAllGeometries(dbservice, dataset);
+			Iterable<Node> Geometries = RTreeUtility.getAllGeometries(dbservice, dataset);
 			for ( Node node : Geometries)
 			{
 //				OwnMethods.Print(node.getAllProperties().toString());

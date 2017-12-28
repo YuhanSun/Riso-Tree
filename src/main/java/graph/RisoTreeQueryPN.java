@@ -29,6 +29,7 @@ import commons.MyPoint;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
+import commons.RTreeUtility;
 import commons.Utility;
 import commons.Config.Explain_Or_Profile;
 import knn.Element;
@@ -877,7 +878,7 @@ public class RisoTreeQueryPN {
 
 			Transaction tx = dbservice.beginTx();
 			LinkedList<Node> cur_list = new LinkedList<Node>();
-			Node root_node =  OSM_Utility.getRTreeRoot(dbservice, dataset);
+			Node root_node =  RTreeUtility.getRTreeRoot(dbservice, dataset);
 			cur_list.add(root_node);
 			LinkedList<Node> next_list = new LinkedList<Node>(); 
 
@@ -1669,7 +1670,7 @@ public class RisoTreeQueryPN {
 			}
 				
 			Transaction tx = dbservice.beginTx();
-			Node root_node =  OSM_Utility.getRTreeRoot(dbservice, dataset);
+			Node root_node =  RTreeUtility.getRTreeRoot(dbservice, dataset);
 //			if ( checkPaths(root_node, paths) == false)
 //			{
 //				tx.success();
@@ -1822,7 +1823,7 @@ public class RisoTreeQueryPN {
 
 			Transaction tx = dbservice.beginTx();
 			LinkedList<Node> cur_list = new LinkedList<Node>();
-			Node root_node =  OSM_Utility.getRTreeRoot(dbservice, dataset);
+			Node root_node =  RTreeUtility.getRTreeRoot(dbservice, dataset);
 			cur_list.add(root_node);
 			LinkedList<Node> next_list = new LinkedList<Node>(); 
 
