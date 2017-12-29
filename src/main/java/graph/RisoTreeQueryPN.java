@@ -1653,6 +1653,8 @@ public class RisoTreeQueryPN {
 		visit_spatial_object_count = 0;
 		queue_time = 0;
 		check_paths_time = 0;
+		get_iterator_time = 0;
+		iterate_time = 0;
 		page_hit_count = 0;
 		try {
 			ArrayList<Long> resultIDs = new ArrayList<Long>(); 
@@ -1752,21 +1754,22 @@ public class RisoTreeQueryPN {
 					start = System.currentTimeMillis();
 					if ( result.hasNext())
 					{
-						result.next();
+//						result.next();
 						resultIDs.add(id);
 						OwnMethods.Print(String.format("%d, %f", id, element.distance));
 					}
 					iterate_time += System.currentTimeMillis() - start;
 					start = System.currentTimeMillis();
 					
-					ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-					page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+//					ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+//					page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+//					OwnMethods.Print(planDescription);
 				}
 				else
 					throw new Exception(String.format("Node %d does not affiliate to any type!", node.getId()));
 			}
 			
-			queue_time += System.currentTimeMillis();
+			queue_time += System.currentTimeMillis() - start;
 			return resultIDs;
 			
 		}

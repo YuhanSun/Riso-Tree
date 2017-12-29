@@ -659,6 +659,7 @@ public class SpatialFirst_List {
 		queue_time = 0;
 		get_iterator_time = 0;
 		iterate_time = 0;
+		page_hit_count = 0;
 		try {
 			ArrayList<Long> resultIDs = new ArrayList<Long>(); 
 			MyPoint queryLoc = null;
@@ -751,7 +752,7 @@ public class SpatialFirst_List {
 					throw new Exception(String.format("Node %d does not affiliate to any type!", node.getId()));
 			}
 			
-			queue_time += System.currentTimeMillis();
+			queue_time += System.currentTimeMillis() - start;
 			return resultIDs;
 			
 		}
