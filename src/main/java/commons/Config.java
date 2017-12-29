@@ -35,10 +35,10 @@ public class Config
 	
 	//attention here, these settings change a lot
 	private String neo4j_version = "neo4j-community-3.1.1";
-	private system operatingSystem = system.Windows;
-	private String dataset = Datasets.Gowalla_25.name();
+	private system operatingSystem = system.Ubuntu;
+	private String dataset = Datasets.Gowalla_100.name();
 	
-	private int MAX_HOPNUM = 0;
+	private int MAX_HOPNUM = 2;
 	private int MAX_HMBR_HOPNUM = 3;
 	private int nonspatial_label_count = 25;
 
