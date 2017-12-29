@@ -14,6 +14,7 @@ import commons.Query_Graph;
 import commons.Utility;
 import commons.Config.system;
 import graph.RisoTreeQueryPN;
+import graph.SpatialFirst_List;
 
 public class QueryNodeCount {
 
@@ -38,7 +39,7 @@ public class QueryNodeCount {
 		
 	public boolean TEST_FORMAT;
 	public int experimentCount = 10;
-	public int K = 10;
+	public int K = 5;
 	
 	public QueryNodeCount()
 	{
@@ -97,11 +98,17 @@ public class QueryNodeCount {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ArrayList<Integer> nodeCountList = new ArrayList<Integer>();
+		nodeCountList.add(3);
 		nodeCountList.add(5);
+		nodeCountList.add(7);
+		nodeCountList.add(9);
+		nodeCountList.add(11);
+		nodeCountList.add(13);
 		
 		QueryNodeCount queryNodeCount = new QueryNodeCount();
 		
 		queryNodeCount.RisoTreePN(nodeCountList, 0);
+		queryNodeCount.SpatialFirst(nodeCountList, 0);
 	}
 	
 	public void RisoTreePN(ArrayList<Integer> nodeCountList, int query_id)
@@ -118,8 +125,8 @@ public class QueryNodeCount {
 				result_avg_path = String.format("%s/risotree_PN%d_%d_avg.txt", resultDir, MAX_HOPNUM, query_id);
 				break;
 			case Windows:
-				result_detail_path = String.format("%s\\risotree_PN_%d.txt", resultDir, query_id);
-				result_avg_path = String.format("%s\\risotree_PN_%d_avg.txt.txt", resultDir, query_id);
+				result_detail_path = String.format("%s\\risotree_PN%d_%d.txt", resultDir, query_id);
+				result_avg_path = String.format("%s\\risotree_PN%d_%d_avg.txt", resultDir, query_id);
 				break;
 			}
 
@@ -130,7 +137,7 @@ public class QueryNodeCount {
 				OwnMethods.WriteFile(result_avg_path, true, write_line);
 			}
 
-			String head_line = "visited_count\tqueue_time\tget_iterator_time\titerate_time\t"
+			String head_line = "visited_count\tqueue_time\tcheckPaths_time\tget_iterator_time\titerate_time\t"
 					+ "total_time\taccess_pages\n";
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, "nodeCount\t" + head_line);
@@ -149,6 +156,7 @@ public class QueryNodeCount {
 						graph_pos_map_list, MAX_HOPNUM);
 
 				ArrayList<Long> time_queue = new ArrayList<Long>();
+				ArrayList<Long> time_checkPaths = new ArrayList<Long>(); 
 				ArrayList<Long> time_get_iterator = new ArrayList<Long>();
 				ArrayList<Long> time_iterate = new ArrayList<Long>();
 				ArrayList<Long> total_time = new ArrayList<Long>();
@@ -189,9 +197,10 @@ public class QueryNodeCount {
 						page_hit.add(risoTreeQueryPN.page_hit_count);
 						OwnMethods.Print("Page access:" + risoTreeQueryPN.page_hit_count);
 						time_queue.add(risoTreeQueryPN.queue_time);
+						time_checkPaths.add(risoTreeQueryPN.check_paths_time);
 
 						write_line = String.format("%d\t%d\t", visited_spatial_count.get(i), time_queue.get(i));
-						write_line += String.format("%d\t", time_get_iterator.get(i));
+						write_line += String.format("%d\t%d\t", time_checkPaths.get(i), time_get_iterator.get(i));
 						write_line += String.format("%d\t%d\t", time_iterate.get(i), total_time.get(i));
 						write_line += String.format("%d\n", page_hit.get(i));
 						if(!TEST_FORMAT)
@@ -208,6 +217,128 @@ public class QueryNodeCount {
 
 				}
 				risoTreeQueryPN.dbservice.shutdown();
+
+				write_line = String.valueOf(nodeCount) + "\t";
+				write_line += String.format("%d\t%d\t", Utility.Average(visited_spatial_count), Utility.Average(time_queue));
+				write_line += String.format("%d\t%d\t", Utility.Average(time_checkPaths), Utility.Average(time_get_iterator));
+				write_line += String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
+				write_line += String.format("%d\n", Utility.Average(page_hit));
+				if(!TEST_FORMAT)
+					OwnMethods.WriteFile(result_avg_path, true, write_line);
+
+			}
+			OwnMethods.WriteFile(result_detail_path, true, "\n");
+			OwnMethods.WriteFile(result_avg_path, true, "\n");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	public void SpatialFirst(ArrayList<Integer> nodeCountList, int query_id)
+	{
+		try {
+			long start;
+			long time;
+			int limit = -1;
+
+			String result_detail_path = null, result_avg_path = null;
+			switch (systemName) {
+			case Ubuntu:
+				result_detail_path = String.format("%s/spatialFirst_%d.txt", resultDir, query_id);
+				result_avg_path = String.format("%s/spatialFirst_%d_avg.txt", resultDir, query_id);
+				break;
+			case Windows:
+				result_detail_path = String.format("%s\\spatialFirst_%d.txt", resultDir, query_id);
+				result_avg_path = String.format("%s\\spatialFirst_%d_avg.txt", resultDir, query_id);
+				break;
+			}
+
+			String write_line = String.format("%s\t%d\n", dataset, limit);
+			if(!TEST_FORMAT)
+			{
+				OwnMethods.WriteFile(result_detail_path, true, write_line);
+				OwnMethods.WriteFile(result_avg_path, true, write_line);
+			}
+
+			String head_line = "visited_count\tqueue_time\tget_iterator_time\titerate_time\t"
+					+ "total_time\taccess_pages\n";
+			if(!TEST_FORMAT)
+				OwnMethods.WriteFile(result_avg_path, true, "nodeCount\t" + head_line);
+
+			for ( int nodeCount : nodeCountList)
+			{
+				String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
+				ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+				Query_Graph query_Graph = queryGraphs.get(query_id);
+
+				write_line = nodeCount + "\n" + head_line;
+				if(!TEST_FORMAT)
+					OwnMethods.WriteFile(result_detail_path, true, write_line);
+
+				SpatialFirst_List spatialFirst = new SpatialFirst_List(db_path, dataset, 
+						graph_pos_map_list);
+
+				ArrayList<Long> time_queue = new ArrayList<Long>();
+				ArrayList<Long> time_get_iterator = new ArrayList<Long>();
+				ArrayList<Long> time_iterate = new ArrayList<Long>();
+				ArrayList<Long> total_time = new ArrayList<Long>();
+				ArrayList<Long> visited_spatial_count = new ArrayList<Long>();
+				ArrayList<Long> page_hit = new ArrayList<Long>();
+
+				for ( int i = 0; i < experimentCount; i++)
+				{
+					MyRectangle rectangle = queryrect.get(i);
+					if ( rectangle.area() == 0.0)
+					{
+						double delta = Math.pow(0.1, 10);
+						rectangle = new MyRectangle(rectangle.min_x - delta, rectangle.min_y - delta,
+								rectangle.max_x + delta, rectangle.max_y + delta);
+					}
+
+					query_Graph.spa_predicate = new MyRectangle[query_Graph.graph.size()];
+
+					//only handle query with one spatial predicate
+					int j = 0;
+					for (  ; j < query_Graph.graph.size(); j++)
+						if(query_Graph.Has_Spa_Predicate[j])
+							break;
+					query_Graph.spa_predicate[j] = rectangle;
+
+					if(!TEST_FORMAT)
+					{
+						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+
+						start = System.currentTimeMillis();
+						spatialFirst.LAGAQ_KNN(query_Graph, K);
+						time = System.currentTimeMillis() - start;
+
+						time_get_iterator.add(spatialFirst.get_iterator_time);
+						time_iterate.add(spatialFirst.iterate_time);
+						total_time.add(time);
+						visited_spatial_count.add((long) spatialFirst.visit_spatial_object_count);
+						page_hit.add(spatialFirst.page_hit_count);
+						OwnMethods.Print("Page access:" + spatialFirst.page_hit_count);
+						time_queue.add(spatialFirst.queue_time);
+
+						write_line = String.format("%d\t%d\t", visited_spatial_count.get(i), time_queue.get(i));
+						write_line += String.format("%d\t", time_get_iterator.get(i));
+						write_line += String.format("%d\t%d\t", time_iterate.get(i), total_time.get(i));
+						write_line += String.format("%d\n", page_hit.get(i));
+						if(!TEST_FORMAT)
+							OwnMethods.WriteFile(result_detail_path, true, write_line);
+					}
+
+					spatialFirst.dbservice.shutdown();
+
+					OwnMethods.ClearCache(password);
+					Thread.currentThread();
+					Thread.sleep(5000);
+
+					spatialFirst.dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+
+				}
+				spatialFirst.dbservice.shutdown();
 
 				write_line = String.valueOf(nodeCount) + "\t";
 				write_line += String.format("%d\t%d\t", Utility.Average(visited_spatial_count), Utility.Average(time_queue));
