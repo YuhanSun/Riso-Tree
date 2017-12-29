@@ -67,6 +67,8 @@ public class RisoTreeQueryPN {
 	public long page_hit_count;
 	public String logPath;
 	
+	public long queue_time;
+	public long check_paths_time;
 	public int visit_spatial_object_count;
 	
 	//test control variables
@@ -1649,6 +1651,9 @@ public class RisoTreeQueryPN {
 	public ArrayList<Long> LAGAQ_KNN(Query_Graph query_Graph, int K)
 	{
 		visit_spatial_object_count = 0;
+		queue_time = 0;
+		check_paths_time = 0;
+		page_hit_count = 0;
 		try {
 			ArrayList<Long> resultIDs = new ArrayList<Long>(); 
 			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
@@ -1668,7 +1673,8 @@ public class RisoTreeQueryPN {
 						paths.add(path);
 				break;
 			}
-				
+			
+			long start = System.currentTimeMillis();
 			Transaction tx = dbservice.beginTx();
 			Node root_node =  RTreeUtility.getRTreeRoot(dbservice, dataset);
 //			if ( checkPaths(root_node, paths) == false)
@@ -1693,12 +1699,15 @@ public class RisoTreeQueryPN {
 					for ( Relationship relationship : rels)
 					{
 						Node child = relationship.getEndNode();
+						long start1 = System.currentTimeMillis();
 						if (child.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING))
 						{
 							if (checkPaths(child, paths) == false)
 							{
+								check_paths_time += System.currentTimeMillis() - start1;
 								continue;
 							}
+							check_paths_time += System.currentTimeMillis() - start1;
 						}
 						double[] bbox = (double[]) child.getProperty("bbox");
 						MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
@@ -1731,22 +1740,33 @@ public class RisoTreeQueryPN {
 				{
 					visit_spatial_object_count++;
 					long id = node.getId();
-					OwnMethods.Print(id);
-					String query = formQuery_KNN(query_Graph, -1, Explain_Or_Profile.Profile, 
+//					OwnMethods.Print(id);
+					queue_time += System.currentTimeMillis() - start;
+					
+					start = System.currentTimeMillis();
+					String query = formQuery_KNN(query_Graph, 1, Explain_Or_Profile.Profile, 
 							querySpatialVertexID, id);
 					Result result = dbservice.execute(query);
+					get_iterator_time += System.currentTimeMillis() - start;
+
+					start = System.currentTimeMillis();
 					if ( result.hasNext())
 					{
+						result.next();
 						resultIDs.add(id);
 						OwnMethods.Print(String.format("%d, %f", id, element.distance));
 					}
-//					resultIDs.add(id);
+					iterate_time += System.currentTimeMillis() - start;
+					start = System.currentTimeMillis();
 					
+					ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+					page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
 				}
 				else
 					throw new Exception(String.format("Node %d does not affiliate to any type!", node.getId()));
 			}
 			
+			queue_time += System.currentTimeMillis();
 			return resultIDs;
 			
 		}
@@ -1755,11 +1775,6 @@ public class RisoTreeQueryPN {
 		}
 		return null;
 	}
-	
-//	public ArrayList<Long> KNN(Query_Graph, int K)
-//	{
-//		
-//	}
 	
 	/**
 	 * Does not consider condition that area of query rectangle is 0.
