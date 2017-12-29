@@ -42,11 +42,8 @@ public class SpatialFirst_ListTest {
 	//query input
 	static Query_Graph query_Graph;
 	static long[] graph_pos_map_list;
-	static int nodeCount = 5, query_id = 0;
-//	static int name_suffix = 7;
-//	static int name_suffix = 75;
-//	static int name_suffix = 7549;//0.1
 	
+	static int nodeCount = 5, query_id = 1;
 	
 	static int name_suffix = 1280;//Gowalla 0.001
 	static String queryrect_path = null, querygraph_path = null;
@@ -88,7 +85,7 @@ public class SpatialFirst_ListTest {
 		query_Graph = queryGraphs.get(query_id);
 		
 		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
-		MyRectangle rectangle = queryrect.get(0);
+		MyRectangle rectangle = queryrect.get(1);
 		int j = 0;
 		for (  ; j < query_Graph.graph.size(); j++)
 			if(query_Graph.Has_Spa_Predicate[j])
@@ -206,6 +203,7 @@ public class SpatialFirst_ListTest {
 			ArrayList<Long> resultIDs = spatialFirst_List.LAGAQ_KNN(query_Graph, K);
 			OwnMethods.Print(resultIDs);
 			OwnMethods.Print(spatialFirst_List.visit_spatial_object_count);
+			OwnMethods.Print(spatialFirst_List.page_hit_count);
 		}
 		catch (Exception e)
 		{

@@ -62,6 +62,7 @@ public class SpatialFirst_List {
 	public long result_count;
 	public long page_hit_count;
 	
+	public long queue_time;
 	public int visit_spatial_object_count;
 
 	/**
@@ -655,6 +656,9 @@ public class SpatialFirst_List {
 	public ArrayList<Long> LAGAQ_KNN(Query_Graph query_Graph, int K)
 	{
 		visit_spatial_object_count = 0;
+		queue_time = 0;
+		get_iterator_time = 0;
+		iterate_time = 0;
 		try {
 			ArrayList<Long> resultIDs = new ArrayList<Long>(); 
 			MyPoint queryLoc = null;
@@ -670,7 +674,8 @@ public class SpatialFirst_List {
 					break;
 				}
 			}
-				
+			
+			long start = System.currentTimeMillis();
 			Transaction tx = dbservice.beginTx();
 			Node root_node =  RTreeUtility.getRTreeRoot(dbservice, dataset);
 			
@@ -719,22 +724,34 @@ public class SpatialFirst_List {
 				{
 					visit_spatial_object_count++;
 					long id = node.getId();
-					OwnMethods.Print(id);
-					String query = RisoTreeQueryPN.formQuery_KNN(query_Graph, -1, Explain_Or_Profile.Profile, 
+//					OwnMethods.Print(id);
+					
+					queue_time += System.currentTimeMillis() - start;
+					
+					start = System.currentTimeMillis();
+					String query = RisoTreeQueryPN.formQuery_KNN(query_Graph, 1, Explain_Or_Profile.Profile, 
 							querySpatialVertexID, id);
 					Result result = dbservice.execute(query);
+					get_iterator_time += System.currentTimeMillis() - start;
+					
+					start = System.currentTimeMillis();
 					if ( result.hasNext())
 					{
+						result.next();
 						resultIDs.add(id);
-						OwnMethods.Print(String.format("%d, %f", id, element.distance));
+//						OwnMethods.Print(String.format("%d, %f", id, element.distance));
 					}
-//					resultIDs.add(id);
+					iterate_time += System.currentTimeMillis() - start;
+					start = System.currentTimeMillis();
 					
+					ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+					page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
 				}
 				else
 					throw new Exception(String.format("Node %d does not affiliate to any type!", node.getId()));
 			}
 			
+			queue_time += System.currentTimeMillis();
 			return resultIDs;
 			
 		}
