@@ -12,6 +12,7 @@ import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Utility;
+import commons.Config.Datasets;
 import commons.Config.system;
 import graph.RisoTreeQueryPN;
 import graph.SpatialFirst_List;
@@ -62,7 +63,7 @@ public class QueryNodeCount {
 			entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
 			querygraphDir = String.format("/mnt/hgfs/Google_Drive/Projects/risotree/query/query_graph/%s", dataset);
 			spaPredicateDir = String.format("/mnt/hgfs/Google_Drive/Projects/risotree/query/spa_predicate/%s", dataset);
-			queryrectCenterPath = String.format("%s/%s_centerids.txt", spaPredicateDir, dataset.split("_")[0]);
+			queryrectCenterPath = String.format("%s/%s_centerids.txt", spaPredicateDir, dataset);
 			resultDir = String.format("/mnt/hgfs/Google_Drive/Experiment_Result/Riso-Tree/KNN/%s", dataset);
 			//			resultDir = String.format("/mnt/hgfs/Google_Drive/Experiment_Result/Riso-Tree/%s/switch_point", dataset);
 			break;
@@ -98,17 +99,26 @@ public class QueryNodeCount {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ArrayList<Integer> nodeCountList = new ArrayList<Integer>();
-		nodeCountList.add(3);
-		nodeCountList.add(5);
-		nodeCountList.add(7);
+//		nodeCountList.add(3);
+//		nodeCountList.add(5);
+//		nodeCountList.add(7);
 		nodeCountList.add(9);
 		nodeCountList.add(11);
-		nodeCountList.add(13);
+		
+		ArrayList<String> datasets = new ArrayList<String>();
+		datasets.add(Datasets.foursquare_100.name());
+//		datasets.add(Datasets.Patents_100_random_80.name());
+//		datasets.add(Datasets.go_uniprot_100_random_80.name());
 		
 		QueryNodeCount queryNodeCount = new QueryNodeCount();
+		for (String dataset : datasets)
+		{
+			queryNodeCount.config.setDatasetName(dataset);
+			queryNodeCount.initializeParameters();
+			queryNodeCount.RisoTreePN(nodeCountList, 0);
+			queryNodeCount.SpatialFirst(nodeCountList, 0);
+		}
 		
-		queryNodeCount.RisoTreePN(nodeCountList, 0);
-		queryNodeCount.SpatialFirst(nodeCountList, 0);
 	}
 	
 	public void RisoTreePN(ArrayList<Integer> nodeCountList, int query_id)

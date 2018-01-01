@@ -36,11 +36,11 @@ public class Config
 	//attention here, these settings change a lot
 	private String neo4j_version = "neo4j-community-3.1.1";
 	private system operatingSystem = system.Ubuntu;
-	private String dataset = Datasets.Gowalla_100.name();
+	private String dataset = Datasets.go_uniprot_100_random_80.name();
 	
 	private int MAX_HOPNUM = 2;
 	private int MAX_HMBR_HOPNUM = 3;
-	private int nonspatial_label_count = 25;
+	private int nonspatial_label_count = 100;
 
 	private String Rect_minx_name = "minx";
 	private String Rect_miny_name = "miny";
