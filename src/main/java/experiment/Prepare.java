@@ -145,7 +145,7 @@ public class Prepare {
 //		setNewLabel();
 //		newLabelTest();
 		
-//		generateRandomQueryGraph();
+		generateRandomQueryGraph();
 //		generateQueryRectangleCenterID();
 //		generateQueryRectangleForSelectivity();
 		
@@ -411,7 +411,8 @@ public class Prepare {
 	 */
 	public static void generateRandomQueryGraph()
 	{
-		for ( int node_count = 35; node_count <= 35; node_count+=5)
+//		for ( int node_count = 35; node_count <= 35; node_count+=5)
+		for ( int node_count = 7; node_count <= 13; node_count+=2)
 //		int node_count = 10;
 		{
 			int spa_pred_count = 1;
