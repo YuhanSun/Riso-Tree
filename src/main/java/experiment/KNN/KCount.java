@@ -36,9 +36,11 @@ public class KCount {
 	public String queryrectCenterPath = null;
 	public ArrayList<Entity> entities = null;
 	public ArrayList<MyRectangle> queryrect = null;
+	public ArrayList<Query_Graph> queryGraphs = null;
 	public long[] graph_pos_map_list;
 		
 	public boolean TEST_FORMAT;
+	public int nodeCount = 5;
 	public int experimentCount = 10;
 	
 	public KCount()
@@ -76,6 +78,10 @@ public class KCount {
 			resultDir = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\KNN\\%s", dataset);
 			break;
 		}
+		
+		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
+		queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, 10);
+		
 		entities = OwnMethods.ReadEntity(entityPath);
 		ArrayList<Integer> ids = OwnMethods.readIntegerArray(queryrectCenterPath);
 		queryrect = new ArrayList<MyRectangle>();
@@ -99,9 +105,8 @@ public class KCount {
 		try {
 			// TODO Auto-generated method stub
 			ArrayList<Integer> KCountList = new ArrayList<Integer>();
-//			nodeCountList.add(3);
-			KCountList.add(5);
-			KCountList.add(10);
+//			KCountList.add(5);
+//			KCountList.add(10);
 			KCountList.add(20);
 			KCountList.add(40);
 			
@@ -161,12 +166,10 @@ public class KCount {
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, "KCount\t" + head_line);
 
+			Query_Graph query_Graph = queryGraphs.get(query_id);
+			
 			for ( int K : KCount)
 			{
-				String querygraph_path = String.format("%s/%d.txt", querygraphDir, K);
-				ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
-				Query_Graph query_Graph = queryGraphs.get(query_id);
-
 				write_line = K + "\n" + head_line;
 				if(!TEST_FORMAT)
 					OwnMethods.WriteFile(result_detail_path, true, write_line);
@@ -203,6 +206,7 @@ public class KCount {
 
 					if(!TEST_FORMAT)
 					{
+						OwnMethods.Print(query_Graph);
 						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
 
 						start = System.currentTimeMillis();
@@ -285,12 +289,10 @@ public class KCount {
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, "KCount\t" + head_line);
 
+			Query_Graph query_Graph = queryGraphs.get(query_id);
+			
 			for ( int K : KCount)
 			{
-				String querygraph_path = String.format("%s/%d.txt", querygraphDir, K);
-				ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
-				Query_Graph query_Graph = queryGraphs.get(query_id);
-
 				write_line = K + "\n" + head_line;
 				if(!TEST_FORMAT)
 					OwnMethods.WriteFile(result_detail_path, true, write_line);
