@@ -1675,6 +1675,7 @@ public class RisoTreeQueryPN {
 						paths.add(path);
 				break;
 			}
+//			OwnMethods.Print(paths);
 			
 			long start = System.currentTimeMillis();
 			Transaction tx = dbservice.beginTx();

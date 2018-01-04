@@ -23,6 +23,7 @@ import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Utility;
 import commons.Config.system;
+import commons.Entity;
 
 public class RisoTreeQueryPNTest {
 
@@ -32,39 +33,43 @@ public class RisoTreeQueryPNTest {
 	static system systemName = config.getSystemName();
 	static int MAX_HOPNUM = config.getMaxHopNum();
 
-	static String db_path, graph_pos_map_path;
+	static String db_path, entityPath, graph_pos_map_path;
 	static String querygraphDir, spaPredicateDir;
 	
 	//query input
 	static Query_Graph query_Graph;
 	static long[] graph_pos_map_list;
 	
-	static int nodeCount = 5, query_id = 1;
+	static int nodeCount = 3, query_id = 3;
 	
 //	name_suffix = 7;
 //	name_suffix = 75;
 //	name_suffix = 7549;//0.1
 	static int name_suffix = 1280;//Gowalla 0.001
-	static String queryrect_path = null, querygraph_path = null;
+	static String queryrect_path = null, querygraph_path = null, queryrectCenterPath = null;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		switch (systemName) {
 		case Ubuntu:
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
+			entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
 			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map_RTree.txt";
 			querygraphDir = String.format("/mnt/hgfs/Google_Drive/Projects/risotree/query/query_graph/%s", dataset);
 			spaPredicateDir = String.format("/mnt/hgfs/Google_Drive/Projects/risotree/query/spa_predicate/%s", dataset);
 			querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
+			queryrectCenterPath = String.format("%s/%s_centerids.txt", spaPredicateDir, dataset);
 			queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
 			break;
 		case Windows:
 			String dataDirectory = "D:\\Ubuntu_shared\\GeoMinHop\\data";
 			db_path = String.format("%s\\%s\\%s_%s\\data\\databases\\graph.db", dataDirectory, dataset, version, dataset);
+			entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
 			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map_RTree.txt";
 			querygraphDir = String.format("D:\\Google_Drive\\Projects\\risotree\\query\\query_graph\\%s", dataset);
 			spaPredicateDir = String.format("D:\\Google_Drive\\Projects\\risotree\\query\\spa_predicate\\%s", dataset);
 			querygraph_path = String.format("%s\\%d.txt", querygraphDir, nodeCount);
+			queryrectCenterPath = String.format("%s\\%s_centerids.txt", spaPredicateDir, dataset);
 			queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
 		default:
 			break;
@@ -77,8 +82,18 @@ public class RisoTreeQueryPNTest {
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		query_Graph = queryGraphs.get(query_id);
 		
-		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
-		MyRectangle rectangle = queryrect.get(1);
+//		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+		
+		ArrayList<Integer> centerIDs = OwnMethods.readIntegerArray(queryrectCenterPath);
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		ArrayList<MyRectangle> queryrect = new ArrayList<MyRectangle>();
+		for ( int id : centerIDs)
+		{
+			Entity entity = entities.get(id);
+			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
+		}
+		
+		MyRectangle rectangle = queryrect.get(0);
 		int j = 0;
 		for (  ; j < query_Graph.graph.size(); j++)
 			if(query_Graph.Has_Spa_Predicate[j])
@@ -129,7 +144,7 @@ public class RisoTreeQueryPNTest {
 		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 				graph_pos_map_list, MAX_HOPNUM);
 		
-		int K = 10;
+		int K = 5;
 		try
 		{
 			ArrayList<Long> resultIDs = risoTreeQueryPN.LAGAQ_KNN(query_Graph, K);
