@@ -96,28 +96,34 @@ public class KCount {
 	}
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		ArrayList<Integer> KCountList = new ArrayList<Integer>();
-//		nodeCountList.add(3);
-		KCountList.add(5);
-		KCountList.add(10);
-		KCountList.add(20);
-		KCountList.add(40);
-		
-		ArrayList<String> datasets = new ArrayList<String>();
-//		datasets.add(Datasets.Patents_100_random_80.name());
-		datasets.add(Datasets.Gowalla_100.name());
-//		datasets.add(Datasets.go_uniprot_100_random_80.name());
-		
-		QueryNodeCount queryNodeCount = new QueryNodeCount();
-		for (String dataset : datasets)
-		{
-			queryNodeCount.config.setDatasetName(dataset);
-			queryNodeCount.initializeParameters();
-			queryNodeCount.RisoTreePN(KCountList, 3);
-			queryNodeCount.SpatialFirst(KCountList, 3);
+		try {
+			// TODO Auto-generated method stub
+			ArrayList<Integer> KCountList = new ArrayList<Integer>();
+//			nodeCountList.add(3);
+			KCountList.add(5);
+			KCountList.add(10);
+			KCountList.add(20);
+			KCountList.add(40);
+			
+			ArrayList<String> datasets = new ArrayList<String>();
+//			datasets.add(Datasets.Patents_100_random_80.name());
+			datasets.add(Datasets.Gowalla_100.name());
+//			datasets.add(Datasets.go_uniprot_100_random_80.name());
+			
+			KCount kCount = new KCount();
+			for (String dataset : datasets)
+			{
+				kCount.config.setDatasetName(dataset);
+				kCount.initializeParameters();
+				kCount.RisoTreePN(KCountList, 3);
+				kCount.SpatialFirst(KCountList, 3);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+			// TODO: handle exception
 		}
-		
 	}
 	
 	public void RisoTreePN(ArrayList<Integer> KCount, int query_id)
@@ -138,6 +144,10 @@ public class KCount {
 				result_avg_path = String.format("%s\\KCount_risotree_PN%d_%d_avg.txt", resultDir, query_id);
 				break;
 			}
+
+			OwnMethods.Print(result_avg_path);
+			OwnMethods.Print(result_detail_path);
+			
 
 			String write_line = String.format("%s\t%d\n", dataset, limit);
 			if(!TEST_FORMAT)
