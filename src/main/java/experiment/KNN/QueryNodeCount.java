@@ -101,13 +101,13 @@ public class QueryNodeCount {
 		ArrayList<Integer> nodeCountList = new ArrayList<Integer>();
 //		nodeCountList.add(3);
 //		nodeCountList.add(5);
-//		nodeCountList.add(7);
-		nodeCountList.add(9);
+		nodeCountList.add(7);
+//		nodeCountList.add(9);
 //		nodeCountList.add(11);
 		
 		ArrayList<String> datasets = new ArrayList<String>();
-		datasets.add(Datasets.Patents_100_random_80.name());
-//		datasets.add(Datasets.go_uniprot_100_random_80.name());
+//		datasets.add(Datasets.Patents_100_random_80.name());
+		datasets.add(Datasets.foursquare_100.name());
 //		datasets.add(Datasets.go_uniprot_100_random_80.name());
 		
 		QueryNodeCount queryNodeCount = new QueryNodeCount();
@@ -115,8 +115,8 @@ public class QueryNodeCount {
 		{
 			queryNodeCount.config.setDatasetName(dataset);
 			queryNodeCount.initializeParameters();
-//			queryNodeCount.RisoTreePN(nodeCountList, 3);
-			queryNodeCount.SpatialFirst(nodeCountList, 3);
+			queryNodeCount.RisoTreePN(nodeCountList, 0);
+			queryNodeCount.SpatialFirst(nodeCountList, 0);
 		}
 		
 	}
@@ -126,7 +126,6 @@ public class QueryNodeCount {
 		try {
 			long start;
 			long time;
-			int limit = -1;
 
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
@@ -140,7 +139,7 @@ public class QueryNodeCount {
 				break;
 			}
 
-			String write_line = String.format("%s\t%d\n", dataset, limit);
+			String write_line = String.format("%s\t%d\n", dataset, K);
 			if(!TEST_FORMAT)
 			{
 				OwnMethods.WriteFile(result_detail_path, true, write_line);
@@ -251,7 +250,6 @@ public class QueryNodeCount {
 		try {
 			long start;
 			long time;
-			int limit = -1;
 
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
@@ -265,7 +263,7 @@ public class QueryNodeCount {
 				break;
 			}
 
-			String write_line = String.format("%s\t%d\n", dataset, limit);
+			String write_line = String.format("%s\t%d\n", dataset, K);
 			if(!TEST_FORMAT)
 			{
 				OwnMethods.WriteFile(result_detail_path, true, write_line);
