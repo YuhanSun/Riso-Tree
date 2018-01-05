@@ -39,7 +39,7 @@ public class QueryNodeCount {
 	public long[] graph_pos_map_list;
 		
 	public boolean TEST_FORMAT;
-	public int experimentCount = 10;
+	public int experimentCount = 5;
 	public int K = 5;
 	
 	public QueryNodeCount()
@@ -100,14 +100,14 @@ public class QueryNodeCount {
 		// TODO Auto-generated method stub
 		ArrayList<Integer> nodeCountList = new ArrayList<Integer>();
 //		nodeCountList.add(3);
-		nodeCountList.add(5);
+//		nodeCountList.add(5);
 //		nodeCountList.add(7);
-//		nodeCountList.add(9);
+		nodeCountList.add(9);
 //		nodeCountList.add(11);
 		
 		ArrayList<String> datasets = new ArrayList<String>();
-//		datasets.add(Datasets.Patents_100_random_80.name());
-		datasets.add(Datasets.go_uniprot_100_random_80.name());
+		datasets.add(Datasets.Patents_100_random_80.name());
+//		datasets.add(Datasets.go_uniprot_100_random_80.name());
 //		datasets.add(Datasets.go_uniprot_100_random_80.name());
 		
 		QueryNodeCount queryNodeCount = new QueryNodeCount();
@@ -115,7 +115,7 @@ public class QueryNodeCount {
 		{
 			queryNodeCount.config.setDatasetName(dataset);
 			queryNodeCount.initializeParameters();
-			queryNodeCount.RisoTreePN(nodeCountList, 3);
+//			queryNodeCount.RisoTreePN(nodeCountList, 3);
 			queryNodeCount.SpatialFirst(nodeCountList, 3);
 		}
 		
@@ -194,6 +194,7 @@ public class QueryNodeCount {
 
 					if(!TEST_FORMAT)
 					{
+						OwnMethods.Print(query_Graph);
 						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
 
 						start = System.currentTimeMillis();
@@ -317,6 +318,7 @@ public class QueryNodeCount {
 
 					if(!TEST_FORMAT)
 					{
+						OwnMethods.Print(query_Graph);
 						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
 
 						start = System.currentTimeMillis();
