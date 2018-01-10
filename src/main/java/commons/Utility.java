@@ -38,6 +38,42 @@ public class Utility {
 		return result;
 	}
 	
+	public static double distance(MyRectangle rectangle1, MyRectangle rectangle2)
+	{
+		double minx1 = rectangle1.min_x, miny1 = rectangle1.min_y,
+				maxx1 = rectangle1.max_x, maxy1 = rectangle1.max_y;
+		double minx2 = rectangle2.min_x, miny2 = rectangle2.min_y,
+				maxx2 = rectangle2.max_x, maxy2 = rectangle2.max_y;
+		
+		if ( maxx1 < minx2)
+		{
+			if ( maxy1 < miny2)
+				return Math.sqrt((maxx1 - minx2) * (maxx1 - minx2) + (maxy1 - miny2) * (maxy1 - miny2));
+			else if ( miny1 > maxy2)
+				return Math.sqrt((maxx1 - minx2) * (maxx1 - minx2) + (miny1 - maxy2) * (miny1 - maxy2));
+			else
+				return minx2 - maxx1;
+		}
+		else if ( minx1 > maxx2)
+		{
+			if ( maxy1 < miny2)
+				return Math.sqrt((minx1 - maxx2) * (minx1 - maxx2) + (maxy1 - miny2) * (maxy1 - miny2));
+			else if ( miny1 > maxy2)
+				return Math.sqrt((minx1 - maxx2) * (minx1 - maxx2) + (miny1 - maxy2) * (miny1 - maxy2));
+			else
+				return minx1 - maxx2;
+		}
+		else
+		{
+			if ( maxy1 < miny2)
+				return miny2 - maxy1;
+			else if ( miny1 > maxy2)
+				return miny1 - maxy2;
+			else
+				return 0;
+		}
+	}
+	
 	public static double distance(double x, double y, MyRectangle rectangle)
 	{
 		double minx = rectangle.min_x, miny = rectangle.min_y,

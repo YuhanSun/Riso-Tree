@@ -36,6 +36,14 @@ public class UtilityTest {
 	}
 	
 	@Test
+	public void distanceRRTest()
+	{
+		MyRectangle rectangle1 = new MyRectangle(1, 1, 2, 2);
+		MyRectangle rectangle2 = new MyRectangle(0, 3, 0, 3);
+		OwnMethods.Print(Utility.distance(rectangle1, rectangle2));
+	}
+	
+	@Test
 	public void groupSumTest()
 	{
 		ArrayList<Integer> input = new ArrayList<Integer>(Arrays.asList(0,1,2));
