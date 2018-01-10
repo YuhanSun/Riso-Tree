@@ -241,7 +241,7 @@ public class OwnMethods {
 	 * @param filename
 	 * @return
 	 */
-	public static HashMap<String, String>ReadMap(String filename)
+	public static HashMap<String, String> ReadMap(String filename)
 	{
 		try {
 			HashMap<String, String> map = new HashMap<String, String>();
