@@ -14,9 +14,21 @@ import org.neo4j.graphdb.traversal.TraversalDescription;
 import commons.Labels.OSMLabel;
 import commons.Labels.OSMRelation;
 import commons.Labels.RTreeRel;
-import osm.OSM_Utility;
 
 public class RTreeUtility {
+	
+	/**
+	 * Get the MBR of a given node.
+	 * @param node
+	 * @return
+	 */
+	public static MyRectangle getNodeMBR(Node node)
+	{
+		double[] bbox = (double[]) node.getProperty("bbox");
+		MyRectangle myRectangle = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
+		return myRectangle;
+	}
+	
 	/**
 	 * (:ReferenceNode{name:spatial_root}) -[:LAYER]-> (return{layer:layer_name}) -[:RTREE_ROOT]-> (return)
 	 * @param databaseService
