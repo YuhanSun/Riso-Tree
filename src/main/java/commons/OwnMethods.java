@@ -1272,7 +1272,7 @@ public class OwnMethods {
     		if(entity.IsSpatial)
     		{
     			Point datapoint = fact.createPoint(new Coordinate(entity.lon, entity.lat));
-    			strtree.insert(datapoint.getEnvelopeInternal(), datapoint);
+    			strtree.insert(datapoint.getEnvelopeInternal(), entity);
     			
     		}
     	return strtree;

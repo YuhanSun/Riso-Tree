@@ -27,7 +27,6 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-import osm.OSM_Utility;
 import commons.Config;
 import commons.Entity;
 import commons.Labels.OSMRelation;
@@ -373,11 +372,12 @@ public class Prepare {
 					double radius = 0.0;
 					for (Object object : result)
 					{
-						Point point = (Point) object;
-						double dist = center.distance(point);
+						Entity entity = (Entity) object;
+						double dist = Utility.distance(lon, lat, entity.lon, entity.lat);
 						if(dist > radius)
 							radius = dist;
 					}
+					//keep the rectangle area the same with the circle
 					double a = Math.sqrt(Math.PI) * radius;
 					double minx = center.getX() - a / 2;
 					double miny = center.getY() - a / 2;

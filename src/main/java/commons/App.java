@@ -7,9 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import javax.management.relation.RelationType;
-
-import org.neo4j.cypher.internal.frontend.v2_3.perty.print.printCommandsToString;
 import org.neo4j.gis.spatial.Layer;
 import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
@@ -251,7 +248,7 @@ public class App {
 		int index = 0, countSum = 0;
 		for ( MyRectangle rect : queryRectangles)
 		{
-			List<Point> results = stRtree.query(new Envelope(rect.min_x, rect.max_x, rect.min_y, rect.max_y));
+			List<Entity> results = stRtree.query(new Envelope(rect.min_x, rect.max_x, rect.min_y, rect.max_y));
 			OwnMethods.Print(results.size());
 			countSum += results.size();	index++;
 		}
