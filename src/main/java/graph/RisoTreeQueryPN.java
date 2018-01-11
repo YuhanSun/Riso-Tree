@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -34,6 +35,7 @@ import commons.Utility;
 import commons.Config.Explain_Or_Profile;
 import knn.Element;
 import knn.KNNComparator;
+import knn.NodeAndRec;
 import osm.OSM_Utility;
 
 /**
@@ -67,9 +69,14 @@ public class RisoTreeQueryPN {
 	public long page_hit_count;
 	public String logPath;
 	
+	//for knn query track
 	public long queue_time;
 	public long check_paths_time;
 	public int visit_spatial_object_count;
+
+	//for join track
+	public long join_result_count;
+	public long join_time;
 	
 	//test control variables
 	public static boolean outputLevelInfo = true;
@@ -217,7 +224,7 @@ public class RisoTreeQueryPN {
 		
 		for ( int i = 0; i < queryGraph.graph.size(); i++)
 		{
-			if ( queryGraph.spa_predicate[i] != null)
+			if ( queryGraph.Has_Spa_Predicate[i])
 			{
 				if ( MAX_HOPNUM == 0)
 					spaPathsMap.put(i, new HashMap<Integer, HashSet<String>>());
@@ -842,8 +849,8 @@ public class RisoTreeQueryPN {
 			HashMap<Integer, HashMap<Integer, HashSet<String>>> PN_size_propertyname = new HashMap<Integer, HashMap<Integer, HashSet<String>>>();
 			//<spa_id, <neighbor_id, list_property_name>>
 			HashMap<Integer, HashMap<Integer, HashSet<String>>> PN_list_propertyname = new HashMap<Integer, HashMap<Integer,HashSet<String>>>();	
-			//<spa_id, <neighbor_id, NL_list>>
 
+			//<spa_id, <end_id, path_name>> (path_name: PN_a_endid)
 			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
 
 			//Construct min_hop_array for the query graph
@@ -2236,7 +2243,7 @@ public class RisoTreeQueryPN {
 		query += " where\n";
 
 		//id
-		query += String.format(" id(a%d)=%d and ", pos.get(0), idPair[0]);
+		query += String.format(" id(a%d)=%d and", pos.get(0), idPair[0]);
 		query += String.format(" id(a%d)=%d", pos.get(1), idPair[1]);
 		query += "\n"; 
 		
@@ -2249,7 +2256,167 @@ public class RisoTreeQueryPN {
 			query += String.format(" limit %d", limit);
 
 		return query;
+	}
+	
+	public List<Long[]> spatialJoinRTree(double distance, 
+			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap, ArrayList<Integer> pos)
+	{
+		LinkedList<String> leftpaths = new LinkedList<String>();
+		LinkedList<String> rightpaths = new LinkedList<String>(); 
+
+		HashMap<Integer, HashSet<String>> lp = spaPathsMap.get(pos.get(0)); 
+		for ( int endID : lp.keySet())
+			for (String path : lp.get(endID))
+				leftpaths.add(path);
 		
+		HashMap<Integer, HashSet<String>> rp = spaPathsMap.get(pos.get(1)); 
+		for ( int endID : rp.keySet())
+			for (String path : rp.get(endID))
+				rightpaths.add(path);
+		
+		List<Long[]> result = new LinkedList<Long[]>();
+		Queue<NodeAndRec[]> queue = new LinkedList<NodeAndRec[]>();
+		Transaction tx = dbservice.beginTx();
+		Node root = RTreeUtility.getRTreeRoot(dbservice, dataset);
+		MyRectangle rootMBR = RTreeUtility.getNodeMBR(root);
+		
+		NodeAndRec[] pair = new NodeAndRec[2];
+		pair[0] = new NodeAndRec(root, rootMBR);
+		pair[1] = new NodeAndRec(root, rootMBR);
+		queue.add(pair);
+		while ( !queue.isEmpty())
+		{
+			NodeAndRec[] element = queue.poll();
+			NodeAndRec left = element[0];
+			NodeAndRec right = element[1];
+			
+			if ( left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING))
+			{
+				if (checkPaths(left.node, leftpaths) == false ||
+						checkPaths(right.node, rightpaths) == false)
+				{
+//					check_paths_time += System.currentTimeMillis() - start1;
+					continue;
+				}
+//				check_paths_time += System.currentTimeMillis() - start1;
+			}
+
+			LinkedList<NodeAndRec> leftChildren = new LinkedList<NodeAndRec>();
+			LinkedList<NodeAndRec> rightChildern = new LinkedList<NodeAndRec>();
+
+			Iterable<Relationship> rels = left.node.getRelationships(Direction.OUTGOING);
+			for (Relationship relationship : rels)
+			{
+				Node child = relationship.getEndNode();
+				MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+				if ( Utility.distance(mbr, right.rectangle) <= distance)
+					leftChildren.add(new NodeAndRec(child, mbr));
+			}
+
+			rels = right.node.getRelationships(Direction.OUTGOING);
+			for ( Relationship relationship : rels)
+			{
+				Node child = relationship.getEndNode();
+				MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+				if ( Utility.distance(mbr, left.rectangle) <= distance)
+					rightChildern.add(new NodeAndRec(child, mbr));
+			}
+			
+			if ( left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING))
+			{
+				for ( NodeAndRec leftChild : leftChildren)
+					for ( NodeAndRec rightChild : rightChildern)
+						if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
+						{
+							long id1 = leftChild.node.getId();
+							long id2 = rightChild.node.getId();
+							if ( id1 != id2)
+								result.add(new Long[]{id1, id2});
+						}
+			}
+			else
+			{
+				for ( NodeAndRec leftChild : leftChildren)
+				{
+					for ( NodeAndRec rightChild : rightChildern)
+					{
+						if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
+						{
+							NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
+							nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
+							nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);
+							queue.add(nodeAndRecs);
+						}
+					}
+				}
+			}
+		}
+		tx.success();
+		tx.close();
+		return result;
+	}
+	
+	public List<Long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) {
+		try {
+			join_result_count = 0;
+			join_time = 0;
+			get_iterator_time = 0;
+			iterate_time = 0;
+			page_hit_count = 0;
+			
+			List<Long[]> resultPairs = new LinkedList<Long[]>();
+			
+			int count = 0;
+			ArrayList<Integer> pos = new ArrayList<Integer>(2);
+			for ( int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
+			{
+				if ( query_Graph.Has_Spa_Predicate[i] == true)
+				{
+					count++;
+					pos.add(i);
+				}
+			}
+			if (count != 2)
+				throw new Exception(String.format("Number of query graph spatial predicate is "
+						+ "%d, it should be 2!", count));
+			
+			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
+			
+			long start = System.currentTimeMillis();
+			OwnMethods.Print(pos);
+			OwnMethods.Print(spaPathsMap);
+			List<Long[]> idPairs = this.spatialJoinRTree(distance, spaPathsMap, pos);
+			join_time = System.currentTimeMillis() - start;
+			join_result_count = idPairs.size();
+			
+			for ( Long[] idPair : idPairs)
+			{
+				start = System.currentTimeMillis();
+				String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
+				Result result = dbservice.execute(query);
+				get_iterator_time += System.currentTimeMillis() - start;
+				
+				start = System.currentTimeMillis();
+				if ( result.hasNext())
+				{
+					result.next();
+					resultPairs.add(idPair);
+//					OwnMethods.Print(String.format("%d, %f", id, element.distance));
+				}
+				iterate_time += System.currentTimeMillis() - start;
+				start = System.currentTimeMillis();
+				
+				ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+				page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+			}
+			return resultPairs;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return null;
 	}
 	
 //	public static void queryTest()

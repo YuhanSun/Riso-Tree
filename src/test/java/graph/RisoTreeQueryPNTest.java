@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -22,6 +23,7 @@ import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Utility;
+import commons.Config.Explain_Or_Profile;
 import commons.Config.system;
 import commons.Entity;
 
@@ -40,7 +42,7 @@ public class RisoTreeQueryPNTest {
 	static Query_Graph query_Graph;
 	static long[] graph_pos_map_list;
 	
-	static int nodeCount = 3, query_id = 3;
+	static int nodeCount = 5, query_id = 0;
 	
 //	name_suffix = 7;
 //	name_suffix = 75;
@@ -175,5 +177,65 @@ public class RisoTreeQueryPNTest {
 		boolean result = RisoTreeQueryPN.checkPaths(node, paths);
 		OwnMethods.Print(result);
 	}
+	
+	@Test
+	public void formQueryLAGAQ_JoinTest()
+	{
+		query_Graph = new Query_Graph(3);
+		query_Graph.label_list[0] = 3;
+		query_Graph.label_list[1] = 1;
+		query_Graph.label_list[2] = 1;
+		
+		query_Graph.graph.get(0).add(1);
+		query_Graph.graph.get(0).add(2);
+		query_Graph.graph.get(1).add(0);
+		query_Graph.graph.get(2).add(0);
+		
+		query_Graph.Has_Spa_Predicate[1] = true;
+		query_Graph.Has_Spa_Predicate[2] = true;
+		
+		ArrayList<Integer> pos = new ArrayList<Integer>();
+		pos.add(1);
+		pos.add(2);
+		
+		Long[] idPair = new Long[2];
+		idPair[0] = (long) 100;
+		idPair[1] = (long) 200;
+		
+		String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
+		OwnMethods.Print(query);
+	}
 
+	@Test
+	public void LAGAQ_JoinTest()
+	{
+//		query_Graph = new Query_Graph(3);
+//		query_Graph.label_list[0] = 3;
+//		query_Graph.label_list[1] = 1;
+//		query_Graph.label_list[2] = 1;
+//		
+//		query_Graph.graph.get(0).add(1);
+//		query_Graph.graph.get(0).add(2);
+//		query_Graph.graph.get(1).add(0);
+//		query_Graph.graph.get(2).add(0);
+//		
+//		query_Graph.Has_Spa_Predicate[1] = true;
+//		query_Graph.Has_Spa_Predicate[2] = true;
+		
+		OwnMethods.convertQueryGraphForJoin(query_Graph);
+		OwnMethods.Print(query_Graph.toString());
+		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
+		long start = System.currentTimeMillis();
+		List<Long[]> result = risoTreeQueryPN.LAGAQ_Join(query_Graph, 0.01);
+		OwnMethods.Print(String.format("Total time: %d", System.currentTimeMillis() - start));
+		
+		OwnMethods.Print("Join time: " + risoTreeQueryPN.join_time);
+		OwnMethods.Print("Get iterate time: " + risoTreeQueryPN.get_iterator_time); 
+		OwnMethods.Print("Iterate time: " + risoTreeQueryPN.iterate_time);
+		OwnMethods.Print("Join result count: " + risoTreeQueryPN.join_result_count);
+		OwnMethods.Print(result);
+		OwnMethods.Print(result.size());
+		
+		risoTreeQueryPN.dbservice.shutdown();
+	}
 }
