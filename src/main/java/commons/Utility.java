@@ -12,6 +12,8 @@ import knn.Element;
 
 public class Utility {
 	
+//	public static 
+	
 	public static ArrayList<Integer> groupSum(double min, double max, ArrayList<Integer> input, int binCount)
 	{
 		ArrayList<Integer> result = new ArrayList<Integer>(binCount);
@@ -115,6 +117,11 @@ public class Utility {
 	public static double distance(MyPoint l1, MyPoint l2)
 	{
 		return Math.sqrt((l1.x - l2.x) * (l1.x - l2.x) + (l1.y - l2.y) * (l1.y - l2.y)); 
+	}
+	
+	public static double distance(double x1, double y1, double x2, double y2)
+	{
+		return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 	}
 	
 	public static double earthRadius = 6371000; // meters
