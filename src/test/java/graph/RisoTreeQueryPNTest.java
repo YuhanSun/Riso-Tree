@@ -233,6 +233,10 @@ public class RisoTreeQueryPNTest {
 		OwnMethods.Print(String.format("Total time: %d", System.currentTimeMillis() - start));
 		
 		OwnMethods.Print("Join time: " + risoTreeQueryPN.join_time);
+		OwnMethods.Print("check paths time: " + risoTreeQueryPN.check_paths_time);
+		OwnMethods.Print("has relation time: " + risoTreeQueryPN.has_relation_time);
+		OwnMethods.Print("has relation addition time: " + risoTreeQueryPN.has_relation_time_addition);
+		
 		OwnMethods.Print("Get iterate time: " + risoTreeQueryPN.get_iterator_time); 
 		OwnMethods.Print("Iterate time: " + risoTreeQueryPN.iterate_time);
 		OwnMethods.Print("Join result count: " + risoTreeQueryPN.join_result_count);
