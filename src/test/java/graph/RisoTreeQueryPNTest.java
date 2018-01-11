@@ -229,7 +229,7 @@ public class RisoTreeQueryPNTest {
 		
 		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
 		long start = System.currentTimeMillis();
-		List<Long[]> result = risoTreeQueryPN.LAGAQ_Join(query_Graph, 0.01);
+		List<Long[]> result = risoTreeQueryPN.LAGAQ_Join(query_Graph, 0.1);
 		OwnMethods.Print(String.format("Total time: %d", System.currentTimeMillis() - start));
 		
 		OwnMethods.Print("Join time: " + risoTreeQueryPN.join_time);
