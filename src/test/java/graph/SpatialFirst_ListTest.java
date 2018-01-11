@@ -2,15 +2,18 @@ package graph;
 
 import static org.junit.Assert.*;
 
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
@@ -227,5 +230,64 @@ public class SpatialFirst_ListTest {
 		{
 			spatialFirst_List.dbservice.shutdown();
 		}
+	}
+	
+	@Test
+	public void spatialJoinRTreeTest() {
+		SpatialFirst_List spatialFirst_List = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
+		try{
+			FileWriter writer = new FileWriter("D:\\temp\\output.txt");
+			long start = System.currentTimeMillis();
+			List<Long[]> result = spatialFirst_List.spatialJoinRTree(0.01);
+			OwnMethods.Print(System.currentTimeMillis() - start);
+			for (Long[] element : result)
+			{
+				writer.write(String.format("%d,%d\n", element[0], element[1]));
+			}
+			writer.close();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	@Test
+	public void LAGAQ_JoinTest() {
+		query_Graph = new Query_Graph(3);
+		query_Graph.label_list[0] = 3;
+		query_Graph.label_list[1] = 1;
+		query_Graph.label_list[2] = 1;
+		
+		query_Graph.graph.get(0).add(1);
+		query_Graph.graph.get(0).add(2);
+		query_Graph.graph.get(1).add(0);
+		query_Graph.graph.get(2).add(0);
+		
+		query_Graph.Has_Spa_Predicate[1] = true;
+		query_Graph.Has_Spa_Predicate[2] = true;
+		
+		ArrayList<Integer> pos = new ArrayList<Integer>();
+		pos.add(1);
+		pos.add(2);
+		
+		Long[] idPair = new Long[2];
+		idPair[0] = (long) 100;
+		idPair[1] = (long) 200;
+		
+		SpatialFirst_List spatialFirst_List = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
+		long start = System.currentTimeMillis();
+		List<Long[]> result = spatialFirst_List.LAGAQ_Join(query_Graph, 0.01);
+		OwnMethods.Print(String.format("Total time: %d", System.currentTimeMillis() - start));
+		
+		OwnMethods.Print("Join time: " + spatialFirst_List.join_time);
+		OwnMethods.Print("Get iterate time: " + spatialFirst_List.get_iterator_time);
+		OwnMethods.Print("Iterate time: " + spatialFirst_List.iterate_time);
+		OwnMethods.Print("Join result count: " + spatialFirst_List.join_result_count);
+		OwnMethods.Print(result);
+		OwnMethods.Print(result.size());
+		
+		spatialFirst_List.shutdown();
 	}
 }

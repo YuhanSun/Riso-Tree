@@ -3,9 +3,8 @@ package graph;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Map;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -19,14 +18,14 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import osm.OSM_Utility;
 import commons.Config;
 import commons.Config.*;
 import commons.Labels;
 import commons.MyPoint;
-import commons.Labels.OSMRelation;
+import commons.Labels.RTreeRel;
 import knn.Element;
 import knn.KNNComparator;
+import knn.NodeAndRec;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
@@ -48,12 +47,12 @@ public class SpatialFirst_List {
 	public String dataset;
 	public long[] graph_pos_map_list;
 
-	public Config config = new Config();
-	public String lon_name = config.GetLongitudePropertyName();
-	public String lat_name = config.GetLatitudePropertyName();
-	public int MAX_HOPNUM = config.getMaxHopNum();
-	public String graphLinkLabelName = Labels.GraphRel.GRAPH_LINK.name();
-	public system systemName = config.getSystemName();
+	public static Config config = new Config();
+	public static String lon_name = config.GetLongitudePropertyName();
+	public static String lat_name = config.GetLatitudePropertyName();
+	public static int MAX_HOPNUM = config.getMaxHopNum();
+	public static String graphLinkLabelName = Labels.GraphRel.GRAPH_LINK.name();
+	public static system systemName = config.getSystemName();
 
 	//query statistics
 	public long range_query_time;
@@ -62,9 +61,13 @@ public class SpatialFirst_List {
 	public long result_count;
 	public long page_hit_count;
 	
+	//for knn query track
 	public long queue_time;
 	public int visit_spatial_object_count;
-
+	
+	//for join track
+	public long join_result_count;
+	public long join_time;
 	/**
 	 * 
 	 * @param db_path	database location
@@ -753,11 +756,148 @@ public class SpatialFirst_List {
 			}
 			
 			queue_time += System.currentTimeMillis() - start;
+			tx.success();
+			tx.close();
 			return resultIDs;
 			
 		}
 		catch(Exception e) {
 			e.printStackTrace(); System.exit(-1);
+		}
+		return null;
+	}
+	
+	public List<Long[]> spatialJoinRTree(double distance)
+	{
+		List<Long[]> result = new LinkedList<Long[]>();
+		Queue<NodeAndRec[]> queue = new LinkedList<NodeAndRec[]>();
+		Transaction tx = dbservice.beginTx();
+		Node root = RTreeUtility.getRTreeRoot(dbservice, dataset);
+		MyRectangle rootMBR = RTreeUtility.getNodeMBR(root);
+		
+		NodeAndRec[] pair = new NodeAndRec[2];
+		pair[0] = new NodeAndRec(root, rootMBR);
+		pair[1] = new NodeAndRec(root, rootMBR);
+		queue.add(pair);
+		while ( !queue.isEmpty())
+		{
+			NodeAndRec[] element = queue.poll();
+			NodeAndRec left = element[0];
+			NodeAndRec right = element[1];
+
+			LinkedList<NodeAndRec> leftChildren = new LinkedList<NodeAndRec>();
+			LinkedList<NodeAndRec> rightChildern = new LinkedList<NodeAndRec>();
+
+			Iterable<Relationship> rels = left.node.getRelationships(Direction.OUTGOING);
+			for (Relationship relationship : rels)
+			{
+				Node child = relationship.getEndNode();
+				MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+				if ( Utility.distance(mbr, right.rectangle) <= distance)
+					leftChildren.add(new NodeAndRec(child, mbr));
+			}
+
+			rels = right.node.getRelationships(Direction.OUTGOING);
+			for ( Relationship relationship : rels)
+			{
+				Node child = relationship.getEndNode();
+				MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+				if ( Utility.distance(mbr, left.rectangle) <= distance)
+					rightChildern.add(new NodeAndRec(child, mbr));
+			}
+			
+			if ( left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING))
+			{
+				for ( NodeAndRec leftChild : leftChildren)
+					for ( NodeAndRec rightChild : rightChildern)
+						if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
+						{
+							long id1 = leftChild.node.getId();
+							long id2 = rightChild.node.getId();
+							if ( id1 != id2)
+								result.add(new Long[]{id1, id2});
+						}
+			}
+			else
+			{
+				for ( NodeAndRec leftChild : leftChildren)
+				{
+					for ( NodeAndRec rightChild : rightChildern)
+					{
+						if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
+						{
+							NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
+							nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
+							nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);
+							queue.add(nodeAndRecs);
+						}
+					}
+				}
+			}
+		}
+		tx.success();
+		tx.close();
+		return result;
+	}
+	
+	public List<Long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) {
+		try {
+			join_result_count = 0;
+			join_time = 0;
+			get_iterator_time = 0;
+			iterate_time = 0;
+			page_hit_count = 0;
+			
+			List<Long[]> resultPairs = new LinkedList<Long[]>();
+			
+			int count = 0;
+			ArrayList<Integer> pos = new ArrayList<Integer>(2);
+			for ( int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
+			{
+				if ( query_Graph.Has_Spa_Predicate[i] == true)
+				{
+					count++;
+					pos.add(i);
+				}
+			}
+			if (count != 2)
+				throw new Exception(String.format("Number of query graph spatial predicate is "
+						+ "%d, it should be 2!", count));
+			
+			long start = System.currentTimeMillis();
+			List<Long[]> idPairs = this.spatialJoinRTree(distance);
+			join_time = System.currentTimeMillis() - start;
+			join_result_count = idPairs.size();
+			
+			Transaction tx = dbservice.beginTx();
+			for ( Long[] idPair : idPairs)
+			{
+				start = System.currentTimeMillis();
+				String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
+				Result result = dbservice.execute(query);
+				get_iterator_time += System.currentTimeMillis() - start;
+				
+				start = System.currentTimeMillis();
+				if ( result.hasNext())
+				{
+					result.next();
+					resultPairs.add(idPair);
+//					OwnMethods.Print(String.format("%d, %f", id, element.distance));
+				}
+				iterate_time += System.currentTimeMillis() - start;
+				start = System.currentTimeMillis();
+				
+				ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+				page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+			}
+			tx.success();
+			tx.close();
+			return resultPairs;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.exit(-1);
 		}
 		return null;
 	}
