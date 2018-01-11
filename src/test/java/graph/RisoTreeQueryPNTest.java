@@ -222,8 +222,11 @@ public class RisoTreeQueryPNTest {
 //		query_Graph.Has_Spa_Predicate[1] = true;
 //		query_Graph.Has_Spa_Predicate[2] = true;
 		
+		OwnMethods.ClearCache("syh19910205");
+		
 		OwnMethods.convertQueryGraphForJoin(query_Graph);
 		OwnMethods.Print(query_Graph.toString());
+		
 		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
 		long start = System.currentTimeMillis();
 		List<Long[]> result = risoTreeQueryPN.LAGAQ_Join(query_Graph, 0.01);

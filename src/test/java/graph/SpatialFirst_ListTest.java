@@ -47,7 +47,7 @@ public class SpatialFirst_ListTest {
 	static Query_Graph query_Graph;
 	static long[] graph_pos_map_list;
 	
-	static int nodeCount = 3, query_id = 3;
+	static int nodeCount = 5, query_id = 0;
 	
 	static int name_suffix = 1280;//Gowalla 0.001
 	static String queryrect_path = null, querygraph_path = null, queryrectCenterPath = null;
@@ -255,26 +255,23 @@ public class SpatialFirst_ListTest {
 	
 	@Test
 	public void LAGAQ_JoinTest() {
-		query_Graph = new Query_Graph(3);
-		query_Graph.label_list[0] = 3;
-		query_Graph.label_list[1] = 1;
-		query_Graph.label_list[2] = 1;
+//		query_Graph = new Query_Graph(3);
+//		query_Graph.label_list[0] = 3;
+//		query_Graph.label_list[1] = 1;
+//		query_Graph.label_list[2] = 1;
+//		
+//		query_Graph.graph.get(0).add(1);
+//		query_Graph.graph.get(0).add(2);
+//		query_Graph.graph.get(1).add(0);
+//		query_Graph.graph.get(2).add(0);
+//		
+//		query_Graph.Has_Spa_Predicate[1] = true;
+//		query_Graph.Has_Spa_Predicate[2] = true;
 		
-		query_Graph.graph.get(0).add(1);
-		query_Graph.graph.get(0).add(2);
-		query_Graph.graph.get(1).add(0);
-		query_Graph.graph.get(2).add(0);
+		OwnMethods.ClearCache("syh19910205");
 		
-		query_Graph.Has_Spa_Predicate[1] = true;
-		query_Graph.Has_Spa_Predicate[2] = true;
-		
-		ArrayList<Integer> pos = new ArrayList<Integer>();
-		pos.add(1);
-		pos.add(2);
-		
-		Long[] idPair = new Long[2];
-		idPair[0] = (long) 100;
-		idPair[1] = (long) 200;
+		OwnMethods.convertQueryGraphForJoin(query_Graph);
+		OwnMethods.Print(query_Graph.toString());
 		
 		SpatialFirst_List spatialFirst_List = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 		long start = System.currentTimeMillis();
