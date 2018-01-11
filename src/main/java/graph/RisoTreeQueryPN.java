@@ -2288,53 +2288,65 @@ public class RisoTreeQueryPN {
 		pair[0] = new NodeAndRec(root, rootMBR);
 		pair[1] = new NodeAndRec(root, rootMBR);
 		queue.add(pair);
+		boolean isChildLeaf = false;
 		while ( !queue.isEmpty())
 		{
 			NodeAndRec[] element = queue.poll();
 			NodeAndRec left = element[0];
 			NodeAndRec right = element[1];
 			
-			long start = System.currentTimeMillis();
-			boolean flag = left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
-			has_relation_time_addition += System.currentTimeMillis() - start;
-			if (flag)
-			{
-				long start1 = System.currentTimeMillis();
-				if (checkPaths(left.node, leftpaths) == false ||
-						checkPaths(right.node, rightpaths) == false)
-				{
-					check_paths_time += System.currentTimeMillis() - start1;
-					continue;
-				}
-				check_paths_time += System.currentTimeMillis() - start1;
-			}
-			
 			LinkedList<NodeAndRec> leftChildren = new LinkedList<NodeAndRec>();
 			LinkedList<NodeAndRec> rightChildern = new LinkedList<NodeAndRec>();
 
 			Iterable<Relationship> rels = left.node.getRelationships(Direction.OUTGOING);
-			for (Relationship relationship : rels)
+			
+			Iterator<Relationship> iterator = rels.iterator();
+			if ( isChildLeaf == false)
 			{
-				Node child = relationship.getEndNode();
-				MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-				if ( Utility.distance(mbr, right.rectangle) <= distance)
-					leftChildren.add(new NodeAndRec(child, mbr));
-			}
-
-			rels = right.node.getRelationships(Direction.OUTGOING);
-			for ( Relationship relationship : rels)
-			{
-				Node child = relationship.getEndNode();
-				MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-				if ( Utility.distance(mbr, left.rectangle) <= distance)
-					rightChildern.add(new NodeAndRec(child, mbr));
+				while (iterator.hasNext())
+				{
+					Node child = iterator.next().getEndNode();
+					long start1 = System.currentTimeMillis();
+					isChildLeaf = child.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
+					has_relation_time += System.currentTimeMillis() - start1;
+					break;
+				}
 			}
 			
-			start = System.currentTimeMillis();
-			flag = left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
-			has_relation_time += System.currentTimeMillis() - start;
-			if (flag)
+			if ( isChildLeaf)
 			{
+				for (Relationship relationship : rels)
+				{
+					Node child = relationship.getEndNode();
+					long start1 = System.currentTimeMillis();
+					if (checkPaths(child, leftpaths) == false)
+					{
+						check_paths_time += System.currentTimeMillis() - start1;
+						continue;
+					}
+					check_paths_time += System.currentTimeMillis() - start1;
+					
+					MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+					if ( Utility.distance(mbr, right.rectangle) <= distance)
+						leftChildren.add(new NodeAndRec(child, mbr));
+				}
+
+				rels = right.node.getRelationships(Direction.OUTGOING);
+				for ( Relationship relationship : rels)
+				{
+					Node child = relationship.getEndNode();
+					long start1 = System.currentTimeMillis();
+					if (checkPaths(child, leftpaths) == false)
+					{
+						check_paths_time += System.currentTimeMillis() - start1;
+						continue;
+					}
+					check_paths_time += System.currentTimeMillis() - start1;
+					MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+					if ( Utility.distance(mbr, left.rectangle) <= distance)
+						rightChildern.add(new NodeAndRec(child, mbr));
+				}
+				
 				for ( NodeAndRec leftChild : leftChildren)
 					for ( NodeAndRec rightChild : rightChildern)
 						if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
@@ -2347,6 +2359,23 @@ public class RisoTreeQueryPN {
 			}
 			else
 			{
+				for (Relationship relationship : rels)
+				{
+					Node child = relationship.getEndNode();
+					MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+					if ( Utility.distance(mbr, right.rectangle) <= distance)
+						leftChildren.add(new NodeAndRec(child, mbr));
+				}
+
+				rels = right.node.getRelationships(Direction.OUTGOING);
+				for ( Relationship relationship : rels)
+				{
+					Node child = relationship.getEndNode();
+					MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+					if ( Utility.distance(mbr, left.rectangle) <= distance)
+						rightChildern.add(new NodeAndRec(child, mbr));
+				}
+				
 				for ( NodeAndRec leftChild : leftChildren)
 				{
 					for ( NodeAndRec rightChild : rightChildern)
@@ -2385,6 +2414,7 @@ public class RisoTreeQueryPN {
 			for (String path : rp.get(endID))
 				rightpaths.add(path);
 		
+		//find all the overlap vertices
 		ArrayList<Integer> overlapVertices = new ArrayList<Integer>();
 		for ( int lid : lp.keySet())
 			for ( int rid : rp.keySet())
@@ -2420,6 +2450,8 @@ public class RisoTreeQueryPN {
 					continue;
 				}
 				check_paths_time += System.currentTimeMillis() - start1;
+				
+				
 			}
 
 			LinkedList<NodeAndRec> leftChildren = new LinkedList<NodeAndRec>();
