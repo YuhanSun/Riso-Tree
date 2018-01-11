@@ -69,9 +69,13 @@ public class RisoTreeQueryPN {
 	public long page_hit_count;
 	public String logPath;
 	
+	//for both knn and join
+	public long check_paths_time;
+	public long has_relation_time;
+	public long has_relation_time_addition;
+	
 	//for knn query track
 	public long queue_time;
-	public long check_paths_time;
 	public int visit_spatial_object_count;
 
 	//for join track
@@ -2258,8 +2262,8 @@ public class RisoTreeQueryPN {
 		return query;
 	}
 	
-	public List<Long[]> spatialJoinRTree(double distance, 
-			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap, ArrayList<Integer> pos)
+	public List<Long[]> spatialJoinRTree(double distance, ArrayList<Integer> pos, 
+			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap)
 	{
 		LinkedList<String> leftpaths = new LinkedList<String>();
 		LinkedList<String> rightpaths = new LinkedList<String>(); 
@@ -2290,15 +2294,132 @@ public class RisoTreeQueryPN {
 			NodeAndRec left = element[0];
 			NodeAndRec right = element[1];
 			
-			if ( left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING))
+			long start = System.currentTimeMillis();
+			boolean flag = left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
+			has_relation_time_addition += System.currentTimeMillis() - start;
+			if (flag)
 			{
+				long start1 = System.currentTimeMillis();
 				if (checkPaths(left.node, leftpaths) == false ||
 						checkPaths(right.node, rightpaths) == false)
 				{
-//					check_paths_time += System.currentTimeMillis() - start1;
+					check_paths_time += System.currentTimeMillis() - start1;
 					continue;
 				}
-//				check_paths_time += System.currentTimeMillis() - start1;
+				check_paths_time += System.currentTimeMillis() - start1;
+			}
+			
+			LinkedList<NodeAndRec> leftChildren = new LinkedList<NodeAndRec>();
+			LinkedList<NodeAndRec> rightChildern = new LinkedList<NodeAndRec>();
+
+			Iterable<Relationship> rels = left.node.getRelationships(Direction.OUTGOING);
+			for (Relationship relationship : rels)
+			{
+				Node child = relationship.getEndNode();
+				MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+				if ( Utility.distance(mbr, right.rectangle) <= distance)
+					leftChildren.add(new NodeAndRec(child, mbr));
+			}
+
+			rels = right.node.getRelationships(Direction.OUTGOING);
+			for ( Relationship relationship : rels)
+			{
+				Node child = relationship.getEndNode();
+				MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+				if ( Utility.distance(mbr, left.rectangle) <= distance)
+					rightChildern.add(new NodeAndRec(child, mbr));
+			}
+			
+			start = System.currentTimeMillis();
+			flag = left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
+			has_relation_time += System.currentTimeMillis() - start;
+			if (flag)
+			{
+				for ( NodeAndRec leftChild : leftChildren)
+					for ( NodeAndRec rightChild : rightChildern)
+						if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
+						{
+							long id1 = leftChild.node.getId();
+							long id2 = rightChild.node.getId();
+							if ( id1 != id2)
+								result.add(new Long[]{id1, id2});
+						}
+			}
+			else
+			{
+				for ( NodeAndRec leftChild : leftChildren)
+				{
+					for ( NodeAndRec rightChild : rightChildern)
+					{
+						if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
+						{
+							NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
+							nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
+							nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);
+							queue.add(nodeAndRecs);
+						}
+					}
+				}
+			}
+		}
+		tx.success();
+		tx.close();
+		return result;
+	}
+	
+	public List<Long[]> spatialJoinRTreeOverlap(double distance, ArrayList<Integer> pos, 
+			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap)
+	{
+		LinkedList<String> leftpaths = new LinkedList<String>();
+		LinkedList<String> rightpaths = new LinkedList<String>(); 
+
+		//pos[0]--lp
+		//pos[1]--rp
+		HashMap<Integer, HashSet<String>> lp = spaPathsMap.get(pos.get(0)); 
+		for ( int endID : lp.keySet())
+			for (String path : lp.get(endID))
+				leftpaths.add(path);
+		
+		HashMap<Integer, HashSet<String>> rp = spaPathsMap.get(pos.get(1)); 
+		for ( int endID : rp.keySet())
+			for (String path : rp.get(endID))
+				rightpaths.add(path);
+		
+		ArrayList<Integer> overlapVertices = new ArrayList<Integer>();
+		for ( int lid : lp.keySet())
+			for ( int rid : rp.keySet())
+				if (lid == rid)
+					overlapVertices.add(lid);
+		
+		List<Long[]> result = new LinkedList<Long[]>();
+		Queue<NodeAndRec[]> queue = new LinkedList<NodeAndRec[]>();
+		Transaction tx = dbservice.beginTx();
+		Node root = RTreeUtility.getRTreeRoot(dbservice, dataset);
+		MyRectangle rootMBR = RTreeUtility.getNodeMBR(root);
+		
+		NodeAndRec[] pair = new NodeAndRec[2];
+		pair[0] = new NodeAndRec(root, rootMBR);
+		pair[1] = new NodeAndRec(root, rootMBR);
+		queue.add(pair);
+		while ( !queue.isEmpty())
+		{
+			NodeAndRec[] element = queue.poll();
+			NodeAndRec left = element[0];
+			NodeAndRec right = element[1];
+			
+			long start = System.currentTimeMillis();
+			boolean flag = left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
+			has_relation_time += System.currentTimeMillis() - start;
+			if (flag)
+			{
+				long start1 = System.currentTimeMillis();
+				if (checkPaths(left.node, leftpaths) == false ||
+						checkPaths(right.node, rightpaths) == false)
+				{
+					check_paths_time += System.currentTimeMillis() - start1;
+					continue;
+				}
+				check_paths_time += System.currentTimeMillis() - start1;
 			}
 
 			LinkedList<NodeAndRec> leftChildren = new LinkedList<NodeAndRec>();
@@ -2322,7 +2443,10 @@ public class RisoTreeQueryPN {
 					rightChildern.add(new NodeAndRec(child, mbr));
 			}
 			
-			if ( left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING))
+			start = System.currentTimeMillis();
+			flag = left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
+			has_relation_time += System.currentTimeMillis() - start;
+			if ( flag)
 			{
 				for ( NodeAndRec leftChild : leftChildren)
 					for ( NodeAndRec rightChild : rightChildern)
@@ -2360,6 +2484,9 @@ public class RisoTreeQueryPN {
 		try {
 			join_result_count = 0;
 			join_time = 0;
+			check_paths_time = 0;
+			has_relation_time = 0;
+			has_relation_time_addition = 0;
 			get_iterator_time = 0;
 			iterate_time = 0;
 			page_hit_count = 0;
@@ -2385,7 +2512,7 @@ public class RisoTreeQueryPN {
 			long start = System.currentTimeMillis();
 			OwnMethods.Print(pos);
 			OwnMethods.Print(spaPathsMap);
-			List<Long[]> idPairs = this.spatialJoinRTree(distance, spaPathsMap, pos);
+			List<Long[]> idPairs = this.spatialJoinRTree(distance, pos, spaPathsMap);
 			join_time = System.currentTimeMillis() - start;
 			join_result_count = idPairs.size();
 			
@@ -2418,102 +2545,4 @@ public class RisoTreeQueryPN {
 		}
 		return null;
 	}
-	
-//	public static void queryTest()
-//	{
-//		String db_path = "", querygraphDir = "", querygraph_path = "", graph_pos_map_path = "", log_path = "";
-//		int queryNodeCount = 3;
-//		int query_id = 0;
-//		Config config = new Config();
-//		String dataset = config.getDatasetName();
-//		system systemName = config.getSystemName();
-//		String neo4jVersion = config.GetNeo4jVersion(); 
-//		switch (systemName) {
-//		case Ubuntu:
-//			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", neo4jVersion, dataset);
-//			querygraphDir = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/query_graph/%s/", dataset);
-//			querygraph_path = String.format("%s%d.txt", querygraphDir, queryNodeCount);
-//			graph_pos_map_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/node_map.txt";
-//			log_path = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/" + dataset + "/test.log";
-//			break;
-//		case Windows:
-//			db_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\%s_%s\\data\\databases\\graph.db", dataset, neo4jVersion, dataset);
-//			querygraphDir = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\query_graph\\%s\\", dataset);
-//			querygraph_path = String.format("%s%d.txt", querygraphDir, queryNodeCount);
-//			graph_pos_map_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\node_map.txt";
-//			log_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\" + dataset + "\\test.log";
-//		default:
-//			break;
-//		}
-//		
-//		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
-//		Query_Graph query_Graph = queryGraphs.get(query_id);
-//		query_Graph.spa_predicate[2] = new MyRectangle(-84.521118, 33.827220, -84.375996, 33.972342);//1000, 2
-////		query_Graph.spa_predicate[2] = new MyRectangle(-84.468680, 33.879658, -84.428434, 33.919904);//100
-//		//		query_Graph.spa_predicate[1] = new MyRectangle(9.523183, 46.839041, 9.541593, 46.857451);//100
-//		//		query_Graph.spa_predicate[1] = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);/10,000
-//		//		query_Graph.spa_predicate[1] = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);//100,000
-//		//		query_Graph.spa_predicate[1] = new MyRectangle(-179.017757, -135.408325, 207.362849, 250.972281);//1,000,000
-//		//		query_Graph.spa_predicate[1] = new MyRectangle(-91.713778, 14.589395, -68.517838, 37.785335);
-//		//		query_Graph.spa_predicate[3] = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);
-//		
-//		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
-//		long[] graph_pos_map_list= new long[graph_pos_map.size()];
-//		for ( String key_str : graph_pos_map.keySet())
-//		{
-//			int key = Integer.parseInt(key_str);
-//			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
-//			graph_pos_map_list[key] = pos_id;
-//		}
-//
-//		try {
-//			RisoTreeQuery risoTreeQuery = new RisoTreeQuery(db_path, dataset, graph_pos_map_list);
-//			long start = System.currentTimeMillis();
-//			risoTreeQuery.Query(query_Graph, -1);
-//			OwnMethods.Print("Time:" + (System.currentTimeMillis() - start));
-//			OwnMethods.Print(String.format("result count:%d", risoTreeQuery.result_count));
-//			risoTreeQuery.dbservice.shutdown();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
-//	
-//	public static void main(String[] args) {
-//		queryTest();
-//
-//			//			SpatialFirst spatialFirst = new SpatialFirst(db_path, dataset);
-//			//			TreeSet<Long> result2 = spatialFirst.Query(query_Graph);
-//			//			spatialFirst.shutdown();
-//			//			
-//			//			LinkedList<Long> counter1 = new LinkedList<Long>();
-//			//			for ( long id : result1)
-//			//				if(result2.contains(id) == false)
-//			//					counter1.add(id);
-//			//			
-//			//			for ( long id : counter1)
-//			//				OwnMethods.Print(id);
-//			//			OwnMethods.Print(counter1.size());
-//
-//			//			LinkedList<Long> counter2 = new LinkedList<Long>();
-//			//			for ( long id : result2)
-//			//				if(result1.contains(id) == false)
-//			//					counter2.add(id);
-//			//			
-//			//			for ( long id : counter2)
-//			//				OwnMethods.Print(id);
-//			//			OwnMethods.Print(counter2.size());
-//
-//			//			dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
-//			//			tx = dbservice.beginTx();
-//			//			for ( long id : counter1)
-//			//			{
-//			//				double[] bbox = (double[])dbservice.getNodeById(id).getProperty("bbox");
-//			//				MyRectangle rectangle = new MyRectangle(bbox);
-//			////				for ( double element : bbox)
-//			////					OwnMethods.Print(element);
-//			//				OwnMethods.Print(rectangle.toString());
-//			////				break;
-//			//			}
-//	}
-
 }
