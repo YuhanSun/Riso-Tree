@@ -42,6 +42,29 @@ import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 public class OwnMethods {
 	
 	/**
+	 * Convert the one-predicate query graph to two-predicate
+	 * The query graph is for LAGAQ-join input.
+	 * @param query_Graph
+	 */
+	public static void convertQueryGraphForJoin(Query_Graph query_Graph)
+	{
+		int nodeCount = query_Graph.graph.size();
+		Random random = new Random();
+		while ( true)
+		{
+			int id = (int) (nodeCount * random.nextDouble());
+			if ( query_Graph.Has_Spa_Predicate[id])
+				continue;
+			
+			if (query_Graph.label_list[id] == 1)
+			{
+				query_Graph.Has_Spa_Predicate[id] = true;
+				break;
+			}
+		}
+	}
+	
+	/**
 	 * Load hmbr from file to database.
 	 * @param hmbrPath
 	 * @param datbasePath
