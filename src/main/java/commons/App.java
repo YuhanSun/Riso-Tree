@@ -250,7 +250,8 @@ public class App {
 		{
 			List<Entity> results = stRtree.query(new Envelope(rect.min_x, rect.max_x, rect.min_y, rect.max_y));
 			OwnMethods.Print(results.size());
-			countSum += results.size();	index++;
+			countSum += results.size();	
+			index++;
 		}
 		OwnMethods.Print(String.format("Average selectivity:%d", countSum / index));
 	}
