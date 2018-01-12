@@ -13,12 +13,16 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.cypher.internal.compiler.v2_3.docgen.plannerDocGen.idNameConverter;
+import org.neo4j.cypher.internal.compiler.v3_1.ast.rewriters.expandCallWhere;
 import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 import commons.Config;
 import commons.Entity;
@@ -30,6 +34,7 @@ import commons.Utility;
 import commons.Config.Explain_Or_Profile;
 import commons.Config.system;
 import commons.Labels.OSMRelation;
+import net.sf.geographiclib.Pair;
 
 public class SpatialFirst_ListTest {
 
@@ -251,6 +256,103 @@ public class SpatialFirst_ListTest {
 			e.printStackTrace();
 			System.exit(-1);
 		}
+	}
+	
+	@Test 
+	public void spatialJoinRTreeValidate() {
+		OwnMethods.Print(entityPath);
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+//		STRtree stRtree = OwnMethods.ConstructSTRee(entities);
+		double distance = 0.1;
+		
+		int resolution = 1000;
+		int size = 1;
+		
+		HashMap<Integer, LinkedList<Integer>> gridMap = new HashMap<>();
+		for (int i = 0; i < resolution * resolution; i++) 
+			gridMap.put(i, new LinkedList<>());
+		
+		for (int i = 0; i < entities.size(); i++)
+		{
+			Entity entity = entities.get(i);
+			if ( entity.IsSpatial)
+			{
+				int x = (int) (entity.lon / size);
+				int y = (int) (entity.lat / size);
+				x = (x == 1000 ? x-1:x);
+				y = (y == 1000 ? y-1:y);
+				int id = y * 1000 + x;
+				gridMap.get(id).add(i);
+			}
+		}
+
+		ArrayList<Integer[]> result = new ArrayList<>();
+		
+		ArrayList<Integer> offsets = new ArrayList<>();
+		offsets.add(-1);
+		offsets.add(0);
+		offsets.add(1);
+		offsets.add(-1000);
+		offsets.add(-999);
+		offsets.add(-1001);
+		offsets.add(1000);
+		offsets.add(999);
+		offsets.add(1001);
+		for (int i = 0; i < resolution*resolution; i++)
+		{
+			OwnMethods.Print(i);
+			for ( int offset : offsets)
+			{
+				if ( gridMap.containsKey(i + offset))
+				{
+					for ( int id1 :gridMap.get(i))
+					{
+						for ( int id2 : gridMap.get(i + offset))
+						{
+							Entity entity1 = entities.get(id1);
+							Entity entity2 = entities.get(id2);
+							if (Utility.distance(entity1.lon, entity1.lat,
+									entity2.lon, entity2.lat) <= distance
+									&& entity1.id != entity2.id)
+							{
+								Integer[] pair = new Integer[2];
+								pair[0] = id1;
+								pair[1] = id2;
+								result.add(pair);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		
+//		for ( Entity entity : entities)
+//		{
+//			OwnMethods.Print(entity.id);
+//			if ( entity.IsSpatial)
+//			{
+//				for (Entity entity2 : entities)
+//				{
+//					if (entity2.IsSpatial)
+//					{
+//						if (Utility.distance(entity.lon, entity.lat, 
+//								entity2.lon, entity2.lat) <= distance)
+//						{
+//							Integer[] pair = new Integer[2];
+//							if ( entity.id != entity2.id)
+//							{
+//								pair[0] = entity.id;
+//								pair[1] = entity2.id;
+//								result.add(pair);
+//							}
+//						}	
+//					}
+//				}
+//			}
+//		}
+		OwnMethods.Print(result.size());
+		
 	}
 	
 	@Test
