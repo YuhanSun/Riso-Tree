@@ -3,6 +3,7 @@ package graph;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -205,7 +206,47 @@ public class RisoTreeQueryPNTest {
 		String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
 		OwnMethods.Print(query);
 	}
+	
+//	@Test
+//	public void spatialJoinRTreeTest() {
+//		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
+//		try{
+//			long start = System.currentTimeMillis();
+//			List<Long[]> result = risoTreeQueryPN.spatialJoinRTree(0.01, pos, spaPathsMap);
+//			OwnMethods.Print(System.currentTimeMillis() - start);
+//		}
+//		catch(Exception e)
+//		{
+//			e.printStackTrace();
+//			System.exit(-1);
+//		}
+//	}
 
+	@Test
+	public void spatialJoinRTreeTest()
+	{
+		try {
+			FileWriter writer = new FileWriter("D:\\temp\\output2.txt");
+			OwnMethods.ClearCache("syh19910205");
+			RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
+			long start = System.currentTimeMillis();
+			List<Long[]> result = risoTreeQueryPN.spatialJoinRTree(0.1, null, null);
+			long time =  System.currentTimeMillis() - start;
+			OwnMethods.Print(time);
+			OwnMethods.Print(result.size());
+			risoTreeQueryPN.dbservice.shutdown();
+			for (Long[] element : result)
+			{
+				writer.write(String.format("%d,%d\n", element[0], element[1]));
+			}
+			writer.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	@Test
 	public void LAGAQ_JoinTest()
 	{

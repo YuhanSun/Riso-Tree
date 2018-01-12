@@ -241,10 +241,12 @@ public class SpatialFirst_ListTest {
 	public void spatialJoinRTreeTest() {
 		SpatialFirst_List spatialFirst_List = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 		try{
-			FileWriter writer = new FileWriter("D:\\temp\\output.txt");
+			FileWriter writer = new FileWriter("D:\\temp\\output1.txt");
 			long start = System.currentTimeMillis();
-			List<Long[]> result = spatialFirst_List.spatialJoinRTree(0.01);
+			List<Long[]> result = spatialFirst_List.spatialJoinRTree(0.1);
 			OwnMethods.Print(System.currentTimeMillis() - start);
+			OwnMethods.Print(result.size());
+			spatialFirst_List.shutdown();
 			for (Long[] element : result)
 			{
 				writer.write(String.format("%d,%d\n", element[0], element[1]));
