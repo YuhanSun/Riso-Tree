@@ -4,15 +4,36 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
+
+import com.vividsolutions.jts.index.strtree.STRtree;
+
+import commons.Config.system;
 
 public class UtilityTest {
+	
+	static Config config = new Config();
+	static String dataset = config.getDatasetName();
+	static system systemName = config.getSystemName();
+	static String entityPath;
 
 	@Before
 	public void setUp() throws Exception {
+		switch (systemName) {
+		case Ubuntu:
+			entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
+			break;
+		case Windows:
+			String dataDirectory = "D:\\Ubuntu_shared\\GeoMinHop\\data";
+			entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
+		default:
+			break;
+		}
 	}
 
 	@After
@@ -49,6 +70,31 @@ public class UtilityTest {
 		ArrayList<Integer> input = new ArrayList<Integer>(Arrays.asList(0,1,2));
 		ArrayList<Integer> result = Utility.groupSum(0, 2, input, 3);
 		OwnMethods.Print(result);
+	}
+	
+	@Test
+	public void distanceQueryTest()
+	{
+		OwnMethods.Print(entityPath);
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		double distance = 10;
+		
+		STRtree stRtree = OwnMethods.ConstructSTRee(entities);
+		long start = System.currentTimeMillis();
+		MyPoint point = new MyPoint(500, 500);	
+		LinkedList<Entity> result = Utility.distanceQuery(stRtree, point, distance);
+		long time = System.currentTimeMillis() - start;
+		OwnMethods.Print(String.format("time using index: %d", time));
+		OwnMethods.Print("result size: " + result.size());
+		
+		start = System.currentTimeMillis();
+		int count = 0;
+		for ( Entity entity: entities)
+			if (Utility.distance(entity.lon, entity.lat, point.x, point.y) <= distance)
+				count++;
+		time = System.currentTimeMillis() - start;
+		OwnMethods.Print("time no index: " + time);
+		OwnMethods.Print("result size " + count);
 		
 	}
 }

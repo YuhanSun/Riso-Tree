@@ -7,12 +7,37 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 import knn.Element;
 
 public class Utility {
 	
-//	public static 
+	/**
+	 * For a given query point and a radius, to find all the spatial
+	 * objects in the STRTree.
+	 * @param stRtree the input STRtree
+	 * @param point the input query location
+	 * @param distance the search radius
+	 * @return all the spatial objects within the distance from the query point
+	 */
+	public static LinkedList<Entity> distanceQuery(STRtree stRtree, MyPoint point, double distance)
+	{
+		Envelope searchEnv = new Envelope(point.x - distance, point.x + distance, 
+				point.y - distance, point.y + distance);
+		List<Entity> rangeResult = stRtree.query(searchEnv);
+		LinkedList<Entity> result = new LinkedList<Entity>();
+		for (Entity entity : rangeResult)
+		{
+			if (Utility.distance(entity.lon, entity.lat, point.x, point.y) <= distance)
+				result.add(entity);
+		}
+		return result;
+	}
 	
 	public static ArrayList<Integer> groupSum(double min, double max, ArrayList<Integer> input, int binCount)
 	{
