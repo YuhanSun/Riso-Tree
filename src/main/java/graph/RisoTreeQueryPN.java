@@ -2268,15 +2268,15 @@ public class RisoTreeQueryPN {
 		LinkedList<String> leftpaths = new LinkedList<String>();
 		LinkedList<String> rightpaths = new LinkedList<String>(); 
 
-		HashMap<Integer, HashSet<String>> lp = spaPathsMap.get(pos.get(0)); 
-		for ( int endID : lp.keySet())
-			for (String path : lp.get(endID))
-				leftpaths.add(path);
-		
-		HashMap<Integer, HashSet<String>> rp = spaPathsMap.get(pos.get(1)); 
-		for ( int endID : rp.keySet())
-			for (String path : rp.get(endID))
-				rightpaths.add(path);
+//		HashMap<Integer, HashSet<String>> lp = spaPathsMap.get(pos.get(0)); 
+//		for ( int endID : lp.keySet())
+//			for (String path : lp.get(endID))
+//				leftpaths.add(path);
+//		
+//		HashMap<Integer, HashSet<String>> rp = spaPathsMap.get(pos.get(1));
+//		for ( int endID : rp.keySet())
+//			for (String path : rp.get(endID))
+//				rightpaths.add(path);
 		
 		List<Long[]> result = new LinkedList<Long[]>();
 		Queue<NodeAndRec[]> queue = new LinkedList<NodeAndRec[]>();
@@ -2318,13 +2318,13 @@ public class RisoTreeQueryPN {
 				for (Relationship relationship : rels)
 				{
 					Node child = relationship.getEndNode();
-					long start1 = System.currentTimeMillis();
-					if (checkPaths(child, leftpaths) == false)
-					{
-						check_paths_time += System.currentTimeMillis() - start1;
-						continue;
-					}
-					check_paths_time += System.currentTimeMillis() - start1;
+//					long start1 = System.currentTimeMillis();
+//					if (checkPaths(child, leftpaths) == false)
+//					{
+//						check_paths_time += System.currentTimeMillis() - start1;
+//						continue;
+//					}
+//					check_paths_time += System.currentTimeMillis() - start1;
 					
 					MyRectangle mbr = RTreeUtility.getNodeMBR(child);
 					if ( Utility.distance(mbr, right.rectangle) <= distance)
@@ -2335,13 +2335,13 @@ public class RisoTreeQueryPN {
 				for ( Relationship relationship : rels)
 				{
 					Node child = relationship.getEndNode();
-					long start1 = System.currentTimeMillis();
-					if (checkPaths(child, leftpaths) == false)
-					{
-						check_paths_time += System.currentTimeMillis() - start1;
-						continue;
-					}
-					check_paths_time += System.currentTimeMillis() - start1;
+//					long start1 = System.currentTimeMillis();
+//					if (checkPaths(child, rightpaths) == false)
+//					{
+//						check_paths_time += System.currentTimeMillis() - start1;
+//						continue;
+//					}
+//					check_paths_time += System.currentTimeMillis() - start1;
 					MyRectangle mbr = RTreeUtility.getNodeMBR(child);
 					if ( Utility.distance(mbr, left.rectangle) <= distance)
 						rightChildern.add(new NodeAndRec(child, mbr));
