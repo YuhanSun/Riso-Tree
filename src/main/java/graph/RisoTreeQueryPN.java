@@ -2262,7 +2262,201 @@ public class RisoTreeQueryPN {
 		return query;
 	}
 	
+	/**
+	 * Use the property key "PN_...list" to decide whether 
+	 * the node is a leaf node. 
+	 * (May needs to be modified when property name changes) 
+	 * @param node the given node
+	 * @return
+	 */
+	public boolean isNodeLeaf(Node node)
+	{
+//		Iterable<String> keys = node.getPropertyKeys();
+//		for ( String key : keys)
+//		{
+//			if (key.startsWith("PN") && key.endsWith("list"))
+//				return true;
+//		}
+//		return false;
+		return node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
+	}
+	
+	public boolean isChildNodeLeaf(Node node)
+	{
+		try
+		{
+			Iterable<Relationship> rels = node.getRelationships(
+					RTreeRel.RTREE_CHILD, Direction.OUTGOING);
+			Iterator<Relationship> iterator = rels.iterator();
+			if(iterator.hasNext())
+			{
+				Node child = iterator.next().getEndNode();
+				return isNodeLeaf(child);
+			}
+			else throw new Exception("This node is not a non-leaf node in the tree");
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		return false;
+	}
+	
 	public List<Long[]> spatialJoinRTree(double distance, ArrayList<Integer> pos, 
+			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap)
+	{
+		List<Long[]> result = new LinkedList<Long[]>();
+		Queue<NodeAndRec[]> queue = new LinkedList<NodeAndRec[]>();
+		Transaction tx = dbservice.beginTx();
+		Node root = RTreeUtility.getRTreeRoot(dbservice, dataset);
+		MyRectangle rootMBR = RTreeUtility.getNodeMBR(root);
+		
+		NodeAndRec[] pair = new NodeAndRec[2];
+		pair[0] = new NodeAndRec(root, rootMBR);
+		pair[1] = new NodeAndRec(root, rootMBR);
+		queue.add(pair);
+//		boolean isChildLeaf, isLeaf;
+//		isLeaf = isNodeLeaf(root);
+//		if(isLeaf)
+//			isChildLeaf = true;
+//		else
+//			isChildLeaf = isChildNodeLeaf(root);
+		
+		while ( !queue.isEmpty())
+		{
+			NodeAndRec[] element = queue.poll();
+			NodeAndRec left = element[0];
+			NodeAndRec right = element[1];
+
+			LinkedList<NodeAndRec> leftChildren = new LinkedList<NodeAndRec>();
+			LinkedList<NodeAndRec> rightChildern = new LinkedList<NodeAndRec>();
+			
+			//no path checking in this case
+			if (isChildNodeLeaf(left.node) == false)
+			{
+				Iterable<Relationship> rels = left.node.getRelationships(Direction.OUTGOING);
+				for (Relationship relationship : rels)
+				{
+					Node child = relationship.getEndNode();
+					MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+					if ( Utility.distance(mbr, right.rectangle) <= distance)
+						leftChildren.add(new NodeAndRec(child, mbr));
+				}
+
+				rels = right.node.getRelationships(Direction.OUTGOING);
+				for ( Relationship relationship : rels)
+				{
+					Node child = relationship.getEndNode();
+					MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+					if ( Utility.distance(mbr, left.rectangle) <= distance)
+						rightChildern.add(new NodeAndRec(child, mbr));
+				}
+				
+				for ( NodeAndRec leftChild : leftChildren)
+				{
+					for ( NodeAndRec rightChild : rightChildern)
+					{
+						if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
+						{
+							NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
+							nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
+							nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);
+							queue.add(nodeAndRecs);
+						}
+					}
+				}
+			}
+			else
+			{
+				//node is leaf
+				if(isNodeLeaf(left.node))
+				{
+					Iterable<Relationship> rels = left.node.getRelationships(Direction.OUTGOING);
+					for (Relationship relationship : rels)
+					{
+						Node child = relationship.getEndNode();
+						MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+						if ( Utility.distance(mbr, right.rectangle) <= distance)
+							leftChildren.add(new NodeAndRec(child, mbr));
+					}
+
+					rels = right.node.getRelationships(Direction.OUTGOING);
+					for ( Relationship relationship : rels)
+					{
+						Node child = relationship.getEndNode();
+						MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+						if ( Utility.distance(mbr, left.rectangle) <= distance)
+							rightChildern.add(new NodeAndRec(child, mbr));
+					}
+					
+					for ( NodeAndRec leftChild : leftChildren)
+						for ( NodeAndRec rightChild : rightChildern)
+							if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
+							{
+								long id1 = leftChild.node.getId();
+								long id2 = rightChild.node.getId();
+								if ( id1 != id2)
+									result.add(new Long[]{id1, id2});
+							}
+				}
+				//child is leaf, check childern's paths
+				else
+				{
+					Iterable<Relationship> rels = left.node.getRelationships(Direction.OUTGOING);
+					for (Relationship relationship : rels)
+					{
+						Node child = relationship.getEndNode();
+//						long start1 = System.currentTimeMillis();
+//						if (checkPaths(child, leftpaths) == false)
+//						{
+//							check_paths_time += System.currentTimeMillis() - start1;
+//							continue;
+//						}
+//						check_paths_time += System.currentTimeMillis() - start1;
+						MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+						if ( Utility.distance(mbr, right.rectangle) <= distance)
+							leftChildren.add(new NodeAndRec(child, mbr));
+					}
+
+					rels = right.node.getRelationships(Direction.OUTGOING);
+					for ( Relationship relationship : rels)
+					{
+						Node child = relationship.getEndNode();
+//						long start1 = System.currentTimeMillis();
+//						if (checkPaths(child, rightpaths) == false)
+//						{
+//							check_paths_time += System.currentTimeMillis() - start1;
+//							continue;
+//						}
+//						check_paths_time += System.currentTimeMillis() - start1;
+						MyRectangle mbr = RTreeUtility.getNodeMBR(child);
+						if ( Utility.distance(mbr, left.rectangle) <= distance)
+							rightChildern.add(new NodeAndRec(child, mbr));
+					}
+					
+					for ( NodeAndRec leftChild : leftChildren)
+					{
+						for ( NodeAndRec rightChild : rightChildern)
+						{
+							if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
+							{
+								NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
+								nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
+								nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);
+								queue.add(nodeAndRecs);
+							}
+						}
+					}
+				}
+			}
+		}
+		tx.success();
+		tx.close();
+		return result;
+	}
+	
+	public List<Long[]> spatialJoinRTreeBackup(double distance, ArrayList<Integer> pos, 
 			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap)
 	{
 //		LinkedList<String> leftpaths = new LinkedList<String>();
