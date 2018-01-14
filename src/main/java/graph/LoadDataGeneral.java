@@ -30,6 +30,11 @@ import commons.Labels.GraphRel;
 import commons.Labels.RTreeRel;
 import osm.OSM_Utility;
 
+/**
+ * not used
+ * @author ysun138
+ *
+ */
 public class LoadDataGeneral {
 	
 	static Config config = new Config();
