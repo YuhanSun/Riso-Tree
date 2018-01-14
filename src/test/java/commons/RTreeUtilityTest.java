@@ -68,4 +68,24 @@ public class RTreeUtilityTest {
 		tx.success();tx.close();
 		databaseService.shutdown();
 	}
+	
+	@Test
+	public void getHeightTest()
+	{
+		OwnMethods.Print(db_path);
+		GraphDatabaseService databaseService = new GraphDatabaseFactory()
+				.newEmbeddedDatabase(new File(db_path));
+		Transaction tx = databaseService.beginTx();
+		Node node = RTreeUtility.getRTreeRoot(databaseService, dataset);
+		
+//		Node node = databaseService.getNodeById(758295);
+		
+		OwnMethods.Print(RTreeUtility.getHeight(node));
+		
+		OwnMethods.Print(node.getAllProperties());
+		
+		tx.success();
+		tx.close();
+		databaseService.shutdown();
+	}
 }

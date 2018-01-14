@@ -1,7 +1,10 @@
 package commons;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+
+import javax.management.relation.Relation;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -16,6 +19,44 @@ import commons.Labels.OSMRelation;
 import commons.Labels.RTreeRel;
 
 public class RTreeUtility {
+	
+	/**
+	 * Get the height of current node in RTree.
+	 * Leaf level will be of height 1.
+	 * Leaf node is the level above the real spatial vertex.
+	 * @param node the given node
+	 * @return height of the input node. 
+	 * where <code>-1</code> means node is not in RTree;
+	 * <code>1</code> means leaf node in RTree.
+	 */
+	public static int getHeight(Node node)
+	{
+		if (node.hasRelationship(RTreeRel.RTREE_CHILD, Direction.OUTGOING))
+		{
+			Node curNode = node;
+			int level = 1;
+			while(true)
+			{
+				Iterable<Relationship> rels = curNode.getRelationships(RTreeRel.RTREE_CHILD, Direction.OUTGOING);
+				Iterator<Relationship> iterator = rels.iterator();
+				if (iterator.hasNext())
+				{
+					level++;
+					curNode = iterator.next().getEndNode();
+				}
+				else
+					return level;
+				
+			}
+		}
+		else
+		{
+			if (node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING))
+				return 1;
+			else return -1;
+		}
+		
+	}
 	
 	/**
 	 * Get the MBR of a given node.
