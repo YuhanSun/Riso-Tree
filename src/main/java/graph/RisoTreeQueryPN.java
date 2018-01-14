@@ -2332,8 +2332,8 @@ public class RisoTreeQueryPN {
 			LinkedList<NodeAndRec> leftChildren = new LinkedList<NodeAndRec>();
 			LinkedList<NodeAndRec> rightChildern = new LinkedList<NodeAndRec>();
 			
-			//no path checking in this case
-			if (isChildNodeLeaf(left.node) == false)
+			//node is leaf
+			if(isNodeLeaf(left.node))
 			{
 				Iterable<Relationship> rels = left.node.getRelationships(Direction.OUTGOING);
 				for (Relationship relationship : rels)
@@ -2354,23 +2354,19 @@ public class RisoTreeQueryPN {
 				}
 				
 				for ( NodeAndRec leftChild : leftChildren)
-				{
 					for ( NodeAndRec rightChild : rightChildern)
-					{
 						if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
 						{
-							NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
-							nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
-							nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);
-							queue.add(nodeAndRecs);
+							long id1 = leftChild.node.getId();
+							long id2 = rightChild.node.getId();
+							if ( id1 != id2)
+								result.add(new Long[]{id1, id2});
 						}
-					}
-				}
 			}
 			else
 			{
-				//node is leaf
-				if(isNodeLeaf(left.node))
+				//no path checking in this case
+				if (isChildNodeLeaf(left.node) == false)
 				{
 					Iterable<Relationship> rels = left.node.getRelationships(Direction.OUTGOING);
 					for (Relationship relationship : rels)
@@ -2391,14 +2387,18 @@ public class RisoTreeQueryPN {
 					}
 					
 					for ( NodeAndRec leftChild : leftChildren)
+					{
 						for ( NodeAndRec rightChild : rightChildern)
+						{
 							if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
 							{
-								long id1 = leftChild.node.getId();
-								long id2 = rightChild.node.getId();
-								if ( id1 != id2)
-									result.add(new Long[]{id1, id2});
+								NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
+								nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
+								nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);
+								queue.add(nodeAndRecs);
 							}
+						}
+					}
 				}
 				//child is leaf, check childern's paths
 				else
