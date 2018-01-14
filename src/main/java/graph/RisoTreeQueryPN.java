@@ -2398,13 +2398,11 @@ public class RisoTreeQueryPN {
 			nextlevel = new LinkedList<>();
 		}
 		
+		//curlevel only has leaf nodes
 		for ( NodeAndRec[] element : curlevel)
 		{
 			NodeAndRec left = element[0];
 			NodeAndRec right = element[1];
-			
-			OwnMethods.Print(left.node.getId());
-			OwnMethods.Print(right.node.getId());
 			
 			LinkedList<NodeAndRec> leftChildren = new LinkedList<NodeAndRec>();
 			LinkedList<NodeAndRec> rightChildern = new LinkedList<NodeAndRec>();

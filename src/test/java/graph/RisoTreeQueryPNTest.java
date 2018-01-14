@@ -226,20 +226,22 @@ public class RisoTreeQueryPNTest {
 	public void spatialJoinRTreeTest()
 	{
 		try {
-			FileWriter writer = new FileWriter("D:\\temp\\output2.txt");
-//			OwnMethods.ClearCache("syh19910205");
+			double distance = 0.01;
+			OwnMethods.Print(distance);
+//			FileWriter writer = new FileWriter("D:\\temp\\output2.txt");
+			OwnMethods.ClearCache("syh19910205");
 			RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
 			long start = System.currentTimeMillis();
-			List<Long[]> result = risoTreeQueryPN.spatialJoinRTree(0.1, null, null);
+			List<Long[]> result = risoTreeQueryPN.spatialJoinRTree(distance, null, null);
 			long time =  System.currentTimeMillis() - start;
 			OwnMethods.Print(time);
 			OwnMethods.Print(result.size());
 			risoTreeQueryPN.dbservice.shutdown();
-			for (Long[] element : result)
-			{
-				writer.write(String.format("%d,%d\n", element[0], element[1]));
-			}
-			writer.close();
+//			for (Long[] element : result)
+//			{
+//				writer.write(String.format("%d,%d\n", element[0], element[1]));
+//			}
+//			writer.close();
 		}
 		catch (Exception e)
 		{

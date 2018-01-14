@@ -241,9 +241,12 @@ public class SpatialFirst_ListTest {
 	public void spatialJoinRTreeTest() {
 		SpatialFirst_List spatialFirst_List = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 		try{
+			double distance = 0.01;
+			OwnMethods.Print(distance);
+			OwnMethods.ClearCache("syh19910205");
 			FileWriter writer = new FileWriter("D:\\temp\\output1.txt");
 			long start = System.currentTimeMillis();
-			List<Long[]> result = spatialFirst_List.spatialJoinRTree(0.1);
+			List<Long[]> result = spatialFirst_List.spatialJoinRTree(distance);
 			OwnMethods.Print(System.currentTimeMillis() - start);
 			OwnMethods.Print(result.size());
 			spatialFirst_List.shutdown();
