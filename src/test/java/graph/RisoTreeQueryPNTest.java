@@ -227,7 +227,7 @@ public class RisoTreeQueryPNTest {
 	{
 		try {
 			FileWriter writer = new FileWriter("D:\\temp\\output2.txt");
-			OwnMethods.ClearCache("syh19910205");
+//			OwnMethods.ClearCache("syh19910205");
 			RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
 			long start = System.currentTimeMillis();
 			List<Long[]> result = risoTreeQueryPN.spatialJoinRTree(0.1, null, null);
