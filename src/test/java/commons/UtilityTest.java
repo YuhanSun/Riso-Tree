@@ -95,6 +95,31 @@ public class UtilityTest {
 		time = System.currentTimeMillis() - start;
 		OwnMethods.Print("time no index: " + time);
 		OwnMethods.Print("result size " + count);
+	}
+	
+	@Test
+	public void sortedListIntersectTest()
+	{
+		ArrayList<Integer> l1 = new ArrayList<>(Arrays.asList(1, 2, 4));
+		int[] l2 = {3};
+		OwnMethods.Print(Utility.sortedListIntersect(l1, l2));
 		
+		l1 = new ArrayList<>();
+		l1.add(1);
+		int [] l3 = {1, 2, 3, 4};
+		OwnMethods.Print(Utility.sortedListIntersect(l1, l3));
+		
+	}
+	
+	@Test
+	public void isSortedIntersectTest()
+	{
+		ArrayList<Integer> l1 = new ArrayList<>(Arrays.asList(1, 2, 4));
+		ArrayList<Integer> l2 = new ArrayList<>(Arrays.asList(3));
+		OwnMethods.Print(Utility.isSortedIntersect(l1, l2));
+		
+		l1 = new ArrayList<>(Arrays.asList(1, 2, 4));
+		l2 = new ArrayList<>(Arrays.asList(2));
+		OwnMethods.Print(Utility.isSortedIntersect(l1, l2));
 	}
 }

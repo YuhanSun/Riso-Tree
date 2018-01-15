@@ -18,6 +18,76 @@ import knn.Element;
 public class Utility {
 	
 	/**
+	 * Decide whether two list has intersection.
+	 * @param l1
+	 * @param l2
+	 * @return
+	 */
+	public static boolean isSortedIntersect(ArrayList<Integer> l1, ArrayList<Integer> l2)
+	{
+		int i = 0, j = 0;
+		while (true)
+		{
+			if (i >= l1.size())
+				return false;
+			if (j >= l2.size())
+				return false;
+			if ( l1.get(i) < l2.get(j))
+				i++;
+			else if (l1.get(i) > l2.get(j))
+				j++;
+			else return true;
+		}
+	}
+	
+	/**
+	 * Intersect two sorted list
+	 * @param l1
+	 * @param l2
+	 * @return
+	 */
+	public static ArrayList<Integer> sortedListIntersect(ArrayList<Integer> l1,  int[] l2)
+	{
+		ArrayList<Integer> res = new ArrayList<>(l1.size() + l2.length);
+		int i = 0, j = 0;
+		while ( true)
+		{
+			if ( i >= l1.size())
+			{
+				for ( ; j < l2.length; j++)
+					res.add(l2[j]);
+				break;
+			}
+			if (j >= l2.length)
+			{	
+				for ( ; i < l1.size(); i++)
+					res.add(l1.get(i));
+				break;
+			}
+			if ( l1.get(i) < l2[j])
+			{
+				res.add(l1.get(i));
+				i++;
+			}
+			else
+			{
+				if ( l1.get(i) > l2[j])
+				{
+					res.add(l2[j]);
+					j++;
+				}
+				else
+				{
+					res.add(l2[j]);
+					i++;
+					j++;
+				}
+			}
+		}
+		return res;
+	}
+	
+	/**
 	 * For a given query point and a radius, to find all the spatial
 	 * objects in the STRTree.
 	 * @param stRtree the input STRtree
