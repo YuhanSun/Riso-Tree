@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -247,6 +248,49 @@ public class RisoTreeQueryPNTest {
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	@Test
+	public void constructPNTest()
+	{
+		OwnMethods.convertQueryGraphForJoin(query_Graph);
+		OwnMethods.Print(query_Graph.toString());
+		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
+		GraphDatabaseService databaseService = risoTreeQueryPN.dbservice;
+		Transaction tx = databaseService.beginTx();
+		Node node = databaseService.getNodeById(758387);
+//		OwnMethods.Print(node.getPropertyKeys());
+		
+		HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = risoTreeQueryPN.recognizePaths(query_Graph);
+		HashMap<Integer, HashSet<String>> paths = spaPathsMap.get(2);
+		ArrayList<Integer> overlapVertices = new ArrayList<>();
+		overlapVertices.add(1);
+		overlapVertices.add(4);
+		HashMap<Integer, ArrayList<Integer>> res = risoTreeQueryPN.constructPN(node, paths, overlapVertices);
+		OwnMethods.Print(res);
+		tx.success();
+		tx.close();
+	}
+	
+	@Test
+	public void isIntersectTest()
+	{
+		long start = System.currentTimeMillis();
+		ArrayList<Integer> overlapVertices = new ArrayList<>(
+				Arrays.asList(0, 2));
+		
+		HashMap<Integer, ArrayList<Integer>> pnListLeft = new HashMap<>();
+		pnListLeft.put(0, new ArrayList<Integer>(Arrays.asList(0, 1, 2)));
+		pnListLeft.put(2, new ArrayList<Integer>(Arrays.asList(0, 1, 2)));
+		
+		HashMap<Integer, ArrayList<Integer>> pnListRight = new HashMap<>();
+		pnListRight.put(0, new ArrayList<Integer>(Arrays.asList(0, 1, 2)));
+		pnListRight.put(2, new ArrayList<Integer>(Arrays.asList()));
+		OwnMethods.Print(System.currentTimeMillis() - start);
+		
+		start = System.currentTimeMillis();
+		OwnMethods.Print(RisoTreeQueryPN.isIntersect(overlapVertices, pnListLeft, pnListRight));
+		OwnMethods.Print(System.currentTimeMillis() - start);
 	}
 	
 	@Test

@@ -12,7 +12,6 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Stack;
 
-import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -2281,6 +2280,11 @@ public class RisoTreeQueryPN {
 		return node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
 	}
 	
+	/**
+	 * Decide whether child of a given node is a leaf node
+	 * @param node the given node
+	 * @return
+	 */
 	public boolean isChildNodeLeaf(Node node)
 	{
 		try
@@ -2301,6 +2305,25 @@ public class RisoTreeQueryPN {
 			System.exit(-1);
 		}
 		return false;
+	}
+	
+	public HashMap<Integer, ArrayList<Integer>> constructPN(Node node, HashMap<Integer, HashSet<String>> paths, 
+			 ArrayList<Integer> overlapVertices)
+	{
+		HashMap<Integer, ArrayList<Integer>> pnMap = new HashMap<>();
+		for ( int id : overlapVertices)
+		{
+			ArrayList<Integer> pn = new ArrayList<>();
+			for (String pnName : paths.get(id))
+			{
+				OwnMethods.Print(pnName);
+				int[] l = (int[]) node.getProperty(pnName);
+				pn = Utility.sortedListIntersect(pn, l);
+			}
+			pnMap.put(id, pn);
+		}
+		
+		return pnMap;
 	}
 	
 	public List<Long[]> spatialJoinRTree(double distance, ArrayList<Integer> pos, 
@@ -2449,6 +2472,25 @@ public class RisoTreeQueryPN {
 		return result;
 	}
 	
+	/**
+	 * Decide whether two given PN maps have intersect in all overlapped query vertices. 
+	 * @param overlapVertices overlapped query vertices
+	 * @param pnListLeft <id, pathNeighbors> for the join left predicate
+	 * @param pnListRight <id, pathNeighbors> for the join right predicate
+	 * @return
+	 */
+	public static boolean isIntersect(ArrayList<Integer> overlapVertices,
+			HashMap<Integer, ArrayList<Integer>> pnListLeft, HashMap<Integer, ArrayList<Integer>> pnListRight)
+	{
+		for ( int id : overlapVertices)
+		{
+			if (Utility.isSortedIntersect(pnListLeft.get(id), 
+					pnListRight.get(id)) == false)
+					return false;
+		}
+		return true;
+	}
+	
 	public List<Long[]> spatialJoinRTreeOverlap(double distance, ArrayList<Integer> pos, 
 			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap)
 	{
@@ -2564,6 +2606,7 @@ public class RisoTreeQueryPN {
 				//child is leaf, check childern's paths
 				else
 				{
+					LinkedList<HashMap<Integer, ArrayList<Integer>>> pnListLeft = new LinkedList<>();
 					Iterable<Relationship> rels = left.node.getRelationships(Direction.OUTGOING);
 					for (Relationship relationship : rels)
 					{
@@ -2577,9 +2620,14 @@ public class RisoTreeQueryPN {
 						check_paths_time += System.currentTimeMillis() - start1;
 						MyRectangle mbr = RTreeUtility.getNodeMBR(child);
 						if ( Utility.distance(mbr, right.rectangle) <= distance)
+						{
 							leftChildren.add(new NodeAndRec(child, mbr));
+							HashMap<Integer, ArrayList<Integer>> pn = constructPN(child, lp, overlapVertices);
+							pnListLeft.add(pn);
+						}
 					}
 
+					LinkedList<HashMap<Integer, ArrayList<Integer>>> pnListRight = new LinkedList<>();
 					rels = right.node.getRelationships(Direction.OUTGOING);
 					for ( Relationship relationship : rels)
 					{
@@ -2593,14 +2641,23 @@ public class RisoTreeQueryPN {
 						check_paths_time += System.currentTimeMillis() - start1;
 						MyRectangle mbr = RTreeUtility.getNodeMBR(child);
 						if ( Utility.distance(mbr, left.rectangle) <= distance)
+						{
 							rightChildern.add(new NodeAndRec(child, mbr));
+							HashMap<Integer, ArrayList<Integer>> pn = constructPN(child, rp, overlapVertices);
+							pnListRight.add(pn);
+						}
 					}
 					
+					Iterator<HashMap<Integer, ArrayList<Integer>>> iteratorLeft = pnListLeft.iterator();
+					Iterator<HashMap<Integer, ArrayList<Integer>>> iteratorRight = pnListRight.iterator();
 					for ( NodeAndRec leftChild : leftChildren)
 					{
+						HashMap<Integer, ArrayList<Integer>> pnLeft = iteratorLeft.next();
 						for ( NodeAndRec rightChild : rightChildern)
 						{
-							if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance)
+							HashMap<Integer, ArrayList<Integer>> pnRight = iteratorRight.next();
+							if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance
+									&& isIntersect(overlapVertices, pnLeft, pnRight))
 							{
 								NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
 								nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
@@ -2649,7 +2706,7 @@ public class RisoTreeQueryPN {
 			long start = System.currentTimeMillis();
 			OwnMethods.Print(pos);
 			OwnMethods.Print(spaPathsMap);
-			List<Long[]> idPairs = this.spatialJoinRTree(distance, pos, spaPathsMap);
+			List<Long[]> idPairs = this.spatialJoinRTreeOverlap(distance, pos, spaPathsMap);
 			join_time = System.currentTimeMillis() - start;
 			join_result_count = idPairs.size();
 			
