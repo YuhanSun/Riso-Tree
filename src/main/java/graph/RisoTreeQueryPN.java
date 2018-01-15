@@ -2316,7 +2316,6 @@ public class RisoTreeQueryPN {
 			ArrayList<Integer> pn = new ArrayList<>();
 			for (String pnName : paths.get(id))
 			{
-				OwnMethods.Print(pnName);
 				int[] l = (int[]) node.getProperty(pnName);
 				pn = Utility.sortedListIntersect(pn, l);
 			}
@@ -2649,10 +2648,10 @@ public class RisoTreeQueryPN {
 					}
 					
 					Iterator<HashMap<Integer, ArrayList<Integer>>> iteratorLeft = pnListLeft.iterator();
-					Iterator<HashMap<Integer, ArrayList<Integer>>> iteratorRight = pnListRight.iterator();
 					for ( NodeAndRec leftChild : leftChildren)
 					{
 						HashMap<Integer, ArrayList<Integer>> pnLeft = iteratorLeft.next();
+						Iterator<HashMap<Integer, ArrayList<Integer>>> iteratorRight = pnListRight.iterator();
 						for ( NodeAndRec rightChild : rightChildern)
 						{
 							HashMap<Integer, ArrayList<Integer>> pnRight = iteratorRight.next();
@@ -2710,26 +2709,26 @@ public class RisoTreeQueryPN {
 			join_time = System.currentTimeMillis() - start;
 			join_result_count = idPairs.size();
 			
-			for ( Long[] idPair : idPairs)
-			{
-				start = System.currentTimeMillis();
-				String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
-				Result result = dbservice.execute(query);
-				get_iterator_time += System.currentTimeMillis() - start;
-				
-				start = System.currentTimeMillis();
-				if ( result.hasNext())
-				{
-					result.next();
-					resultPairs.add(idPair);
-//					OwnMethods.Print(String.format("%d, %f", id, element.distance));
-				}
-				iterate_time += System.currentTimeMillis() - start;
-				start = System.currentTimeMillis();
-				
-				ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-				page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-			}
+//			for ( Long[] idPair : idPairs)
+//			{
+//				start = System.currentTimeMillis();
+//				String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
+//				Result result = dbservice.execute(query);
+//				get_iterator_time += System.currentTimeMillis() - start;
+//				
+//				start = System.currentTimeMillis();
+//				if ( result.hasNext())
+//				{
+//					result.next();
+//					resultPairs.add(idPair);
+////					OwnMethods.Print(String.format("%d, %f", id, element.distance));
+//				}
+//				iterate_time += System.currentTimeMillis() - start;
+//				start = System.currentTimeMillis();
+//				
+//				ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+//				page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+//			}
 			return resultPairs;
 		}
 		catch(Exception e)
