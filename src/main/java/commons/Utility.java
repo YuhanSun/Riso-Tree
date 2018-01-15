@@ -50,32 +50,14 @@ public class Utility {
 	{
 		ArrayList<Integer> res = new ArrayList<>(l1.size() + l2.length);
 		int i = 0, j = 0;
-		while ( true)
+		while ( i < l1.size() && j < l2.length)
 		{
-			if ( i >= l1.size())
-			{
-				for ( ; j < l2.length; j++)
-					res.add(l2[j]);
-				break;
-			}
-			if (j >= l2.length)
-			{	
-				for ( ; i < l1.size(); i++)
-					res.add(l1.get(i));
-				break;
-			}
 			if ( l1.get(i) < l2[j])
-			{
-				res.add(l1.get(i));
 				i++;
-			}
 			else
 			{
 				if ( l1.get(i) > l2[j])
-				{
-					res.add(l2[j]);
 					j++;
-				}
 				else
 				{
 					res.add(l2[j]);
