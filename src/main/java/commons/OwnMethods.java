@@ -46,7 +46,7 @@ public class OwnMethods {
 	 * The query graph is for LAGAQ-join input.
 	 * @param query_Graph
 	 */
-	public static void convertQueryGraphForJoin(Query_Graph query_Graph)
+	public static void convertQueryGraphForJoinRandom(Query_Graph query_Graph)
 	{
 		int nodeCount = query_Graph.graph.size();
 		Random random = new Random();
