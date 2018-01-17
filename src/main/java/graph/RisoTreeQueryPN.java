@@ -2315,10 +2315,18 @@ public class RisoTreeQueryPN {
 		for ( int id : overlapVertices)
 		{
 			ArrayList<Integer> pn = new ArrayList<>();
+			boolean isFirst = true;
 			for (String pnName : paths.get(id))
 			{
 				int[] l = (int[]) node.getProperty(pnName);
-				pn = Utility.sortedListIntersect(pn, l);
+				if (isFirst)
+				{
+					for ( int element : l)
+						pn.add(element);
+					isFirst = false;
+				}
+				else
+					pn = Utility.sortedListIntersect(pn, l);
 			}
 			pnMap.put(id, pn);
 		}
@@ -2741,8 +2749,8 @@ public class RisoTreeQueryPN {
 			long start = System.currentTimeMillis();
 			OwnMethods.Print(pos);
 			OwnMethods.Print(spaPathsMap);
-//			List<Long[]> idPairs = this.spatialJoinRTreeOverlap(distance, pos, spaPathsMap);
-			List<Long[]> idPairs = this.spatialJoinRTree(distance, pos, spaPathsMap);
+			List<Long[]> idPairs = this.spatialJoinRTreeOverlap(distance, pos, spaPathsMap);
+//			List<Long[]> idPairs = this.spatialJoinRTree(distance, pos, spaPathsMap);
 			join_time = System.currentTimeMillis() - start;
 			join_result_count = idPairs.size();
 			
