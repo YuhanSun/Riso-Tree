@@ -1,10 +1,16 @@
 package graph;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.*;
+import commons.Config.Explain_Or_Profile;
 
 /**
  * this class is graphfirst approach,
@@ -137,4 +143,70 @@ public class Naive_Neo4j_Match {
 		return query;
 	}
 
+	public String formQueryJoin(Query_Graph query_Graph, double distance,
+			Explain_Or_Profile explain_Or_Profile)
+	{
+		String query = "";
+		switch (explain_Or_Profile) {
+		case Profile:
+			query += "profile match ";
+			break;
+		case Explain:
+			query += "explain match ";
+			break;			
+		case Nothing:
+			query += "match ";
+			break;
+		}
+		
+		//label
+		query += String.format("(a0:GRAPH_%d)", query_Graph.label_list[0]);
+		for(int i = 1; i < query_Graph.graph.size(); i++)
+		{
+			query += String.format(",(a%d:GRAPH_%d)",i, query_Graph.label_list[i]);
+		}
+		
+		//edge
+		for(int i = 0; i<query_Graph.graph.size(); i++)
+		{
+			for(int j = 0;j<query_Graph.graph.get(i).size();j++)
+			{
+				int neighbor = query_Graph.graph.get(i).get(j);
+				if(neighbor > i)
+					query += String.format(",(a%d)--(a%d)", i, neighbor);
+			}
+		}
+		
+		query += " where ";
+		//spatial predicate
+		ArrayList<Integer> pos = new ArrayList<>();
+		for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
+			if ( query_Graph.Has_Spa_Predicate[i])
+				pos.add(i);
+		query += String.format("(a%1$d.%3$s - a%2$d.%3$s)*(a%1$d.%3$s - a%2$d.%3$s) + "
+				+ "(a%1$d.%4$s - a%2$d.%4$s)*(a%1$d.%4$s - a%2$d.%4$s) <= %5$f", 
+				pos.get(0), pos.get(1), lon_name, lat_name, distance*distance);
+		
+		//return
+		query += String.format(" return id(a%d), id(a%d)", pos.get(0), pos.get(1));
+		
+		return query;
+	}
+	
+	public List<Long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) 
+	{
+		List<Long[]> res = new LinkedList<>();
+		String query = formQueryJoin(query_Graph, distance, Explain_Or_Profile.Profile);
+		OwnMethods.Print(query);
+		Transaction tx = neo4j_API.graphDb.beginTx();
+		Result result = neo4j_API.graphDb.execute(query);
+		int count = 0;
+		while(result.hasNext())
+		{
+			OwnMethods.Print(result);
+			count++;
+		}
+		OwnMethods.Print(count);
+		return res;
+	}
 }

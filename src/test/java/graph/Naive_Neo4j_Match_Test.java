@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -11,8 +12,10 @@ import org.junit.Test;
 import org.neo4j.graphdb.Result;
 
 import commons.Config;
+import commons.Entity;
 import commons.MyRectangle;
 import commons.OwnMethods;
+import commons.Config.Explain_Or_Profile;
 import commons.Config.system;
 import commons.Query_Graph;
 import commons.Utility;
@@ -27,26 +30,66 @@ public class Naive_Neo4j_Match_Test {
 	static String db_path;
 	static String querygraphDir, spaPredicateDir;
 	
+	static int nodeCount = 5, query_id = 0;
+	static int name_suffix = 1280;//Gowalla 0.001
+	static String entityPath, querygraph_path, queryrectCenterPath, queryrect_path;
+	
+	//query input
+	static Query_Graph query_Graph;
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		switch (systemName) {
 		case Ubuntu:
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
+			entityPath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
 			querygraphDir = String.format("/mnt/hgfs/Google_Drive/Projects/risotree/query/query_graph/%s", dataset);
 			spaPredicateDir = String.format("/mnt/hgfs/Google_Drive/Projects/risotree/query/spa_predicate/%s", dataset);
+			querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
+			queryrectCenterPath = String.format("%s/%s_centerids.txt", spaPredicateDir, dataset);
+			queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
 			break;
 		case Windows:
 			String dataDirectory = "D:\\Ubuntu_shared\\GeoMinHop\\data";
 			db_path = String.format("%s\\%s\\%s_%s\\data\\databases\\graph.db", dataDirectory, dataset, version, dataset);
+			entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
 			querygraphDir = String.format("D:\\Google_Drive\\Projects\\risotree\\query\\query_graph\\%s", dataset);
 			spaPredicateDir = String.format("D:\\Google_Drive\\Projects\\risotree\\query\\spa_predicate\\%s", dataset);
+			querygraph_path = String.format("%s\\%d.txt", querygraphDir, nodeCount);
+			queryrectCenterPath = String.format("%s\\%s_centerids.txt", spaPredicateDir, dataset);
+			queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
 		default:
 			break;
 		}
+		iniQueryInput();
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
+	}
+	
+	public static void iniQueryInput()
+	{
+		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		query_Graph = queryGraphs.get(query_id);
+		
+//		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+//		
+//		ArrayList<Integer> centerIDs = OwnMethods.readIntegerArray(queryrectCenterPath);
+//		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+//		ArrayList<MyRectangle> queryrect = new ArrayList<MyRectangle>();
+//		for ( int id : centerIDs)
+//		{
+//			Entity entity = entities.get(id);
+//			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
+//		}
+		
+//		MyRectangle rectangle = queryrect.get(0);
+//		int j = 0;
+//		for (  ; j < query_Graph.graph.size(); j++)
+//			if(query_Graph.Has_Spa_Predicate[j])
+//				break;
+//		query_Graph.spa_predicate[j] = rectangle;
 	}
 
 	@Test
@@ -106,5 +149,24 @@ public class Naive_Neo4j_Match_Test {
 		OwnMethods.Print(result.getExecutionPlanDescription());
 	}
 	
-
+	@Test
+	public void formQueryJoinTest()
+	{
+		double distance  = 0.1;
+		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
+		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
+		OwnMethods.Print(query_Graph);
+		String query = naive_Neo4j_Match.formQueryJoin(query_Graph, distance, Explain_Or_Profile.Profile);
+		OwnMethods.Print(query);
+	}
+	
+	@Test
+	public void LAGAQ_JoinTest()
+	{
+		double distance  = 0.1;
+		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
+		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
+		OwnMethods.Print(query_Graph);
+		naive_Neo4j_Match.LAGAQ_Join(query_Graph, distance);
+	}
 }
