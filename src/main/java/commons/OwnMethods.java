@@ -42,25 +42,70 @@ import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 public class OwnMethods {
 	
 	/**
+	 * Convert the one-predicate query graph to two-predicate.
+	 * The first spatial vertex will be set to be true
+	 * The query graph is for LAGAQ-join input.
+	 * @param query_Graph
+	 */
+	public static void convertQueryGraphForJoin(Query_Graph query_Graph)
+	{
+		try
+		{
+			for ( int i = 0; i < query_Graph.graph.size(); i++)
+			{
+				if (query_Graph.label_list[i] == 1 && query_Graph.Has_Spa_Predicate[i] == false)
+				{
+					query_Graph.Has_Spa_Predicate[i] = true;
+					return;
+				}
+			}
+			throw new Exception("query graph only has one spatial vertex!");
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
+	}
+	
+	/**
 	 * Convert the one-predicate query graph to two-predicate
+	 * Randomly pick up the next true spatial vertex.
 	 * The query graph is for LAGAQ-join input.
 	 * @param query_Graph
 	 */
 	public static void convertQueryGraphForJoinRandom(Query_Graph query_Graph)
 	{
-		int nodeCount = query_Graph.graph.size();
-		Random random = new Random();
-		while ( true)
+		try
 		{
-			int id = (int) (nodeCount * random.nextDouble());
-			if ( query_Graph.Has_Spa_Predicate[id])
-				continue;
+			int nodeCount = query_Graph.graph.size();
 			
-			if (query_Graph.label_list[id] == 1)
+			int spaCount = 0;
+			for ( int i = 0; i < nodeCount; i++)
+				if ( query_Graph.label_list[i] == 1)
+					spaCount++;
+			
+			if (spaCount <= 1)
+				throw new Exception("query graph only has one spatial vertex!");
+			
+			Random random = new Random();
+			while ( true)
 			{
-				query_Graph.Has_Spa_Predicate[id] = true;
-				break;
+				int id = (int) (nodeCount * random.nextDouble());
+				if ( query_Graph.Has_Spa_Predicate[id])
+					continue;
+				
+				if (query_Graph.label_list[id] == 1)
+				{
+					query_Graph.Has_Spa_Predicate[id] = true;
+					break;
+				}
 			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 	
