@@ -203,7 +203,7 @@ public class Naive_Neo4j_Match {
 		int count = 0;
 		while(result.hasNext())
 		{
-			OwnMethods.Print(result);
+			OwnMethods.Print(result.next());
 			count++;
 		}
 		OwnMethods.Print(count);
