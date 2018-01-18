@@ -3,7 +3,9 @@ package graph;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
@@ -35,10 +37,9 @@ public class Naive_Neo4j_Match {
 
 	public int query_node_count;
 
-	public int[] neo4j_time;
-	public int[] hmbr_check_time;
-	public int[] spa_check_time;
-	public long start;
+	public long get_iterator_time, iterate_time;
+	public long result_count = 0;
+	public long page_access;
 
 	public Naive_Neo4j_Match(String db_path)
 	{
@@ -143,8 +144,8 @@ public class Naive_Neo4j_Match {
 		return query;
 	}
 
-	public String formQueryJoin(Query_Graph query_Graph, double distance,
-			Explain_Or_Profile explain_Or_Profile)
+	public String formQueryJoin(Query_Graph query_Graph, ArrayList<Integer> pos,
+			double distance, Explain_Or_Profile explain_Or_Profile)
 	{
 		String query = "";
 		switch (explain_Or_Profile) {
@@ -179,10 +180,6 @@ public class Naive_Neo4j_Match {
 		
 		query += " where ";
 		//spatial predicate
-		ArrayList<Integer> pos = new ArrayList<>();
-		for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
-			if ( query_Graph.Has_Spa_Predicate[i])
-				pos.add(i);
 		query += String.format("(a%1$d.%3$s - a%2$d.%3$s)*(a%1$d.%3$s - a%2$d.%3$s) + "
 				+ "(a%1$d.%4$s - a%2$d.%4$s)*(a%1$d.%4$s - a%2$d.%4$s) <= %5$f", 
 				pos.get(0), pos.get(1), lon_name, lat_name, distance*distance);
@@ -195,18 +192,38 @@ public class Naive_Neo4j_Match {
 	
 	public List<Long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) 
 	{
+		get_iterator_time = 0;
+		iterate_time = 0;
+		result_count = 0;
+		page_access = 0;
 		List<Long[]> res = new LinkedList<>();
-		String query = formQueryJoin(query_Graph, distance, Explain_Or_Profile.Profile);
+		ArrayList<Integer> pos = new ArrayList<>();
+		for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
+			if ( query_Graph.Has_Spa_Predicate[i])
+				pos.add(i);
+		String query = formQueryJoin(query_Graph, pos, distance, Explain_Or_Profile.Profile);
 		OwnMethods.Print(query);
 		Transaction tx = neo4j_API.graphDb.beginTx();
+		long start = System.currentTimeMillis();
 		Result result = neo4j_API.graphDb.execute(query);
-		int count = 0;
+		get_iterator_time += System.currentTimeMillis() - start;
+		start = System.currentTimeMillis();
 		while(result.hasNext())
 		{
-			OwnMethods.Print(result.next());
-			count++;
+			Map<String, Object> row = result.next();
+			long id1 = (long) row.get(pos.get(0));
+			long id2 = (long) row.get(pos.get(1));
+			Long[] pair = new Long[]{id1, id2};
+			res.add(pair);
+			result_count++;
 		}
-		OwnMethods.Print(count);
+		iterate_time += System.currentTimeMillis();
+		
+		ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+		page_access = OwnMethods.GetTotalDBHits(planDescription);
+		
+		tx.success();
+		tx.close();
 		return res;
 	}
 }

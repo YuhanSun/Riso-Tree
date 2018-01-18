@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -156,7 +157,11 @@ public class Naive_Neo4j_Match_Test {
 		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
 		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
 		OwnMethods.Print(query_Graph);
-		String query = naive_Neo4j_Match.formQueryJoin(query_Graph, distance, Explain_Or_Profile.Profile);
+		ArrayList<Integer> pos = new ArrayList<>();
+		for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
+			if ( query_Graph.Has_Spa_Predicate[i])
+				pos.add(i);
+		String query = naive_Neo4j_Match.formQueryJoin(query_Graph, pos, distance, Explain_Or_Profile.Profile);
 		OwnMethods.Print(query);
 	}
 	
@@ -167,6 +172,14 @@ public class Naive_Neo4j_Match_Test {
 		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
 		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
 		OwnMethods.Print(query_Graph);
-		naive_Neo4j_Match.LAGAQ_Join(query_Graph, distance);
+		long start = System.currentTimeMillis();
+		List<Long[]> res = naive_Neo4j_Match.LAGAQ_Join(query_Graph, distance);
+		long time = System.currentTimeMillis() - start;
+		OwnMethods.Print("total time: " + time);
+		OwnMethods.Print("get iterator time: " + naive_Neo4j_Match.get_iterator_time);
+		OwnMethods.Print("iterate time: " + naive_Neo4j_Match.iterate_time);
+		OwnMethods.Print("result count: " + naive_Neo4j_Match.result_count);
+		OwnMethods.Print("result count: " + res.size());
+		naive_Neo4j_Match.neo4j_API.ShutDown();
 	}
 }
