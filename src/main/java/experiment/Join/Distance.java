@@ -34,8 +34,8 @@ public class Distance {
 	public String querygraphDir;
 //	public String spaPredicateDir;
 	public String resultDir;
-	public String queryrectCenterPath = null;
-	public ArrayList<Entity> entities = null;
+//	public String queryrectCenterPath = null;
+//	public ArrayList<Entity> entities = null;
 	public ArrayList<MyRectangle> queryrect = null;
 	public ArrayList<Query_Graph> queryGraphs = null;
 	public long[] graph_pos_map_list;
@@ -83,14 +83,14 @@ public class Distance {
 		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
 		queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, 10);
 		
-		entities = OwnMethods.ReadEntity(entityPath);
-		ArrayList<Integer> ids = OwnMethods.readIntegerArray(queryrectCenterPath);
-		queryrect = new ArrayList<MyRectangle>();
-		for ( int id :ids)
-		{
-			Entity entity = entities.get(id);
-			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
-		}
+//		entities = OwnMethods.ReadEntity(entityPath);
+//		ArrayList<Integer> ids = OwnMethods.readIntegerArray(queryrectCenterPath);
+//		queryrect = new ArrayList<MyRectangle>();
+//		for ( int id :ids)
+//		{
+//			Entity entity = entities.get(id);
+//			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
+//		}
 		
 		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
 		graph_pos_map_list= new long[graph_pos_map.size()];
@@ -109,12 +109,15 @@ public class Distance {
 		distanceList.add(0.01);
 		distanceList.add(0.1);
 		distanceList.add(1.0);
-		
-		String dataset = Datasets.Patents_100_random_80.name();
-		Distance distanceExperiment = new Distance();
-		distanceExperiment.config.setDatasetName(dataset);
-		distanceExperiment.initializeParameters();
-		distanceExperiment.risoTreeQueryPN(distanceList, 0);
+		try {
+			String dataset = Datasets.Patents_100_random_80.name();
+			Distance distanceExperiment = new Distance();
+			distanceExperiment.config.setDatasetName(dataset);
+			distanceExperiment.initializeParameters();
+			distanceExperiment.risoTreeQueryPN(distanceList, 0);			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -130,18 +133,20 @@ public class Distance {
 			long time;
 
 			Query_Graph query_Graph = queryGraphs.get(query_id);
+			OwnMethods.convertQueryGraphForJoin(query_Graph);
+			OwnMethods.Print(query_Graph);
 
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
 			case Ubuntu:
-				result_detail_path = String.format("%s/risotree_PN%d_%d_%d.txt", resultDir, MAX_HOPNUM, nodeCount, query_id);
-				result_avg_path = String.format("%s/risotree_PN%d_%d_%d_avg.txt", resultDir, MAX_HOPNUM, nodeCount, query_id);
+				result_detail_path = String.format("%s/distaance_risotree_PN%d_%d_%d.txt", resultDir, MAX_HOPNUM, nodeCount, query_id);
+				result_avg_path = String.format("%s/distance_risotree_PN%d_%d_%d_avg.txt", resultDir, MAX_HOPNUM, nodeCount, query_id);
 				//				result_detail_path = String.format("%s/risotree_%d_%d_test.txt", resultDir, nodeCount, query_id);
 				//				result_avg_path = String.format("%s/risotree_%d_%d_avg_test.txt", resultDir, nodeCount, query_id);
 				break;
 			case Windows:
-				result_detail_path = String.format("%s\\risotree_PN_%d_%d.txt", resultDir, nodeCount, query_id);
-				result_avg_path = String.format("%s\\risotree_PN_%d_%d_avg.txt", resultDir, nodeCount, query_id);
+				result_detail_path = String.format("%s\\distance_risotree_PN_%d_%d.txt", resultDir, nodeCount, query_id);
+				result_avg_path = String.format("%s\\distance_risotree_PN_%d_%d_avg.txt", resultDir, nodeCount, query_id);
 				break;
 			}
 
@@ -152,9 +157,9 @@ public class Distance {
 				OwnMethods.WriteFile(result_avg_path, true, write_line);
 			}
 
-			String head_line = "count\trange_time\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
+			String head_line = "result_count\tjoin_count\tjoin_time\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
 			if(!TEST_FORMAT)
-				OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
+				OwnMethods.WriteFile(result_avg_path, true, "distance\t" + head_line);
 
 			for (double distance : distanceList)
 			{
@@ -169,12 +174,13 @@ public class Distance {
 					Thread.sleep(5000);
 					RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 							graph_pos_map_list, MAX_HOPNUM);
-					OwnMethods.convertQueryGraphForJoin(query_Graph);
+					
 					start = System.currentTimeMillis();
 					risoTreeQueryPN.LAGAQ_Join(query_Graph, distance);
 					time = System.currentTimeMillis() - start;
 
 					write_line = String.valueOf(distance) + "\t";
+					write_line += String.format("%d\t", risoTreeQueryPN.result_count);
 					write_line += String.format("%d\t%d\t", risoTreeQueryPN.join_result_count, risoTreeQueryPN.join_time);
 					write_line += String.format("%d\t", risoTreeQueryPN.get_iterator_time);
 					write_line += String.format("%d\t%d\t", risoTreeQueryPN.get_iterator_time, time);
