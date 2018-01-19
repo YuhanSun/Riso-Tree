@@ -181,8 +181,8 @@ public class Naive_Neo4j_Match {
 		query += " where ";
 		//spatial predicate
 		query += String.format("(a%1$d.%3$s - a%2$d.%3$s)*(a%1$d.%3$s - a%2$d.%3$s) + "
-				+ "(a%1$d.%4$s - a%2$d.%4$s)*(a%1$d.%4$s - a%2$d.%4$s) <= %5$f", 
-				pos.get(0), pos.get(1), lon_name, lat_name, distance*distance);
+				+ "(a%1$d.%4$s - a%2$d.%4$s)*(a%1$d.%4$s - a%2$d.%4$s) <= %5$s", 
+				pos.get(0), pos.get(1), lon_name, lat_name, String.valueOf(distance*distance));
 		
 		//return
 		query += String.format(" return id(a%d), id(a%d)", pos.get(0), pos.get(1));
@@ -211,13 +211,14 @@ public class Naive_Neo4j_Match {
 		while(result.hasNext())
 		{
 			Map<String, Object> row = result.next();
-			long id1 = (long) row.get(pos.get(0));
-			long id2 = (long) row.get(pos.get(1));
+//			OwnMethods.Print(row);
+			long id1 = (long) row.get(String.format("id(a%d)", pos.get(0)));
+			long id2 = (long) row.get(String.format("id(a%d)", pos.get(1)));
 			Long[] pair = new Long[]{id1, id2};
 			res.add(pair);
 			result_count++;
 		}
-		iterate_time += System.currentTimeMillis();
+		iterate_time += System.currentTimeMillis() - start;
 		
 		ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
 		page_access = OwnMethods.GetTotalDBHits(planDescription);
