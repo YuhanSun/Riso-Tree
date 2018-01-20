@@ -17,6 +17,7 @@ import commons.Config.Datasets;
 import commons.Config.system;
 import graph.Naive_Neo4j_Match;
 import graph.RisoTreeQueryPN;
+import graph.SpatialFirst_List;
 
 public class Distance {
 
@@ -121,6 +122,75 @@ public class Distance {
 	}
 	
 	/**
+	 * use spatial first list approach
+	 * @param nodeCount
+	 * @param query_id
+	 * @throws Exception
+	 */
+	public void spatialFirstList(ArrayList<Double>distanceList , int query_id)
+	{
+		try {
+			long start;
+			long time;
+
+			Query_Graph query_Graph = queryGraphs.get(query_id);
+			OwnMethods.convertQueryGraphForJoin(query_Graph);
+			OwnMethods.Print(query_Graph);
+
+			String result_avg_path = null;
+			switch (systemName) {
+			case Ubuntu:
+				result_avg_path = String.format("%s/distance_spatialFirst_%d_%d_avg.txt", resultDir, nodeCount, query_id);
+				//				result_avg_path = String.format("%s/risotree_%d_%d_avg_test.txt", resultDir, nodeCount, query_id);
+				break;
+			case Windows:
+				result_avg_path = String.format("%s\\distance_risotree_%d_%d_avg.txt", resultDir, nodeCount, query_id);
+				break;
+			}
+
+			String write_line = String.format("%s\n", dataset);
+			if(!TEST_FORMAT)
+				OwnMethods.WriteFile(result_avg_path, true, write_line);
+
+			String head_line = "result_count\tjoin_count\tjoin_time\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
+			if(!TEST_FORMAT)
+				OwnMethods.WriteFile(result_avg_path, true, "distance\t" + head_line);
+
+			for (double distance : distanceList)
+			{
+				OwnMethods.Print("\n" + String.valueOf(distance));
+
+				if(!TEST_FORMAT)
+				{
+					OwnMethods.ClearCache(password);
+					Thread.currentThread();
+					Thread.sleep(5000);
+					SpatialFirst_List spatialFirstList = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
+					
+					start = System.currentTimeMillis();
+					spatialFirstList.LAGAQ_Join(query_Graph, distance);
+					time = System.currentTimeMillis() - start;
+
+					write_line = String.valueOf(distance) + "\t";
+					write_line += String.format("%d\t", spatialFirstList.result_count);
+					write_line += String.format("%d\t%d\t", spatialFirstList.join_result_count, spatialFirstList.join_time);
+					write_line += String.format("%d\t", spatialFirstList.get_iterator_time);
+					write_line += String.format("%d\t%d\t", spatialFirstList.get_iterator_time, time);
+					write_line += String.format("%d\n", spatialFirstList.page_hit_count);
+					if(!TEST_FORMAT)
+						OwnMethods.WriteFile(result_avg_path, true, write_line);
+
+					spatialFirstList.dbservice.shutdown();
+				}
+			}
+			OwnMethods.WriteFile(result_avg_path, true, "\n");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	/**
 	 * use RisoTree and graph first approach
 	 * @param nodeCount
 	 * @param query_id
@@ -136,26 +206,18 @@ public class Distance {
 			OwnMethods.convertQueryGraphForJoin(query_Graph);
 			OwnMethods.Print(query_Graph);
 
-			String result_detail_path = null, result_avg_path = null;
+			String result_avg_path = null;
 			switch (systemName) {
 			case Ubuntu:
-				result_detail_path = String.format("%s/distaance_risotree_PN%d_%d_%d.txt", resultDir, MAX_HOPNUM, nodeCount, query_id);
 				result_avg_path = String.format("%s/distance_risotree_PN%d_%d_%d_avg.txt", resultDir, MAX_HOPNUM, nodeCount, query_id);
-				//				result_detail_path = String.format("%s/risotree_%d_%d_test.txt", resultDir, nodeCount, query_id);
 				//				result_avg_path = String.format("%s/risotree_%d_%d_avg_test.txt", resultDir, nodeCount, query_id);
 				break;
 			case Windows:
-				result_detail_path = String.format("%s\\distance_risotree_PN_%d_%d.txt", resultDir, nodeCount, query_id);
 				result_avg_path = String.format("%s\\distance_risotree_PN_%d_%d_avg.txt", resultDir, nodeCount, query_id);
 				break;
 			}
 
 			String write_line = String.format("%s\n", dataset);
-			if(!TEST_FORMAT)
-			{
-				OwnMethods.WriteFile(result_detail_path, true, write_line);
-				OwnMethods.WriteFile(result_avg_path, true, write_line);
-			}
 
 			String head_line = "result_count\tjoin_count\tjoin_time\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
 			if(!TEST_FORMAT)
@@ -164,8 +226,6 @@ public class Distance {
 			for (double distance : distanceList)
 			{
 				write_line = String.valueOf(distance) + "\n" + head_line;
-				if(!TEST_FORMAT)
-					OwnMethods.WriteFile(result_detail_path, true, write_line);
 
 				if(!TEST_FORMAT)
 				{
@@ -191,7 +251,6 @@ public class Distance {
 					risoTreeQueryPN.dbservice.shutdown();
 				}
 			}
-			OwnMethods.WriteFile(result_detail_path, true, "\n");
 			OwnMethods.WriteFile(result_avg_path, true, "\n");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -206,6 +265,8 @@ public class Distance {
 			long time;
 
 			Query_Graph query_Graph = queryGraphs.get(query_id);
+			OwnMethods.convertQueryGraphForJoin(query_Graph);
+			OwnMethods.Print(query_Graph);
 
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
@@ -240,7 +301,6 @@ public class Distance {
 
 				if(!TEST_FORMAT)
 				{
-					OwnMethods.convertQueryGraphForJoin(query_Graph);
 					OwnMethods.ClearCache(password);
 					Thread.currentThread();
 					Thread.sleep(5000);
