@@ -82,7 +82,8 @@ public class Distance {
 		}
 		
 		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
-		queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, 10);
+		OwnMethods.Print(querygraph_path);
+		queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, 5);
 		
 //		entities = OwnMethods.ReadEntity(entityPath);
 //		ArrayList<Integer> ids = OwnMethods.readIntegerArray(queryrectCenterPath);
@@ -106,18 +107,25 @@ public class Distance {
 	public static void main(String[] args) {
 		ArrayList<Double> distanceList = new ArrayList<>();
 		//Patents dataset
-		distanceList.add(0.001);
-		distanceList.add(0.01);
-		distanceList.add(0.1);
-		distanceList.add(1.0);
+//		distanceList.add(0.000001);
+//		distanceList.add(0.00001);
+		distanceList.add(0.0001);
+//		distanceList.add(0.001);
+		distanceList.add(0.0002);
+		distanceList.add(0.0004);
+		distanceList.add(0.0008);
 		try {
-			String dataset = Datasets.Patents_100_random_80.name();
+//			String dataset = Datasets.Patents_100_random_80.name();
+			String dataset = Datasets.foursquare_100.name();
 			Distance distanceExperiment = new Distance();
 			distanceExperiment.config.setDatasetName(dataset);
 			distanceExperiment.initializeParameters();
-			distanceExperiment.risoTreeQueryPN(distanceList, 0);			
+			distanceExperiment.Neo4j_Naive(distanceList, 2);
+//			distanceExperiment.risoTreeQueryPN(distanceList, 2);			
+//			distanceExperiment.spatialFirstList(distanceList, 2);
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	
@@ -148,6 +156,7 @@ public class Distance {
 				break;
 			}
 
+			OwnMethods.Print(result_avg_path);
 			String write_line = String.format("%s\n", dataset);
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, write_line);
@@ -219,7 +228,7 @@ public class Distance {
 
 			String write_line = String.format("%s\n", dataset);
 
-			String head_line = "result_count\tjoin_count\tjoin_time\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
+			String head_line = "result_count\tjoin_count\tjoin_time\tcheck_path_time\t_check_overlap_time\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, "distance\t" + head_line);
 
@@ -242,6 +251,7 @@ public class Distance {
 					write_line = String.valueOf(distance) + "\t";
 					write_line += String.format("%d\t", risoTreeQueryPN.result_count);
 					write_line += String.format("%d\t%d\t", risoTreeQueryPN.join_result_count, risoTreeQueryPN.join_time);
+					write_line += String.format("%d\t%d\t", risoTreeQueryPN.check_paths_time, risoTreeQueryPN.check_overlap_time);
 					write_line += String.format("%d\t", risoTreeQueryPN.get_iterator_time);
 					write_line += String.format("%d\t%d\t", risoTreeQueryPN.get_iterator_time, time);
 					write_line += String.format("%d\n", risoTreeQueryPN.page_hit_count);
@@ -289,7 +299,7 @@ public class Distance {
 
 			String head_line = "count\tget_iterator_time\ttotal_time\taccess_pages\n";
 			if(!TEST_FORMAT)
-				OwnMethods.WriteFile(result_avg_path, true, "selectivity\t" + head_line);
+				OwnMethods.WriteFile(result_avg_path, true, "distance\t" + head_line);
 
 			for (double distance : distanceList)
 			{
