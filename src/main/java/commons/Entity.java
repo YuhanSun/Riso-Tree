@@ -1,7 +1,5 @@
 package commons;
 
-import org.neo4j.register.Register.Int;
-
 public class Entity {
     public boolean IsSpatial;
     public double lon;
