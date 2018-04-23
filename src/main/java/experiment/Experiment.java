@@ -13,6 +13,13 @@ import commons.*;
 import commons.Config.system;
 import graph.*;
 
+/**
+ * Experiment for selectivity
+ * The selectivity is evaluated by 
+ * using number spatial objects.
+ * @author ysun138
+ *
+ */
 public class Experiment {
 
 	public Config config;

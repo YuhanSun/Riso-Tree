@@ -277,6 +277,7 @@ public class OwnMethods {
 			else
 				labelList.add(0);
 		}
+		OwnMethods.Print("Write label list to: " + labelListPath);
 		OwnMethods.WriteArray(labelListPath, labelList);
 	}
 	
@@ -1145,6 +1146,11 @@ public class OwnMethods {
     	return count;
     }
     
+    /**
+     * Deprecated. Not general.
+     * @param datasource
+     * @return
+     */
     public static int GetNodeCount(String datasource) {
         int node_count;
         node_count = 0;

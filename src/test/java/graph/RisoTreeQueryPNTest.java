@@ -278,12 +278,13 @@ public class RisoTreeQueryPNTest {
 //		OwnMethods.Print(node.getPropertyKeys());
 		
 		HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = risoTreeQueryPN.recognizePaths(query_Graph);
-		HashMap<Integer, HashSet<String>> paths = spaPathsMap.get(2);
-		ArrayList<Integer> overlapVertices = new ArrayList<>();
-		overlapVertices.add(1);
-		overlapVertices.add(4);
-		HashMap<Integer, ArrayList<Integer>> res = risoTreeQueryPN.constructPN(node, paths, overlapVertices);
-		OwnMethods.Print(res);
+		OwnMethods.Print(spaPathsMap);
+//		HashMap<Integer, HashSet<String>> paths = spaPathsMap.get(2);
+//		ArrayList<Integer> overlapVertices = new ArrayList<>();
+//		overlapVertices.add(1);
+//		overlapVertices.add(4);
+//		HashMap<Integer, ArrayList<Integer>> res = risoTreeQueryPN.constructPN(node, paths, overlapVertices);
+//		OwnMethods.Print(res);
 		tx.success();
 		tx.close();
 	}
@@ -291,22 +292,22 @@ public class RisoTreeQueryPNTest {
 	@Test
 	public void isIntersectTest()
 	{
-		long start = System.currentTimeMillis();
-		ArrayList<Integer> overlapVertices = new ArrayList<>(
-				Arrays.asList(0, 2));
-		
-		HashMap<Integer, ArrayList<Integer>> pnListLeft = new HashMap<>();
-		pnListLeft.put(0, new ArrayList<Integer>(Arrays.asList(0, 1, 2)));
-		pnListLeft.put(2, new ArrayList<Integer>(Arrays.asList(0, 1, 2)));
-		
-		HashMap<Integer, ArrayList<Integer>> pnListRight = new HashMap<>();
-		pnListRight.put(0, new ArrayList<Integer>(Arrays.asList(0, 1, 2)));
-		pnListRight.put(2, new ArrayList<Integer>(Arrays.asList()));
-		OwnMethods.Print(System.currentTimeMillis() - start);
-		
-		start = System.currentTimeMillis();
-		OwnMethods.Print(RisoTreeQueryPN.isIntersect(overlapVertices, pnListLeft, pnListRight));
-		OwnMethods.Print(System.currentTimeMillis() - start);
+//		long start = System.currentTimeMillis();
+//		ArrayList<Integer> overlapVertices = new ArrayList<>(
+//				Arrays.asList(0, 2));
+//		
+//		HashMap<Integer, ArrayList<Integer>> pnListLeft = new HashMap<>();
+//		pnListLeft.put(0, new ArrayList<Integer>(Arrays.asList(0, 1, 2)));
+//		pnListLeft.put(2, new ArrayList<Integer>(Arrays.asList(0, 1, 2)));
+//		
+//		HashMap<Integer, ArrayList<Integer>> pnListRight = new HashMap<>();
+//		pnListRight.put(0, new ArrayList<Integer>(Arrays.asList(0, 1, 2)));
+//		pnListRight.put(2, new ArrayList<Integer>(Arrays.asList()));
+//		OwnMethods.Print(System.currentTimeMillis() - start);
+//		
+//		start = System.currentTimeMillis();
+//		OwnMethods.Print(RisoTreeQueryPN.isIntersect(overlapVertices, pnListLeft, pnListRight));
+//		OwnMethods.Print(System.currentTimeMillis() - start);
 	}
 	
 	@Test
@@ -325,14 +326,14 @@ public class RisoTreeQueryPNTest {
 //		query_Graph.Has_Spa_Predicate[1] = true;
 //		query_Graph.Has_Spa_Predicate[2] = true;
 		
-		OwnMethods.ClearCache("syh19910205");
+//		OwnMethods.ClearCache("syh19910205");
 		
 		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
 		OwnMethods.Print(query_Graph.toString());
 		
 		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
 		long start = System.currentTimeMillis();
-		List<Long[]> result = risoTreeQueryPN.LAGAQ_Join(query_Graph, 0.1);
+		List<Long[]> result = risoTreeQueryPN.LAGAQ_Join(query_Graph, 0.01);
 		OwnMethods.Print(String.format("Total time: %d", System.currentTimeMillis() - start));
 		
 		OwnMethods.Print("Join time: " + risoTreeQueryPN.join_time);
