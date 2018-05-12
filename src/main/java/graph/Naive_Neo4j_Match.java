@@ -185,7 +185,7 @@ public class Naive_Neo4j_Match {
 				pos.get(0), pos.get(1), lon_name, lat_name, String.valueOf(distance*distance));
 		
 		//return
-		query += String.format(" return id(a%d), id(a%d)", pos.get(0), pos.get(1));
+		query += String.format(" return distinct id(a%d), id(a%d)", pos.get(0), pos.get(1));
 		
 		return query;
 	}
