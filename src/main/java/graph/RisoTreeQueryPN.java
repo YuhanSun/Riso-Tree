@@ -2753,27 +2753,30 @@ public class RisoTreeQueryPN {
 //			List<Long[]> idPairs = this.spatialJoinRTree(distance, pos, spaPathsMap);
 			join_time = System.currentTimeMillis() - start;
 			join_result_count = idPairs.size();
+			OwnMethods.Print("join time: " + join_time);
+			OwnMethods.Print("join count: " + idPairs.size());
 			
-//			for ( Long[] idPair : idPairs)
-//			{
-//				start = System.currentTimeMillis();
-//				String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
-//				Result result = dbservice.execute(query);
-//				get_iterator_time += System.currentTimeMillis() - start;
-//				
-//				start = System.currentTimeMillis();
-//				if ( result.hasNext())
-//				{
-//					result.next();
-//					resultPairs.add(idPair);
-////					OwnMethods.Print(String.format("%d, %f", id, element.distance));
-//				}
-//				iterate_time += System.currentTimeMillis() - start;
-//				start = System.currentTimeMillis();
-//				
-//				ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-//				page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-//			}
+			for ( Long[] idPair : idPairs)
+			{
+				start = System.currentTimeMillis();
+				String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
+				Result result = dbservice.execute(query);
+				get_iterator_time += System.currentTimeMillis() - start;
+				
+				start = System.currentTimeMillis();
+				if ( result.hasNext())
+				{
+					result.next();
+					resultPairs.add(idPair);
+//					OwnMethods.Print(String.format("%d, %f", id, element.distance));
+				}
+				iterate_time += System.currentTimeMillis() - start;
+				start = System.currentTimeMillis();
+				
+				ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+				page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+			}
+			result_count = resultPairs.size();
 			return resultPairs;
 		}
 		catch(Exception e)
