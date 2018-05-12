@@ -31,7 +31,7 @@ public class Naive_Neo4j_Match_Test {
 	static String db_path;
 	static String querygraphDir, spaPredicateDir;
 	
-	static int nodeCount = 5, query_id = 0;
+	static int nodeCount = 7, query_id = 0;
 	static int name_suffix = 1280;//Gowalla 0.001
 	static String entityPath, querygraph_path, queryrectCenterPath, queryrect_path;
 	
@@ -168,13 +168,14 @@ public class Naive_Neo4j_Match_Test {
 	@Test
 	public void LAGAQ_JoinTest()
 	{
-		double distance  = 0.1;
+		double distance  = 0.00001;
 		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
 		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
 		OwnMethods.Print(query_Graph);
 		long start = System.currentTimeMillis();
 		List<Long[]> res = naive_Neo4j_Match.LAGAQ_Join(query_Graph, distance);
 		long time = System.currentTimeMillis() - start;
+		OwnMethods.Print("distance: " + distance);
 		OwnMethods.Print("total time: " + time);
 		OwnMethods.Print("get iterator time: " + naive_Neo4j_Match.get_iterator_time);
 		OwnMethods.Print("iterate time: " + naive_Neo4j_Match.iterate_time);
