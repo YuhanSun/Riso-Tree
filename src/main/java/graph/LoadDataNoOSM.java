@@ -53,6 +53,23 @@ public class LoadDataNoOSM {
 	
 	static ArrayList<Entity> entities; 
 	
+	static String dir = "/hdd2/data/ysun138/RisoTree";
+	
+	static void iniParametersServer()
+	{
+		dataset = Config.Datasets.wikidata_100.name();
+		dbPath = dir + "/neo4j-community-3.1.1/data/databases/graph.db";
+		graphPath = dir + "/graph.txt";
+		entityPath = dir + "/entity.txt";
+		labelListPath = dir + "/label.txt";
+		mapPath = dir + "/node_map_RTree.txt";
+		
+		nonspatial_label_count = 100;
+		
+		lon_name = config.GetLongitudePropertyName();
+		lat_name = config.GetLatitudePropertyName();
+	}
+	
 	static void initParameters()
 	{
 		systemName = config.getSystemName();
@@ -105,27 +122,28 @@ public class LoadDataNoOSM {
 	public static void main(String[] args) {
 		
 		try {
-			initParameters();
+//			initParameters();
+			iniParametersServer();
 			
-			batchRTreeInsert();
+//			batchRTreeInsert();
+//			
+//			if ( nonspatial_label_count == 1)
+//				generateLabelList();
+//			else
+//			{
+//				generateNonspatialLabel();
+//				nonspatialLabelTest();
+//			}
+//			
+//			LoadNonSpatialEntity();
+//			
+//			GetSpatialNodeMap();
+//			
+//			LoadGraphEdges();
 			
-			if ( nonspatial_label_count == 1)
-				generateLabelList();
-			else
-			{
-				generateNonspatialLabel();
-				nonspatialLabelTest();
-			}
+			CalculateCount();
 			
-			LoadNonSpatialEntity();
-			
-			GetSpatialNodeMap();
-			
-			LoadGraphEdges();
-			
-//			CalculateCount();
-			
-//			Construct_RisoTree.main(null);
+			Construct_RisoTree.main(null);
 //			
 //			loadHMBR();
 			

@@ -82,10 +82,10 @@ public class App {
 	
 	public static void main(String[] args) {
 		
-		initVariablesForTest();
+//		initVariablesForTest();
 //		Naive();
-		test();
-//		batchRTreeInsert();
+//		test();
+		batchRTreeInsert();
 //		generateLabelList();
 //		rangeQueryCompare();
 //		rangeQueryCountCompare();
@@ -131,6 +131,15 @@ public class App {
 	
 	public static void test()
 	{
+		OwnMethods.Print(80/100.0);
+		
+//		double distance  = 0.000001;
+//		String string = String.format("%s", String.valueOf(distance * distance));
+//		OwnMethods.Print(string);
+		
+//		String string = String.format("%1$d", 1);
+//		OwnMethods.Print(string);
+		
 //		GraphDatabaseService databaseService = new GraphDatabaseFactory()
 //				.newEmbeddedDatabase(new File(db_path));
 //		Transaction tx = databaseService.beginTx();

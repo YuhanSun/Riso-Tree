@@ -67,6 +67,8 @@ public class Prepare {
 	static int spatialVertexCount;
 	static ArrayList<Integer> labels;//all labels in the graph
 	
+	static ArrayList<Entity> entities = null;
+	
 	//for patent_20
 //	static double startSelectivity = 0.000001;
 //	static double endSelectivity = 0.002;
@@ -119,7 +121,7 @@ public class Prepare {
 			break;
 		}
 		
-		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		entities = OwnMethods.ReadEntity(entityPath);
 		spatialVertexCount = OwnMethods.GetSpatialEntityCount(entities);
 		nonspatial_vertex_count = entities.size() - spatialVertexCount;
 		
@@ -144,7 +146,7 @@ public class Prepare {
 //		setNewLabel();
 //		newLabelTest();
 		
-		generateRandomQueryGraph();
+//		generateRandomQueryGraph();
 //		generateQueryRectangleCenterID();
 //		generateQueryRectangleForSelectivity();
 		
@@ -334,7 +336,8 @@ public class Prepare {
 		try {
 			int experiment_count = 500;
 			OwnMethods.Print("Read entity from " + entityPath);
-			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+			if (entities == null)
+				entities = OwnMethods.ReadEntity(entityPath);
 			int spa_count = OwnMethods.GetSpatialEntityCount(entities);
 			STRtree stRtree = OwnMethods.ConstructSTRee(entities);
 
@@ -372,8 +375,10 @@ public class Prepare {
 					double radius = 0.0;
 					for (Object object : result)
 					{
-						Entity entity = (Entity) object;
-						double dist = Utility.distance(lon, lat, entity.lon, entity.lat);
+//						Entity entity = (Entity) object;
+//						double dist = Utility.distance(lon, lat, entity.lon, entity.lat);
+						Point point = (Point) object;
+						double dist = Utility.distance(lon, lat, point.getX(), point.getY());
 						if(dist > radius)
 							radius = dist;
 					}
@@ -401,7 +406,10 @@ public class Prepare {
 	 */
 	public static void generateQueryRectangleCenterID()
 	{
-		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+		OwnMethods.Print("read entity from " + entityPath);
+		
+		if (entities == null)
+			entities = OwnMethods.ReadEntity(entityPath);
 		
 		OwnMethods.generateQueryRectangleCenterID(entities, center_id_path, 500);
 	}
@@ -426,7 +434,8 @@ public class Prepare {
 			}
 			
 			ArrayList<ArrayList<Integer>> datagraph = OwnMethods.ReadGraph(graph_path);
-			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+			if (entities == null)
+				entities = OwnMethods.ReadEntity(entityPath);
 			ArrayList<Integer> labels = OwnMethods.readIntegerArray(label_list_path);
 			
 			OwnMethods.Print(datagraph.size());

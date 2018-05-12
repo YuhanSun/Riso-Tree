@@ -61,6 +61,31 @@ public class Construct_RisoTree {
 	
 	static ArrayList<Integer> labels;//all labels in the graph
 	
+	static String dir = "/hdd2/data/ysun138/RisoTree";
+	
+	static void initParametersServer()
+	{
+		systemName = Config.system.Ubuntu;
+		dataset = Config.Datasets.wikidata_100.name();
+		MAX_HOPNUM = 2;
+		db_path = dir + "/neo4j-community-3.1.1/data/databases/graph.db";
+		graph_path = dir + "/graph.txt";
+		label_list_path = dir + "/label.txt";
+		graph_node_map_path = dir + "/node_map_RTree.txt";
+		containIDPath = dir + "/containID.txt";
+		PNPath = dir + "/PathNeighbors";
+		nonspatial_label_count = 100;
+		if (nonspatial_label_count == 1)
+			labels = new ArrayList<Integer>(Arrays.asList(0, 1));
+		else
+		{
+			labels = new ArrayList<Integer>(1 + nonspatial_label_count);
+			labels.add(1);
+			for ( int i = 0; i < nonspatial_label_count; i++)
+				labels.add(i + 2);
+		}
+	}
+	
 	static void initParameters()
 	{
 		systemName = config.getSystemName();
@@ -117,32 +142,37 @@ public class Construct_RisoTree {
 	}
 	
 	public static void main(String[] args) {
-		initParameters();
-		
-		generateContainSpatialID();
-		constructPN();
-		LoadPN();
-//		generatePNSize();
-		
-		
-//		ConstructNL();
-//		ClearNL();
-//		
-//		ArrayList<Integer> label_list = OwnMethods.readIntegerArray(label_list_path);
-//		String neighborListPath = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/"+dataset+"/2hop_neighbor_spa.txt";
-//		Construct(neighborListPath, 2, labels, label_list);
-		
-		//for the second hop
-//		LoadLeafNodeNList();
-//		MergeLeafNL();
-		
-//		generateNL_size();
-//		NL_size_Check();
-//		set_Spatial_Label();
-		
-		//set a lot of labels
-//		set_NL_list_label(max_hop_num, labels);
-//		set_NL_list_label_DeepestNonLeaf(max_hop_num, labels);
+		try {
+//			initParameters();
+			initParametersServer();
+			
+			generateContainSpatialID();
+			constructPN();
+			LoadPN();
+//			generatePNSize();
+			
+//			ConstructNL();
+//			ClearNL();
+//			
+//			ArrayList<Integer> label_list = OwnMethods.readIntegerArray(label_list_path);
+//			String neighborListPath = "/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/"+dataset+"/2hop_neighbor_spa.txt";
+//			Construct(neighborListPath, 2, labels, label_list);
+			
+			//for the second hop
+//			LoadLeafNodeNList();
+//			MergeLeafNL();
+			
+//			generateNL_size();
+//			NL_size_Check();
+//			set_Spatial_Label();
+			
+			//set a lot of labels
+//			set_NL_list_label(max_hop_num, labels);
+//			set_NL_list_label_DeepestNonLeaf(max_hop_num, labels);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 	
 	/**
@@ -236,7 +266,7 @@ public class Construct_RisoTree {
 			int hop = 2;
 			BufferedReader reader =  new BufferedReader(new FileReader(new File(PNPath + "_" + hop)));
 			Map<String, String> config = new HashMap<String, String>();
-			config.put("dbms.pagecache.memory", "20g");
+			config.put("dbms.pagecache.memory", "100g");
 			BatchInserter inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
 			
 			String line = null;
@@ -459,8 +489,8 @@ public class Construct_RisoTree {
 			Transaction tx2 = dbservice.beginTx();
 			
 			
-//			for ( int hop = 2; hop <= MAX_HOPNUM; hop++)
-			int hop = 2;
+			for ( int hop = 2; hop <= MAX_HOPNUM; hop++)
+//			int hop = 2;
 			{
 				FileWriter writer2 =  new FileWriter(new File(PNPath+"_"+hop));
 				String regex = "PN";
@@ -524,6 +554,10 @@ public class Construct_RisoTree {
 		}
 	}
 	
+	/**
+	 * Generate the map of neo4j RisoTree leaf level id 
+	 * and spatial objects graph id.
+	 */
 	public static void generateContainSpatialID()
 	{
 		try {
