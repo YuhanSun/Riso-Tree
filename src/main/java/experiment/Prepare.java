@@ -27,7 +27,6 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-import au.com.objectix.jgridshift.Util;
 import commons.Config;
 import commons.Entity;
 import commons.Labels.OSMRelation;
@@ -91,6 +90,7 @@ public class Prepare {
 	static String center_id_path;
 	
 	static String dir = "/hdd2/data/ysun138/RisoTree";
+	static String queryGraphDir;
 	
 	static void iniParametersServer()
 	{
@@ -100,7 +100,9 @@ public class Prepare {
 		label_list_path = dir + "/label.txt";
 		graph_node_map_path = dir + "/node_map_RTree.txt";
 		queryDir = dir + "/query";
+		queryGraphDir = String.format("%s/query_graph/%s/", queryDir, dataset);
 //		center_id_path = String.format("%s/spa_predicate/%s/%s_centerids.txt", queryDir, dataset, dataset);
+		systemName = system.Ubuntu;
 	}
 	
 	static void initParameters()
@@ -117,6 +119,7 @@ public class Prepare {
 			rtree_map_path = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/rtree_map.txt", dataset);
 			log_path = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/set_label.log", dataset);
 			queryDir = "/mnt/hgfs/Google_Drive/Projects/risotree/query";
+			queryGraphDir = String.format("%s/query_graph/%s/", queryDir, dataset);
 			center_id_path = String.format("%s/spa_predicate/%s/%s_centerids.txt", queryDir, dataset, dataset);
 			break;
 		case Windows:
@@ -130,6 +133,7 @@ public class Prepare {
 			rtree_map_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\rtree_map.txt", dataset);
 			log_path = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\set_label.log", dataset);
 			queryDir = "D:\\Google_Drive\\Projects\\risotree\\query";
+			queryGraphDir = String.format("%s\\query_graph\\%s\\", queryDir, dataset);
 			center_id_path = String.format("%s\\spa_predicate\\%s\\%s_centerids.txt", queryDir, dataset, dataset);
 		default:
 			break;
@@ -434,6 +438,12 @@ public class Prepare {
 	 */
 	public static void generateRandomQueryGraph()
 	{
+		if (!OwnMethods.pathExist(queryGraphDir))
+		{
+			OwnMethods.Print(queryGraphDir + " does not exist!");
+			System.exit(-1);
+		}
+		
 		OwnMethods.Print("read graph from " + graph_path);
 		ArrayList<ArrayList<Integer>> datagraph = OwnMethods.ReadGraph(graph_path);
 		if (entities == null)
@@ -453,14 +463,7 @@ public class Prepare {
 //		int node_count = 10;
 		{
 			int spa_pred_count = 1;
-			String querygraph_path = "";
-			switch (systemName) {
-			case Ubuntu:
-				querygraph_path = String.format("%s/query_graph/%s/%d.txt", queryDir, dataset, node_count);
-				break;
-			case Windows:
-				querygraph_path = String.format("%s\\query_graph\\%s\\%d.txt", queryDir, dataset, node_count);
-			}
+			String querygraph_path = String.format("%s%d.txt", queryGraphDir, node_count);
 			
 			ArrayList<Query_Graph> query_Graphs = new ArrayList<Query_Graph>(10);
 			while ( query_Graphs.size() != 10)

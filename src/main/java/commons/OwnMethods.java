@@ -42,6 +42,16 @@ import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 
 public class OwnMethods {
 	
+	public static boolean pathExist(String path)
+	{
+		File file = new File(path);
+
+		if (file.exists()) 
+			return true;
+		else
+			return false;
+	}
+	
 	/**
 	 * Convert the one-predicate query graph to two-predicate.
 	 * The first spatial vertex will be set to be true
