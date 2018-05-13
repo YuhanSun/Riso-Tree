@@ -20,6 +20,7 @@ public class Config
 		foursquare, foursquare_10, foursquare_100,
 		Gowalla, Gowalla_10, Gowalla_100, Gowalla_25, Gowalla_50, 
 		Yelp, Yelp_10, Yelp_100,
+		wikidata_2, wikidata_100,
 	}
 	
 	public Config() 
@@ -35,8 +36,8 @@ public class Config
 	
 	//attention here, these settings change a lot
 	private String neo4j_version = "neo4j-community-3.1.1";
-	private system operatingSystem = system.Ubuntu;
-	private String dataset = Datasets.go_uniprot_100_random_80.name();
+	private system operatingSystem = system.Windows;
+	private String dataset = Datasets.wikidata_100.name();
 	
 	private int MAX_HOPNUM = 2;
 	private int MAX_HMBR_HOPNUM = 3;
