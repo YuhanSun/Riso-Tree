@@ -49,8 +49,12 @@ public class Experiment {
 //	double endSelectivity = 0.2;
 	
 	//foursquare_100
+//	public double startSelectivity = 0.000001;
+//	public double endSelectivity = 0.002;
+	
+	//wikidata_100
 	public double startSelectivity = 0.000001;
-	public double endSelectivity = 0.002;
+	public double endSelectivity = 0.2;
 	
 	//Patents
 //	double startSelectivity = 0.00001;
