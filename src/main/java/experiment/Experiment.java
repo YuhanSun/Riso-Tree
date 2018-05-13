@@ -69,8 +69,22 @@ public class Experiment {
 	{
 		this.config = config;
 		initializeParameters();
+		
 	}
 
+	static String dir = "/hdd2/data/ysun138/RisoTree";
+	
+	public void initializeParametersServer()
+	{
+		TEST_FORMAT = false;
+		dataset = Config.Datasets.wikidata_100.name();
+		version = config.GetNeo4jVersion();
+		systemName = system.Ubuntu;
+		db_path = dir + "/neo4j-community-3.1.1/data/databases/graph.db";
+		entityPath = dir + "/entity.txt";
+		graph_pos_map_path= dir + "/node_map_RTree.txt";
+	}
+	
 	public void initializeParameters()
 	{	
 		TEST_FORMAT = false;
@@ -113,20 +127,20 @@ public class Experiment {
 //					Config.Datasets.Patents_100_random_80.name(), 
 //					Config.Datasets.go_uniprot_100_random_80.name()));
 			
-			config.setDatasetName(Config.Datasets.foursquare_100.name());
-			Experiment experiment = new Experiment(config);
-			experiment.experimentCount = 3;
-			experiment.Neo4j_Naive(10, 0);
+//			config.setDatasetName(Config.Datasets.wikidata_100.name());
+//			Experiment experiment = new Experiment(config);
+//			experiment.experimentCount = 3;
+//			experiment.Neo4j_Naive(10, 0);
 			
-//			config.setDatasetName(Config.Datasets.foursquare_100.name());
-//			for ( int hopNum = 1; hopNum <= 2; hopNum++)
-////			int hopNum = 2;
-//			{
-//				config.setMAXHOPNUM(hopNum);
-//				Experiment experiment = new Experiment(config);
-//				experiment.initializeParameters();
-//				experiment.risoTreeQueryPN(10, 0);
-//			}
+			config.setDatasetName(Config.Datasets.wikidata_100.name());
+			for ( int hopNum = 0; hopNum <= 2; hopNum++)
+//			int hopNum = 2;
+			{
+				config.setMAXHOPNUM(hopNum);
+				Experiment experiment = new Experiment(config);
+				experiment.initializeParameters();
+				experiment.risoTreeQueryPN(10, 0);
+			}
 
 //			for (int nodeCount = 5; nodeCount <= 35; nodeCount+=5)
 //				//			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)

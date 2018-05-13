@@ -512,6 +512,8 @@ public class OwnMethods {
 				int start_index = random.nextInt(subgraph_ids.size());	// pos in the subgraph_ids
 				int start_id = subgraph_ids.get(start_index);
 				ArrayList<Integer> neighbors = graph.get(start_id);
+				if (neighbors.size() == 0)
+					continue;
 				int end_index_neighbor = random.nextInt(neighbors.size());	// pos in the neighbors array
 				int end_id = neighbors.get(end_index_neighbor);
 				int end_index = subgraph_ids.indexOf(end_id);	//pos in the subgraph_ids array
