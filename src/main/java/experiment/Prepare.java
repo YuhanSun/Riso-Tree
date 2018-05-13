@@ -27,6 +27,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
+import au.com.objectix.jgridshift.Util;
 import commons.Config;
 import commons.Entity;
 import commons.Labels.OSMRelation;
@@ -89,6 +90,19 @@ public class Prepare {
 	static String queryDir;
 	static String center_id_path;
 	
+	static String dir = "/hdd2/data/ysun138/RisoTree";
+	
+	static void iniParametersServer()
+	{
+//		db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
+		graph_path = dir + "/graph.txt";
+		entityPath = dir + "/entity.txt";
+		label_list_path = dir + "/label.txt";
+		graph_node_map_path = dir + "/node_map_RTree.txt";
+		queryDir = dir + "/query";
+//		center_id_path = String.format("%s/spa_predicate/%s/%s_centerids.txt", queryDir, dataset, dataset);
+	}
+	
 	static void initParameters()
 	{
 		switch (systemName) {
@@ -137,7 +151,8 @@ public class Prepare {
 	}
 	
 	public static void main(String[] args) {
-		initParameters();
+//		initParameters();
+		iniParametersServer();
 		
 //		String oldDataset = "Patents_10_random_20";
 //		modifyLayerName(oldDataset);
@@ -146,7 +161,7 @@ public class Prepare {
 //		setNewLabel();
 //		newLabelTest();
 		
-//		generateRandomQueryGraph();
+		generateRandomQueryGraph();
 //		generateQueryRectangleCenterID();
 //		generateQueryRectangleForSelectivity();
 		
@@ -419,8 +434,22 @@ public class Prepare {
 	 */
 	public static void generateRandomQueryGraph()
 	{
+		OwnMethods.Print("read graph from " + graph_path);
+		ArrayList<ArrayList<Integer>> datagraph = OwnMethods.ReadGraph(graph_path);
+		if (entities == null)
+		{
+			OwnMethods.Print("read entity from " + entityPath);
+			entities = OwnMethods.ReadEntity(entityPath);
+		}
+		
+		OwnMethods.Print("read label list from " + label_list_path);
+		ArrayList<Integer> labels = OwnMethods.readIntegerArray(label_list_path);
+		
+		OwnMethods.Print("data graph size: " + datagraph.size());
+		OwnMethods.Print("entity size: " + entities.size());
+		OwnMethods.Print("label size: " + labels.size());
 //		for ( int node_count = 35; node_count <= 35; node_count+=5)
-		for ( int node_count = 7; node_count <= 13; node_count+=2)
+		for ( int node_count = 5; node_count <= 15; node_count+=2)
 //		int node_count = 10;
 		{
 			int spa_pred_count = 1;
@@ -432,15 +461,6 @@ public class Prepare {
 			case Windows:
 				querygraph_path = String.format("%s\\query_graph\\%s\\%d.txt", queryDir, dataset, node_count);
 			}
-			
-			ArrayList<ArrayList<Integer>> datagraph = OwnMethods.ReadGraph(graph_path);
-			if (entities == null)
-				entities = OwnMethods.ReadEntity(entityPath);
-			ArrayList<Integer> labels = OwnMethods.readIntegerArray(label_list_path);
-			
-			OwnMethods.Print(datagraph.size());
-			OwnMethods.Print(entities.size());
-			OwnMethods.Print(labels.size());
 			
 			ArrayList<Query_Graph> query_Graphs = new ArrayList<Query_Graph>(10);
 			while ( query_Graphs.size() != 10)
@@ -465,8 +485,8 @@ public class Prepare {
 						}
 					}
 				OwnMethods.Print(query_Graphs.size());
-
 			}
+			OwnMethods.Print("output query graph to " + querygraph_path);
 			Utility.WriteQueryGraph(querygraph_path, query_Graphs);
 		}
 	}
