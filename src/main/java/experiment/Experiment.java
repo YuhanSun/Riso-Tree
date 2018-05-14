@@ -38,7 +38,7 @@ public class Experiment {
 	public String resultDir;
 
 	public boolean TEST_FORMAT;
-	public int experimentCount = 10;
+	public int experimentCount = 1;
 
 	//non-spatial ratio 20
 	//	static double startSelectivity = 0.000001;
@@ -144,6 +144,10 @@ public class Experiment {
 				experiment.initializeParameters();
 				experiment.risoTreeQueryPN(10, 0);
 			}
+			
+			Experiment experiment = new Experiment(config);
+			experiment.experimentCount = 3;
+			experiment.Neo4j_Naive(10, 0);
 
 //			for (int nodeCount = 5; nodeCount <= 35; nodeCount+=5)
 //				//			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
