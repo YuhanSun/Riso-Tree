@@ -123,7 +123,7 @@ public class ConstructionTime {
 				LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(config, true);
 				long RTreeTime = loadDataNoOSM.batchRTreeInsertTime();
 
-				Construct_RisoTree construct_RisoTree = new Construct_RisoTree(config);
+				Construct_RisoTree construct_RisoTree = new Construct_RisoTree(config, true);
 //				construct_RisoTree.generateContainSpatialID();
 				ArrayList<Long> PNTime = construct_RisoTree.constructPNTime();
 
