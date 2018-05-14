@@ -472,6 +472,9 @@ public class Experiment {
 			long start;
 			long time;
 			int limit = -1;
+			
+			OwnMethods.Print("read map from " + graph_pos_map_path);
+			long[] graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 
 			String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
 			ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
@@ -523,7 +526,6 @@ public class Experiment {
 					OwnMethods.WriteFile(result_detail_path, true, write_line);
 
 				ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
-				long[] graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 				RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 						graph_pos_map_list, MAX_HOPNUM);
 

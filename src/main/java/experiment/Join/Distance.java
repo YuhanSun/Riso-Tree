@@ -39,11 +39,11 @@ public class Distance {
 //	public ArrayList<Entity> entities = null;
 	public ArrayList<MyRectangle> queryrect = null;
 	public ArrayList<Query_Graph> queryGraphs = null;
-	public long[] graph_pos_map_list;
 		
+	public int entityCount, spaCount;
+	
 	public boolean TEST_FORMAT;
 	public int nodeCount = 5;
-	public int experimentCount = 10;
 	
 	public Distance()
 	{
@@ -94,14 +94,9 @@ public class Distance {
 //			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
 //		}
 		
-		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
-		graph_pos_map_list= new long[graph_pos_map.size()];
-		for ( String key_str : graph_pos_map.keySet())
-		{
-			int key = Integer.parseInt(key_str);
-			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
-			graph_pos_map_list[key] = pos_id;
-		}
+		spaCount = OwnMethods.GetSpatialEntityCount(entityPath);
+		entityCount = OwnMethods.getEntityCount(entityPath);
+		
 	}
 	
 	public static void main(String[] args) {
@@ -120,7 +115,7 @@ public class Distance {
 			Distance distanceExperiment = new Distance();
 			distanceExperiment.config.setDatasetName(dataset);
 			distanceExperiment.initializeParameters();
-//			distanceExperiment.Neo4j_Naive(distanceList, 2);
+			distanceExperiment.Neo4j_Naive(distanceList, 2);
 			distanceExperiment.risoTreeQueryPN(distanceList, 2);			
 //			distanceExperiment.spatialFirstList(distanceList, 2);
 		} catch (Exception e) {
@@ -141,6 +136,9 @@ public class Distance {
 			long start;
 			long time;
 
+			OwnMethods.Print("read map from " + graph_pos_map_path);
+			long[] graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
+			
 			Query_Graph query_Graph = queryGraphs.get(query_id);
 			OwnMethods.convertQueryGraphForJoin(query_Graph);
 			OwnMethods.Print(query_Graph);
@@ -211,6 +209,9 @@ public class Distance {
 			long start;
 			long time;
 
+			OwnMethods.Print("read map from " + graph_pos_map_path);
+			long[] graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
+			
 			Query_Graph query_Graph = queryGraphs.get(query_id);
 			OwnMethods.convertQueryGraphForJoin(query_Graph);
 			OwnMethods.Print(query_Graph);
