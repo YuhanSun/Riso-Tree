@@ -17,6 +17,12 @@ import commons.Config.system;
 import graph.RisoTreeQueryPN;
 import graph.SpatialFirst_List;
 
+/**
+ * Use the same query graph with different locations,
+ * which is controlled by experimentCount.
+ * @author ysun138
+ *
+ */
 public class KCount {
 
 	public Config config;
@@ -39,6 +45,8 @@ public class KCount {
 	public ArrayList<Query_Graph> queryGraphs = null;
 	public long[] graph_pos_map_list;
 		
+	public int entityCount, spaCount;
+	
 	public boolean TEST_FORMAT;
 	public int nodeCount = 5;
 	public int experimentCount = 10;
@@ -91,29 +99,27 @@ public class KCount {
 			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
 		}
 		
-		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
-		graph_pos_map_list= new long[graph_pos_map.size()];
-		for ( String key_str : graph_pos_map.keySet())
-		{
-			int key = Integer.parseInt(key_str);
-			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
-			graph_pos_map_list[key] = pos_id;
-		}
+		spaCount = OwnMethods.GetSpatialEntityCount(entityPath);
+		entityCount = OwnMethods.getEntityCount(entityPath);
+		
+		OwnMethods.Print("read map from " + graph_pos_map_path);
+		graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 	}
 	
 	public static void main(String[] args) {
 		try {
 			// TODO Auto-generated method stub
 			ArrayList<Integer> KCountList = new ArrayList<Integer>();
-//			KCountList.add(5);
-//			KCountList.add(10);
+			KCountList.add(5);
+			KCountList.add(10);
 			KCountList.add(20);
 			KCountList.add(40);
 			
 			ArrayList<String> datasets = new ArrayList<String>();
 //			datasets.add(Datasets.Patents_100_random_80.name());
-			datasets.add(Datasets.Gowalla_100.name());
+//			datasets.add(Datasets.Gowalla_100.name());
 //			datasets.add(Datasets.go_uniprot_100_random_80.name());
+			datasets.add(Datasets.wikidata_100.name());
 			
 			KCount kCount = new KCount();
 			for (String dataset : datasets)
@@ -136,8 +142,10 @@ public class KCount {
 		try {
 			long start;
 			long time;
-			int limit = -1;
 
+			OwnMethods.Print("read map from " + graph_pos_map_path);
+			long[] graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
+			
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
 			case Ubuntu:
@@ -154,7 +162,7 @@ public class KCount {
 			OwnMethods.Print(result_detail_path);
 			
 
-			String write_line = String.format("%s\t%d\n", dataset, limit);
+			String write_line = String.format("%s\tqueryID: %d\n", dataset, query_id);
 			if(!TEST_FORMAT)
 			{
 				OwnMethods.WriteFile(result_detail_path, true, write_line);

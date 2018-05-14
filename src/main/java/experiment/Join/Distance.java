@@ -115,8 +115,8 @@ public class Distance {
 			Distance distanceExperiment = new Distance();
 			distanceExperiment.config.setDatasetName(dataset);
 			distanceExperiment.initializeParameters();
-			distanceExperiment.Neo4j_Naive(distanceList, 2);
-			distanceExperiment.risoTreeQueryPN(distanceList, 2);			
+			distanceExperiment.risoTreeQueryPN(distanceList, 0);			
+			distanceExperiment.Neo4j_Naive(distanceList, 0);
 //			distanceExperiment.spatialFirstList(distanceList, 2);
 		} catch (Exception e) {
 			e.printStackTrace();

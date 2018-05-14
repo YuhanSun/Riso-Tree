@@ -38,6 +38,8 @@ public class QueryNodeCount {
 	public ArrayList<MyRectangle> queryrect = null;
 	public long[] graph_pos_map_list;
 		
+	public int entityCount, spaCount;
+	
 	public boolean TEST_FORMAT;
 	public int experimentCount = 5;
 	public int K = 5;
@@ -86,14 +88,11 @@ public class QueryNodeCount {
 			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
 		}
 		
-		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
-		graph_pos_map_list= new long[graph_pos_map.size()];
-		for ( String key_str : graph_pos_map.keySet())
-		{
-			int key = Integer.parseInt(key_str);
-			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
-			graph_pos_map_list[key] = pos_id;
-		}
+		spaCount = OwnMethods.GetSpatialEntityCount(entityPath);
+		entityCount = OwnMethods.getEntityCount(entityPath);
+		
+		OwnMethods.Print("read map from " + graph_pos_map_path);
+		graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 	}
 	
 	public static void main(String[] args) {
@@ -107,8 +106,9 @@ public class QueryNodeCount {
 		
 		ArrayList<String> datasets = new ArrayList<String>();
 //		datasets.add(Datasets.Patents_100_random_80.name());
-		datasets.add(Datasets.foursquare_100.name());
+//		datasets.add(Datasets.foursquare_100.name());
 //		datasets.add(Datasets.go_uniprot_100_random_80.name());
+		datasets.add(Datasets.wikidata_100.name());
 		
 		QueryNodeCount queryNodeCount = new QueryNodeCount();
 		for (String dataset : datasets)
