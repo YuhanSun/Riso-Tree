@@ -119,6 +119,15 @@ public class LoadDataNoOSM {
 		initParameters();
 	}
 	
+	public LoadDataNoOSM(Config config, boolean isServer)
+	{
+		this.config = config;
+		if (isServer)
+			iniParametersServer();
+		else
+			initParameters();
+	}
+	
 	public static void main(String[] args) {
 		
 		try {
@@ -446,6 +455,8 @@ public class LoadDataNoOSM {
 		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
 		OwnMethods.Print("dataset:" + dataset + "\ndatabase:" + dbPath + "\n");
 
+		OwnMethods.Print("read entities from " + entityPath);
+		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath); 
 		SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 
 		Transaction tx = databaseService.beginTx();
@@ -453,7 +464,6 @@ public class LoadDataNoOSM {
 		EditableLayer layer = spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
 		//			org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
 
-		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath); 
 		ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
 		int spaCount = 0;
 		long start =  System.currentTimeMillis();

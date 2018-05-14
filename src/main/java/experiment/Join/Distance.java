@@ -116,12 +116,12 @@ public class Distance {
 		distanceList.add(0.0008);
 		try {
 //			String dataset = Datasets.Patents_100_random_80.name();
-			String dataset = Datasets.foursquare_100.name();
+			String dataset = Datasets.wikidata_100.name();
 			Distance distanceExperiment = new Distance();
 			distanceExperiment.config.setDatasetName(dataset);
 			distanceExperiment.initializeParameters();
-			distanceExperiment.Neo4j_Naive(distanceList, 2);
-//			distanceExperiment.risoTreeQueryPN(distanceList, 2);			
+//			distanceExperiment.Neo4j_Naive(distanceList, 2);
+			distanceExperiment.risoTreeQueryPN(distanceList, 2);			
 //			distanceExperiment.spatialFirstList(distanceList, 2);
 		} catch (Exception e) {
 			e.printStackTrace();

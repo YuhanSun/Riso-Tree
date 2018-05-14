@@ -41,6 +41,26 @@ public class IndexSize {
 	static String db_path, graphPath, entityPath, containIDPath, PNPath;
 	static ArrayList<Integer> labels;//all labels in the graph
 	
+	public static void initializeParametersServer()
+	{	
+		String dir = "/hdd2/data/ysun138/RisoTree";
+		db_path = String.format("%s/%s/data/databases/graph.db", dir, version);
+		graphPath = String.format("%s/graph.txt", dir);
+		entityPath = String.format("%s/entity.txt", dir);
+		containIDPath = String.format("%s/containID.txt", dir);
+		PNPath = String.format("%s/PathNeighbors", dir);
+		nonspatial_label_count = 100;
+		if (nonspatial_label_count == 1)
+			labels = new ArrayList<Integer>(Arrays.asList(0, 1));
+		else
+		{
+			labels = new ArrayList<Integer>(1 + nonspatial_label_count);
+			labels.add(1);
+			for ( int i = 0; i < nonspatial_label_count; i++)
+				labels.add(i + 2);
+		}
+	}
+	
 	public static void initializeParameters()
 	{	
 		switch (systemName) {
@@ -71,7 +91,9 @@ public class IndexSize {
 	}
 	
 	public static void main(String[] args) {
-		initializeParameters();
+//		initializeParameters();
+		initializeParametersServer();
+		
 //		calculateIndexSize();
 //		calculateValidIndexSize();
 //		graphSize();

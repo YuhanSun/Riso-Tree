@@ -135,6 +135,12 @@ public class Construct_RisoTree {
 		initParameters();
 	}
 	
+	public Construct_RisoTree(Config config, boolean isServer)
+	{
+		config = config;
+		initParametersServer();
+	}
+	
 	public Construct_RisoTree(Config pConfig)
 	{
 		config = pConfig;
