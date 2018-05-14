@@ -459,8 +459,8 @@ public class Prepare {
 		OwnMethods.Print("entity size: " + entities.size());
 		OwnMethods.Print("label size: " + labels.size());
 //		for ( int node_count = 35; node_count <= 35; node_count+=5)
-		for ( int node_count = 5; node_count <= 15; node_count+=2)
-//		int node_count = 10;
+//		for ( int node_count = 5; node_count <= 15; node_count+=2)
+		int node_count = 10;
 		{
 			int spa_pred_count = 1;
 			String querygraph_path = String.format("%s%d.txt", queryGraphDir, node_count);

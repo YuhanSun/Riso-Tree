@@ -316,6 +316,31 @@ public class OwnMethods {
 		return arrayList;
 	}
 	
+	public static long[] ReadMap(String filename, int entityCount)
+	{
+		BufferedReader reader = null;
+		String line = "";
+		long[] map = new long[entityCount];
+		try {
+			reader = new BufferedReader(new FileReader(new File(filename)));
+			while ( (line = reader.readLine()) != null)
+			{
+				String[] liStrings = line.split(",");
+				int graphID = Integer.parseInt(liStrings[0]);
+				long neo4jID = Long.parseLong(liStrings[1]);
+				map[graphID] = neo4jID;
+			}
+			reader.close();
+			return map;
+			
+		} catch (Exception e) {
+			OwnMethods.Print(line);
+			e.printStackTrace();
+		}
+		OwnMethods.Print("nothing in ReadMap(" + filename + ")");
+		return map;
+	}
+	
 	/**
 	 * Read map from file
 	 * @param filename
@@ -1150,6 +1175,56 @@ public class OwnMethods {
         return 0;
     }
 
+    public static int getEntityCount(String entityPath)
+    {
+    	int count = 0;
+        BufferedReader reader = null;
+        String str = null;
+        int id = 0;
+        try {
+            reader = new BufferedReader(new FileReader(new File(entityPath)));
+            str = reader.readLine();
+            count = Integer.parseInt(str);
+            reader.close();
+        }
+        catch (Exception e) {
+            OwnMethods.Print(String.format("error happens in entity id %d", id));
+            OwnMethods.Print(str);
+            e.printStackTrace();	System.exit(-1);
+        }
+		return count;
+    }
+    
+    public static int GetSpatialEntityCount(String entityPath)
+    {
+    	int count = 0;
+        BufferedReader reader = null;
+        String str = null;
+        int id = 0;
+        try {
+            reader = new BufferedReader(new FileReader(new File(entityPath)));
+            str = reader.readLine();
+            int node_count = Integer.parseInt(str);
+            while ((str = reader.readLine()) != null) {
+                String[] str_l = str.split(",");
+                int flag = Integer.parseInt(str_l[1]);
+                if (flag == 0) {
+                    continue;
+                } else {
+                    count++;
+                }
+                ++id;
+            }
+            reader.close();
+        }
+        catch (Exception e) {
+            OwnMethods.Print(String.format("error happens in entity id %d", id));
+            OwnMethods.Print(str);
+            e.printStackTrace();	System.exit(-1);
+        }
+		return count;
+    }
+    
     public static int GetSpatialEntityCount(ArrayList<Entity> entities)
     {
     	int count = 0;

@@ -67,13 +67,12 @@ public class Experiment {
 	//	static double startSelectivity = 0.0001;
 	//	static double endSelectivity = 0.2;
 
-	public int spaCount;
+	public int entityCount, spaCount;
 
 	public Experiment(Config config)
 	{
 		this.config = config;
 		initializeParameters();
-		
 	}
 
 	static String dir = "/hdd2/data/ysun138/RisoTree";
@@ -116,8 +115,8 @@ public class Experiment {
 			resultDir = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s", dataset);
 			break;
 		}
-		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
-		spaCount = OwnMethods.GetSpatialEntityCount(entities);
+		spaCount = OwnMethods.GetSpatialEntityCount(entityPath);
+		entityCount = OwnMethods.getEntityCount(entityPath);
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -524,14 +523,7 @@ public class Experiment {
 					OwnMethods.WriteFile(result_detail_path, true, write_line);
 
 				ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
-				HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
-				long[] graph_pos_map_list= new long[graph_pos_map.size()];
-				for ( String key_str : graph_pos_map.keySet())
-				{
-					int key = Integer.parseInt(key_str);
-					int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
-					graph_pos_map_list[key] = pos_id;
-				}
+				long[] graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 				RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 						graph_pos_map_list, MAX_HOPNUM);
 
