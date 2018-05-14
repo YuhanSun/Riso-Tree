@@ -155,7 +155,7 @@ public class Distance {
 			}
 
 			OwnMethods.Print(result_avg_path);
-			String write_line = String.format("%s\n", dataset);
+			String write_line = String.format("%s\t%d\n", dataset, query_id);
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, write_line);
 
@@ -227,7 +227,7 @@ public class Distance {
 				break;
 			}
 
-			String write_line = String.format("%s\n", dataset);
+			String write_line = String.format("%s\t%d\n", dataset, query_id);
 
 			String head_line = "result_count\tjoin_count\tjoin_time\tcheck_path_time\t_check_overlap_time\tget_iterator_time\titerate_time\ttotal_time\taccess_pages\n";
 			if(!TEST_FORMAT)

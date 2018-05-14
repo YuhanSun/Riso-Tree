@@ -271,7 +271,6 @@ public class KCount {
 		try {
 			long start;
 			long time;
-			int limit = -1;
 
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
@@ -285,7 +284,7 @@ public class KCount {
 				break;
 			}
 
-			String write_line = String.format("%s\t%d\n", dataset, limit);
+			String write_line = String.format("%s\t%d\n", dataset, query_id);
 			if(!TEST_FORMAT)
 			{
 				OwnMethods.WriteFile(result_detail_path, true, write_line);
