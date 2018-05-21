@@ -52,9 +52,10 @@ public class SpatialFirst_ListTest {
 	static Query_Graph query_Graph;
 	static long[] graph_pos_map_list;
 	
-	static int nodeCount = 5, query_id = 0;
+	static int nodeCount = 10, query_id = 0, rectID = 2;
 	
-	static int name_suffix = 1280;//Gowalla 0.001
+//	static int name_suffix = 1280;//Gowalla 0.001
+	static int name_suffix = 5756;//wikidata_100 0.001
 	static String queryrect_path = null, querygraph_path = null, queryrectCenterPath = null;
 	
 	@Before
@@ -95,35 +96,33 @@ public class SpatialFirst_ListTest {
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 		query_Graph = queryGraphs.get(query_id);
 		
-//		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
 		
-		ArrayList<Integer> centerIDs = OwnMethods.readIntegerArray(queryrectCenterPath);
-		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
-		ArrayList<MyRectangle> queryrect = new ArrayList<MyRectangle>();
-		for ( int id : centerIDs)
-		{
-			Entity entity = entities.get(id);
-			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
-		}
+//		ArrayList<Integer> centerIDs = OwnMethods.readIntegerArray(queryrectCenterPath);
+//		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+//		ArrayList<MyRectangle> queryrect = new ArrayList<MyRectangle>();
+//		for ( int id : centerIDs)
+//		{
+//			Entity entity = entities.get(id);
+//			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
+//		}
 		
-		MyRectangle rectangle = queryrect.get(0);
+		MyRectangle rectangle = queryrect.get(rectID);
+		OwnMethods.Print("query rectangle: " + rectangle);
 		int j = 0;
 		for (  ; j < query_Graph.graph.size(); j++)
 			if(query_Graph.Has_Spa_Predicate[j])
 				break;
 		query_Graph.spa_predicate[j] = rectangle;
 		
-		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
-		graph_pos_map_list= new long[graph_pos_map.size()];
-		for ( String key_str : graph_pos_map.keySet())
-		{
-			int key = Integer.parseInt(key_str);
-			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
-			graph_pos_map_list[key] = pos_id;
-		}
+		int entityCount = OwnMethods.getEntityCount(entityPath);
+		OwnMethods.Print("read map from " + graph_pos_map_path);
+		graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
+		
 	}
 	
-	public static void subgraphMatchQuery_Block_Test()
+	@Test
+	public void subgraphMatchQuery_Block_Test()
 	{
 		SpatialFirst_List spatialFirstlist = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 		
@@ -149,7 +148,7 @@ public class SpatialFirst_ListTest {
 			SpatialFirst_List spatialFirstlist = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 			Transaction tx = spatialFirstlist.dbservice.beginTx();
 			Node rootNode = RTreeUtility.getRTreeRoot(spatialFirstlist.dbservice, dataset);
-			MyRectangle query_rectangle = new MyRectangle(-98.025157, 29.953977, -97.641747, 30.337387);
+			MyRectangle query_rectangle = new MyRectangle(38.090088, 36.413699, 41.962690, 40.286301);
 			LinkedList<Node> result = spatialFirstlist.rangeQuery(rootNode, query_rectangle);
 			OwnMethods.Print(String.format("Result size: %d", result.size()));
 			tx.success();

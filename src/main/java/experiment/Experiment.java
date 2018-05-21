@@ -53,8 +53,8 @@ public class Experiment {
 //	public double endSelectivity = 0.002;
 	
 	//wikidata_100
-	public double startSelectivity = 0.000001;
-	public double endSelectivity = 0.2;
+	public double startSelectivity = 0.001;
+	public double endSelectivity = 0.002;
 	
 	//Patents
 //	double startSelectivity = 0.00001;
@@ -137,12 +137,12 @@ public class Experiment {
 			
 			config.setDatasetName(Config.Datasets.wikidata_100.name());
 //			for ( int hopNum = 0; hopNum <= 2; hopNum++)
-			int hopNum = 2;
+			int hopNum = 1;
 			{
 				config.setMAXHOPNUM(hopNum);
 				Experiment experiment = new Experiment(config);
 				experiment.initializeParameters();
-				experiment.experimentCount = 1;
+				experiment.experimentCount = 3;
 				experiment.risoTreeQueryPN(10, 0);
 			}
 			

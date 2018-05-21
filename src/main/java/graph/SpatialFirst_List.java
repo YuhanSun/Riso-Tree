@@ -142,7 +142,8 @@ public class SpatialFirst_List {
 	}
 
 	/**
-	 * only returns the deepest non-leaf rtree nodes
+	 * Only returns the rtree leaf nodes.
+	 * Require one more level filtering.
 	 * @param root_node
 	 * @param query_rectangle
 	 * @return
@@ -579,6 +580,7 @@ public class SpatialFirst_List {
 
 			long start_1 = System.currentTimeMillis();
 			Node rootNode = RTreeUtility.getRTreeRoot(dbservice, dataset);
+			OwnMethods.Print("query range: " + min_queryRectangle);
 			LinkedList<Node> rangeQueryResult = this.rangeQuery(rootNode, min_queryRectangle);
 			range_query_time = System.currentTimeMillis() - start_1;
 			
@@ -639,6 +641,7 @@ public class SpatialFirst_List {
 					}
 				}
 			}
+			OwnMethods.Print("range query result count: " + located_in_count);
 
 			tx.success();
 			tx.close();

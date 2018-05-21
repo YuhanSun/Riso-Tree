@@ -31,8 +31,9 @@ public class Naive_Neo4j_Match_Test {
 	static String db_path;
 	static String querygraphDir, spaPredicateDir;
 	
-	static int nodeCount = 7, query_id = 0;
-	static int name_suffix = 1280;//Gowalla 0.001
+	static int nodeCount = 10, query_id = 0, rectID = 2;
+//	static int name_suffix = 1280;//Gowalla 0.001
+	static int name_suffix = 5756;//wikidata_100 0.001
 	static String entityPath, querygraph_path, queryrectCenterPath, queryrect_path;
 	
 	//query input
@@ -95,8 +96,8 @@ public class Naive_Neo4j_Match_Test {
 
 	@Test
 	public void queryTest() {
-		int nodeCount = 2, query_id = 0;
-		int name_suffix = 75;
+//		int nodeCount = 2, query_id = 0;
+//		int name_suffix = 75;
 		
 		String queryrect_path = null, querygraph_path = null;
 		switch (systemName) {
@@ -114,7 +115,7 @@ public class Naive_Neo4j_Match_Test {
 		Query_Graph query_Graph = queryGraphs.get(query_id);
 		
 		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
-		MyRectangle rectangle = queryrect.get(0);
+		MyRectangle rectangle = queryrect.get(rectID);
 		int j = 0;
 		for (  ; j < query_Graph.graph.size(); j++)
 			if(query_Graph.Has_Spa_Predicate[j])
@@ -123,8 +124,13 @@ public class Naive_Neo4j_Match_Test {
 		
 		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
 		Result result = naive_Neo4j_Match.SubgraphMatch_Spa_API(query_Graph, -1);
+		int count = 0;
 		while (result.hasNext())
+		{
+			count++;
 			OwnMethods.Print(result.next());
+		}
+		OwnMethods.Print(count);
 	}
 	
 	@Test

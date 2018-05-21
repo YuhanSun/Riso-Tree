@@ -44,12 +44,14 @@ public class RisoTreeQueryPNTest {
 	static Query_Graph query_Graph;
 	static long[] graph_pos_map_list;
 	
-	static int nodeCount = 5, query_id = 0;
+	static int nodeCount = 10, query_id = 0, rectID = 2;
 	
 //	name_suffix = 7;
 //	name_suffix = 75;
 //	name_suffix = 7549;//0.1
-	static int name_suffix = 1280;//Gowalla 0.001
+//	static int name_suffix = 1280;//Gowalla 0.001
+	static int name_suffix = 5756;//wikidata_100 0.001
+	
 	static String queryrect_path = null, querygraph_path = null, queryrectCenterPath = null;
 	
 	@BeforeClass
@@ -97,7 +99,7 @@ public class RisoTreeQueryPNTest {
 			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
 		}
 		
-		MyRectangle rectangle = queryrect.get(0);
+		MyRectangle rectangle = queryrect.get(rectID);
 		int j = 0;
 		for (  ; j < query_Graph.graph.size(); j++)
 			if(query_Graph.Has_Spa_Predicate[j])
