@@ -66,6 +66,8 @@ public class RisoTreeQueryPN {
 	public long iterate_time;
 	public long result_count;
 	public long page_hit_count;
+	public long overlap_leaf_node_count;
+	public long located_in_count;
 	public String logPath;
 	
 	//for both knn and join
@@ -97,11 +99,17 @@ public class RisoTreeQueryPN {
 	public RisoTreeQueryPN(String db_path, String p_dataset, 
 			long[] p_graph_pos_map, int pMAXHOPNUM)
 	{
-		dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+		
+		dbservice = OwnMethods.getDatabaseService(db_path);
 		dataset = p_dataset;
 		graph_pos_map_list =  p_graph_pos_map;
 //		logPath = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/query.log", dataset);
 		logPath = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\query.log", dataset);
+//		if (!OwnMethods.pathExist(logPath))
+//		{
+//			OwnMethods.Print(logPath + " does not exist");
+//			System.exit(-1);
+//		}
 		MAX_HOPNUM = pMAXHOPNUM;
 	}
 
@@ -836,11 +844,14 @@ public class RisoTreeQueryPN {
 	public void Query(Query_Graph query_Graph, int limit)
 	{
 		try {
+			OwnMethods.Print("Initialize variables for query");
 			range_query_time = 0;
 			get_iterator_time = 0;
 			iterate_time = 0;
 			result_count = 0;
 			page_hit_count = 0;
+			overlap_leaf_node_count = 0;
+			located_in_count = 0;
 			String logWriteLine = "";
 			
 			//<spa_id, rectangle> all query rectangles
@@ -882,6 +893,8 @@ public class RisoTreeQueryPN {
 					}
 				}
 			}
+			
+			
 			if ( outputLevelInfo)
 			{
 				logWriteLine = String.format("min_hop: %s\nNL_property: %s", min_hop, PN_size_propertyname);
@@ -951,9 +964,10 @@ public class RisoTreeQueryPN {
 					return;
 				}
 
-				//traverse to the second deepest level and start to form the cypher query
+				//traverse to the leaf node level and start to form the cypher query
 				if( overlap_MBR_list.isEmpty() == false && next_list.isEmpty())
 				{
+					overlap_leaf_node_count = overlap_MBR_list.size();
 					//<spa_id, card>
 					HashMap<Integer, Double> spa_cards = new HashMap<Integer, Double>();
 					for (int key : spa_predicates.keySet())
@@ -1213,7 +1227,7 @@ public class RisoTreeQueryPN {
 					{
 						MyRectangle queryRect = spa_predicates.get(minSpaID);
 						//get located in nodes
-						int located_in_count = 0;
+						located_in_count = 0;
 						int levelTime = 0;
 						level_index++;
 						double nodeIndex = 0;
