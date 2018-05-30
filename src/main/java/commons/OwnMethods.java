@@ -42,6 +42,23 @@ import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 
 public class OwnMethods {
 	
+	public static GraphDatabaseService getDatabaseService(String dbPath)
+	{
+		if (!OwnMethods.pathExist(dbPath))
+		{
+			OwnMethods.Print(dbPath + "does not exist!");
+			System.exit(-1);
+		}
+		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+		return dbservice;
+	}
+	
+	public static <T> void print(T[] array)
+	{
+		for (T element : array)
+			OwnMethods.Print(element);
+	}
+	
 	public static boolean pathExist(String path)
 	{
 		File file = new File(path);
