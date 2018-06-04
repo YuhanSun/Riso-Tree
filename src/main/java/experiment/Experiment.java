@@ -484,7 +484,6 @@ public class Experiment {
 			OwnMethods.Print("read query graph from " + querygraph_path);
 			ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 			Query_Graph query_Graph = queryGraphs.get(query_id);
-			OwnMethods.Print(query_Graph);
 
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
@@ -531,7 +530,10 @@ public class Experiment {
 				if(!TEST_FORMAT)
 					OwnMethods.WriteFile(result_detail_path, true, write_line);
 
+				OwnMethods.Print("read query rectangle from " + queryrect_path);
 				ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+				
+				OwnMethods.Print("initialize RisoTreeQueryPN \ndbpath: " + db_path + "\n dataset: " + dataset + "\n MAX_HOPNUM: " + MAX_HOPNUM);
 				RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 						graph_pos_map_list, MAX_HOPNUM);
 
@@ -563,8 +565,15 @@ public class Experiment {
 
 					if(!TEST_FORMAT)
 					{
-						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+//						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+						OwnMethods.Print(query_Graph);
+						OwnMethods.print(query_Graph.spa_predicate);
 
+						//prehot the database
+						Result result = risoTreeQueryPN.dbservice.execute("match (n) where id(n) = 0 return n");
+						while( result.hasNext())
+							result.next();
+						
 						start = System.currentTimeMillis();
 						risoTreeQueryPN.Query(query_Graph, -1);
 						time = System.currentTimeMillis() - start;
@@ -784,6 +793,7 @@ public class Experiment {
 			int limit = -1;
 
 			String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
+			OwnMethods.Print("read query graph from " + querygraph_path);
 			ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 			Query_Graph query_Graph = queryGraphs.get(query_id);
 
@@ -836,7 +846,9 @@ public class Experiment {
 				if(!TEST_FORMAT)
 					OwnMethods.WriteFile(result_detail_path, true, write_line);
 
+				OwnMethods.Print("read query rectangle from " + queryrect_path);
 				ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+				OwnMethods.Print("initialize Naive_Neo4j_Match with db_path: " + db_path);
 				Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
 				for ( int i = 0; i < experimentCount; i++)
 				{
@@ -851,8 +863,11 @@ public class Experiment {
 
 					if(!TEST_FORMAT)
 					{
-						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+//						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+						OwnMethods.Print(query_Graph);
+						OwnMethods.print(query_Graph.spa_predicate);
 
+						//prehot the database
 						Result result = naive_Neo4j_Match.neo4j_API.graphDb.execute("match (n) where id(n) = 0 return n");
 						while( result.hasNext())
 							result.next();
