@@ -89,16 +89,16 @@ public class Prepare {
 	static String queryDir;
 	static String center_id_path;
 	
-	static String dir = "/hdd2/data/ysun138/RisoTree";
 	static String queryGraphDir;
 	
 	static void iniParametersServer()
 	{
-//		db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
-		graph_path = dir + "/graph.txt";
-		entityPath = dir + "/entity.txt";
-		label_list_path = dir + "/label.txt";
-		graph_node_map_path = dir + "/node_map_RTree.txt";
+		String dir = "/hdd2/data/ysun138/RisoTree";
+		String dataDir = dir + "/" + dataset;
+		graph_path = dataDir + "/graph.txt";
+		entityPath = dataDir + "/entity.txt";
+		label_list_path = dataDir + "/label.txt";
+		graph_node_map_path = dataDir + "/node_map_RTree.txt";
 		queryDir = dir + "/query";
 		queryGraphDir = String.format("%s/query_graph/%s/", queryDir, dataset);
 //		center_id_path = String.format("%s/spa_predicate/%s/%s_centerids.txt", queryDir, dataset, dataset);
@@ -460,7 +460,7 @@ public class Prepare {
 		OwnMethods.Print("label size: " + labels.size());
 //		for ( int node_count = 35; node_count <= 35; node_count+=5)
 //		for ( int node_count = 5; node_count <= 15; node_count+=2)
-		int node_count = 10;
+		int node_count = 3;
 		{
 			int spa_pred_count = 1;
 			String querygraph_path = String.format("%s%d.txt", queryGraphDir, node_count);
