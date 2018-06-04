@@ -136,18 +136,19 @@ public class Experiment {
 //			experiment.Neo4j_Naive(10, 0);
 			
 			config.setDatasetName(Config.Datasets.wikidata_100.name());
+			
 			for ( int hopNum = 1; hopNum >= 0; hopNum--)
 //			int hopNum = 2;
 			{
 				config.setMAXHOPNUM(hopNum);
 				Experiment experiment = new Experiment(config);
 				experiment.initializeParameters();
-				experiment.risoTreeQueryPN(10, 0);
+				experiment.risoTreeQueryPN(3, 0);
 			}
 			
 //			Experiment experiment = new Experiment(config);
 //			experiment.experimentCount = 3;
-//			experiment.Neo4j_Naive(10, 0);
+//			experiment.Neo4j_Naive(3, 0);
 
 //			for (int nodeCount = 5; nodeCount <= 35; nodeCount+=5)
 //				//			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
