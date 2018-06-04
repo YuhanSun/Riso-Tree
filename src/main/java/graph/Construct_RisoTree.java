@@ -39,6 +39,7 @@ import osm.OSM_Utility;
 /**
  * 
  * @author yuhansun
+ * Construct PN index and load it into db.
  *
  */
 public class Construct_RisoTree {
@@ -61,13 +62,13 @@ public class Construct_RisoTree {
 	
 	static ArrayList<Integer> labels;//all labels in the graph
 	
-	static String dir = "/hdd2/data/ysun138/RisoTree";
 	
 	static void initParametersServer()
 	{
 		systemName = Config.system.Ubuntu;
 		dataset = Config.Datasets.wikidata_100.name();
-		MAX_HOPNUM = 2;
+		String dir = "/hdd2/data/ysun138/RisoTree/" + dataset;
+		MAX_HOPNUM = config.getMaxHopNum();
 		db_path = dir + "/neo4j-community-3.1.1/data/databases/graph.db";
 		graph_path = dir + "/graph.txt";
 		label_list_path = dir + "/label.txt";
@@ -137,7 +138,7 @@ public class Construct_RisoTree {
 	
 	public Construct_RisoTree(Config config, boolean isServer)
 	{
-		config = config;
+		this.config = config;
 		initParametersServer();
 	}
 	
@@ -152,8 +153,8 @@ public class Construct_RisoTree {
 //			initParameters();
 			initParametersServer();
 			
-			generateContainSpatialID();
-			constructPN();
+//			generateContainSpatialID();
+//			constructPN();
 			LoadPN();
 //			generatePNSize();
 			
@@ -184,84 +185,85 @@ public class Construct_RisoTree {
 	/**
 	 * Not used
 	 */
-	public static void generatePNSize()
-	{
-		try {
-			BufferedReader reader =  new BufferedReader(new FileReader(new File(PNPath)));
-			Map<String, String> config = new HashMap<String, String>();
-			config.put("dbms.pagecache.memory", "20g");
-			BatchInserter inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
-			
-			String line = null;
-			line = reader.readLine();
-			long nodeID = Long.parseLong(line);
-			
-			Map<String, Object> properties = new HashMap<String, Object>();
-			int count = 0;
-			while (true)
-			{
-				while ( (line = reader.readLine()) != null)
-				{
-					if (line.matches("\\d+$") == false)
-					{
-//						OwnMethods.Print(line);
-						String[] lineList = line.split(",", 2);
-						String key = lineList[0];
-						
-						String content = lineList[1];
-						String[] contentList = content.substring(1, content.length() - 1)
-								.split(", ");
-						
-						properties.put(key + "_size", contentList.length);
-					}
-					else break;
-				}
-				count++;
-				inserter.setNodeProperties(nodeID, properties);
-				if ( count == 500)
-				{
-					inserter.shutdown();
-					inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
-				}
-				
-				if ( line == null)
-					break;
-				nodeID = Long.parseLong(line);
-				OwnMethods.Print(nodeID);
-			}
-			inserter.shutdown();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		/**
-		 * very slow
-		 */
+//	public static void generatePNSize()
+//	{
 //		try {
-//			HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
-//			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));			
-//			Transaction tx = dbservice.beginTx();
-//			for ( long nodeID : containIDMap.keySet())
+//			BufferedReader reader =  new BufferedReader(new FileReader(new File(PNPath)));
+//			Map<String, String> config = new HashMap<String, String>();
+//			config.put("dbms.pagecache.memory", "20g");
+//			BatchInserter inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
+//			
+//			String line = null;
+//			line = reader.readLine();
+//			long nodeID = Long.parseLong(line);
+//			
+//			Map<String, Object> properties = new HashMap<String, Object>();
+//			int count = 0;
+//			while (true)
 //			{
-//				OwnMethods.Print(nodeID);
-//				Node node = dbservice.getNodeById(nodeID);
-//				Map<String, Object> properties = node.getAllProperties();
-//				Map<String, Object> addProperties = new HashMap<String, Object>(); 
-//				for ( String key : properties.keySet())
-//					if ( key.contains("PN") && key.contains("size") == false)
+//				while ( (line = reader.readLine()) != null)
+//				{
+//					if (line.matches("\\d+$") == false)
 //					{
-//						int[] pathNeighbors = (int[]) properties.get(key);
-//						addProperties.put(key + "_size", pathNeighbors.length);	
+////						OwnMethods.Print(line);
+//						String[] lineList = line.split(",", 2);
+//						String key = lineList[0];
+//						
+//						String content = lineList[1];
+//						String[] contentList = content.substring(1, content.length() - 1)
+//								.split(", ");
+//						
+//						properties.put(key + "_size", contentList.length);
 //					}
-//				for ( String key : addProperties.keySet())
-//					node.setProperty(key, addProperties.get(key));
+//					else break;
+//				}
+//				count++;
+//				inserter.setNodeProperties(nodeID, properties);
+//				if ( count == 500)
+//				{
+//					inserter.shutdown();
+//					inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
+//				}
+//				
+//				if ( line == null)
+//					break;
+//				nodeID = Long.parseLong(line);
+//				OwnMethods.Print(nodeID);
 //			}
-//			tx.success();
-//			tx.close();
-//			dbservice.shutdown();
+//			inserter.shutdown();
 //		} catch (Exception e) {
 //			e.printStackTrace();
+//			System.exit(-1);
 //		}
-	}
+//		/**
+//		 * very slow
+//		 */
+////		try {
+////			HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
+////			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));			
+////			Transaction tx = dbservice.beginTx();
+////			for ( long nodeID : containIDMap.keySet())
+////			{
+////				OwnMethods.Print(nodeID);
+////				Node node = dbservice.getNodeById(nodeID);
+////				Map<String, Object> properties = node.getAllProperties();
+////				Map<String, Object> addProperties = new HashMap<String, Object>(); 
+////				for ( String key : properties.keySet())
+////					if ( key.contains("PN") && key.contains("size") == false)
+////					{
+////						int[] pathNeighbors = (int[]) properties.get(key);
+////						addProperties.put(key + "_size", pathNeighbors.length);	
+////					}
+////				for ( String key : addProperties.keySet())
+////					node.setProperty(key, addProperties.get(key));
+////			}
+////			tx.success();
+////			tx.close();
+////			dbservice.shutdown();
+////		} catch (Exception e) {
+////			e.printStackTrace();
+////		}
+//	}
 	
 	/**
 	 * The file only contains two hop information
@@ -269,10 +271,15 @@ public class Construct_RisoTree {
 	public static void LoadPN()
 	{
 		try {
-			int hop = 2;
-			BufferedReader reader =  new BufferedReader(new FileReader(new File(PNPath + "_" + hop)));
+			int hop = 1;
+			
+			String indexPath = PNPath + "_" + hop;
+			OwnMethods.Print("read index from " + indexPath);
+			BufferedReader reader =  new BufferedReader(new FileReader(new File(indexPath)));
 			Map<String, String> config = new HashMap<String, String>();
 			config.put("dbms.pagecache.memory", "100g");
+			if (!OwnMethods.pathExist(db_path))
+				throw new Exception(db_path + " does not exist!");
 			BatchInserter inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
 			
 			String line = null;
@@ -312,6 +319,7 @@ public class Construct_RisoTree {
 			inserter.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	
@@ -444,21 +452,40 @@ public class Construct_RisoTree {
 	public static void constructPN()
 	{
 		try {
+			OwnMethods.Print("read contain map from " + containIDPath);
 			HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
+			OwnMethods.Print("read graph from " + graph_path);
 			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+			OwnMethods.Print("read label list from " + label_list_path);
 			ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
-			GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+			GraphDatabaseService dbservice = OwnMethods.getDatabaseService(db_path);
 			FileWriter writer1 = new FileWriter(new File(PNPath + "_"+1));
 			//for one hop
 			Transaction tx = dbservice.beginTx();
 			for ( long nodeId : containIDMap.keySet())
 			{
-				OwnMethods.Print(nodeId);
+				boolean flag = false;
+				if (nodeId == 5774037)
+				{
+					OwnMethods.Print(nodeId);
+					flag = true;
+				}
 				writer1.write(nodeId + "\n");
 				TreeSet<Integer> pathNeighbors = new TreeSet<Integer>();
 				for ( int spaID : containIDMap.get(nodeId))
+				{
 					for ( int neighborID : graph.get(spaID))
+					{
 						pathNeighbors.add(neighborID);
+						if(flag)
+						{
+							if (neighborID == 32437)
+							{
+								OwnMethods.Print(String.format("spa id %d has neighbor %d", spaID, neighborID));
+							}
+						}
+					}
+				}
 				
 				HashMap<Integer, ArrayList<Integer>> pathLabelNeighbor = new HashMap<Integer, ArrayList<Integer>>();
 				for ( int neighborID : pathNeighbors)
@@ -494,8 +521,8 @@ public class Construct_RisoTree {
 			//more than one hop
 			Transaction tx2 = dbservice.beginTx();
 			
-			
-			for ( int hop = 2; hop <= MAX_HOPNUM; hop++)
+			int hop = 2;
+			while (hop <= MAX_HOPNUM)
 //			int hop = 2;
 			{
 				FileWriter writer2 =  new FileWriter(new File(PNPath+"_"+hop));
@@ -550,6 +577,7 @@ public class Construct_RisoTree {
 					}
 				}
 				writer2.close();
+				hop++;
 			}
 			tx2.success();
 			tx2.close();
@@ -557,6 +585,7 @@ public class Construct_RisoTree {
 			dbservice.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	

@@ -66,10 +66,22 @@ public class DataProcess {
 	
 	public static void convertSingleToBidirectinalGraph()
 	{
-		String singleGraphPath = String.format("%s\\%s\\new_graph.txt", dataDirectory, dataset);
-		String bidirectionGraphPath = String.format("%s\\%s\\graph.txt", dataDirectory, dataset);	
+		//original version
+//		String singleGraphPath = String.format("%s\\%s\\new_graph.txt", dataDirectory, dataset);
+//		String bidirectionGraphPath = String.format("%s\\%s\\graph.txt", dataDirectory, dataset);	
+		
+		//server version
+		dataDirectory = "/hdd2/data/ysun138/RisoTree";
+		String singleGraphPath = String.format("%s/%s/graph_single.txt", dataDirectory, dataset);
+		String bidirectionGraphPath = String.format("%s/%s/graph.txt", dataDirectory, dataset);
+		
+		OwnMethods.Print("read single graph from " + singleGraphPath);
 		ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(singleGraphPath);
+		
+		OwnMethods.Print("generate bidirectional graph");
 		ArrayList<TreeSet<Integer>> bidirectionalGraph = OwnMethods.singleDirectionalToBidirectionalGraph(graph);
+		
+		OwnMethods.Print("output birectional graph to " + bidirectionGraphPath);
 		OwnMethods.writeGraphTreeSet(bidirectionalGraph, bidirectionGraphPath);
 	}
 
