@@ -70,12 +70,27 @@ public class Analyze {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-//		OwnMethods.Print(config.getDatasetName());
-//		config.setDatasetName(Datasets.foursquare_100.toString());
-//		initParameters();
-//		OwnMethods.Print(graphPath);
+		OwnMethods.Print(config.getDatasetName());
+		config.setDatasetName(Datasets.wikidata_100.toString());
+		initParameters();
+		OwnMethods.Print(graphPath);
+		getAverageDegree();
 		
-		get2HopNeighborCount();
+//		get2HopNeighborCount();
+		
+	}
+	
+	public static void getAverageDegree()
+	{
+		ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+		int edgeCount = 0;
+		for ( ArrayList<Integer> neighbors : graph)
+		{
+			edgeCount += neighbors.size();
+		}
+		OwnMethods.Print("node count: " + graph.size());
+		OwnMethods.Print("edge count: " + edgeCount);
+		OwnMethods.Print("average edge count: " + (double) edgeCount / graph.size() );
 	}
 	
 	public static void get1HopNeighborCount() {
