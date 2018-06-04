@@ -53,8 +53,8 @@ public class Experiment {
 //	public double endSelectivity = 0.002;
 	
 	//wikidata_100
-	public double startSelectivity = 0.001;
-	public double endSelectivity = 0.002;
+	public double startSelectivity = 0.000001;
+	public double endSelectivity = 0.02;
 	
 	//Patents
 //	double startSelectivity = 0.00001;
@@ -136,13 +136,12 @@ public class Experiment {
 //			experiment.Neo4j_Naive(10, 0);
 			
 			config.setDatasetName(Config.Datasets.wikidata_100.name());
-//			for ( int hopNum = 0; hopNum <= 2; hopNum++)
-			int hopNum = 1;
+			for ( int hopNum = 0; hopNum <= 1; hopNum++)
+//			int hopNum = 2;
 			{
 				config.setMAXHOPNUM(hopNum);
 				Experiment experiment = new Experiment(config);
 				experiment.initializeParameters();
-				experiment.experimentCount = 3;
 				experiment.risoTreeQueryPN(10, 0);
 			}
 			
@@ -476,13 +475,16 @@ public class Experiment {
 		try {
 			long start;
 			long time;
+			int limit = -1;
 			
 			OwnMethods.Print("read map from " + graph_pos_map_path);
 			long[] graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 
 			String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
+			OwnMethods.Print("read query graph from " + querygraph_path);
 			ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
 			Query_Graph query_Graph = queryGraphs.get(query_id);
+			OwnMethods.Print(query_Graph);
 
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {
@@ -498,7 +500,7 @@ public class Experiment {
 				break;
 			}
 
-			String write_line = String.format("%s\t%d\n", dataset, query_id);
+			String write_line = String.format("%s\t%d\n", dataset, limit);
 			if(!TEST_FORMAT)
 			{
 				OwnMethods.WriteFile(result_detail_path, true, write_line);
@@ -803,7 +805,7 @@ public class Experiment {
 			ArrayList<Long> count = new ArrayList<Long>();
 			ArrayList<Long> access = new ArrayList<Long>();
 
-			String write_line = String.format("%s\t%d\n", dataset, query_id);
+			String write_line = String.format("%s\t%d\n", dataset, limit);
 			if(!TEST_FORMAT)
 			{
 				OwnMethods.WriteFile(result_detail_path, true, write_line);
