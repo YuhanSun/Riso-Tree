@@ -33,7 +33,7 @@ public class Naive_Neo4j_Match_Test {
 	static String db_path;
 	static String querygraphDir, spaPredicateDir;
 	
-	static int nodeCount = 5, query_id = 0, rectID = 2;
+	static int nodeCount = 3, query_id = 0, rectID = 2;
 //	static int name_suffix = 1280;//Gowalla 0.001
 	static int name_suffix = 575;//wikidata_100 0.0001
 //	static int name_suffix = 57;//wikidata_100 0.00001

@@ -44,7 +44,7 @@ public class RisoTreeQueryPNTest {
 	static Query_Graph query_Graph;
 	static long[] graph_pos_map_list;
 	
-	static int nodeCount = 10, query_id = 0, rectID = 2;
+	static int nodeCount = 3, query_id = 0, rectID = 2;
 	
 //	name_suffix = 7;
 //	name_suffix = 75;
@@ -132,6 +132,7 @@ public class RisoTreeQueryPNTest {
 	
 	@Test
 	public void queryTest() {
+		OwnMethods.Print("database path: " + db_path);
 		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 				graph_pos_map_list, MAX_HOPNUM);
 		OwnMethods.Print(query_Graph);
