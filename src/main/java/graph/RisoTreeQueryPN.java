@@ -1093,6 +1093,7 @@ public class RisoTreeQueryPN {
 						{
 							if ( node.hasProperty(minPNListPropertyname))
 							{
+								//here id is graph id rather than neo4j id
 								int[] NL_list_label = ( int[] ) node.getProperty(minPNListPropertyname);
 								for ( int node_id : NL_list_label)
 									min_NL_list.add(node_id);
@@ -1116,9 +1117,10 @@ public class RisoTreeQueryPN {
 						OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
 					}
 					
-					// if NL is more selective than spatial predicate
+					// if PN is more selective than spatial predicate
 					if ( realMinPNSize < min_spa_card)
 					{
+						OwnMethods.Print("PN is more selective");
 						int index = 0;
 						ArrayList<Long> id_pos_list = new ArrayList<Long>();
 						double idIndex = 0;
@@ -1231,6 +1233,8 @@ public class RisoTreeQueryPN {
 						int levelTime = 0;
 						level_index++;
 						double nodeIndex = 0;
+						//construct a cypher query for each tree leaf node
+						//which consists of several spatial objects
 						for ( Node node : overlap_MBR_list)
 						{
 							nodeIndex++;
@@ -1238,6 +1242,7 @@ public class RisoTreeQueryPN {
 							Iterable<Relationship> rels = node.getRelationships(
 									Direction.OUTGOING, Labels.RTreeRel.RTREE_REFERENCE);
 
+							//default fan-out of neo4j spatial is 100
 							ArrayList<Long> ids = new ArrayList<Long>(100); 
 							for ( Relationship relationship: rels)
 							{

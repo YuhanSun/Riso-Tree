@@ -53,7 +53,7 @@ public class LoadDataNoOSM {
 	
 	static ArrayList<Entity> entities; 
 	
-	static String dir = "/hdd2/data/ysun138/RisoTree";
+	static String dir = "/hdd2/data/ysun138/RisoTree/wikidata_100";
 	
 	static void iniParametersServer()
 	{
@@ -144,15 +144,15 @@ public class LoadDataNoOSM {
 //				nonspatialLabelTest();
 //			}
 //			
-//			LoadNonSpatialEntity();
-//			
-//			GetSpatialNodeMap();
-//			
-//			LoadGraphEdges();
+			LoadNonSpatialEntity();
+			
+			GetSpatialNodeMap();
+			
+			LoadGraphEdges();
 			
 			CalculateCount();
 			
-			Construct_RisoTree.main(null);
+//			Construct_RisoTree.main(null);
 //			
 //			loadHMBR();
 			
@@ -239,7 +239,7 @@ public class LoadDataNoOSM {
 		try {
 			Map<String, String> id_map = OwnMethods.ReadMap(mapPath);
 			Map<String, String> config = new HashMap<String, String>();
-			config.put("dbms.pagecache.memory", "6g");
+			config.put("dbms.pagecache.memory", "100g");
 			OwnMethods.Print("batch insert into: " + dbPath);
 			inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
 			
