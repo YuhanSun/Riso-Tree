@@ -116,8 +116,8 @@ public class Distance {
 			distanceExperiment.config.setDatasetName(dataset);
 			distanceExperiment.initializeParameters();
 			distanceExperiment.risoTreeQueryPN(distanceList, 0);			
-			distanceExperiment.Neo4j_Naive(distanceList, 0);
-//			distanceExperiment.spatialFirstList(distanceList, 2);
+			distanceExperiment.spatialFirstList(distanceList, 0);
+//			distanceExperiment.Neo4j_Naive(distanceList, 0);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -172,6 +172,7 @@ public class Distance {
 					OwnMethods.ClearCache(password);
 					Thread.currentThread();
 					Thread.sleep(5000);
+					OwnMethods.Print(String.format("initialize SpatialFirst_List with dbpath: %s\n dataset: %s\n", db_path, dataset));
 					SpatialFirst_List spatialFirstList = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 					
 					start = System.currentTimeMillis();
@@ -242,6 +243,8 @@ public class Distance {
 					OwnMethods.ClearCache(password);
 					Thread.currentThread();
 					Thread.sleep(5000);
+					OwnMethods.Print(String.format("initialize RisoTreeQueryPN with "
+							+ "dbpath: %s\n dataset: %s\n MAX_HOPNUM: %d", db_path, dataset, MAX_HOPNUM));
 					RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 							graph_pos_map_list, MAX_HOPNUM);
 					
