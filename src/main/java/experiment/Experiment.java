@@ -136,7 +136,7 @@ public class Experiment {
 //			experiment.Neo4j_Naive(10, 0);
 			
 			config.setDatasetName(Config.Datasets.wikidata_100.name());
-			for ( int hopNum = 0; hopNum <= 1; hopNum++)
+			for ( int hopNum = 1; hopNum >= 0; hopNum--)
 //			int hopNum = 2;
 			{
 				config.setMAXHOPNUM(hopNum);
