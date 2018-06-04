@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -18,6 +19,7 @@ import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Config.Explain_Or_Profile;
 import commons.Config.system;
+import scala.util.control.Exception;
 import commons.Query_Graph;
 import commons.Utility;
 
@@ -31,16 +33,17 @@ public class Naive_Neo4j_Match_Test {
 	static String db_path;
 	static String querygraphDir, spaPredicateDir;
 	
-	static int nodeCount = 10, query_id = 0, rectID = 2;
+	static int nodeCount = 5, query_id = 0, rectID = 2;
 //	static int name_suffix = 1280;//Gowalla 0.001
-	static int name_suffix = 5756;//wikidata_100 0.001
+	static int name_suffix = 575;//wikidata_100 0.0001
+//	static int name_suffix = 57;//wikidata_100 0.00001
 	static String entityPath, querygraph_path, queryrectCenterPath, queryrect_path;
 	
 	//query input
 	static Query_Graph query_Graph;
 	
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	public static void setUpBeforeClass() throws java.lang.Exception {
 		switch (systemName) {
 		case Ubuntu:
 			db_path = String.format("/home/yuhansun/Documents/GeoGraphMatchData/%s_%s/data/databases/graph.db", version, dataset);
@@ -67,7 +70,7 @@ public class Naive_Neo4j_Match_Test {
 	}
 
 	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
+	public static void tearDownAfterClass() throws java.lang.Exception {
 	}
 	
 	public static void iniQueryInput()
@@ -96,9 +99,6 @@ public class Naive_Neo4j_Match_Test {
 
 	@Test
 	public void queryTest() {
-//		int nodeCount = 2, query_id = 0;
-//		int name_suffix = 75;
-		
 		String queryrect_path = null, querygraph_path = null;
 		switch (systemName) {
 		case Ubuntu:
@@ -122,13 +122,22 @@ public class Naive_Neo4j_Match_Test {
 				break;
 		query_Graph.spa_predicate[j] = rectangle;
 		
+		OwnMethods.Print(query_Graph);
+		OwnMethods.print(query_Graph.spa_predicate);
+		OwnMethods.Print("database path: " + db_path);
+		if (!OwnMethods.pathExist(db_path))
+		{
+			OwnMethods.Print(db_path + " does not exist!");
+			System.exit(-1);
+		}
 		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
 		Result result = naive_Neo4j_Match.SubgraphMatch_Spa_API(query_Graph, -1);
 		int count = 0;
 		while (result.hasNext())
 		{
 			count++;
-			OwnMethods.Print(result.next());
+			Map<String, Object> row = result.next();
+//			OwnMethods.Print(result.next());
 		}
 		OwnMethods.Print(count);
 	}

@@ -50,7 +50,8 @@ public class RisoTreeQueryPNTest {
 //	name_suffix = 75;
 //	name_suffix = 7549;//0.1
 //	static int name_suffix = 1280;//Gowalla 0.001
-	static int name_suffix = 5756;//wikidata_100 0.001
+//	static int name_suffix = 5756;//wikidata_100 0.001
+	static int name_suffix = 575;//wikidata_100 0.0001
 	
 	static String queryrect_path = null, querygraph_path = null, queryrectCenterPath = null;
 	
@@ -80,24 +81,27 @@ public class RisoTreeQueryPNTest {
 		default:
 			break;
 		}
+		OwnMethods.Print("iniQueryInput");
 		iniQueryInput();
 	}
 	
 	public static void iniQueryInput()
 	{
+		OwnMethods.Print("read query graph from " + querygraph_path);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+		OwnMethods.Print("query id is " + query_id);
 		query_Graph = queryGraphs.get(query_id);
 		
-//		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
 		
-		ArrayList<Integer> centerIDs = OwnMethods.readIntegerArray(queryrectCenterPath);
-		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
-		ArrayList<MyRectangle> queryrect = new ArrayList<MyRectangle>();
-		for ( int id : centerIDs)
-		{
-			Entity entity = entities.get(id);
-			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
-		}
+//		ArrayList<Integer> centerIDs = OwnMethods.readIntegerArray(queryrectCenterPath);
+//		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+//		ArrayList<MyRectangle> queryrect = new ArrayList<MyRectangle>();
+//		for ( int id : centerIDs)
+//		{
+//			Entity entity = entities.get(id);
+//			queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
+//		}
 		
 		MyRectangle rectangle = queryrect.get(rectID);
 		int j = 0;
@@ -106,14 +110,9 @@ public class RisoTreeQueryPNTest {
 				break;
 		query_Graph.spa_predicate[j] = rectangle;
 		
-		HashMap<String, String> graph_pos_map = OwnMethods.ReadMap(graph_pos_map_path);
-		graph_pos_map_list= new long[graph_pos_map.size()];
-		for ( String key_str : graph_pos_map.keySet())
-		{
-			int key = Integer.parseInt(key_str);
-			int pos_id = Integer.parseInt(graph_pos_map.get(key_str));
-			graph_pos_map_list[key] = pos_id;
-		}
+		int entityCount = OwnMethods.getEntityCount(entityPath);
+		OwnMethods.Print("read map from " + graph_pos_map_path);
+		graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 	}
 
 	@AfterClass
@@ -135,11 +134,16 @@ public class RisoTreeQueryPNTest {
 	public void queryTest() {
 		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 				graph_pos_map_list, MAX_HOPNUM);
+		OwnMethods.Print(query_Graph);
+		OwnMethods.print(query_Graph.spa_predicate);
+		
 		risoTreeQueryPN.Query(query_Graph, -1);
+		OwnMethods.Print("overlap leaf node count: " + risoTreeQueryPN.overlap_leaf_node_count);
 		OwnMethods.Print("Result count:" + risoTreeQueryPN.result_count);
 		OwnMethods.Print("Page access:" + risoTreeQueryPN.page_hit_count);
 		OwnMethods.Print("get iterator time:" + risoTreeQueryPN.get_iterator_time);
 		OwnMethods.Print("iterate time:" + risoTreeQueryPN.iterate_time);
+		OwnMethods.Print("located in count:" + risoTreeQueryPN.located_in_count);
 		
 		risoTreeQueryPN.dbservice.shutdown();
 	}
