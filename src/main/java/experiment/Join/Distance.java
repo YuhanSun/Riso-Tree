@@ -102,21 +102,25 @@ public class Distance {
 	public static void main(String[] args) {
 		ArrayList<Double> distanceList = new ArrayList<>();
 		//Patents dataset
-//		distanceList.add(0.000001);
-//		distanceList.add(0.00001);
-		distanceList.add(0.0001);
 //		distanceList.add(0.001);
-		distanceList.add(0.0002);
-		distanceList.add(0.0004);
-		distanceList.add(0.0008);
+//		distanceList.add(0.0002);
+//		distanceList.add(0.0004);
+//		distanceList.add(0.0008);
+		
+		//wikidata_100
+//		distanceList.add(0.0000000001);
+//		distanceList.add(0.000000001);
+		distanceList.add(0.00000001);
+//		distanceList.add(0.0000001);
+//		distanceList.add(0.000001);
 		try {
 //			String dataset = Datasets.Patents_100_random_80.name();
 			String dataset = Datasets.wikidata_100.name();
 			Distance distanceExperiment = new Distance();
 			distanceExperiment.config.setDatasetName(dataset);
 			distanceExperiment.initializeParameters();
-			distanceExperiment.risoTreeQueryPN(distanceList, 0);			
-			distanceExperiment.spatialFirstList(distanceList, 0);
+//			distanceExperiment.risoTreeQueryPN(distanceList, 0);			
+//			distanceExperiment.spatialFirstList(distanceList, 0);
 //			distanceExperiment.Neo4j_Naive(distanceList, 0);
 		} catch (Exception e) {
 			e.printStackTrace();
