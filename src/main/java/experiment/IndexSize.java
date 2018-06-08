@@ -43,7 +43,7 @@ public class IndexSize {
 	
 	public static void initializeParametersServer()
 	{	
-		String dir = "/hdd2/data/ysun138/RisoTree";
+		String dir = "/hdd2/data/ysun138/RisoTree/" + dataset;
 		db_path = String.format("%s/%s/data/databases/graph.db", dir, version);
 		graphPath = String.format("%s/graph.txt", dir);
 		entityPath = String.format("%s/entity.txt", dir);
@@ -101,8 +101,8 @@ public class IndexSize {
 //		LoadDataNoOSM.main(null);
 //		Construct_RisoTree.main(null);
 		getRTreeSize();
-		getOneHopIndexFromFile();
-		getTwoHopIndexFromFile();
+//		getOneHopIndexFromFile();
+//		getTwoHopIndexFromFile();
 //		getOneHopIndexSize();
 //		getTwoHopIndexSize();
 	}
@@ -202,7 +202,9 @@ public class IndexSize {
 	{
 		try
 		{
-			BufferedReader reader = new BufferedReader(new FileReader(new File(PNPath+"_1")));
+			String indexPath = PNPath + "_1";
+			OwnMethods.Print("read index from " + indexPath);
+			BufferedReader reader = new BufferedReader(new FileReader(new File(indexPath)));
 			String line = null;
 			line = reader.readLine();
 			long nodeID = Long.parseLong(line);

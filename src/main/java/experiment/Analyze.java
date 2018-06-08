@@ -73,7 +73,6 @@ public class Analyze {
 		OwnMethods.Print(config.getDatasetName());
 		config.setDatasetName(Datasets.wikidata_100.toString());
 		initParameters();
-		OwnMethods.Print(graphPath);
 		getAverageDegree();
 		
 //		get2HopNeighborCount();
@@ -82,6 +81,7 @@ public class Analyze {
 	
 	public static void getAverageDegree()
 	{
+		OwnMethods.Print("read graph from " + graphPath);
 		ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
 		int edgeCount = 0;
 		for ( ArrayList<Integer> neighbors : graph)

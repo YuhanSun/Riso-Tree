@@ -332,9 +332,12 @@ public class Construct_RisoTree {
 	 */
 	public static ArrayList<Long> constructPNTime()
 	{
-		ArrayList<Long> constructTime = new ArrayList<Long>(); 
+		ArrayList<Long> constructTime = new ArrayList<Long>();
+		OwnMethods.Print("read contain map from " + containIDPath);
 		HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
+		OwnMethods.Print("read graph from " + graph_path);
 		ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+		OwnMethods.Print("read label list from " + label_list_path);
 		ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
 		//			FileWriter writer1 = new FileWriter(new File(PNPath + "_"+1));
 		HashMap<Long, HashMap<String, ArrayList<Integer>>> PN = new 
@@ -344,6 +347,7 @@ public class Construct_RisoTree {
 			PN.put(nodeID, new HashMap<String, ArrayList<Integer>>());
 
 		//for one hop
+		OwnMethods.Print("construct 1 hop");
 		long start = System.currentTimeMillis();
 		for ( long nodeId : containIDMap.keySet())
 		{
@@ -382,10 +386,11 @@ public class Construct_RisoTree {
 		//			writer1.close();
 
 		//more than one hop
-
-		//			for ( int hop = 2; hop <= MAX_HOPNUM; hop++)
+		int hop = 2;
+		while ( hop <= MAX_HOPNUM)
 		//			int hop = 2;
 		{
+			OwnMethods.Print(String.format("construct %d hop", hop));
 			//				FileWriter writer2 =  new FileWriter(new File(PNPath+"_"+hop));
 			//				String regex = "PN";
 			//				for ( int i = 0; i < hop - 1; i++)
@@ -438,6 +443,7 @@ public class Construct_RisoTree {
 			OwnMethods.Print("two hop time:"+twohopTime);
 			constructTime.add(twohopTime);
 			//				writer2.close();
+			hop++;
 		}
 		return constructTime;
 	}

@@ -48,8 +48,33 @@ public class ConstructionTime {
 				labels.add(i + 2);
 		}
 	}
+	
+	static void initParametersServer()
+	{
+		systemName = Config.system.Ubuntu;
+		dataset = Config.Datasets.wikidata_100.name();
+		String dir = "/hdd2/data/ysun138/RisoTree/" + dataset;
+		MAX_HOPNUM = config.getMaxHopNum();
+		db_path = dir + "/neo4j-community-3.1.1/data/databases/graph.db";
+		graphPath = dir + "/graph.txt";
+//		label_list_path = dir + "/label.txt";
+//		graph_node_map_path = dir + "/node_map_RTree.txt";
+		containIDPath = dir + "/containID.txt";
+		PNPath = dir + "/PathNeighbors";
+		nonspatial_label_count = 100;
+		if (nonspatial_label_count == 1)
+			labels = new ArrayList<Integer>(Arrays.asList(0, 1));
+		else
+		{
+			labels = new ArrayList<Integer>(1 + nonspatial_label_count);
+			labels.add(1);
+			for ( int i = 0; i < nonspatial_label_count; i++)
+				labels.add(i + 2);
+		}
+	}
+	
 	public static void main(String[] args) {
-//		initializeParameters();
+		initializeParameters();
 //		LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM();
 //		long RTreeTime = loadDataNoOSM.batchRTreeInsertTime();
 		
@@ -106,9 +131,8 @@ public class ConstructionTime {
 					//				Config.Datasets.foursquare_100.name()
 					Config.Datasets.wikidata_100.name()
 					));
-			//			ArrayList<String> dataset_a = new ArrayList<String>(Arrays.asList(Config.Datasets.Gowalla_50.name()));
 
-			//			String resultPath = "D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\constructionTimeDataset.txt";
+//			String resultPath = "D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\constructionTimeDataset.txt";
 			String dir = "/hdd2/data/ysun138/RisoTree/result";
 			String resultPath = dir + "/constructionTimeDataset.txt";
 			if (!OwnMethods.pathExist(dir))
@@ -120,15 +144,18 @@ public class ConstructionTime {
 			{
 				Config config = new Config();
 				config.setDatasetName(dataset);
-				LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(config, true);
-				long RTreeTime = loadDataNoOSM.batchRTreeInsertTime();
+				long RTreeTime = 0;
+//				LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(config, true);
+//				long RTreeTime = loadDataNoOSM.batchRTreeInsertTime();
 
 				Construct_RisoTree construct_RisoTree = new Construct_RisoTree(config, true);
 //				construct_RisoTree.generateContainSpatialID();
 				ArrayList<Long> PNTime = construct_RisoTree.constructPNTime();
 
-				String writeStr = String.format("%s\t%d\t%d\t%d\n", 
-						dataset, RTreeTime, PNTime.get(0), PNTime.get(1));
+				String writeStr = String.format("%s\t%d\t%d\n", 
+						dataset, RTreeTime, PNTime.get(0));
+//				String writeStr = String.format("%s\t%d\t%d\t%d\n", 
+//						dataset, RTreeTime, PNTime.get(0), PNTime.get(1));
 				OwnMethods.WriteFile(resultPath, true, writeStr);
 			}
 
