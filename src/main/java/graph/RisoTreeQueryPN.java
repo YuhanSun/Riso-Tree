@@ -90,6 +90,26 @@ public class RisoTreeQueryPN {
 	public static boolean outputExecutionPlan = false;
 	public static boolean outputResult = false;
 	
+	public static boolean forceGraphFirst = true;
+	
+	public RisoTreeQueryPN(String db_path, String p_dataset, 
+			long[] p_graph_pos_map, int pMAXHOPNUM, boolean forceGraphFirst)
+	{
+		
+		dbservice = OwnMethods.getDatabaseService(db_path);
+		dataset = p_dataset;
+		graph_pos_map_list =  p_graph_pos_map;
+//		logPath = String.format("/mnt/hgfs/Experiment_Result/Riso-Tree/%s/query.log", dataset);
+		logPath = String.format("D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\%s\\query.log", dataset);
+//		if (!OwnMethods.pathExist(logPath))
+//		{
+//			OwnMethods.Print(logPath + " does not exist");
+//			System.exit(-1);
+//		}
+		MAX_HOPNUM = pMAXHOPNUM;
+		this.forceGraphFirst = forceGraphFirst;
+	}
+	
 	/**
 	 * initialize
 	 * @param db_path database path ./graph.db
@@ -1118,6 +1138,11 @@ public class RisoTreeQueryPN {
 					}
 					
 					// if PN is more selective than spatial predicate
+					if (forceGraphFirst) {
+						OwnMethods.Print("force graph first even min PN size is " + realMinPNSize);
+						realMinPNSize = 0;
+					}
+					
 					if ( realMinPNSize < min_spa_card)
 					{
 						OwnMethods.Print("PN is more selective");

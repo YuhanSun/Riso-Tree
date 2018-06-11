@@ -535,7 +535,13 @@ public class Experiment {
 				ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
 				
 				OwnMethods.Print("initialize RisoTreeQueryPN \ndbpath: " + db_path + "\n dataset: " + dataset + "\n MAX_HOPNUM: " + MAX_HOPNUM);
-				RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
+				
+				RisoTreeQueryPN risoTreeQueryPN = null;
+				if (MAX_HOPNUM != 0)
+					risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
+							graph_pos_map_list, MAX_HOPNUM, true);
+				else
+					risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 						graph_pos_map_list, MAX_HOPNUM);
 
 				ArrayList<Long> range_query_time = new ArrayList<Long>();
