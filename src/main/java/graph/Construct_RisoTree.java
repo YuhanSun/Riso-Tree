@@ -139,7 +139,10 @@ public class Construct_RisoTree {
 	public Construct_RisoTree(Config config, boolean isServer)
 	{
 		this.config = config;
-		initParametersServer();
+		if (isServer)
+			initParametersServer();
+		else
+			initParameters();
 	}
 	
 	public Construct_RisoTree(Config pConfig)
@@ -150,12 +153,12 @@ public class Construct_RisoTree {
 	
 	public static void main(String[] args) {
 		try {
-//			initParameters();
-			initParametersServer();
+			initParameters();
+//			initParametersServer();
 			
-//			generateContainSpatialID();
-//			constructPN();
-			LoadPN();
+			generateContainSpatialID();
+			constructPN();
+//			LoadPN();
 //			generatePNSize();
 			
 //			ConstructNL();
@@ -470,12 +473,13 @@ public class Construct_RisoTree {
 			Transaction tx = dbservice.beginTx();
 			for ( long nodeId : containIDMap.keySet())
 			{
-				boolean flag = false;
-				if (nodeId == 5774037)
-				{
-					OwnMethods.Print(nodeId);
-					flag = true;
-				}
+//				boolean flag = false;
+//				if (nodeId == 5774037)
+//				{
+//					OwnMethods.Print(nodeId);
+//					flag = true;
+//				}
+				
 				writer1.write(nodeId + "\n");
 				TreeSet<Integer> pathNeighbors = new TreeSet<Integer>();
 				for ( int spaID : containIDMap.get(nodeId))
@@ -483,13 +487,13 @@ public class Construct_RisoTree {
 					for ( int neighborID : graph.get(spaID))
 					{
 						pathNeighbors.add(neighborID);
-						if(flag)
-						{
-							if (neighborID == 32437)
-							{
-								OwnMethods.Print(String.format("spa id %d has neighbor %d", spaID, neighborID));
-							}
-						}
+//						if(flag)
+//						{
+//							if (neighborID == 32437)
+//							{
+//								OwnMethods.Print(String.format("spa id %d has neighbor %d", spaID, neighborID));
+//							}
+//						}
 					}
 				}
 				
