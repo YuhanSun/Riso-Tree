@@ -53,8 +53,12 @@ public class Experiment {
 //	public double endSelectivity = 0.002;
 	
 	//wikidata_100
-	public double startSelectivity = 0.000001;
-	public double endSelectivity = 0.02;
+//	public double startSelectivity = 0.000001;
+//	public double endSelectivity = 0.02;
+	
+	//yelp
+	public double startSelectivity = 0.0001;
+	public double endSelectivity = 0.2;
 	
 	//Patents
 //	double startSelectivity = 0.00001;
@@ -135,20 +139,21 @@ public class Experiment {
 //			experiment.experimentCount = 3;
 //			experiment.Neo4j_Naive(10, 0);
 			
-			config.setDatasetName(Config.Datasets.wikidata_100.name());
+			config.setDatasetName(Config.Datasets.Yelp_100.name());
 			
-			for ( int hopNum = 1; hopNum >= 0; hopNum--)
+			for ( int hopNum = 0; hopNum >= 0; hopNum--)
 //			int hopNum = 2;
 			{
 				config.setMAXHOPNUM(hopNum);
 				Experiment experiment = new Experiment(config);
 				experiment.initializeParameters();
-				experiment.risoTreeQueryPN(3, 0);
+				experiment.experimentCount = 3;
+				experiment.risoTreeQueryPN(5, 3);
 			}
 			
-//			Experiment experiment = new Experiment(config);
-//			experiment.experimentCount = 3;
-//			experiment.Neo4j_Naive(3, 0);
+			Experiment experiment = new Experiment(config);
+			experiment.experimentCount = 3;
+			experiment.Neo4j_Naive(5, 3);
 
 //			for (int nodeCount = 5; nodeCount <= 35; nodeCount+=5)
 //				//			for ( int queryIndex = 0; queryIndex < 9; queryIndex++)
@@ -542,7 +547,7 @@ public class Experiment {
 							graph_pos_map_list, MAX_HOPNUM, true);
 				else
 					risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
-						graph_pos_map_list, MAX_HOPNUM);
+						graph_pos_map_list, MAX_HOPNUM, false);
 
 				ArrayList<Long> range_query_time = new ArrayList<Long>();
 				ArrayList<Long> time_get_iterator = new ArrayList<Long>();
