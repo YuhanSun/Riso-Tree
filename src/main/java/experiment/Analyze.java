@@ -71,12 +71,19 @@ public class Analyze {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		OwnMethods.Print(config.getDatasetName());
-		config.setDatasetName(Datasets.wikidata_100.toString());
+		config.setDatasetName(Datasets.Yelp_100.toString());
 		initParameters();
 		getAverageDegree();
-		
+//		getSpatialEntityCount();
 //		get2HopNeighborCount();
 		
+	}
+	
+	public static void getSpatialEntityCount()
+	{
+		OwnMethods.Print("read entity from " + entityPath);
+		int spaCount = OwnMethods.GetSpatialEntityCount(entityPath);
+		OwnMethods.Print("spatial count: " + spaCount);
 	}
 	
 	public static void getAverageDegree()

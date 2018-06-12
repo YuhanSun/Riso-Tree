@@ -129,26 +129,30 @@ public class ConstructionTime {
 					//				Config.Datasets.go_uniprot_100_random_80.name()
 					//				Config.Datasets.Gowalla_100.name(), 
 					//				Config.Datasets.foursquare_100.name()
-					Config.Datasets.wikidata_100.name()
+//					Config.Datasets.Yelp_100.name()
 					));
 
-//			String resultPath = "D:\\Google_Drive\\Experiment_Result\\Riso-Tree\\constructionTimeDataset.txt";
-			String dir = "/hdd2/data/ysun138/RisoTree/result";
-			String resultPath = dir + "/constructionTimeDataset.txt";
-			if (!OwnMethods.pathExist(dir))
+			String resultDir = "D:\\Google_Drive\\Experiment_Result\\Riso-Tree";
+			String resultPath = resultDir + "\\constructionTimeDataset.txt";
+			
+//			String dir = "/hdd2/data/ysun138/RisoTree/result";
+//			String resultPath = dir + "/constructionTimeDataset.txt";
+			
+			if (!OwnMethods.pathExist(resultDir))
 			{
-				OwnMethods.Print(dir + " does not exist!");
+				OwnMethods.Print(resultDir + " does not exist!");
 				System.exit(-1);
 			}
+			
 			for ( String dataset : dataset_a)
 			{
 				Config config = new Config();
 				config.setDatasetName(dataset);
 				long RTreeTime = 0;
-//				LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(config, true);
-//				long RTreeTime = loadDataNoOSM.batchRTreeInsertTime();
+				LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(config, false);
+				RTreeTime = loadDataNoOSM.batchRTreeInsertTime();
 
-				Construct_RisoTree construct_RisoTree = new Construct_RisoTree(config, true);
+				Construct_RisoTree construct_RisoTree = new Construct_RisoTree(config, false);
 //				construct_RisoTree.generateContainSpatialID();
 				ArrayList<Long> PNTime = construct_RisoTree.constructPNTime();
 
