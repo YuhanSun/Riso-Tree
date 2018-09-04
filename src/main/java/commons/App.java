@@ -84,8 +84,8 @@ public class App {
 		
 //		initVariablesForTest();
 //		Naive();
-//		test();
-		batchRTreeInsert();
+		test();
+//		batchRTreeInsert();
 //		generateLabelList();
 //		rangeQueryCompare();
 //		rangeQueryCountCompare();
@@ -122,16 +122,28 @@ public class App {
 		}
 		tx.success();
 		tx.close();
-		OwnMethods.Print(statistic);
+		Utility.print(statistic);
 		databaseService.shutdown();
 		ArrayList<Integer> result = Utility.groupSum(0, 10201, statistic, 10201);
-		OwnMethods.Print(result);
-		OwnMethods.Print(statistic.size());
+		Utility.print(result);
+		Utility.print(statistic.size());
 	}
 	
 	public static void test()
 	{
-		OwnMethods.Print(80/100.0);
+//		Utility.print(80/100.0);
+	  String string = "PN_0";
+//	  String[] l = string.split("PN");
+//	  Utility.print(l);
+//	  string = l[1];
+	  string = string.replaceFirst("PN", "");
+	  Utility.print(string);
+	  
+	  String[] l = string.split("_");
+	  Utility.print(l);
+	  Utility.print(l.length);
+//	  ArrayList<Integer> test = new ArrayList<>();
+//	  test.toString();
 		
 //		double distance  = 0.000001;
 //		String string = String.format("%s", String.valueOf(distance * distance));
@@ -182,8 +194,8 @@ public class App {
 		while ( result.hasNext())
 			result.next();
 		long time = System.currentTimeMillis() - start;
-		OwnMethods.Print(time);
-		OwnMethods.Print(result.getExecutionPlanDescription());
+		Utility.print(time);
+		Utility.print(result.getExecutionPlanDescription());
 		databaseService.shutdown();
 		
 		OwnMethods.ClearCache(password);
@@ -193,8 +205,8 @@ public class App {
 		while ( result.hasNext())
 			result.next();
 		time = System.currentTimeMillis() - start;
-		OwnMethods.Print(time);
-		OwnMethods.Print(result.getExecutionPlanDescription());
+		Utility.print(time);
+		Utility.print(result.getExecutionPlanDescription());
 		databaseService.shutdown();
 	}
 	
@@ -214,7 +226,7 @@ public class App {
 //		while (result.hasNext())
 //			OwnMethods.Print(result.next());
 		ExecutionPlanDescription description = result.getExecutionPlanDescription();
-		OwnMethods.Print(description.toString());
+		Utility.print(description.toString());
 		tx.success(); tx.close(); databaseService.shutdown();
 	}
 	
@@ -226,7 +238,7 @@ public class App {
 		Transaction tx = databaseService.beginTx();
 		Result result = databaseService.execute(query);
 		while( result.hasNext())
-			OwnMethods.Print(result.next());
+			Utility.print(result.next());
 		tx.success();tx.close();
 		databaseService.shutdown();
 		
@@ -242,7 +254,7 @@ public class App {
 		
 		for ( int i = 0; i < graph1.size(); i++)
 			if ( graph1.get(i).size() != graph2.get(i).size())
-				OwnMethods.Print(String.format("line %d different!", i));
+				Utility.print(String.format("line %d different!", i));
 	}
 	
 	private static void selectivityTest() 
@@ -258,11 +270,11 @@ public class App {
 		for ( MyRectangle rect : queryRectangles)
 		{
 			List<Entity> results = stRtree.query(new Envelope(rect.min_x, rect.max_x, rect.min_y, rect.max_y));
-			OwnMethods.Print(results.size());
+			Utility.print(results.size());
 			countSum += results.size();	
 			index++;
 		}
-		OwnMethods.Print(String.format("Average selectivity:%d", countSum / index));
+		Utility.print(String.format("Average selectivity:%d", countSum / index));
 	}
 	
 	/**
@@ -275,7 +287,7 @@ public class App {
 		String queryRectanglePath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\query\\spa_predicate\\%s\\queryrect_1.txt", dataset);
 //		String queryRectanglePath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_1.txt", dataset);
 	    try {
-	    	OwnMethods.Print(db_path);
+	    	Utility.print(db_path);
 	    	GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 	        Layer layer = spatialDatabaseService.getLayer(layerName);
@@ -292,29 +304,29 @@ public class App {
 	        	
 	        	LinkedList<Node> resultMyMethod = SpatialFirst.rangeQuery(root, queryRectangle);
 	        	
-	        	OwnMethods.Print(String.format("%d\t%d", resultGeoPipe.size(), resultMyMethod.size()));
+	        	Utility.print(String.format("%d\t%d", resultGeoPipe.size(), resultMyMethod.size()));
 	        	
 	        	if ( resultGeoPipe.size() != resultMyMethod.size())
 	        	{
-	        		OwnMethods.Print(queryRectangle);
-	        		OwnMethods.Print(String.format("GeoPile count:%d", resultGeoPipe.size()));
-	        		OwnMethods.Print(String.format("MyMethod count:%d", resultMyMethod.size()));
+	        		Utility.print(queryRectangle);
+	        		Utility.print(String.format("GeoPile count:%d", resultGeoPipe.size()));
+	        		Utility.print(String.format("MyMethod count:%d", resultMyMethod.size()));
 	        		
-	        		OwnMethods.Print("GeoPipe result:");
+	        		Utility.print("GeoPipe result:");
 	        		for ( SpatialDatabaseRecord record : resultGeoPipe)
 		        	{
 	        			Node node = record.getGeomNode();
-	        			OwnMethods.Print(node);
+	        			Utility.print(node);
 		        		double[] bbox = (double[]) node.getProperty("bbox");
-		        		OwnMethods.Print(Arrays.toString(bbox));
+		        		Utility.print(Arrays.toString(bbox));
 		        	}
 	        		
-	        		OwnMethods.Print("\nMyMethod result:");
+	        		Utility.print("\nMyMethod result:");
 	        		for (Node node : resultMyMethod)
 	        		{
-	        			OwnMethods.Print(node);
+	        			Utility.print(node);
 	        			double[] bbox = (double[]) node.getProperty("bbox");
-		        		OwnMethods.Print(Arrays.toString(bbox));
+		        		Utility.print(Arrays.toString(bbox));
 	        		}
 	        		break;
 	        	}
@@ -344,7 +356,7 @@ public class App {
 //		String dbPath = "/home/yuhansun/Documents/GeoGraphMatchData/neo4j-community-3.1.1/data/databases/graph.db";
 //		String queryRectanglePath = String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_1.txt", dataset);
 	    try {
-	    	OwnMethods.Print(db_path);
+	    	Utility.print(db_path);
 	    	GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 	        Layer layer = spatialDatabaseService.getLayer(layerName);
@@ -384,10 +396,10 @@ public class App {
 	        
 	        databaseService.shutdown();
 	        
-	        OwnMethods.Print(String.format("GeoPile count:%d", countGeoPipe));
-	        OwnMethods.Print(String.format("GeoPipe Time:%d", timeGeoPipe));
-	        OwnMethods.Print(String.format("MyMethod count:%d", countMyMethod));
-	        OwnMethods.Print(String.format("MyMethod Time:%d", timeMyMethod));
+	        Utility.print(String.format("GeoPile count:%d", countGeoPipe));
+	        Utility.print(String.format("GeoPipe Time:%d", timeGeoPipe));
+	        Utility.print(String.format("MyMethod count:%d", countMyMethod));
+	        Utility.print(String.format("MyMethod Time:%d", timeMyMethod));
 	    }
 	    catch(Exception e)
 	    {
@@ -481,7 +493,7 @@ public class App {
 	{
 //		db_path = "D:\\Ubuntu_shared\\GeoMinHop\\data\\foursquare\\"
 //				+ "neo4j-community-3.1.1_foursquare_backup\\data\\databases\\graph.db";;
-		OwnMethods.Print("db path:"+db_path);
+		Utility.print("db path:"+db_path);
 		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		Transaction tx = databaseService.beginTx();
 //		Node node = databaseService.getNodeById(3743197);
@@ -489,11 +501,11 @@ public class App {
 //		OwnMethods.Print(node.getAllProperties());
 		ResourceIterable<Label> labels = databaseService.getAllLabels();
 		for ( Label label : labels)
-			OwnMethods.Print(label);
+			Utility.print(label);
 		
 		ResourceIterable<RelationshipType> relationTypes = databaseService.getAllRelationshipTypes();
 		for (RelationshipType type : relationTypes)
-			OwnMethods.Print(type);
+			Utility.print(type);
 		
 		tx.success();
 		tx.close();
@@ -507,7 +519,7 @@ public class App {
 				+ String.format(" where %f <= a%d.%s <= %f ", queryRectangle.min_x, 1, lon_name, queryRectangle.max_x)
 				+ String.format("and %f <= a%d.%s <= %f", queryRectangle.min_y, 1, lat_name, queryRectangle.max_y);
 		query += " return id(a0), id(a1), id(a2), id(a3)";
-		OwnMethods.Print(query);
+		Utility.print(query);
 		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = databaseService.beginTx();
@@ -516,7 +528,7 @@ public class App {
 				result.next();
 			
 			ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-			OwnMethods.Print(planDescription.getProfilerStatistics().getRows());
+			Utility.print(planDescription.getProfilerStatistics().getRows());
 			tx.close();
 			tx.success();
 			databaseService.shutdown();

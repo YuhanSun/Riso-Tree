@@ -32,7 +32,9 @@ import commons.Config;
 import commons.Labels;
 import commons.OwnMethods;
 import commons.RTreeUtility;
+import commons.Utility;
 import commons.Config.system;
+import commons.Neo4jGraphUtility;
 import commons.Labels.RTreeRel;
 import osm.OSM_Utility;
 
@@ -277,7 +279,7 @@ public class Construct_RisoTree {
 			int hop = 1;
 			
 			String indexPath = PNPath + "_" + hop;
-			OwnMethods.Print("read index from " + indexPath);
+			Utility.print("read index from " + indexPath);
 			BufferedReader reader =  new BufferedReader(new FileReader(new File(indexPath)));
 			Map<String, String> config = new HashMap<String, String>();
 			config.put("dbms.pagecache.memory", "100g");
@@ -317,7 +319,7 @@ public class Construct_RisoTree {
 				if ( line == null)
 					break;
 				nodeID = Long.parseLong(line);
-				OwnMethods.Print(nodeID);
+				Utility.print(nodeID);
 			}
 			inserter.shutdown();
 		} catch (Exception e) {
@@ -336,11 +338,11 @@ public class Construct_RisoTree {
 	public static ArrayList<Long> constructPNTime()
 	{
 		ArrayList<Long> constructTime = new ArrayList<Long>();
-		OwnMethods.Print("read contain map from " + containIDPath);
+		Utility.print("read contain map from " + containIDPath);
 		HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
-		OwnMethods.Print("read graph from " + graph_path);
+		Utility.print("read graph from " + graph_path);
 		ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
-		OwnMethods.Print("read label list from " + label_list_path);
+		Utility.print("read label list from " + label_list_path);
 		ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
 		//			FileWriter writer1 = new FileWriter(new File(PNPath + "_"+1));
 		HashMap<Long, HashMap<String, ArrayList<Integer>>> PN = new 
@@ -350,7 +352,7 @@ public class Construct_RisoTree {
 			PN.put(nodeID, new HashMap<String, ArrayList<Integer>>());
 
 		//for one hop
-		OwnMethods.Print("construct 1 hop");
+		Utility.print("construct 1 hop");
 		long start = System.currentTimeMillis();
 		for ( long nodeId : containIDMap.keySet())
 		{
@@ -384,7 +386,7 @@ public class Construct_RisoTree {
 			}
 		}
 		long onehopTime = System.currentTimeMillis() - start;
-		OwnMethods.Print("one hop time:" + onehopTime);
+		Utility.print("one hop time:" + onehopTime);
 		constructTime.add(onehopTime);
 		//			writer1.close();
 
@@ -393,7 +395,7 @@ public class Construct_RisoTree {
 		while ( hop <= MAX_HOPNUM)
 		//			int hop = 2;
 		{
-			OwnMethods.Print(String.format("construct %d hop", hop));
+			Utility.print(String.format("construct %d hop", hop));
 			//				FileWriter writer2 =  new FileWriter(new File(PNPath+"_"+hop));
 			//				String regex = "PN";
 			//				for ( int i = 0; i < hop - 1; i++)
@@ -443,7 +445,7 @@ public class Construct_RisoTree {
 				}
 			}
 			long twohopTime = System.currentTimeMillis() - start;
-			OwnMethods.Print("two hop time:"+twohopTime);
+			Utility.print("two hop time:"+twohopTime);
 			constructTime.add(twohopTime);
 			//				writer2.close();
 			hop++;
@@ -461,13 +463,13 @@ public class Construct_RisoTree {
 	public static void constructPN()
 	{
 		try {
-			OwnMethods.Print("read contain map from " + containIDPath);
+			Utility.print("read contain map from " + containIDPath);
 			HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
-			OwnMethods.Print("read graph from " + graph_path);
+			Utility.print("read graph from " + graph_path);
 			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
-			OwnMethods.Print("read label list from " + label_list_path);
+			Utility.print("read label list from " + label_list_path);
 			ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
-			GraphDatabaseService dbservice = OwnMethods.getDatabaseService(db_path);
+			GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
 			FileWriter writer1 = new FileWriter(new File(PNPath + "_"+1));
 			//for one hop
 			Transaction tx = dbservice.beginTx();
@@ -543,7 +545,7 @@ public class Construct_RisoTree {
 				
 				for ( long nodeID : containIDMap.keySet())
 				{
-					OwnMethods.Print(nodeID);
+					Utility.print(nodeID);
 					writer2.write(nodeID + "\n");
 					Node node = dbservice.getNodeById(nodeID);
 					Map<String, Object> properties = node.getAllProperties();
@@ -664,8 +666,8 @@ public class Construct_RisoTree {
 			tx = dbservice.beginTx();
 			while ( queue.isEmpty() == false)
 			{
-				OwnMethods.Print("index:" + index);
-				OwnMethods.Print("count:" + count);
+				Utility.print("index:" + index);
+				Utility.print("count:" + count);
 				Long pos = queue.poll();
 				Node node = dbservice.getNodeById(pos);
 				if(count < 4250)
@@ -755,8 +757,8 @@ public class Construct_RisoTree {
 			tx = dbservice.beginTx();
 			while ( queue.isEmpty() == false)
 			{
-				OwnMethods.Print("index:" + index);
-				OwnMethods.Print("count:" + count);
+				Utility.print("index:" + index);
+				Utility.print("count:" + count);
 				Long pos = queue.poll();
 				Node node = dbservice.getNodeById(pos);
 				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRel.RTREE_CHILD);
@@ -846,7 +848,7 @@ public class Construct_RisoTree {
 							String NL_size_property_name = String.format("NL_%d_%d_size", i, label);
 							int size = (Integer) node.getProperty(NL_size_property_name);
 							String line = String.format("%d %s size:%d", node.getProperty("rtree_id"), NL_size_property_name, size);
-							OwnMethods.Print(line);
+							Utility.print(line);
 							OwnMethods.WriteFile(output_path, true, line + "\n");
 						}
 					}
@@ -868,7 +870,7 @@ public class Construct_RisoTree {
 	
 	public static void generateNL_size()
 	{
-		OwnMethods.Print("Calculate NL size\n");
+		Utility.print("Calculate NL size\n");
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
@@ -1013,7 +1015,7 @@ public class Construct_RisoTree {
 			
 			while ( ( line = reader.readLine()) != null)
 			{
-				OwnMethods.Print(tx_index);
+				Utility.print(tx_index);
 				tx_index++;
 				
 				Transaction tx = dbservice.beginTx();
@@ -1064,7 +1066,7 @@ public class Construct_RisoTree {
 			dbservice.shutdown();
 			
 		} catch (Exception e) {
-			OwnMethods.Print(line);
+			Utility.print(line);
 			e.printStackTrace();
 		}
 		
@@ -1078,7 +1080,7 @@ public class Construct_RisoTree {
 	 */
 	public static void ConstructNL()
 	{
-		OwnMethods.Print("Construct the first hop NL list\n");
+		Utility.print("Construct the first hop NL list\n");
 		try {
 			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
 			ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
@@ -1376,7 +1378,7 @@ public class Construct_RisoTree {
 				if(node.hasProperty(clear_property_name))
 				{
 					int[] property = (int[]) node.removeProperty(clear_property_name);
-					OwnMethods.Print(property.toString());
+					Utility.print(property.toString());
 				}
 				Iterable<Relationship> rels = node.getRelationships(Direction.OUTGOING, RTreeRel.RTREE_CHILD);
 				for (Relationship rel : rels)
