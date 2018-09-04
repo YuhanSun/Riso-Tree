@@ -393,7 +393,7 @@ public class SpatialFirst_List {
 							result_count += profile.getRows();
 							page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
 //						OwnMethods.Print(planDescription);
-							OwnMethods.Print(String.format("%d, %d", id, cur_count));
+							Utility.print(String.format("%d, %d", id, cur_count));
 						}
 					}
 					else {
@@ -404,7 +404,7 @@ public class SpatialFirst_List {
 
 			tx.success();
 			tx.close();
-			OwnMethods.Print(String.format("locate in count:%d", located_in_count));
+			Utility.print(String.format("locate in count:%d", located_in_count));
 //			OwnMethods.Print(String.format("result size: %d", result_count));
 //			OwnMethods.Print(String.format("time: %d", System.currentTimeMillis() - start));
 			//			return result;
@@ -487,7 +487,7 @@ public class SpatialFirst_List {
 //		query += String.format(" id(a%d) in %s\n", pos, ids.toString());
 		
 		query += ")\n"; 
-		OwnMethods.Print(String.format("spa_ids size: %d", ids.size()));
+		Utility.print(String.format("spa_ids size: %d", ids.size()));
 		
 		//NL_id_list
 //		for ( int key : NL_hopnum.keySet())
@@ -580,7 +580,7 @@ public class SpatialFirst_List {
 
 			long start_1 = System.currentTimeMillis();
 			Node rootNode = RTreeUtility.getRTreeRoot(dbservice, dataset);
-			OwnMethods.Print("query range: " + min_queryRectangle);
+			Utility.print("query range: " + min_queryRectangle);
 			LinkedList<Node> rangeQueryResult = this.rangeQuery(rootNode, min_queryRectangle);
 			range_query_time = System.currentTimeMillis() - start_1;
 			
@@ -613,7 +613,7 @@ public class SpatialFirst_List {
 					start_1 = System.currentTimeMillis();
 					String query = formSubgraphQuery_Block(query_Graph, limit, Explain_Or_Profile.Profile, spa_predicates, min_pos,
 							ids, NL_hopnum, rtree_node);
-					OwnMethods.Print(query);
+					Utility.print(query);
 
 					Result result = dbservice.execute(query);
 					get_iterator_time += System.currentTimeMillis() - start_1;
@@ -641,7 +641,7 @@ public class SpatialFirst_List {
 					}
 				}
 			}
-			OwnMethods.Print("range query result count: " + located_in_count);
+			Utility.print("range query result count: " + located_in_count);
 
 			tx.success();
 			tx.close();

@@ -282,12 +282,12 @@ public class SpatialFirst {
 			Transaction tx = spatialFirst.dbservice.beginTx();
 			Node rootNode = RTreeUtility.getRTreeRoot(spatialFirst.dbservice, dataset_test);
 			LinkedList<Node> result = spatialFirst.rangeQuery(rootNode, queryRectangle);
-			OwnMethods.Print(String.format("Result size: %d", result.size()));
+			Utility.print(String.format("Result size: %d", result.size()));
 			for ( Node node : result)
 			{
 				Node graph_node = node.getSingleRelationship
 						(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
-				OwnMethods.Print(graph_node.getId());
+				Utility.print(graph_node.getId());
 			}
 			tx.success();
 			tx.close();
@@ -307,7 +307,7 @@ public class SpatialFirst {
 			int pos = 1;
 			long id = 100;
 			String query = spatialFirst.formSubgraphQuery(query_Graph, -1, 0, spa_predicates, pos, id);
-			OwnMethods.Print(query);
+			Utility.print(query);
 			spatialFirst.dbservice.shutdown();
 		} catch (Exception e) {
 			e.printStackTrace();

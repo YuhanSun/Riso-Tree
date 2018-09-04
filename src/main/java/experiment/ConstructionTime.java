@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import commons.Config;
 import commons.OwnMethods;
+import commons.Utility;
 import commons.Config.system;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
@@ -129,7 +130,7 @@ public class ConstructionTime {
 					//				Config.Datasets.go_uniprot_100_random_80.name()
 					//				Config.Datasets.Gowalla_100.name(), 
 					//				Config.Datasets.foursquare_100.name()
-//					Config.Datasets.Yelp_100.name()
+					Config.Datasets.Yelp_100.name()
 					));
 
 			String resultDir = "D:\\Google_Drive\\Experiment_Result\\Riso-Tree";
@@ -140,7 +141,7 @@ public class ConstructionTime {
 			
 			if (!OwnMethods.pathExist(resultDir))
 			{
-				OwnMethods.Print(resultDir + " does not exist!");
+				Utility.print(resultDir + " does not exist!");
 				System.exit(-1);
 			}
 			

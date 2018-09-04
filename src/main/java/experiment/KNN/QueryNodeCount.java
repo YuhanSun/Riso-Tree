@@ -91,7 +91,7 @@ public class QueryNodeCount {
 		spaCount = OwnMethods.GetSpatialEntityCount(entityPath);
 		entityCount = OwnMethods.getEntityCount(entityPath);
 		
-		OwnMethods.Print("read map from " + graph_pos_map_path);
+		Utility.print("read map from " + graph_pos_map_path);
 		graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 	}
 	
@@ -193,8 +193,8 @@ public class QueryNodeCount {
 
 					if(!TEST_FORMAT)
 					{
-						OwnMethods.Print(query_Graph);
-						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+						Utility.print(query_Graph);
+						Utility.print(String.format("%d : %s", i, rectangle.toString()));
 
 						start = System.currentTimeMillis();
 						risoTreeQueryPN.LAGAQ_KNN(query_Graph, K);
@@ -205,7 +205,7 @@ public class QueryNodeCount {
 						total_time.add(time);
 						visited_spatial_count.add((long) risoTreeQueryPN.visit_spatial_object_count);
 						page_hit.add(risoTreeQueryPN.page_hit_count);
-						OwnMethods.Print("Page access:" + risoTreeQueryPN.page_hit_count);
+						Utility.print("Page access:" + risoTreeQueryPN.page_hit_count);
 						time_queue.add(risoTreeQueryPN.queue_time);
 						time_checkPaths.add(risoTreeQueryPN.check_paths_time);
 
@@ -316,8 +316,8 @@ public class QueryNodeCount {
 
 					if(!TEST_FORMAT)
 					{
-						OwnMethods.Print(query_Graph);
-						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+						Utility.print(query_Graph);
+						Utility.print(String.format("%d : %s", i, rectangle.toString()));
 
 						start = System.currentTimeMillis();
 						spatialFirst.LAGAQ_KNN(query_Graph, K);
@@ -328,7 +328,7 @@ public class QueryNodeCount {
 						total_time.add(time);
 						visited_spatial_count.add((long) spatialFirst.visit_spatial_object_count);
 						page_hit.add(spatialFirst.page_hit_count);
-						OwnMethods.Print("Page access:" + spatialFirst.page_hit_count);
+						Utility.print("Page access:" + spatialFirst.page_hit_count);
 						time_queue.add(spatialFirst.queue_time);
 
 						write_line = String.format("%d\t%d\t", visited_spatial_count.get(i), time_queue.get(i));

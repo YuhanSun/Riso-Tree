@@ -102,7 +102,7 @@ public class KCount {
 		spaCount = OwnMethods.GetSpatialEntityCount(entityPath);
 		entityCount = OwnMethods.getEntityCount(entityPath);
 		
-		OwnMethods.Print("read map from " + graph_pos_map_path);
+		Utility.print("read map from " + graph_pos_map_path);
 		graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 	}
 	
@@ -143,7 +143,7 @@ public class KCount {
 			long start;
 			long time;
 
-			OwnMethods.Print("read map from " + graph_pos_map_path);
+			Utility.print("read map from " + graph_pos_map_path);
 			long[] graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 			
 			String result_detail_path = null, result_avg_path = null;
@@ -158,8 +158,8 @@ public class KCount {
 				break;
 			}
 
-			OwnMethods.Print(result_avg_path);
-			OwnMethods.Print(result_detail_path);
+			Utility.print(result_avg_path);
+			Utility.print(result_detail_path);
 			
 
 			String write_line = String.format("%s\tqueryID: %d\n", dataset, query_id);
@@ -214,8 +214,8 @@ public class KCount {
 
 					if(!TEST_FORMAT)
 					{
-						OwnMethods.Print(query_Graph);
-						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+						Utility.print(query_Graph);
+						Utility.print(String.format("%d : %s", i, rectangle.toString()));
 
 						start = System.currentTimeMillis();
 						risoTreeQueryPN.LAGAQ_KNN(query_Graph, K);
@@ -226,7 +226,7 @@ public class KCount {
 						total_time.add(time);
 						visited_spatial_count.add((long) risoTreeQueryPN.visit_spatial_object_count);
 						page_hit.add(risoTreeQueryPN.page_hit_count);
-						OwnMethods.Print("Page access:" + risoTreeQueryPN.page_hit_count);
+						Utility.print("Page access:" + risoTreeQueryPN.page_hit_count);
 						time_queue.add(risoTreeQueryPN.queue_time);
 						time_checkPaths.add(risoTreeQueryPN.check_paths_time);
 
@@ -335,7 +335,7 @@ public class KCount {
 
 					if(!TEST_FORMAT)
 					{
-						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+						Utility.print(String.format("%d : %s", i, rectangle.toString()));
 
 						start = System.currentTimeMillis();
 						spatialFirst.LAGAQ_KNN(query_Graph, K);
@@ -346,7 +346,7 @@ public class KCount {
 						total_time.add(time);
 						visited_spatial_count.add((long) spatialFirst.visit_spatial_object_count);
 						page_hit.add(spatialFirst.page_hit_count);
-						OwnMethods.Print("Page access:" + spatialFirst.page_hit_count);
+						Utility.print("Page access:" + spatialFirst.page_hit_count);
 						time_queue.add(spatialFirst.queue_time);
 
 						write_line = String.format("%d\t%d\t", visited_spatial_count.get(i), time_queue.get(i));

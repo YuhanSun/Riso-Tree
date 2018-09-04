@@ -108,7 +108,7 @@ public class SpatialFirst_ListTest {
 //		}
 		
 		MyRectangle rectangle = queryrect.get(rectID);
-		OwnMethods.Print("query rectangle: " + rectangle);
+		Utility.print("query rectangle: " + rectangle);
 		int j = 0;
 		for (  ; j < query_Graph.graph.size(); j++)
 			if(query_Graph.Has_Spa_Predicate[j])
@@ -116,7 +116,7 @@ public class SpatialFirst_ListTest {
 		query_Graph.spa_predicate[j] = rectangle;
 		
 		int entityCount = OwnMethods.getEntityCount(entityPath);
-		OwnMethods.Print("read map from " + graph_pos_map_path);
+		Utility.print("read map from " + graph_pos_map_path);
 		graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 		
 	}
@@ -127,7 +127,7 @@ public class SpatialFirst_ListTest {
 		SpatialFirst_List spatialFirstlist = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 		
 		spatialFirstlist.query_Block(query_Graph, -1);
-		OwnMethods.Print(String.format("result size: %d", spatialFirstlist.result_count));
+		Utility.print(String.format("result size: %d", spatialFirstlist.result_count));
 		spatialFirstlist.shutdown();
 	}
 	
@@ -137,7 +137,7 @@ public class SpatialFirst_ListTest {
 		SpatialFirst_List spatialFirstlist = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 
 		spatialFirstlist.query(query_Graph, -1);
-		OwnMethods.Print(String.format("result size: %d", spatialFirstlist.result_count));
+		Utility.print(String.format("result size: %d", spatialFirstlist.result_count));
 		spatialFirstlist.shutdown();
 	}
 	
@@ -150,7 +150,7 @@ public class SpatialFirst_ListTest {
 			Node rootNode = RTreeUtility.getRTreeRoot(spatialFirstlist.dbservice, dataset);
 			MyRectangle query_rectangle = new MyRectangle(38.090088, 36.413699, 41.962690, 40.286301);
 			LinkedList<Node> result = spatialFirstlist.rangeQuery(rootNode, query_rectangle);
-			OwnMethods.Print(String.format("Result size: %d", result.size()));
+			Utility.print(String.format("Result size: %d", result.size()));
 			tx.success();
 			tx.close();
 			spatialFirstlist.dbservice.shutdown();
@@ -187,7 +187,7 @@ public class SpatialFirst_ListTest {
 			
 			String query = spatialFirstlist.formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile, 
 					spa_predicates, pos, id, NL_hopnum, node);
-			OwnMethods.Print(query);
+			Utility.print(query);
 			
 			Result result = spatialFirstlist.dbservice.execute(query);
 //			ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
@@ -201,7 +201,7 @@ public class SpatialFirst_ListTest {
 				ida1_list.add(ida1);
 				count++;
 			}
-			OwnMethods.Print(count);
+			Utility.print(count);
 			
 			for ( long ida1 : ida1_list)
 				OwnMethods.WriteFile(log_path, true, ida1 + "\n");
@@ -221,9 +221,9 @@ public class SpatialFirst_ListTest {
 		try
 		{
 			ArrayList<Long> resultIDs = spatialFirst_List.LAGAQ_KNN(query_Graph, K);
-			OwnMethods.Print(resultIDs);
-			OwnMethods.Print(spatialFirst_List.visit_spatial_object_count);
-			OwnMethods.Print(spatialFirst_List.page_hit_count);
+			Utility.print(resultIDs);
+			Utility.print(spatialFirst_List.visit_spatial_object_count);
+			Utility.print(spatialFirst_List.page_hit_count);
 		}
 		catch (Exception e)
 		{
@@ -241,13 +241,13 @@ public class SpatialFirst_ListTest {
 		SpatialFirst_List spatialFirst_List = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 		try{
 			double distance = 0.01;
-			OwnMethods.Print(distance);
+			Utility.print(distance);
 			OwnMethods.ClearCache("syh19910205");
 //			FileWriter writer = new FileWriter("D:\\temp\\output1.txt");
 			long start = System.currentTimeMillis();
 			List<Long[]> result = spatialFirst_List.spatialJoinRTree(distance);
-			OwnMethods.Print(System.currentTimeMillis() - start);
-			OwnMethods.Print(result.size());
+			Utility.print(System.currentTimeMillis() - start);
+			Utility.print(result.size());
 			spatialFirst_List.shutdown();
 //			for (Long[] element : result)
 //			{
@@ -264,7 +264,7 @@ public class SpatialFirst_ListTest {
 	
 	@Test 
 	public void spatialJoinRTreeValidate() {
-		OwnMethods.Print(entityPath);
+		Utility.print(entityPath);
 		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 //		STRtree stRtree = OwnMethods.ConstructSTRee(entities);
 		double distance = 0.1;
@@ -304,7 +304,7 @@ public class SpatialFirst_ListTest {
 		offsets.add(1001);
 		for (int i = 0; i < resolution*resolution; i++)
 		{
-			OwnMethods.Print(i);
+			Utility.print(i);
 			for ( int offset : offsets)
 			{
 				if ( gridMap.containsKey(i + offset))
@@ -355,7 +355,7 @@ public class SpatialFirst_ListTest {
 //				}
 //			}
 //		}
-		OwnMethods.Print(result.size());
+		Utility.print(result.size());
 		
 	}
 	
@@ -377,19 +377,19 @@ public class SpatialFirst_ListTest {
 		OwnMethods.ClearCache("syh19910205");
 		
 		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
-		OwnMethods.Print(query_Graph.toString());
+		Utility.print(query_Graph.toString());
 		
 		SpatialFirst_List spatialFirst_List = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 		long start = System.currentTimeMillis();
 		List<Long[]> result = spatialFirst_List.LAGAQ_Join(query_Graph, 0.01);
-		OwnMethods.Print(String.format("Total time: %d", System.currentTimeMillis() - start));
+		Utility.print(String.format("Total time: %d", System.currentTimeMillis() - start));
 		
-		OwnMethods.Print("Join time: " + spatialFirst_List.join_time);
-		OwnMethods.Print("Get iterate time: " + spatialFirst_List.get_iterator_time);
-		OwnMethods.Print("Iterate time: " + spatialFirst_List.iterate_time);
-		OwnMethods.Print("Join result count: " + spatialFirst_List.join_result_count);
-		OwnMethods.Print(result);
-		OwnMethods.Print(result.size());
+		Utility.print("Join time: " + spatialFirst_List.join_time);
+		Utility.print("Get iterate time: " + spatialFirst_List.get_iterator_time);
+		Utility.print("Iterate time: " + spatialFirst_List.iterate_time);
+		Utility.print("Join result count: " + spatialFirst_List.join_result_count);
+		Utility.print(result);
+		Utility.print(result.size());
 		
 		spatialFirst_List.shutdown();
 	}

@@ -367,7 +367,7 @@ public class ExperimentSpaceSelectivity {
 						break;
 					}
 					
-					OwnMethods.Print("Write query rectangles to " + output_path);
+					Utility.print("Write query rectangles to " + output_path);
 					String write_line = "";
 					for (int j = 0; j < experiment_count; j++)
 					{
@@ -457,7 +457,7 @@ public class ExperimentSpaceSelectivity {
 
 					if(!TEST_FORMAT)
 					{
-						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+						Utility.print(String.format("%d : %s", i, rectangle.toString()));
 
 						Result result = naive_Neo4j_Match.neo4j_API.graphDb.execute("match (n) where id(n) = 0 return n");
 						while( result.hasNext())
@@ -629,7 +629,7 @@ public class ExperimentSpaceSelectivity {
 					
 					if(!TEST_FORMAT)
 					{
-						OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
+						Utility.print(String.format("%d : %s", i, rectangle.toString()));
 						
 						start = System.currentTimeMillis();
 						risoTreeQueryPN.Query(query_Graph, -1);
@@ -639,7 +639,7 @@ public class ExperimentSpaceSelectivity {
 						time_iterate.add(risoTreeQueryPN.iterate_time);
 						total_time.add(time);
 						count.add(risoTreeQueryPN.result_count);
-						access.add(risoTreeQueryPN.page_hit_count);OwnMethods.Print("Page access:" + risoTreeQueryPN.page_hit_count);
+						access.add(risoTreeQueryPN.page_hit_count);Utility.print("Page access:" + risoTreeQueryPN.page_hit_count);
 						range_query_time.add(risoTreeQueryPN.range_query_time);
 						
 						write_line = String.format("%d\t%d\t", count.get(i), range_query_time.get(i));

@@ -14,8 +14,8 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import commons.Config;
-import commons.OwnMethods;
 import commons.Config.system;
+import commons.Utility;
 
 public class LoadDataNoOSMTest {
 
@@ -70,12 +70,12 @@ public class LoadDataNoOSMTest {
 	public void nodeMapTest() {
 		Transaction tx = databaseService.beginTx();
 		Node node = databaseService.getNodeById(78589);
-		OwnMethods.Print(node);
-		OwnMethods.Print(node.getAllProperties());
+		Utility.print(node);
+		Utility.print(node.getAllProperties());
 		
 		node = databaseService.getNodeById(10353);
-		OwnMethods.Print(node);
-		OwnMethods.Print(node.getAllProperties());
+		Utility.print(node);
+		Utility.print(node.getAllProperties());
 		
 		tx.success();
 		tx.close();

@@ -6,7 +6,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import commons.MyRectangle;
-import commons.OwnMethods;
 
 public class myRectangleTest {
 
@@ -24,9 +23,9 @@ public class myRectangleTest {
 		MyRectangle bbox = new MyRectangle("[-73.971444, 40.762827, -73.971444, 40.762827]");
 		MyRectangle intersectRect = bbox.intersect(queryRect);
 		if ( intersectRect == null)
-			OwnMethods.Print("Null");
+			Utility.print("Null");
 		else
-			OwnMethods.Print(intersectRect);
+			Utility.print(intersectRect);
 	}
 	
 	@Test

@@ -26,8 +26,8 @@ import org.neo4j.graphdb.traversal.TraversalDescription;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-import commons.OwnMethods;
 import commons.Labels.*;
+import commons.Utility;
 
 
 public class OSM_Utility {
@@ -62,7 +62,7 @@ public class OSM_Utility {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		OwnMethods.Print("getOSMDatasetNode return null!");
+		Utility.print("getOSMDatasetNode return null!");
 		return null;
 	}
 	
@@ -154,10 +154,10 @@ public class OSM_Utility {
 //				OwnMethods.Print(record.getGeomNode().getId());
 //				OwnMethods.Print(record.getGeomNode().getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING)
 //						.getStartNode().getId());
-				OwnMethods.Print(record.getNodeId());
-				OwnMethods.Print(record.getGeomNode().getAllProperties());
+				Utility.print(record.getNodeId());
+				Utility.print(record.getGeomNode().getAllProperties());
 			}
-			OwnMethods.Print(results.size());
+			Utility.print(results.size());
 			
 			
 			/**

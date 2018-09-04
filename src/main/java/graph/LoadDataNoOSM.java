@@ -36,6 +36,7 @@ import commons.Labels.GraphRel;
 import commons.Labels.RTreeRel;
 import commons.OwnMethods;
 import commons.RTreeUtility;
+import commons.Utility;
 import osm.OSM_Utility;
 
 /**
@@ -104,7 +105,7 @@ public class LoadDataNoOSM {
 			break;
 		}
 		
-		OwnMethods.Print("Read entity from: " + entityPath);
+		Utility.print("Read entity from: " + entityPath);
 		entities = OwnMethods.ReadEntity(entityPath);
 	}
 	
@@ -181,7 +182,7 @@ public class LoadDataNoOSM {
 	 */
 	public static void CalculateCount()
 	{
-		OwnMethods.Print("Calculate spatial cardinality");
+		Utility.print("Calculate spatial cardinality");
 		try {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
 			Transaction tx = databaseService.beginTx();
@@ -234,13 +235,13 @@ public class LoadDataNoOSM {
 	
 	public static void LoadGraphEdges()
 	{
-		OwnMethods.Print("Load graph edges\n");
+		Utility.print("Load graph edges\n");
 		BatchInserter inserter = null;
 		try {
 			Map<String, String> id_map = OwnMethods.ReadMap(mapPath);
 			Map<String, String> config = new HashMap<String, String>();
 			config.put("dbms.pagecache.memory", "100g");
-			OwnMethods.Print("batch insert into: " + dbPath);
+			Utility.print("batch insert into: " + dbPath);
 			inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
 			
 			ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
@@ -273,7 +274,7 @@ public class LoadDataNoOSM {
 	 */
 	public static void GetSpatialNodeMap()
 	{
-		OwnMethods.Print("Get spatial vertices map");
+		Utility.print("Get spatial vertices map");
 		try {
 			Map<Object, Object> id_map = new TreeMap<Object, Object>();
 			
@@ -292,7 +293,7 @@ public class LoadDataNoOSM {
 			tx.success();	tx.close();
 			databaseService.shutdown();
 			
-			OwnMethods.Print("Write spatial node map to " + mapPath + "\n");
+			Utility.print("Write spatial node map to " + mapPath + "\n");
 			OwnMethods.WriteMap(mapPath, true, id_map);
 			
 		} catch (Exception e) {
@@ -306,13 +307,13 @@ public class LoadDataNoOSM {
 	static void LoadNonSpatialEntity() 
 	{
 		try {
-			OwnMethods.Print(String.format("LoadNonSpatialEntity\n from %s\n%s\n to %s", 
+			Utility.print(String.format("LoadNonSpatialEntity\n from %s\n%s\n to %s", 
 					entityPath, labelListPath, dbPath));
 			
-			OwnMethods.Print("Read entity from: " + entityPath);
+			Utility.print("Read entity from: " + entityPath);
 			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 			
-			OwnMethods.Print("Read label list from: " + labelListPath);
+			Utility.print("Read label list from: " + labelListPath);
 			ArrayList<Integer> labelList = OwnMethods.readIntegerArray(labelListPath);
 			
 			Map<Object, Object> id_map = new TreeMap<Object, Object>();
@@ -320,7 +321,7 @@ public class LoadDataNoOSM {
 			Map<String, String> config = new HashMap<String, String>();
 			config.put("dbms.pagecache.memory", "6g");
 			
-			OwnMethods.Print("Batch insert into: " + dbPath);
+			Utility.print("Batch insert into: " + dbPath);
 			BatchInserter inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
 
 			for (int i = 0; i < entities.size(); i++)
@@ -337,7 +338,7 @@ public class LoadDataNoOSM {
 				}
 			}
 			inserter.shutdown();
-			OwnMethods.Print("Write non-spatial node map to "+mapPath+"\n");
+			Utility.print("Write non-spatial node map to "+mapPath+"\n");
 			OwnMethods.WriteMap(mapPath, false, id_map);
 		} catch (Exception e) {
 			e.printStackTrace();	System.exit(-1);
@@ -361,7 +362,7 @@ public class LoadDataNoOSM {
 			}
 			reader.close();
 			for ( int count : statis)
-				OwnMethods.Print(count);
+				Utility.print(count);
 		} catch (Exception e) {
 			e.printStackTrace();	System.exit(-1);
 		}
@@ -402,18 +403,18 @@ public class LoadDataNoOSM {
 	 */
 	public static void generateLabelList()
 	{
-		OwnMethods.Print("Generate the label list based on entity file\n");
+		Utility.print("Generate the label list based on entity file\n");
 		OwnMethods.getLabelListFromEntity(entityPath, labelListPath);
 	}
 
 	public static void batchRTreeInsert()
 	{
-		OwnMethods.Print("Batch insert RTree");
+		Utility.print("Batch insert RTree");
 		try {
 			String layerName = dataset;
-			OwnMethods.Print("Connect to dbPath: " + dbPath);
+			Utility.print("Connect to dbPath: " + dbPath);
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
-			OwnMethods.Print("dataset:" + dataset + "\ndatabase:" + dbPath + "\n");
+			Utility.print("dataset:" + dataset + "\ndatabase:" + dbPath + "\n");
 			
 			SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 			
@@ -422,7 +423,7 @@ public class LoadDataNoOSM {
 			EditableLayer layer = spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
 //			org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
 			
-			OwnMethods.Print("Read entity from: " + entityPath);
+			Utility.print("Read entity from: " + entityPath);
 			ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath); 
 			ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
 			for ( Entity entity : entities)
@@ -450,12 +451,12 @@ public class LoadDataNoOSM {
 	
 	public long batchRTreeInsertTime()
 	{
-		OwnMethods.Print("Get Batch insert RTree time");
+		Utility.print("Get Batch insert RTree time");
 		String layerName = dataset;
 		GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
-		OwnMethods.Print("dataset:" + dataset + "\ndatabase:" + dbPath + "\n");
+		Utility.print("dataset:" + dataset + "\ndatabase:" + dbPath + "\n");
 
-		OwnMethods.Print("read entities from " + entityPath);
+		Utility.print("read entities from " + entityPath);
 		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath); 
 		SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 
@@ -480,19 +481,19 @@ public class LoadDataNoOSM {
 			}
 		}
 		long time = System.currentTimeMillis() - start;
-		OwnMethods.Print("create node time:" + time);
-		OwnMethods.Print("number of spatial objects:"+spaCount);
+		Utility.print("create node time:" + time);
+		Utility.print("number of spatial objects:"+spaCount);
 
 		start = System.currentTimeMillis();
 		layer.addAll(geomNodes);
 		long constructionTime = System.currentTimeMillis() - start;
-		OwnMethods.Print("construct RTree time:" + constructionTime);
+		Utility.print("construct RTree time:" + constructionTime);
 
 		start = System.currentTimeMillis();
 		tx.success();
 		tx.close();
 		time = System.currentTimeMillis() - start;
-		OwnMethods.Print("load into db time:" + time);
+		Utility.print("load into db time:" + time);
 		spatialDatabaseService.getDatabase().shutdown();
 		return constructionTime;
 	}

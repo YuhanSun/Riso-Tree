@@ -122,12 +122,12 @@ public class Naive_Neo4j_Match_Test {
 				break;
 		query_Graph.spa_predicate[j] = rectangle;
 		
-		OwnMethods.Print(query_Graph);
-		OwnMethods.print(query_Graph.spa_predicate);
-		OwnMethods.Print("database path: " + db_path);
+		Utility.print(query_Graph);
+		Utility.print(query_Graph.spa_predicate);
+		Utility.print("database path: " + db_path);
 		if (!OwnMethods.pathExist(db_path))
 		{
-			OwnMethods.Print(db_path + " does not exist!");
+			Utility.print(db_path + " does not exist!");
 			System.exit(-1);
 		}
 		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
@@ -139,7 +139,7 @@ public class Naive_Neo4j_Match_Test {
 			Map<String, Object> row = result.next();
 //			OwnMethods.Print(result.next());
 		}
-		OwnMethods.Print(count);
+		Utility.print(count);
 	}
 	
 	@Test
@@ -161,8 +161,8 @@ public class Naive_Neo4j_Match_Test {
 		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
 		Result result = naive_Neo4j_Match.SubgraphMatch_Spa_API(query_Graph, 100);
 		while (result.hasNext())
-			OwnMethods.Print(result.next());
-		OwnMethods.Print(result.getExecutionPlanDescription());
+			Utility.print(result.next());
+		Utility.print(result.getExecutionPlanDescription());
 	}
 	
 	@Test
@@ -171,13 +171,13 @@ public class Naive_Neo4j_Match_Test {
 		double distance  = 0.1;
 		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
 		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
-		OwnMethods.Print(query_Graph);
+		Utility.print(query_Graph);
 		ArrayList<Integer> pos = new ArrayList<>();
 		for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
 			if ( query_Graph.Has_Spa_Predicate[i])
 				pos.add(i);
 		String query = naive_Neo4j_Match.formQueryJoin(query_Graph, pos, distance, Explain_Or_Profile.Profile);
-		OwnMethods.Print(query);
+		Utility.print(query);
 	}
 	
 	@Test
@@ -186,16 +186,16 @@ public class Naive_Neo4j_Match_Test {
 		double distance  = 0.00001;
 		Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
 		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
-		OwnMethods.Print(query_Graph);
+		Utility.print(query_Graph);
 		long start = System.currentTimeMillis();
 		List<Long[]> res = naive_Neo4j_Match.LAGAQ_Join(query_Graph, distance);
 		long time = System.currentTimeMillis() - start;
-		OwnMethods.Print("distance: " + distance);
-		OwnMethods.Print("total time: " + time);
-		OwnMethods.Print("get iterator time: " + naive_Neo4j_Match.get_iterator_time);
-		OwnMethods.Print("iterate time: " + naive_Neo4j_Match.iterate_time);
-		OwnMethods.Print("result count: " + naive_Neo4j_Match.result_count);
-		OwnMethods.Print("result count: " + res.size());
+		Utility.print("distance: " + distance);
+		Utility.print("total time: " + time);
+		Utility.print("get iterator time: " + naive_Neo4j_Match.get_iterator_time);
+		Utility.print("iterate time: " + naive_Neo4j_Match.iterate_time);
+		Utility.print("result count: " + naive_Neo4j_Match.result_count);
+		Utility.print("result count: " + res.size());
 		naive_Neo4j_Match.neo4j_API.ShutDown();
 	}
 }

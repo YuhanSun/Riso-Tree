@@ -99,7 +99,7 @@ public class RTreeUtility {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		OwnMethods.Print("getRTreeRoot return null!");
+		Utility.print("getRTreeRoot return null!");
 		return null;
 	}
 	

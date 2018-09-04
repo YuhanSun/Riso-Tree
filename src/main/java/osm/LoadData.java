@@ -25,7 +25,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-import commons.OwnMethods;
+import commons.Utility;
 
 /**
  * load spatial entity into osm layer and 
@@ -74,11 +74,11 @@ public class LoadData {
 					Node node = record.getGeomNode();
 					System.out.println(geometry.toString());
 					System.out.println(node.getAllProperties());
-					OwnMethods.Print(node.getId());
+					Utility.print(node.getId());
 					i++;
 				}
 				tx.success();
-				OwnMethods.Print("count: " + i);
+				Utility.print("count: " + i);
 				//		        SearchFilter searchQuery = new SearchIntersectWindow(layer, new Envelope(0, 0, 1, 1));
 				//		        spatialIndex.searchIndex(searchQuery);
 				//		    SearchResults results = searchQuery.getResults();

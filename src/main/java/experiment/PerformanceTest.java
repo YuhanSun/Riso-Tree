@@ -14,6 +14,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import commons.Config;
 import commons.OwnMethods;
+import commons.Utility;
 import commons.Config.system;
 
 public class PerformanceTest {
@@ -83,10 +84,10 @@ public class PerformanceTest {
 			long iteratorTime = System.currentTimeMillis() - start1;
 			
 			long time = System.currentTimeMillis() - start;
-			OwnMethods.Print(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
+			Utility.print(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
 			
 			ExecutionPlanDescription description = result.getExecutionPlanDescription();
-			OwnMethods.Print(description);
+			Utility.print(description);
 			
 			tx.success();	tx.close();	databaseService.shutdown();
 		} catch (Exception e) {
@@ -128,10 +129,10 @@ public class PerformanceTest {
 				long iteratorTime = System.currentTimeMillis() - start1;
 				
 				long time = System.currentTimeMillis() - start;
-				OwnMethods.Print(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
+				Utility.print(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
 				
 				ExecutionPlanDescription description = result.getExecutionPlanDescription();
-				OwnMethods.Print(description);
+				Utility.print(description);
 				
 				tx.success();	tx.close();	databaseService.shutdown();
 			}
@@ -165,7 +166,7 @@ public class PerformanceTest {
 				long iteratorTime = System.currentTimeMillis() - start1;
 				
 				long time = System.currentTimeMillis() - start;
-				OwnMethods.Print(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
+				Utility.print(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
 				tx.success();	tx.close();	databaseService.shutdown();
 				OwnMethods.ClearCache(password);
 //				Thread.sleep(15000);	
@@ -197,7 +198,7 @@ public class PerformanceTest {
 					count++;
 				}
 				long time = System.currentTimeMillis() - start;
-				OwnMethods.Print(String.format("%s:%d", label.toString(), time));
+				Utility.print(String.format("%s:%d", label.toString(), time));
 //				OwnMethods.Print(String.format("%s:%f", label.toString(), time / count));
 				tx.success();	tx.close();	databaseService.shutdown();
 				OwnMethods.ClearCache(password);

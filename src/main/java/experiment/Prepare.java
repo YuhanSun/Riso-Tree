@@ -215,7 +215,7 @@ public class Prepare {
 			
 			for ( int key : rtreeMap.keySet())
 			{
-				OwnMethods.Print(key);
+				Utility.print(key);
 				Node node = dbService.getNodeById(rtreeMap.get(key));
 				for ( int hop = 1; hop <= MAX_HOPNUM; hop++)
 				{
@@ -269,18 +269,18 @@ public class Prepare {
 			Transaction tx = dbService.beginTx();
 			
 			Node root = RTreeUtility.getRTreeRoot(dbService, dataset);
-			OwnMethods.Print(root.getAllProperties());
+			Utility.print(root.getAllProperties());
 			Node layer_node = root.getSingleRelationship(RTreeRelationshipTypes.RTREE_ROOT, Direction.INCOMING)
 					.getStartNode();
-			OwnMethods.Print(layer_node.getAllProperties());
+			Utility.print(layer_node.getAllProperties());
 			
 			if ( layer_node.getSingleRelationship(OSMRelation.LAYERS, Direction.INCOMING) == null)
-				OwnMethods.Print("No OSM layer");
+				Utility.print("No OSM layer");
 			else
 			{
 				Node osmLayerNode = layer_node.getSingleRelationship(OSMRelation.LAYERS, Direction.INCOMING)
 						.getStartNode();
-				OwnMethods.Print(String.format("osmlayernode : %s", osmLayerNode.getAllProperties()));
+				Utility.print(String.format("osmlayernode : %s", osmLayerNode.getAllProperties()));
 			}
 			tx.success();
 			tx.close();
@@ -301,10 +301,10 @@ public class Prepare {
 			Transaction tx = dbService.beginTx();
 			
 			Node root = RTreeUtility.getRTreeRoot(dbService, oldDataset);
-			OwnMethods.Print(root.getAllProperties());
+			Utility.print(root.getAllProperties());
 			Node layer_node = root.getSingleRelationship(RTreeRelationshipTypes.RTREE_ROOT, Direction.INCOMING)
 					.getStartNode();
-			OwnMethods.Print(layer_node.getAllProperties());
+			Utility.print(layer_node.getAllProperties());
 			layer_node.setProperty("layer", dataset);
 			
 			tx.success();
@@ -327,15 +327,15 @@ public class Prepare {
 			Transaction tx = dbService.beginTx();
 			
 			Node root = RTreeUtility.getRTreeRoot(dbService, oldDataset);
-			OwnMethods.Print(root.getAllProperties());
+			Utility.print(root.getAllProperties());
 			Node layer_node = root.getSingleRelationship(RTreeRelationshipTypes.RTREE_ROOT, Direction.INCOMING)
 					.getStartNode();
-			OwnMethods.Print(layer_node.getAllProperties());
+			Utility.print(layer_node.getAllProperties());
 			layer_node.setProperty("layer", dataset);
 			
 			Node osmLayerNode = layer_node.getSingleRelationship(OSMRelation.LAYERS, Direction.INCOMING)
 					.getStartNode();
-			OwnMethods.Print(String.format("osmlayernode : %s", osmLayerNode.getAllProperties()));
+			Utility.print(String.format("osmlayernode : %s", osmLayerNode.getAllProperties()));
 			osmLayerNode.setProperty("name", dataset);
 			tx.success();
 			tx.close();
@@ -354,13 +354,13 @@ public class Prepare {
 	{
 		try {
 			int experiment_count = 500;
-			OwnMethods.Print("Read entity from " + entityPath);
+			Utility.print("Read entity from " + entityPath);
 			if (entities == null)
 				entities = OwnMethods.ReadEntity(entityPath);
 			int spa_count = OwnMethods.GetSpatialEntityCount(entities);
 			STRtree stRtree = OwnMethods.ConstructSTRee(entities);
 
-			OwnMethods.Print("Read center id from " + center_id_path);
+			Utility.print("Read center id from " + center_id_path);
 			ArrayList<Integer> center_ids = OwnMethods.ReadCenterID(center_id_path);
 			ArrayList<Integer> final_center_ids = OwnMethods.GetRandom_NoDuplicate(center_ids, experiment_count);
 
@@ -380,7 +380,7 @@ public class Prepare {
 					break;
 				}
 				
-				OwnMethods.Print("Write query rectangles to " + output_path);
+				Utility.print("Write query rectangles to " + output_path);
 				String write_line = "";
 				for (int id : final_center_ids)
 				{
@@ -425,7 +425,7 @@ public class Prepare {
 	 */
 	public static void generateQueryRectangleCenterID()
 	{
-		OwnMethods.Print("read entity from " + entityPath);
+		Utility.print("read entity from " + entityPath);
 		
 		if (entities == null)
 			entities = OwnMethods.ReadEntity(entityPath);
@@ -440,24 +440,24 @@ public class Prepare {
 	{
 		if (!OwnMethods.pathExist(queryGraphDir))
 		{
-			OwnMethods.Print(queryGraphDir + " does not exist!");
+			Utility.print(queryGraphDir + " does not exist!");
 			System.exit(-1);
 		}
 		
-		OwnMethods.Print("read graph from " + graph_path);
+		Utility.print("read graph from " + graph_path);
 		ArrayList<ArrayList<Integer>> datagraph = OwnMethods.ReadGraph(graph_path);
 		if (entities == null)
 		{
-			OwnMethods.Print("read entity from " + entityPath);
+			Utility.print("read entity from " + entityPath);
 			entities = OwnMethods.ReadEntity(entityPath);
 		}
 		
-		OwnMethods.Print("read label list from " + label_list_path);
+		Utility.print("read label list from " + label_list_path);
 		ArrayList<Integer> labels = OwnMethods.readIntegerArray(label_list_path);
 		
-		OwnMethods.Print("data graph size: " + datagraph.size());
-		OwnMethods.Print("entity size: " + entities.size());
-		OwnMethods.Print("label size: " + labels.size());
+		Utility.print("data graph size: " + datagraph.size());
+		Utility.print("entity size: " + entities.size());
+		Utility.print("label size: " + labels.size());
 //		for ( int node_count = 35; node_count <= 35; node_count+=5)
 //		for ( int node_count = 5; node_count <= 15; node_count+=2)
 		int node_count = 3;
@@ -483,13 +483,13 @@ public class Prepare {
 							break;
 						if ( j == query_Graphs.size() - 1)
 						{
-							OwnMethods.Print(query_Graph.toString() + "\n");
+							Utility.print(query_Graph.toString() + "\n");
 							query_Graphs.add(query_Graph);
 						}
 					}
-				OwnMethods.Print(query_Graphs.size());
+				Utility.print(query_Graphs.size());
 			}
-			OwnMethods.Print("output query graph to " + querygraph_path);
+			Utility.print("output query graph to " + querygraph_path);
 			Utility.WriteQueryGraph(querygraph_path, query_Graphs);
 		}
 	}
@@ -511,7 +511,7 @@ public class Prepare {
 					count++;
 					nodes.next();
 				}
-				OwnMethods.Print(count);
+				Utility.print(count);
 			}
 			
 			ResourceIterator<Node> nodes = dbService.findNodes(GraphLabel.GRAPH_0);
@@ -520,7 +520,7 @@ public class Prepare {
 				Node node = nodes.next();
 				int id = (Integer) node.getProperty("id");
 				Iterable<Label> labels = node.getLabels();
-				OwnMethods.Print(String.format("%d, %s", id, labels.toString()));
+				Utility.print(String.format("%d, %s", id, labels.toString()));
 			}
 			
 			tx.success();
@@ -541,7 +541,7 @@ public class Prepare {
 			int index = 0;
 			while ( nodes.hasNext())
 			{
-				OwnMethods.Print(index);	index++;
+				Utility.print(index);	index++;
 				Node node = nodes.next();
 //				node.removeLabel(GraphLabel.GRAPH_0);
 				int id = (Integer) node.getProperty("id");

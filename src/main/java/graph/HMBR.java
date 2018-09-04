@@ -11,8 +11,8 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Labels;
 import commons.MyRectangle;
-import commons.OwnMethods;
 import commons.Query_Graph;
+import commons.Utility;
 
 public class HMBR {
 
@@ -184,7 +184,7 @@ public class HMBR {
 
 		String query = FormCypherQuery(query_Graph, limit, minhop_index, true);
 
-		OwnMethods.Print(query);
+		Utility.print(query);
 		Result result = dbservice.execute(query);
 		return result;
 	}

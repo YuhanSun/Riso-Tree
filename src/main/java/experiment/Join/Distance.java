@@ -82,7 +82,7 @@ public class Distance {
 		}
 		
 		String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
-		OwnMethods.Print(querygraph_path);
+		Utility.print(querygraph_path);
 		queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, 5);
 		
 //		entities = OwnMethods.ReadEntity(entityPath);
@@ -140,12 +140,12 @@ public class Distance {
 			long start;
 			long time;
 
-			OwnMethods.Print("read map from " + graph_pos_map_path);
+			Utility.print("read map from " + graph_pos_map_path);
 			long[] graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 			
 			Query_Graph query_Graph = queryGraphs.get(query_id);
 			OwnMethods.convertQueryGraphForJoin(query_Graph);
-			OwnMethods.Print(query_Graph);
+			Utility.print(query_Graph);
 
 			String result_avg_path = null;
 			switch (systemName) {
@@ -158,7 +158,7 @@ public class Distance {
 				break;
 			}
 
-			OwnMethods.Print(result_avg_path);
+			Utility.print(result_avg_path);
 			String write_line = String.format("%s\t%d\n", dataset, query_id);
 			if(!TEST_FORMAT)
 				OwnMethods.WriteFile(result_avg_path, true, write_line);
@@ -169,14 +169,14 @@ public class Distance {
 
 			for (double distance : distanceList)
 			{
-				OwnMethods.Print("\n" + String.valueOf(distance));
+				Utility.print("\n" + String.valueOf(distance));
 
 				if(!TEST_FORMAT)
 				{
 					OwnMethods.ClearCache(password);
 					Thread.currentThread();
 					Thread.sleep(5000);
-					OwnMethods.Print(String.format("initialize SpatialFirst_List with dbpath: %s\n dataset: %s\n", db_path, dataset));
+					Utility.print(String.format("initialize SpatialFirst_List with dbpath: %s\n dataset: %s\n", db_path, dataset));
 					SpatialFirst_List spatialFirstList = new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 					
 					start = System.currentTimeMillis();
@@ -214,12 +214,12 @@ public class Distance {
 			long start;
 			long time;
 
-			OwnMethods.Print("read map from " + graph_pos_map_path);
+			Utility.print("read map from " + graph_pos_map_path);
 			long[] graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 			
 			Query_Graph query_Graph = queryGraphs.get(query_id);
 			OwnMethods.convertQueryGraphForJoin(query_Graph);
-			OwnMethods.Print(query_Graph);
+			Utility.print(query_Graph);
 
 			String result_avg_path = null;
 			switch (systemName) {
@@ -247,7 +247,7 @@ public class Distance {
 					OwnMethods.ClearCache(password);
 					Thread.currentThread();
 					Thread.sleep(5000);
-					OwnMethods.Print(String.format("initialize RisoTreeQueryPN with "
+					Utility.print(String.format("initialize RisoTreeQueryPN with "
 							+ "dbpath: %s\n dataset: %s\n MAX_HOPNUM: %d", db_path, dataset, MAX_HOPNUM));
 					RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 							graph_pos_map_list, MAX_HOPNUM);
@@ -284,7 +284,7 @@ public class Distance {
 
 			Query_Graph query_Graph = queryGraphs.get(query_id);
 			OwnMethods.convertQueryGraphForJoin(query_Graph);
-			OwnMethods.Print(query_Graph);
+			Utility.print(query_Graph);
 
 			String result_detail_path = null, result_avg_path = null;
 			switch (systemName) {

@@ -24,6 +24,7 @@ import commons.Entity;
 import commons.Labels;
 import commons.OwnMethods;
 import commons.RTreeUtility;
+import commons.Utility;
 import commons.Config.system;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
@@ -91,7 +92,7 @@ public class LoadDataGeneral {
 	 */
 	public static void CalculateCount()
 	{
-		OwnMethods.Print("Calculate spatial cardinality");
+		Utility.print("Calculate spatial cardinality");
 		try {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
@@ -144,7 +145,7 @@ public class LoadDataGeneral {
 	
 	public static void LoadGraphEdges()
 	{
-		OwnMethods.Print("Load graph edges\n");
+		Utility.print("Load graph edges\n");
 		BatchInserter inserter = null;
 		try {
 			Map<String, String> id_map = OwnMethods.ReadMap(map_path);
@@ -181,7 +182,7 @@ public class LoadDataGeneral {
 	 */
 	public static void GetSpatialNodeMap()
 	{
-		OwnMethods.Print("Get spatial vertices map and \n transfer osm node property to spatial vertices\n");
+		Utility.print("Get spatial vertices map and \n transfer osm node property to spatial vertices\n");
 		try {
 			Map<Object, Object> id_map = new TreeMap<Object, Object>();
 			
@@ -203,7 +204,7 @@ public class LoadDataGeneral {
 			tx = databaseService.beginTx();
 			for ( int i = 0; i < ids.size(); i++)
 			{
-				OwnMethods.Print(i);
+				Utility.print(i);
 				long id = ids.get(i);
 				Node point = databaseService.getNodeById(id);
 				long entity_id = (Long) point.getProperty("node_osm_id");
@@ -238,7 +239,7 @@ public class LoadDataGeneral {
 	 */
 	public static void set_Spatial_Label()
 	{
-		OwnMethods.Print("Set spatial label\n");
+		Utility.print("Set spatial label\n");
 		GraphDatabaseService dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 		try {
 			Transaction tx = dbservice.beginTx();
@@ -271,7 +272,7 @@ public class LoadDataGeneral {
 	static void LoadNonSpatialEntity() 
 	{
 		try {
-			OwnMethods.Print(String.format("LoadNonSpatialEntity\n from %s\n%s\n to %s\n", 
+			Utility.print(String.format("LoadNonSpatialEntity\n from %s\n%s\n to %s\n", 
 					entity_path, label_list_path, db_path));
 			
 			ArrayList<Entity> entities = OwnMethods.ReadEntity(entity_path);

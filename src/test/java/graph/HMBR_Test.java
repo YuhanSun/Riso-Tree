@@ -82,9 +82,9 @@ public class HMBR_Test {
 		int count = 0;
 		while (result.hasNext())
 		{
-			OwnMethods.Print(result.next());
+			Utility.print(result.next());
 			count++;
 		}
-		OwnMethods.Print(String.format("Result size : %s", count));
+		Utility.print(String.format("Result size : %s", count));
 	}
 }

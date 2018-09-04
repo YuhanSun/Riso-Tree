@@ -21,10 +21,10 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 
 import commons.Config;
-import commons.OwnMethods;
 import commons.Config.system;
 import commons.Labels.OSMLabel;
 import commons.Labels.RTreeRel;
+import commons.Utility;
 
 public class OSM_UtilityTest {
 	
@@ -83,13 +83,13 @@ public class OSM_UtilityTest {
 	@Test
 	public void getReferenceTest()
 	{
-		OwnMethods.Print(db_path);
+		Utility.print(db_path);
 		GraphDatabaseService databaseService = new GraphDatabaseFactory()
 				.newEmbeddedDatabase(new File(db_path));
 		Transaction tx = databaseService.beginTx();
 		ResourceIterator<Node> referenceNodes = databaseService.findNodes(OSMLabel.OSM_NODE);
 		while ( referenceNodes.hasNext())
-			OwnMethods.Print(referenceNodes.next().getAllProperties());
+			Utility.print(referenceNodes.next().getAllProperties());
 	}
 	
 	@Test
@@ -107,8 +107,8 @@ public class OSM_UtilityTest {
 			for ( Relationship relationship : relationships)
 			{
 				Node rtree_layer_node = relationship.getEndNode();
-				OwnMethods.Print(rtree_layer_node);
-				OwnMethods.Print(rtree_layer_node.getAllProperties());
+				Utility.print(rtree_layer_node);
+				Utility.print(rtree_layer_node.getAllProperties());
 			}
 		}
 	}

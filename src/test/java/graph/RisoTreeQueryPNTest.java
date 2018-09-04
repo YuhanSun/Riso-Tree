@@ -44,14 +44,16 @@ public class RisoTreeQueryPNTest {
 	static Query_Graph query_Graph;
 	static long[] graph_pos_map_list;
 	
-	static int nodeCount = 3, query_id = 0, rectID = 2;
+	static int nodeCount = 3, query_id = 2, rectID = 0;
 	
 //	name_suffix = 7;
 //	name_suffix = 75;
 //	name_suffix = 7549;//0.1
 //	static int name_suffix = 1280;//Gowalla 0.001
 //	static int name_suffix = 5756;//wikidata_100 0.001
-	static int name_suffix = 575;//wikidata_100 0.0001
+//	static int name_suffix = 575;//wikidata_100 0.0001
+	
+	static int name_suffix = 77;//Yelp_100 0.001
 	
 	static String queryrect_path = null, querygraph_path = null, queryrectCenterPath = null;
 	
@@ -81,15 +83,15 @@ public class RisoTreeQueryPNTest {
 		default:
 			break;
 		}
-		OwnMethods.Print("iniQueryInput");
+		Utility.print("iniQueryInput");
 		iniQueryInput();
 	}
 	
 	public static void iniQueryInput()
 	{
-		OwnMethods.Print("read query graph from " + querygraph_path);
+		Utility.print("read query graph from " + querygraph_path);
 		ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
-		OwnMethods.Print("query id is " + query_id);
+		Utility.print("query id is " + query_id);
 		query_Graph = queryGraphs.get(query_id);
 		
 		ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
@@ -111,7 +113,7 @@ public class RisoTreeQueryPNTest {
 		query_Graph.spa_predicate[j] = rectangle;
 		
 		int entityCount = OwnMethods.getEntityCount(entityPath);
-		OwnMethods.Print("read map from " + graph_pos_map_path);
+		Utility.print("read map from " + graph_pos_map_path);
 		graph_pos_map_list= OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 	}
 
@@ -125,26 +127,26 @@ public class RisoTreeQueryPNTest {
 		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, null, MAX_HOPNUM);
 		HashMap<Integer, HashMap<Integer, HashSet<String>>> paths = risoTreeQueryPN.recognizePaths(query_Graph);
 		for ( int key : paths.keySet())
-			OwnMethods.Print(String.format("%d:%s", key, paths.get(key)));
+			Utility.print(String.format("%d:%s", key, paths.get(key)));
 		
 		risoTreeQueryPN.dbservice.shutdown();
 	}
 	
 	@Test
 	public void queryTest() {
-		OwnMethods.Print("database path: " + db_path);
+		Utility.print("database path: " + db_path);
 		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, 
 				graph_pos_map_list, MAX_HOPNUM);
-		OwnMethods.Print(query_Graph);
-		OwnMethods.print(query_Graph.spa_predicate);
+		Utility.print(query_Graph);
+		Utility.print(query_Graph.spa_predicate);
 		
 		risoTreeQueryPN.Query(query_Graph, -1);
-		OwnMethods.Print("overlap leaf node count: " + risoTreeQueryPN.overlap_leaf_node_count);
-		OwnMethods.Print("Result count:" + risoTreeQueryPN.result_count);
-		OwnMethods.Print("Page access:" + risoTreeQueryPN.page_hit_count);
-		OwnMethods.Print("get iterator time:" + risoTreeQueryPN.get_iterator_time);
-		OwnMethods.Print("iterate time:" + risoTreeQueryPN.iterate_time);
-		OwnMethods.Print("located in count:" + risoTreeQueryPN.located_in_count);
+		Utility.print("overlap leaf node count: " + risoTreeQueryPN.overlap_leaf_node_count);
+		Utility.print("Result count:" + risoTreeQueryPN.result_count);
+		Utility.print("Page access:" + risoTreeQueryPN.page_hit_count);
+		Utility.print("get iterator time:" + risoTreeQueryPN.get_iterator_time);
+		Utility.print("iterate time:" + risoTreeQueryPN.iterate_time);
+		Utility.print("located in count:" + risoTreeQueryPN.located_in_count);
 		
 		risoTreeQueryPN.dbservice.shutdown();
 	}
@@ -159,9 +161,9 @@ public class RisoTreeQueryPNTest {
 		try
 		{
 			ArrayList<Long> resultIDs = risoTreeQueryPN.LAGAQ_KNN(query_Graph, K);
-			OwnMethods.Print(resultIDs);
-			OwnMethods.Print(risoTreeQueryPN.visit_spatial_object_count);
-			OwnMethods.Print(risoTreeQueryPN.page_hit_count);
+			Utility.print(resultIDs);
+			Utility.print(risoTreeQueryPN.visit_spatial_object_count);
+			Utility.print(risoTreeQueryPN.page_hit_count);
 		}
 		catch (Exception e)
 		{
@@ -184,7 +186,7 @@ public class RisoTreeQueryPNTest {
 		LinkedList<String> paths = new LinkedList<String>();
 		paths.add("PN_27_1000");
 		boolean result = RisoTreeQueryPN.checkPaths(node, paths);
-		OwnMethods.Print(result);
+		Utility.print(result);
 	}
 	
 	@Test
@@ -212,7 +214,7 @@ public class RisoTreeQueryPNTest {
 		idPair[1] = (long) 200;
 		
 		String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
-		OwnMethods.Print(query);
+		Utility.print(query);
 	}
 	
 //	@Test
@@ -235,13 +237,13 @@ public class RisoTreeQueryPNTest {
 	{
 		try {
 			double distance = 1;
-			OwnMethods.Print(distance);
+			Utility.print(distance);
 //			FileWriter writer = new FileWriter("D:\\temp\\output2.txt");
 			OwnMethods.ClearCache("syh19910205");
 			RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
 			
 			OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
-			OwnMethods.Print(query_Graph.toString());
+			Utility.print(query_Graph.toString());
 			
 			HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = risoTreeQueryPN.recognizePaths(query_Graph);
 			
@@ -254,12 +256,12 @@ public class RisoTreeQueryPNTest {
 //			List<Long[]> result = risoTreeQueryPN.spatialJoinRTree(distance, pos, spaPathsMap);
 			List<Long[]> result = risoTreeQueryPN.spatialJoinRTreeOverlap(distance, pos, spaPathsMap);
 			long time =  System.currentTimeMillis() - start;
-			OwnMethods.Print("total time: " + time);
-			OwnMethods.Print("check path time: " + risoTreeQueryPN.check_paths_time);
+			Utility.print("total time: " + time);
+			Utility.print("check path time: " + risoTreeQueryPN.check_paths_time);
 //			OwnMethods.Print("check child leaf time: " + risoTreeQueryPN.check_paths_time);
-			OwnMethods.Print("check overlap time: " + risoTreeQueryPN.check_overlap_time);
+			Utility.print("check overlap time: " + risoTreeQueryPN.check_overlap_time);
 			
-			OwnMethods.Print(result.size());
+			Utility.print(result.size());
 			risoTreeQueryPN.dbservice.shutdown();
 //			for (Long[] element : result)
 //			{
@@ -277,7 +279,7 @@ public class RisoTreeQueryPNTest {
 	public void constructPNTest()
 	{
 		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
-		OwnMethods.Print(query_Graph.toString());
+		Utility.print(query_Graph.toString());
 		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
 		GraphDatabaseService databaseService = risoTreeQueryPN.dbservice;
 		Transaction tx = databaseService.beginTx();
@@ -285,7 +287,7 @@ public class RisoTreeQueryPNTest {
 //		OwnMethods.Print(node.getPropertyKeys());
 		
 		HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = risoTreeQueryPN.recognizePaths(query_Graph);
-		OwnMethods.Print(spaPathsMap);
+		Utility.print(spaPathsMap);
 //		HashMap<Integer, HashSet<String>> paths = spaPathsMap.get(2);
 //		ArrayList<Integer> overlapVertices = new ArrayList<>();
 //		overlapVertices.add(1);
@@ -336,23 +338,23 @@ public class RisoTreeQueryPNTest {
 //		OwnMethods.ClearCache("syh19910205");
 		
 		OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
-		OwnMethods.Print(query_Graph.toString());
+		Utility.print(query_Graph.toString());
 		
 		RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
 		long start = System.currentTimeMillis();
 		List<Long[]> result = risoTreeQueryPN.LAGAQ_Join(query_Graph, 0.01);
-		OwnMethods.Print(String.format("Total time: %d", System.currentTimeMillis() - start));
+		Utility.print(String.format("Total time: %d", System.currentTimeMillis() - start));
 		
-		OwnMethods.Print("Join time: " + risoTreeQueryPN.join_time);
-		OwnMethods.Print("check paths time: " + risoTreeQueryPN.check_paths_time);
+		Utility.print("Join time: " + risoTreeQueryPN.join_time);
+		Utility.print("check paths time: " + risoTreeQueryPN.check_paths_time);
 //		OwnMethods.Print("has relation time: " + risoTreeQueryPN.has_relation_time);
 //		OwnMethods.Print("has relation addition time: " + risoTreeQueryPN.has_relation_time_addition);
 		
-		OwnMethods.Print("Get iterate time: " + risoTreeQueryPN.get_iterator_time); 
-		OwnMethods.Print("Iterate time: " + risoTreeQueryPN.iterate_time);
-		OwnMethods.Print("Join result count: " + risoTreeQueryPN.join_result_count);
-		OwnMethods.Print(result);
-		OwnMethods.Print(result.size());
+		Utility.print("Get iterate time: " + risoTreeQueryPN.get_iterator_time); 
+		Utility.print("Iterate time: " + risoTreeQueryPN.iterate_time);
+		Utility.print("Join result count: " + risoTreeQueryPN.join_result_count);
+		Utility.print(result);
+		Utility.print(result.size());
 		
 		risoTreeQueryPN.dbservice.shutdown();
 	}

@@ -29,12 +29,12 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import commons.Config;
-import commons.OwnMethods;
 import osm.OSM_Utility;
 import commons.Config.system;
 import commons.Labels;
 import commons.Labels.OSMLabel;
 import commons.Labels.RTreeRel;
+import commons.Utility;
 
 public class ConstructRisoTreeTest {
 
@@ -64,7 +64,7 @@ public class ConstructRisoTreeTest {
 		
 		databaseService = new GraphDatabaseFactory().
 				newEmbeddedDatabase(new File(db_path));
-		OwnMethods.Print("dbpath:" + db_path);
+		Utility.print("dbpath:" + db_path);
 	}
 
 	@AfterClass
@@ -77,7 +77,7 @@ public class ConstructRisoTreeTest {
 	{
 		Construct_RisoTree construct_RisoTree = new Construct_RisoTree();
 		ArrayList<Long> constructTime = construct_RisoTree.constructPNTime();
-		OwnMethods.Print(constructTime);
+		Utility.print(constructTime);
 	}
 	
 	/**
@@ -102,7 +102,7 @@ public class ConstructRisoTreeTest {
 		long nodeID1 = Long.parseLong(line1);
 		while (true)
 		{
-			OwnMethods.Print(countTest);
+			Utility.print(countTest);
 			countTest--;
 			if ( countTest==0)
 				break;
@@ -153,11 +153,11 @@ public class ConstructRisoTreeTest {
 		while ( nodes.hasNext())
 		{
 			Node node =  nodes.next();
-			OwnMethods.Print("node:"+node.getAllProperties());
+			Utility.print("node:"+node.getAllProperties());
 			Node parent = node.getSingleRelationship
 					(RTreeRel.RTREE_REFERENCE, Direction.INCOMING).
 					getStartNode();
-			OwnMethods.Print(parent.getAllProperties());
+			Utility.print(parent.getAllProperties());
 			
 //			Iterable<Relationship> rels = node.getRelationships();
 //			Iterator<Relationship> iterator = rels.iterator();
@@ -180,7 +180,7 @@ public class ConstructRisoTreeTest {
 		HashMap<Long, ArrayList<Integer>> containIDMap = Construct_RisoTree.readContainIDMap(containIDPath);
 		for (long key : containIDMap.keySet())
 		{
-			OwnMethods.Print(String.format("%d:%s", key, containIDMap.get(key).toString()));
+			Utility.print(String.format("%d:%s", key, containIDMap.get(key).toString()));
 			break;
 		}
 	}
@@ -195,7 +195,7 @@ public class ConstructRisoTreeTest {
 		for ( String key : properties.keySet())
 		{
 			if ( key.equals("count")|| key.equals("bbox"))
-				OwnMethods.Print(key);
+				Utility.print(key);
 			
 //			if ( key.contains("PN"))
 //			{
@@ -229,7 +229,7 @@ public class ConstructRisoTreeTest {
 //		Map<String, Object> properties = node.getAllProperties();
 		
 		int count = 0;
-		OwnMethods.Print(node.getAllProperties());
+		Utility.print(node.getAllProperties());
 //		for ( String key : properties.keySet())
 //		{
 //			if ( key.contains("list"))

@@ -85,11 +85,11 @@ public class RisoTreeQueryTest {
 		}
 		RisoTreeQuery risoTreeQuery = new RisoTreeQuery(db_path, dataset, graph_pos_map_list);
 		risoTreeQuery.Query(query_Graph, -1);
-		OwnMethods.Print("Result count:" + risoTreeQuery.result_count);
-		OwnMethods.Print("Page access:" + risoTreeQuery.page_hit_count);
-		OwnMethods.Print("range query time:" + risoTreeQuery.range_query_time);
-		OwnMethods.Print("get iterator time:" + risoTreeQuery.get_iterator_time);
-		OwnMethods.Print("iterate time:" + risoTreeQuery.iterate_time);
+		Utility.print("Result count:" + risoTreeQuery.result_count);
+		Utility.print("Page access:" + risoTreeQuery.page_hit_count);
+		Utility.print("range query time:" + risoTreeQuery.range_query_time);
+		Utility.print("get iterator time:" + risoTreeQuery.get_iterator_time);
+		Utility.print("iterate time:" + risoTreeQuery.iterate_time);
 		
 		risoTreeQuery.dbservice.shutdown();
 	}

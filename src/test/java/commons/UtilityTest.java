@@ -44,7 +44,7 @@ public class UtilityTest {
 	public void distanceConvertTest()
 	{
 		float lat1 = 10, lat = 12, lon1 = 0, lon2 = 2;
-		OwnMethods.Print("Distance:" + Utility.distFrom(lat1, lon1, lat, lon2));
+		Utility.print("Distance:" + Utility.distFrom(lat1, lon1, lat, lon2));
 	}
 	
 	@Test
@@ -53,7 +53,7 @@ public class UtilityTest {
 //		double x = 0, y = 0;
 		double x = 1.5, y = 1.5;
 		MyRectangle rectangle = new MyRectangle(1, 1, 2, 2);
-		OwnMethods.Print(Utility.distance(x, y, rectangle));
+		Utility.print(Utility.distance(x, y, rectangle));
 	}
 	
 	@Test
@@ -61,7 +61,7 @@ public class UtilityTest {
 	{
 		MyRectangle rectangle1 = new MyRectangle(1, 1, 2, 2);
 		MyRectangle rectangle2 = new MyRectangle(0, 3, 0, 3);
-		OwnMethods.Print(Utility.distance(rectangle1, rectangle2));
+		Utility.print(Utility.distance(rectangle1, rectangle2));
 	}
 	
 	@Test
@@ -69,13 +69,13 @@ public class UtilityTest {
 	{
 		ArrayList<Integer> input = new ArrayList<Integer>(Arrays.asList(0,1,2));
 		ArrayList<Integer> result = Utility.groupSum(0, 2, input, 3);
-		OwnMethods.Print(result);
+		Utility.print(result);
 	}
 	
 	@Test
 	public void distanceQueryTest()
 	{
-		OwnMethods.Print(entityPath);
+		Utility.print(entityPath);
 		ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 		double distance = 10;
 		
@@ -84,8 +84,8 @@ public class UtilityTest {
 		MyPoint point = new MyPoint(500, 500);	
 		LinkedList<Entity> result = Utility.distanceQuery(stRtree, point, distance);
 		long time = System.currentTimeMillis() - start;
-		OwnMethods.Print(String.format("time using index: %d", time));
-		OwnMethods.Print("result size: " + result.size());
+		Utility.print(String.format("time using index: %d", time));
+		Utility.print("result size: " + result.size());
 		
 		start = System.currentTimeMillis();
 		int count = 0;
@@ -93,8 +93,8 @@ public class UtilityTest {
 			if (Utility.distance(entity.lon, entity.lat, point.x, point.y) <= distance)
 				count++;
 		time = System.currentTimeMillis() - start;
-		OwnMethods.Print("time no index: " + time);
-		OwnMethods.Print("result size " + count);
+		Utility.print("time no index: " + time);
+		Utility.print("result size " + count);
 	}
 	
 	@Test
@@ -102,12 +102,12 @@ public class UtilityTest {
 	{
 		ArrayList<Integer> l1 = new ArrayList<>(Arrays.asList(1, 2, 4));
 		int[] l2 = {3};
-		OwnMethods.Print(Utility.sortedListIntersect(l1, l2));
+		Utility.print(Utility.sortedListIntersect(l1, l2));
 		
 		l1 = new ArrayList<>();
 		l1.add(1);
 		int [] l3 = {1, 2, 3, 4};
-		OwnMethods.Print(Utility.sortedListIntersect(l1, l3));
+		Utility.print(Utility.sortedListIntersect(l1, l3));
 		
 	}
 	
@@ -116,10 +116,10 @@ public class UtilityTest {
 	{
 		ArrayList<Integer> l1 = new ArrayList<>(Arrays.asList(1, 2, 4));
 		ArrayList<Integer> l2 = new ArrayList<>(Arrays.asList(3));
-		OwnMethods.Print(Utility.isSortedIntersect(l1, l2));
+		Utility.print(Utility.isSortedIntersect(l1, l2));
 		
 		l1 = new ArrayList<>(Arrays.asList(1, 2, 4));
 		l2 = new ArrayList<>(Arrays.asList(2));
-		OwnMethods.Print(Utility.isSortedIntersect(l1, l2));
+		Utility.print(Utility.isSortedIntersect(l1, l2));
 	}
 }

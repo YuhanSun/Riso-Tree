@@ -9,8 +9,6 @@ import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
-import commons.OwnMethods;
-import commons.Query_Graph;
 import commons.*;
 import commons.Config.Explain_Or_Profile;
 
@@ -66,7 +64,7 @@ public class Naive_Neo4j_Match {
     public Result SubgraphMatch_Spa_API(Query_Graph query_Graph, int limit)//use neo4j query
 	{
 		String query = FormCypherQuery(query_Graph, limit, true);
-		OwnMethods.Print(query);
+		Utility.print(query);
 		
 		Result result = neo4j_API.graphDb.execute(query);
 		return result;
@@ -202,7 +200,7 @@ public class Naive_Neo4j_Match {
 			if ( query_Graph.Has_Spa_Predicate[i])
 				pos.add(i);
 		String query = formQueryJoin(query_Graph, pos, distance, Explain_Or_Profile.Profile);
-		OwnMethods.Print(query);
+		Utility.print(query);
 		Transaction tx = neo4j_API.graphDb.beginTx();
 		long start = System.currentTimeMillis();
 		Result result = neo4j_API.graphDb.execute(query);
