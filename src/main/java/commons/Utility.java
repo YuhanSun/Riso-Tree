@@ -683,24 +683,6 @@ public class Utility {
     return query;
   }
 
-  public static <T> void print(T[] array) {
-    int i = 0, length = array.length;
-    if (length == 0) {
-      System.out.println("[]");
-    }
-
-    System.out.print("[");
-    for (T element : array) {
-      System.out.print(element);
-      if (i == length - 1) {
-        System.out.println("]");
-        break;
-      }
-      System.out.print(", ");
-      i++;
-    }
-  }
-
   public static void print(Object o) {
     System.out.println(o);
   }
