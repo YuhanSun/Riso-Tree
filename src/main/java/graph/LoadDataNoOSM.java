@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -141,7 +142,9 @@ public class LoadDataNoOSM {
       // dbPath = dir + "\\neo4j-community-3.1.1\\data\\databases\\graph.db";
       // entityPath = dir + "\\entity.txt";
 
-      batchRTreeInsert();
+      // batchRTreeInsert();
+      batchRTreeInsertOneHopAware();
+
       //
       // if ( nonspatial_label_count == 1)
       // generateLabelList();
@@ -406,7 +409,7 @@ public class LoadDataNoOSM {
       Utility.print("Connect to dbPath: " + dbPath);
       GraphDatabaseService databaseService =
           new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
-      Utility.print("dataset:" + dataset + "\ndatabase:" + dbPath + "\n");
+      Utility.print("dataset:" + dataset + "\ndatabase:" + dbPath);
 
       Utility.print("Read entity from: " + entityPath);
       ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
@@ -450,6 +453,107 @@ public class LoadDataNoOSM {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  public static void batchRTreeInsertOneHopAware() {
+    Utility.print("Batch insert RTree one-hop aware");
+    try {
+      String layerName = dataset;
+      Utility.print("Connect to dbPath: " + dbPath);
+      GraphDatabaseService databaseService =
+          new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+      Utility.print("dataset:" + dataset + "\ndatabase:" + dbPath);
+
+      Utility.print("Read entity from: " + entityPath);
+      ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+
+      Utility.print("Read graph from: " + graphPath);
+      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+
+      Utility.print("Read label list from: " + labelListPath);
+      ArrayList<Integer> labelList = OwnMethods.readIntegerArray(labelListPath);
+
+      SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
+
+      Transaction tx = databaseService.beginTx();
+      // SimplePointLayer simplePointLayer =
+      // spatialDatabaseService.createSimplePointLayer(layerName);
+      EditableLayer layer =
+          spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
+      // org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
+
+      ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
+      for (Entity entity : entities) {
+        if (entity.IsSpatial) {
+          Node node = databaseService.createNode(GraphLabel.GRAPH_1);
+          node.setProperty(lon_name, entity.lon);
+          node.setProperty(lat_name, entity.lat);
+          node.setProperty("id", entity.id);
+
+          Map<String, int[]> pn = createPathNeighbors(graph, labelList, entity.id);
+          for (String key : pn.keySet()) {
+            node.setProperty(key, pn.get(key));
+          }
+
+          geomNodes.add(node);
+        }
+      }
+
+      // long start = System.currentTimeMillis();
+      // layer.addAll(geomNodes);
+      //
+      // Utility.print("in memory time: " + (System.currentTimeMillis() - start));
+      // Utility.print("number of spatial objects: " + geomNodes.size());
+
+      long start = System.currentTimeMillis();
+      tx.success();
+      tx.close();
+      Utility.print("commit time: " + (System.currentTimeMillis() - start));
+
+      start = System.currentTimeMillis();
+      spatialDatabaseService.getDatabase().shutdown();
+      Utility.print("shut down time: " + (System.currentTimeMillis() - start));
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+
+  /**
+   * Create 1-hop PathNeighbors for a single node
+   *
+   * @param graph
+   * @param labelList
+   * @param id
+   * @return a map of <"PN_labelId", neighbors>
+   */
+  public static Map<String, int[]> createPathNeighbors(ArrayList<ArrayList<Integer>> graph,
+      ArrayList<Integer> labelList, int id) {
+    Map<String, int[]> pn = new HashMap<>();
+
+    // use LinkedList for unfixed size
+    HashMap<Integer, LinkedList<Integer>> pnTemp = new HashMap<>();
+    ArrayList<Integer> neighbors = graph.get(id);
+    for (int neighbor : neighbors) {
+      int label = labelList.get(neighbor);
+      if (!pnTemp.containsKey(label)) {
+        pnTemp.put(label, new LinkedList<>());
+      }
+      pnTemp.get(label).add(neighbor);
+    }
+
+    for (int key : pnTemp.keySet()) {
+      LinkedList<Integer> pathneighbor = pnTemp.get(key);
+      int[] array = new int[pathneighbor.size()];
+      int i = 0;
+      for (int neighbor : pathneighbor) {
+        array[i++] = neighbor;
+      }
+      pn.put("PN_" + key, array);
+    }
+
+    return pn;
   }
 
   public long batchRTreeInsertTime() {
