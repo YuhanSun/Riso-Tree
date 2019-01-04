@@ -28,6 +28,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.Config;
+import commons.Config.Datasets;
 import commons.Config.system;
 import commons.Entity;
 import commons.Labels.GraphLabel;
@@ -53,11 +54,11 @@ public class LoadDataNoOSM {
 
   static ArrayList<Entity> entities;
 
-  // static String dir = "/hdd2/data/ysun138/RisoTree/wikidata_100";
-  static String dir = "/Users/zhouyang/Google Drive/Projects/tmp/risotree/Yelp";
+  static String dir = "/hdd/code/yuhansun/data";
+  // static String dir = "/Users/zhouyang/Google Drive/Projects/tmp/risotree/Yelp";
 
   static void iniParametersServer() {
-    dataset = Config.Datasets.Yelp.name();
+    dataset = Config.Datasets.Patents_100_random_20.name();
     dbPath = dir + "/neo4j-community-3.1.1/data/databases/graph.db";
     graphPath = dir + "/graph.txt";
     entityPath = dir + "/entity.txt";
@@ -137,10 +138,12 @@ public class LoadDataNoOSM {
       // initParameters();
       iniParametersServer();
 
-      // dataset = Datasets.Patents_100_random_80.name();
-      // dir = "D:\\temp\\Patents";
-      // dbPath = dir + "\\neo4j-community-3.1.1\\data\\databases\\graph.db";
-      // entityPath = dir + "\\entity.txt";
+      dataset = Datasets.Patents_100_random_80.name();
+      dir = "D:\\temp\\Patents";
+      dbPath = dir + "\\neo4j-community-3.1.1\\data\\databases\\graph.db";
+      entityPath = dir + "\\entity.txt";
+      graphPath = dir + "\\graph.txt";
+      labelListPath = dir + "\\label.txt";
 
       // batchRTreeInsert();
       batchRTreeInsertOneHopAware();
@@ -499,13 +502,13 @@ public class LoadDataNoOSM {
         }
       }
 
-      // long start = System.currentTimeMillis();
-      // layer.addAll(geomNodes);
-      //
-      // Utility.print("in memory time: " + (System.currentTimeMillis() - start));
-      // Utility.print("number of spatial objects: " + geomNodes.size());
-
       long start = System.currentTimeMillis();
+      layer.addAll(geomNodes);
+
+      Utility.print("in memory time: " + (System.currentTimeMillis() - start));
+      Utility.print("number of spatial objects: " + geomNodes.size());
+
+      start = System.currentTimeMillis();
       tx.success();
       tx.close();
       Utility.print("commit time: " + (System.currentTimeMillis() - start));
