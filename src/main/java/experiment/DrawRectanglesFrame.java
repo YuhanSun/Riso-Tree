@@ -1,9 +1,15 @@
 package experiment;
 
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -39,6 +45,13 @@ public class DrawRectanglesFrame extends JFrame {
     init();
   }
 
+  public void saveAsImage(String filepath) throws IOException {
+    BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+    Graphics2D graphics2D = image.createGraphics();
+    paint(graphics2D);
+    ImageIO.write(image, "jpeg", new File(filepath));
+  }
+
   public void init() {
     setLocationRelativeTo(null);
     setLayout(new GridLayout(1, 1, 0, 0));
@@ -53,17 +66,27 @@ public class DrawRectanglesFrame extends JFrame {
 
   public static void main(String[] args) {
     try {
-      // TODO Auto-generated method stub
-      MyRectangle drawExtend = new MyRectangle(0, 0, 1000, 500);
+      // MyRectangle drawExtend = new MyRectangle(0, 0, 1000, 500);
 
       // use one non-leaf node for test
-      String dbPath =
-          "/Users/zhouyang/Google Drive/Projects/tmp/risotree/Yelp/neo4j-community-3.1.1/data/databases/graph.db";
-      GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
-      Transaction tx = databaseService.beginTx();
-      Node root = RTreeUtility.getRTreeRoot(databaseService, Datasets.Yelp.name());
+      // String dbPath =
+      // "/Users/zhouyang/Google
+      // Drive/Projects/tmp/risotree/Yelp/neo4j-community-3.1.1/data/databases/graph.db";
+      // GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
 
-      // visualizeChildrenMBR(root, drawExtend);
+      String dataset = Datasets.Patents_100_random_80.name();
+      String dir = "D:\\temp\\Patents";
+      String dbPath = dir + "\\neo4j-community-3.1.1\\data\\databases\\graph.db";
+      GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
+      String imageDir = dir + "\\images\\";
+
+
+      Transaction tx = databaseService.beginTx();
+      Node root = RTreeUtility.getRTreeRoot(databaseService, dataset);
+
+      if (root == null) {
+        throw new Exception("layer does not exist: " + dataset);
+      }
 
       Iterable<Relationship> rels = root.getRelationships(Direction.OUTGOING);
       Iterator<Relationship> iterator = rels.iterator();
@@ -71,7 +94,8 @@ public class DrawRectanglesFrame extends JFrame {
       while (iterator.hasNext()) {
         Relationship relationship = iterator.next();
         Node child = relationship.getEndNode();
-        visualizeChildrenMBR(child, drawExtend);
+        DrawRectanglesFrame frame = visualizeChildrenMBR(child, 1000);
+        frame.saveAsImage(imageDir + index + ".jpeg");
         index++;
         if (index == 10) {
           break;
@@ -97,13 +121,15 @@ public class DrawRectanglesFrame extends JFrame {
     }
   }
 
-  public static void visualizeChildrenMBR(Node node, MyRectangle drawExtend) {
+  public static DrawRectanglesFrame visualizeChildrenMBR(Node node, int width) {
     List<MyRectangle> rectangles = new ArrayList<>();
     double[] bbox = (double[]) node.getProperty("bbox");
-    Utility.print("bbox: ");
-    Utility.print(bbox);
+    Utility.print("bbox: " + Arrays.toString(bbox));
     MyRectangle spaceExtend = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
-    rectangles.add(spaceExtend);
+    double height = (bbox[3] - bbox[1]) / (bbox[2] - bbox[0]) * width;
+    MyRectangle drawExtend = new MyRectangle(0, 0, width, height);
+    Utility.print("draw extend: " + drawExtend);
+
     Iterable<Relationship> rels = node.getRelationships();
     Iterator<Relationship> iterator = rels.iterator();
     while (iterator.hasNext()) {
@@ -112,6 +138,7 @@ public class DrawRectanglesFrame extends JFrame {
       rectangles.add(new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]));
     }
     DrawRectanglesFrame frame = new DrawRectanglesFrame(spaceExtend, drawExtend, rectangles);
+    return frame;
   }
 
 }
