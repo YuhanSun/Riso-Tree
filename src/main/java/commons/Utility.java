@@ -17,6 +17,37 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 public class Utility {
 
   /**
+   * Compute the how many elements in source but not in target. Both arrays are sorted.
+   *
+   * @param arraySource
+   * @param arrayTarget
+   * @return
+   */
+  public static int arraysDifferenceCount(int[] arraySource, int[] arrayTarget) {
+    int count = 0;
+    int i = 0, j = 0;
+    while (i < arraySource.length && j < arrayTarget.length) {
+      if (arraySource[i] < arrayTarget[j]) {
+        count++;
+        i++;
+      } else {
+        if (arraySource[i] == arrayTarget[j]) {
+          i++;
+          j++;
+        } else {
+          j++;
+        }
+      }
+    }
+
+    if (i < arraySource.length) {
+      count += arraySource.length - i;
+    }
+
+    return count;
+  }
+
+  /**
    * Decide whether two list has intersection.
    * 
    * @param l1
