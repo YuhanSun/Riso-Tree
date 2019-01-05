@@ -191,30 +191,32 @@ public class RTreeIndex implements SpatialIndexWriter {
   public void add(List<Node> geomNodes) {
 
     // If the insertion is large relative to the size of the tree, simply rebuild the whole tree.
-    if (geomNodes.size() > totalGeometryCount * 0.4) {
-      List<Node> nodesToAdd = new ArrayList<>(geomNodes.size() + totalGeometryCount);
-      for (Node n : getAllIndexedNodes()) {
-        nodesToAdd.add(n);
-      }
-      nodesToAdd.addAll(geomNodes);
-      for (Node n : getAllIndexInternalNodes()) {
-        if (!n.equals(getIndexRoot())) {
-          deleteNode(n);
-        }
-      }
-      buildRtreeFromScratch(getIndexRoot(), decodeGeometryNodeEnvelopes(nodesToAdd), 0.7);
-      countSaved = false;
-      totalGeometryCount = nodesToAdd.size();
-      monitor.addNbrRebuilt(this);
-    } else {
-      List<NodeWithEnvelope> outliers = bulkInsertion(getIndexRoot(), getHeight(getIndexRoot(), 0),
-          decodeGeometryNodeEnvelopes(geomNodes), 0.7);
-      countSaved = false;
-      totalGeometryCount = totalGeometryCount + (geomNodes.size() - outliers.size());
-      for (NodeWithEnvelope n : outliers) {
-        add(n.node);
-      }
+    // yuhan
+    // if (geomNodes.size() > totalGeometryCount * 0.4) {
+    // List<Node> nodesToAdd = new ArrayList<>(geomNodes.size() + totalGeometryCount);
+    // for (Node n : getAllIndexedNodes()) {
+    // nodesToAdd.add(n);
+    // }
+    // nodesToAdd.addAll(geomNodes);
+    // for (Node n : getAllIndexInternalNodes()) {
+    // if (!n.equals(getIndexRoot())) {
+    // deleteNode(n);
+    // }
+    // }
+    // buildRtreeFromScratch(getIndexRoot(), decodeGeometryNodeEnvelopes(nodesToAdd), 0.7);
+    // countSaved = false;
+    // totalGeometryCount = nodesToAdd.size();
+    // monitor.addNbrRebuilt(this);
+    // } else {
+    List<NodeWithEnvelope> outliers = bulkInsertion(getIndexRoot(), getHeight(getIndexRoot(), 0),
+        decodeGeometryNodeEnvelopes(geomNodes), 0.7);
+    countSaved = false;
+    totalGeometryCount = totalGeometryCount + (geomNodes.size() - outliers.size());
+    for (NodeWithEnvelope n : outliers) {
+      add(n.node);
     }
+    // }
+
   }
 
   private List<NodeWithEnvelope> decodeGeometryNodeEnvelopes(List<Node> nodes) {
