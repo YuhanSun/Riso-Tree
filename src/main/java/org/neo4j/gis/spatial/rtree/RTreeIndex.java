@@ -41,6 +41,7 @@ import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
+import commons.Utility;
 
 /**
  *
@@ -215,6 +216,11 @@ public class RTreeIndex implements SpatialIndexWriter {
     for (NodeWithEnvelope n : outliers) {
       add(n.node);
     }
+
+    System.out
+        .println("chooseIndexnodeWithSmallestGD is called " + chooseSmallestGDCount + " times");
+    System.out.println(differentTimes + " are different");
+
     // }
 
   }
@@ -982,11 +988,20 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
 
     if (indexNodes.size() > 1) {
-      return chooseIndexNodeWithSmallestArea(indexNodes);
+      // return chooseIndexNodeWithSmallestArea(indexNodes);
+      // yuhan
+      chooseSmallestGDCount++;
+      Node node = chooseIndexNodeWithSmallestArea(indexNodes);
+      Node res = chooseIndexnodeWithSmallestGD(indexNodes, geomRootNode);
+      if (node.equals(res) == false) {
+        differentTimes++;
+      }
+      return res;
     } else if (indexNodes.size() == 1) {
       return indexNodes.get(0);
     }
 
+    HashMap<String, int[]> locInGraph = getLocInGraph(geomRootNode);
     // pick the child that needs the minimum enlargement to include the new geometry
     double minimumEnlargement = Double.POSITIVE_INFINITY;
     relationships =
@@ -994,6 +1009,12 @@ public class RTreeIndex implements SpatialIndexWriter {
     for (Relationship relation : relationships) {
       Node indexNode = relation.getEndNode();
       double enlargementNeeded = getAreaEnlargement(indexNode, geomRootNode);
+
+      // yuhan
+      if (Math.abs(alpha - 1.0) < 0.000000000001) {
+        int GD = getGD(indexNode, locInGraph);
+        enlargementNeeded = alpha * enlargementNeeded + (1 - alpha) * (double) GD;
+      }
 
       if (enlargementNeeded < minimumEnlargement) {
         indexNodes.clear();
@@ -1012,6 +1033,50 @@ public class RTreeIndex implements SpatialIndexWriter {
       // this shouldn't happen
       throw new RuntimeException("No IndexNode found for new geometry");
     }
+  }
+
+  private Node chooseIndexnodeWithSmallestGD(List<Node> indexNodes, Node geomRootNode) {
+    Node result = null;
+    int smallestGD = Integer.MAX_VALUE;
+    HashMap<String, int[]> pathNeighbors = getLocInGraph(geomRootNode);
+    for (Node indexNode : indexNodes) {
+      int GD = getGD(indexNode, pathNeighbors);
+      if (result == null || GD < smallestGD) {
+        result = indexNode;
+        smallestGD = GD;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Get the graph location of a node. It is currently represented by a histogram of 1-hop
+   * neighbors.
+   *
+   * @param node
+   * @return
+   */
+  private HashMap<String, int[]> getLocInGraph(Node node) {
+    HashMap<String, int[]> pathNeighbors = new HashMap<>();
+    for (String key : node.getPropertyKeys()) {
+      if (key.contains("PN_")) {
+        pathNeighbors.put(key, (int[]) node.getProperty(key));
+      }
+    }
+    return pathNeighbors;
+  }
+
+  private int getGD(Node indexNode, HashMap<String, int[]> pathNeighbors) {
+    int GD = 0;
+    for (String key : pathNeighbors.keySet()) {
+      int[] indexNodePathNeighbor = (int[]) indexNode.getProperty(key, null);
+      if (indexNodePathNeighbor == null) {
+        GD += pathNeighbors.get(key).length;
+        continue;
+      }
+      GD += Utility.arraysDifferenceCount(pathNeighbors.get(key), indexNodePathNeighbor);
+    }
+    return GD;
   }
 
   private double getAreaEnlargement(Node indexNode, Node geomRootNode) {
@@ -1482,11 +1547,17 @@ public class RTreeIndex implements SpatialIndexWriter {
   private EnvelopeDecoder envelopeDecoder;
   private int maxNodeReferences;
   private String splitMode = GREENES_SPLIT;
+  // private String splitMode = QUADRATIC_SPLIT;
   private boolean shouldMergeTrees = false;
 
   private Node metadataNode;
   private int totalGeometryCount = 0;
   private boolean countSaved = false;
+
+  // the value for graph and spatial ratio
+  private double alpha = 1.0;
+  private int chooseSmallestGDCount = 0;
+  private int differentTimes = 0;
 
   // Private classes
   private class WarmUpVisitor implements SpatialIndexVisitor {
