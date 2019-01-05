@@ -1144,6 +1144,12 @@ public class RTreeIndex implements SpatialIndexWriter {
     return entries;
   }
 
+  /**
+   *
+   * @param indexNode
+   * @param relationshipType
+   * @return a new IndexNode that contains the second part of children
+   */
   private Node greenesSplit(Node indexNode, RelationshipType relationshipType) {
     // Disconnect all current children from the index and return them with their envelopes
     List<NodeWithEnvelope> entries = extractChildNodesWithEnvelopes(indexNode, relationshipType);
@@ -1249,6 +1255,15 @@ public class RTreeIndex implements SpatialIndexWriter {
     return reconnectTwoChildGroups(indexNode, group1, group2, relationshipType);
   }
 
+  /**
+   * Add grou1 into indexNode and group2 into newIndexNode
+   *
+   * @param indexNode
+   * @param group1
+   * @param group2
+   * @param relationshipType
+   * @return newIndexNode
+   */
   private Node reconnectTwoChildGroups(Node indexNode, List<NodeWithEnvelope> group1,
       List<NodeWithEnvelope> group2, RelationshipType relationshipType) {
     // reset bounding box and add new children
