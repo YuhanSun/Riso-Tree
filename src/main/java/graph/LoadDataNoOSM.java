@@ -523,8 +523,8 @@ public class LoadDataNoOSM {
     }
   }
 
-  public static void batchRTreeInsertOneHopAware(String dbPath, String graphPath, String entityPath,
-      String labelListPath) {
+  public static void batchRTreeInsertOneHopAware(String dbPath, String dataset, String graphPath,
+      String entityPath, String labelListPath) {
     Utility.print("Batch insert RTree one-hop aware");
     try {
       String layerName = dataset;
