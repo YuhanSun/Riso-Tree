@@ -16,6 +16,7 @@ public class Driver {
   private String entityPath = "ep";
   private String labelListPath = "lp";
   private String dbPath = "dp";
+  private String dataset = "d";
 
   // function names
   private String risoTreeSkeleton = "tree";
@@ -28,6 +29,8 @@ public class Driver {
     options.addOption(entityPath, "entity-path", true, "enitty path");
     options.addOption(labelListPath, "labellist-path", true, "label list path");
     options.addOption(dbPath, "db-path", true, "db path");
+    options.addOption(dataset, "dataset", true, "dataset for naming the layer");
+
   }
 
   public void parser() {
@@ -47,8 +50,9 @@ public class Driver {
           String entityPathVal = cmd.getOptionValue(entityPath);
           String labelListPathVal = cmd.getOptionValue(labelListPath);
           String dbPathVal = cmd.getOptionValue(dbPath);
+          String datasetVal = cmd.getOptionValue(dataset);
 
-          LoadDataNoOSM.batchRTreeInsertOneHopAware(dbPathVal, graphPathVal, entityPathVal,
+          LoadDataNoOSM.batchRTreeInsertOneHopAware(dbPathVal, dataset, graphPathVal, entityPathVal,
               labelListPathVal);
         }
       }
