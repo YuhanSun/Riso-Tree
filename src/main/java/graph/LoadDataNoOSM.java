@@ -523,6 +523,72 @@ public class LoadDataNoOSM {
     }
   }
 
+  public static void batchRTreeInsertOneHopAware(String dbPath, String graphPath, String entityPath,
+      String labelListPath) {
+    Utility.print("Batch insert RTree one-hop aware");
+    try {
+      String layerName = dataset;
+      Utility.print("Connect to dbPath: " + dbPath);
+      GraphDatabaseService databaseService =
+          new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+      Utility.print("dataset:" + dataset + "\ndatabase:" + dbPath);
+
+      Utility.print("Read entity from: " + entityPath);
+      ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+
+      Utility.print("Read graph from: " + graphPath);
+      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+
+      Utility.print("Read label list from: " + labelListPath);
+      ArrayList<Integer> labelList = OwnMethods.readIntegerArray(labelListPath);
+
+      SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
+
+      Transaction tx = databaseService.beginTx();
+      // SimplePointLayer simplePointLayer =
+      // spatialDatabaseService.createSimplePointLayer(layerName);
+      EditableLayer layer =
+          spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
+      // org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
+
+      ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
+      for (Entity entity : entities) {
+        if (entity.IsSpatial) {
+          Node node = databaseService.createNode(GraphLabel.GRAPH_1);
+          node.setProperty(lon_name, entity.lon);
+          node.setProperty(lat_name, entity.lat);
+          node.setProperty("id", entity.id);
+
+          Map<String, int[]> pn = createPathNeighbors(graph, labelList, entity.id);
+          for (String key : pn.keySet()) {
+            node.setProperty(key, pn.get(key));
+          }
+
+          geomNodes.add(node);
+        }
+      }
+
+      long start = System.currentTimeMillis();
+      layer.addAll(geomNodes);
+
+      Utility.print("in memory time: " + (System.currentTimeMillis() - start));
+      Utility.print("number of spatial objects: " + geomNodes.size());
+
+      start = System.currentTimeMillis();
+      tx.success();
+      tx.close();
+      Utility.print("commit time: " + (System.currentTimeMillis() - start));
+
+      start = System.currentTimeMillis();
+      spatialDatabaseService.getDatabase().shutdown();
+      Utility.print("shut down time: " + (System.currentTimeMillis() - start));
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+
   /**
    * Create 1-hop PathNeighbors for a single node
    *
