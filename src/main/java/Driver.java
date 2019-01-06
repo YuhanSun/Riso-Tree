@@ -3,6 +3,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import commons.Config;
 import graph.LoadDataNoOSM;
 
 public class Driver {
@@ -52,8 +53,9 @@ public class Driver {
           String dbPathVal = cmd.getOptionValue(dbPath);
           String datasetVal = cmd.getOptionValue(dataset);
 
-          LoadDataNoOSM.batchRTreeInsertOneHopAware(dbPathVal, dataset, graphPathVal, entityPathVal,
-              labelListPathVal);
+          LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(new Config());
+          loadDataNoOSM.batchRTreeInsertOneHopAware(dbPathVal, datasetVal, graphPathVal,
+              entityPathVal, labelListPathVal);
         }
       }
     } catch (Exception e) {
