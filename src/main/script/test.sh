@@ -13,5 +13,5 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 echo "java -Xmx100g -cp ${jar_path} Driver -h"
 java -Xmx100g -cp ${jar_path} Driver -h
 
-echo "java -Xmx100g -cp ${jar_path} Driver -gp ${graph_path} -ep ${entity_path} -lp ${label_path}"
-java -Xmx100g -cp ${jar_path} Driver -gp ${graph_path} -ep ${entity_path} -lp ${label_path}
+echo "java -Xmx100g -cp ${jar_path} Driver -f tree -dp ${db_path} -gp ${graph_path} -ep ${entity_path} -lp ${label_path}"
+java -Xmx100g -cp ${jar_path} Driver -f tree -dp ${db_path} -gp ${graph_path} -ep ${entity_path} -lp ${label_path}
