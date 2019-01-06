@@ -53,7 +53,7 @@ public class Driver {
           String dbPathVal = cmd.getOptionValue(dbPath);
           String datasetVal = cmd.getOptionValue(dataset);
 
-          LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(new Config());
+          LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(new Config(), true);
           loadDataNoOSM.batchRTreeInsertOneHopAware(dbPathVal, datasetVal, graphPathVal,
               entityPathVal, labelListPathVal);
         }
