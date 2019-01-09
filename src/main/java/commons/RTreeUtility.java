@@ -1,10 +1,8 @@
 package commons;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -110,26 +108,6 @@ public class RTreeUtility {
         .relationships(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)
         .evaluator(Evaluators.includeWhereLastRelationshipTypeIs(RTreeRel.RTREE_REFERENCE));
     return td.traverse(rtree_root_node).nodes();
-  }
-
-  /**
-   * Get the deepest non-leaf level of an r-tree
-   * 
-   * @param databaseService
-   * @param layer_name
-   * @return
-   */
-  public static Set<Node> getRTreeNonleafDeepestLevelNodes(GraphDatabaseService databaseService,
-      String layer_name) {
-    Set<Node> nodes = new HashSet<Node>();
-    Iterable<Node> geometry_nodes = getAllGeometries(databaseService, layer_name);
-    for (Node node : geometry_nodes) {
-      Node parent =
-          node.getSingleRelationship(RTreeRel.RTREE_REFERENCE, Direction.INCOMING).getStartNode();
-      if (parent != null)
-        nodes.add(parent);
-    }
-    return nodes;
   }
 
   /**

@@ -106,7 +106,7 @@ public class RTreeUtilityTest {
       GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
       String layerName = Datasets.Yelp.name();
       Transaction tx = service.beginTx();
-      Set<Node> set = RTreeUtility.getRTreeNonleafDeepestLevelNodes(service, layerName);
+      Set<Node> set = RTreeUtility.getRTreeLeafLevelNodes(service, layerName);
       List<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(service, layerName);
       Utility.print(set.size());
       Utility.print(nodes.size());

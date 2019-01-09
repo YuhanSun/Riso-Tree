@@ -327,7 +327,7 @@ public class IndexSize {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
 			
-			Set<Node> nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(databaseService, dataset);
+			Set<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(databaseService, dataset);
 			for ( Node node: nodes)
 			{
 				visitedNodeCount++;
@@ -395,7 +395,7 @@ public class IndexSize {
 			GraphDatabaseService databaseService = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
 			Transaction tx = databaseService.beginTx();
 			
-			Set<Node> nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(databaseService, dataset);
+			Set<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(databaseService, dataset);
 			for ( Node node: nodes)
 			{
 				visitedNodeCount++;

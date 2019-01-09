@@ -103,7 +103,7 @@ public class App {
 		GraphDatabaseService databaseService = new GraphDatabaseFactory()
 				.newEmbeddedDatabase(new File(db_path));
 		Transaction tx = databaseService.beginTx();
-		Set<Node> nodes = RTreeUtility.getRTreeNonleafDeepestLevelNodes(databaseService, dataset);
+		Set<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(databaseService, dataset);
 		ArrayList<Integer> statistic = new ArrayList<Integer>(); 
 		for ( Node node : nodes)
 		{
