@@ -1,9 +1,6 @@
 package commons;
 
-import static org.junit.Assert.assertTrue;
 import java.io.File;
-import java.util.List;
-import java.util.Set;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,7 +8,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import commons.Config.Datasets;
 import commons.Config.system;
 
 public class RTreeUtilityTest {
@@ -98,27 +94,27 @@ public class RTreeUtilityTest {
     databaseService.shutdown();
   }
 
-  @Test
-  public void getRTreeLeafLevelNodesTest() {
-    try {
-      String dbPath =
-          "/Users/zhouyang/Google_Drive/Projects/tmp/risotree/Yelp/neo4j-community-3.1.1/data/databases/graph.db_Gleene_1.0";
-      GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
-      String layerName = Datasets.Yelp.name();
-      Transaction tx = service.beginTx();
-      Set<Node> set = RTreeUtility.getRTreeLeafLevelNodes(service, layerName);
-      List<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(service, layerName);
-      Utility.print(set.size());
-      Utility.print(nodes.size());
-      for (Node node : nodes) {
-        assertTrue(set.contains(node));
-      }
-      tx.success();
-      tx.close();
-      service.shutdown();
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+  // @Test
+  // public void getRTreeLeafLevelNodesTest() {
+  // try {
+  // String dbPath =
+  // "/Users/zhouyang/Google_Drive/Projects/tmp/risotree/Yelp/neo4j-community-3.1.1/data/databases/graph.db_Gleene_1.0";
+  // GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+  // String layerName = Datasets.Yelp.name();
+  // Transaction tx = service.beginTx();
+  // Set<Node> set = RTreeUtility.getRTreeLeafLevelNodes(service, layerName);
+  // List<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(service, layerName);
+  // Utility.print(set.size());
+  // Utility.print(nodes.size());
+  // for (Node node : nodes) {
+  // assertTrue(set.contains(node));
+  // }
+  // tx.success();
+  // tx.close();
+  // service.shutdown();
+  //
+  // } catch (Exception e) {
+  // e.printStackTrace();
+  // }
+  // }
 }
