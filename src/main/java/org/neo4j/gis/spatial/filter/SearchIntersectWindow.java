@@ -1,21 +1,19 @@
 /**
- * Copyright (c) 2010-2013 "Neo Technology,"
- * Network Engine for Objects in Lund AB [http://neotechnology.com]
+ * Copyright (c) 2010-2013 "Neo Technology," Network Engine for Objects in Lund AB
+ * [http://neotechnology.com]
  *
  * This file is part of Neo4j.
  *
- * Neo4j is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * Neo4j is free software: you can redistribute it and/or modify it under the terms of the GNU
+ * Affero General Public License as published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 package org.neo4j.gis.spatial.filter;
 
@@ -23,7 +21,6 @@ import org.neo4j.gis.spatial.rtree.filter.AbstractSearchEnvelopeIntersection;
 import org.neo4j.gis.spatial.Layer;
 import org.neo4j.gis.spatial.Utilities;
 import org.neo4j.graphdb.Node;
-
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -34,22 +31,23 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class SearchIntersectWindow extends AbstractSearchEnvelopeIntersection {
 
-	private Layer layer;
-	private Geometry windowGeom;
+  private Layer layer;
+  private Geometry windowGeom;
 
-	public SearchIntersectWindow(Layer layer, Envelope other) {
-		super(layer.getGeometryEncoder(), Utilities.fromJtsToNeo4j(other));
-		this.layer = layer;
-		this.windowGeom = layer.getGeometryFactory().toGeometry(other);
-	}
+  public SearchIntersectWindow(Layer layer, Envelope other) {
+    super(layer.getGeometryEncoder(), Utilities.fromJtsToNeo4j(other));
+    this.layer = layer;
+    this.windowGeom = layer.getGeometryFactory().toGeometry(other);
+  }
 
-	@Override
-	protected boolean onEnvelopeIntersection(Node geomNode, org.neo4j.gis.spatial.rtree.Envelope geomEnvelope) {
-		Geometry geometry = layer.getGeometryEncoder().decodeGeometry(geomNode);
-		// The next line just calls the method that is causing exceptions on OSM data for testing
-		// TODO: Remove when OSM is working properly
-		geometry.getEnvelopeInternal();
-		return geometry.intersects(windowGeom);
-	}
+  @Override
+  protected boolean onEnvelopeIntersection(Node geomNode,
+      org.neo4j.gis.spatial.rtree.Envelope geomEnvelope) {
+    Geometry geometry = layer.getGeometryEncoder().decodeGeometry(geomNode);
+    // The next line just calls the method that is causing exceptions on OSM data for testing
+    // TODO: Remove when OSM is working properly
+    geometry.getEnvelopeInternal();
+    return geometry.intersects(windowGeom);
+  }
 
 }
