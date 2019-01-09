@@ -1039,7 +1039,7 @@ public class Construct_RisoTree {
 
       // get all the deepest non-leaf nodes
       List<Node> leafNodes = RTreeUtility.getRTreeLeafLevelNodes(dbservice, dataset);
-      Set<Node> cur_level_nodes = new HashSet<>();
+      Set<Node> cur_level_nodes = new HashSet<>(leafNodes);
 
       for (Node node : cur_level_nodes) {
         TreeSet<Integer> NL = new TreeSet<Integer>();
