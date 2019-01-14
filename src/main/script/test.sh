@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # server
 dir="/hdd/code/yuhansun"
 dataset="Patents_100_random_20"
