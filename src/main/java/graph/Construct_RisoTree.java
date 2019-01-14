@@ -614,6 +614,41 @@ public class Construct_RisoTree {
     }
   }
 
+  /**
+   * Generate the map of neo4j RisoTree leaf level id and spatial objects graph id.
+   */
+  public void generateContainSpatialID(String db_path, String dataset, String containIDPath) {
+    try {
+      GraphDatabaseService dbservice =
+          new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+      HashMap<Long, TreeSet<Integer>> containIDMap = new HashMap<Long, TreeSet<Integer>>();
+      Transaction tx = dbservice.beginTx();
+      List<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(dbservice, dataset);
+      for (Node node : nodes) {
+        long parentID = node.getId();
+        Iterable<Relationship> rels =
+            node.getRelationships(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
+        TreeSet<Integer> containIDs = new TreeSet<Integer>();
+        for (Relationship relationship : rels) {
+          int childID = (Integer) relationship.getEndNode().getProperty("id");
+          containIDs.add(childID);
+        }
+        containIDMap.put(parentID, containIDs);
+      }
+      tx.success();
+      tx.close();
+      dbservice.shutdown();
+
+      FileWriter writer = new FileWriter(new File(containIDPath));
+      for (long id : containIDMap.keySet())
+        writer.write(String.format("%d,%s\n", id, containIDMap.get(id).toString()));
+      writer.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+
   public static void set_NL_list_label_DeepestNonLeaf(int max_hop_num, ArrayList<Integer> labels) {
     HashMap<String, String> map = OwnMethods.ReadMap(graph_node_map_path);
     HashMap<Integer, Integer> graph_node_map = new HashMap<Integer, Integer>();

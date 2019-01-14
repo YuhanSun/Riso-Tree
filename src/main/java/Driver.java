@@ -1,9 +1,13 @@
+import java.util.Arrays;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import commons.Config;
+import commons.Utility;
+import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
 
 public class Driver {
@@ -19,8 +23,12 @@ public class Driver {
   private String dbPath = "dp";
   private String dataset = "d";
 
+  // Construct_RisoTree
+  private String containIDPath = "c";
+
   // function names
   private String risoTreeSkeleton = "tree";
+  private String containID = "containID";
 
   public Driver(String[] args) {
     this.args = args;
@@ -31,7 +39,7 @@ public class Driver {
     options.addOption(labelListPath, "labellist-path", true, "label list path");
     options.addOption(dbPath, "db-path", true, "db path");
     options.addOption(dataset, "dataset", true, "dataset for naming the layer");
-
+    options.addOption(containIDPath, "containId-path", true, "path for containID.txt");
   }
 
   public void parser() {
@@ -39,6 +47,10 @@ public class Driver {
     CommandLine cmd = null;
     try {
       cmd = parser.parse(options, args);
+      Option[] options = cmd.getOptions();
+      for (Option option : options) {
+        Utility.print(String.format("<%s, %s>\n", option, option.getValue()));
+      }
 
       if (cmd.hasOption("h")) {
         help();
@@ -56,9 +68,15 @@ public class Driver {
           LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(new Config(), true);
           loadDataNoOSM.batchRTreeInsertOneHopAware(dbPathVal, datasetVal, graphPathVal,
               entityPathVal, labelListPathVal);
+        } else if (functionName.equals(containID)) {
+          Construct_RisoTree construct_RisoTree = new Construct_RisoTree(new Config(), true);
+          construct_RisoTree.generateContainSpatialID(cmd.getOptionValue(dbPath),
+              cmd.getOptionValue(dataset), cmd.getOptionValue(containIDPath));
         }
       }
-    } catch (Exception e) {
+    } catch (
+
+    Exception e) {
       e.printStackTrace();
       System.exit(-1);
     }
@@ -72,6 +90,7 @@ public class Driver {
 
 
   public static void main(String[] args) {
+    Utility.print(Arrays.toString(args));
     Driver driver = new Driver(args);
     driver.parser();
   }
