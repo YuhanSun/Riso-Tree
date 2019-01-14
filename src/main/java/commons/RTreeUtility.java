@@ -88,7 +88,7 @@ public class RTreeUtility {
       e.printStackTrace();
       System.exit(-1);
     }
-    Utility.print("getRTreeRoot return null!");
+    Utility.print("getRTreeRoot cannot find layer with name '" + layer_name + "'");
     return null;
   }
 
