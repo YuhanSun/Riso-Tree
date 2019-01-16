@@ -35,7 +35,7 @@ public class Driver {
     options.addOption(help, "help", false, "show help.");
     options.addOption(function, "function", true, "function name");
     options.addOption(graphPath, "graph-path", true, "graph path");
-    options.addOption(entityPath, "entity-path", true, "enitty path");
+    options.addOption(entityPath, "entity-path", true, "entity path");
     options.addOption(labelListPath, "labellist-path", true, "label list path");
     options.addOption(dbPath, "db-path", true, "db path");
     options.addOption(dataset, "dataset", true, "dataset for naming the layer");
@@ -49,7 +49,7 @@ public class Driver {
       cmd = parser.parse(options, args);
       Option[] options = cmd.getOptions();
       for (Option option : options) {
-        Utility.print(String.format("<%s, %s>\n", option, option.getValue()));
+        Utility.print(String.format("<%s, %s>", option, option.getValue()));
       }
 
       if (cmd.hasOption("h")) {
