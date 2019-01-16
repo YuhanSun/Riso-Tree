@@ -115,4 +115,35 @@ public class UtilityTest {
     l2 = new ArrayList<>(Arrays.asList(2));
     Utility.print(Utility.isSortedIntersect(l1, l2));
   }
+
+  /**
+   * Should output: null, [], [0, 1]
+   */
+  @Test
+  public void arrayListToArrayIntTest() {
+    ArrayList<Integer> arrayList = null;
+    Utility.print(Utility.arrayListToArrayInt(arrayList));
+
+    arrayList = new ArrayList<>();
+    Utility.print(Arrays.toString(Utility.arrayListToArrayInt(arrayList)));
+
+    arrayList = new ArrayList<>(Arrays.asList(0, 1));
+    Utility.print(Arrays.toString(Utility.arrayListToArrayInt(arrayList)));
+  }
+
+  /**
+   * [0, 2, 4], [0, 1, 2, 4], [0, 1, 2, 4, 5]
+   */
+  @Test
+  public void sortedArrayMergeTest() {
+    int[] i1 = new int[] {0, 2, 4};
+    int[] i2 = new int[] {0, 2, 4};
+    Utility.print(Arrays.toString(Utility.sortedArrayMerge(i1, i2)));
+
+    i2 = new int[] {0, 1, 2};
+    Utility.print(Arrays.toString(Utility.sortedArrayMerge(i1, i2)));
+
+    i2 = new int[] {1, 4, 5};
+    Utility.print(Arrays.toString(Utility.sortedArrayMerge(i1, i2)));
+  }
 }

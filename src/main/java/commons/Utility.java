@@ -97,6 +97,72 @@ public class Utility {
   }
 
   /**
+   * Merge two array. Expanded or not can be decided by the length of the array.
+   *
+   * @param i1
+   * @param i2
+   * @return
+   */
+  public static int[] sortedArrayMerge(int[] i1, int[] i2) {
+    if (i1 == null) {
+      return i2;
+    }
+
+    if (i2 == null) {
+      return i1;
+    }
+
+    ArrayList<Integer> arrayList = new ArrayList<>(i1.length + i2.length);
+    int i = 0, j = 0;
+    while (i < i1.length && j < i2.length) {
+      if (i1[i] < i2[j]) {
+        arrayList.add(i1[i]);
+        i++;
+      } else {
+        if (i1[i] > i2[j]) {
+          arrayList.add(i2[j]);
+          j++;
+        } else {
+          arrayList.add(i2[j]);
+          i++;
+          j++;
+        }
+      }
+    }
+
+    while (i < i1.length) {
+      arrayList.add(i1[i]);
+      i++;
+    }
+
+    while (j < i2.length) {
+      arrayList.add(i2[j]);
+      j++;
+    }
+
+    return arrayListToArrayInt(arrayList);
+  }
+
+  /**
+   * Convert an ArrayList to int[]. Because ArrayList.toArray() cannot work for int type.
+   *
+   * @param arrayList
+   * @return
+   */
+  public static int[] arrayListToArrayInt(ArrayList<Integer> arrayList) {
+    if (arrayList == null) {
+      return null;
+    }
+    int[] res = new int[arrayList.size()];
+    int i = 0;
+    for (int val : arrayList) {
+      res[i] = val;
+      i++;
+    }
+    return res;
+  }
+
+  /**
    * For a given query point and a radius, to find all the spatial objects in the STRTree.
    * 
    * @param stRtree the input STRtree
@@ -139,6 +205,14 @@ public class Utility {
     return result;
   }
 
+  /**
+   * Distance between two rectangles. Rather than using centering point, this method considers
+   * boundaries of rectangles. So compute closest distance between two rectangle boundaries.
+   *
+   * @param rectangle1
+   * @param rectangle2
+   * @return
+   */
   public static double distance(MyRectangle rectangle1, MyRectangle rectangle2) {
     double minx1 = rectangle1.min_x, miny1 = rectangle1.min_y, maxx1 = rectangle1.max_x,
         maxy1 = rectangle1.max_y;
