@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # server
-dir="/hdd/code/yuhansun"
-dataset="Patents_100_random_20"
-data_dir="${dir}/data/${dataset}"
-code_dir="${dir}/code"
+# dir="/hdd/code/yuhansun"
+# dataset="Patents_100_random_20"
+# data_dir="${dir}/data/${dataset}"
+# code_dir="${dir}/code"
 
 # local test setup
-# dir="/Users/zhouyang/Google_Drive/Projects/tmp/risotree"
-# dataset="Yelp"
-# data_dir="${dir}/${dataset}"
-# code_dir="/Users/zhouyang/Google_Drive/Projects/github_code"
+dir="/Users/zhouyang/Google_Drive/Projects/tmp/risotree"
+dataset="Yelp"
+data_dir="${dir}/${dataset}"
+code_dir="/Users/zhouyang/Google_Drive/Projects/github_code"
 
 db_path="${data_dir}/neo4j-community-3.1.1/data/databases/graph.db_Gleene_1.0"
 graph_path="${data_dir}/graph.txt"
