@@ -1,3 +1,3 @@
 #!/bin/bash
-cd /Users/zhouyang/Google_Drive/Projects/github_code/Riso-Tree
+cd ../../../
 mvn clean install
