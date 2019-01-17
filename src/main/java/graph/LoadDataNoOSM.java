@@ -527,12 +527,6 @@ public class LoadDataNoOSM {
       String entityPath, String labelListPath) {
     Utility.print("Batch insert RTree one-hop aware");
     try {
-      String layerName = dataset;
-      Utility.print("Connect to dbPath: " + dbPath);
-      GraphDatabaseService databaseService =
-          new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
-      Utility.print("dataset:" + dataset + "\ndatabase:" + dbPath);
-
       Utility.print("Read entity from: " + entityPath);
       ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 
@@ -542,6 +536,11 @@ public class LoadDataNoOSM {
       Utility.print("Read label list from: " + labelListPath);
       ArrayList<Integer> labelList = OwnMethods.readIntegerArray(labelListPath);
 
+      String layerName = dataset;
+      Utility.print("Connect to dbPath: " + dbPath);
+      GraphDatabaseService databaseService =
+          new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+      Utility.print("dataset:" + dataset + "\ndatabase:" + dbPath);
       SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 
       Transaction tx = databaseService.beginTx();
