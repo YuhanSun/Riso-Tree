@@ -12,6 +12,20 @@ import graph.LoadDataNoOSM;
 
 public class Driver {
 
+  // function names
+  private static enum FunctionName {
+    tree, containID, constructPN
+  }
+
+  private static FunctionName getFunctionEnum(String function) {
+    for (FunctionName functionName : FunctionName.values()) {
+      if (function.equals(functionName.name())) {
+        return functionName;
+      }
+    }
+    return null;
+  }
+
   private String[] args = null;
   private Options options = new Options();
 
@@ -26,9 +40,8 @@ public class Driver {
   // Construct_RisoTree
   private String containIDPath = "c";
 
-  // function names
-  private String risoTreeSkeleton = "tree";
-  private String containID = "containID";
+  private String MAX_HOPNUM = "MAX_HOPNUM";
+  private String PNPathAndPreffix = "PNPreffix";
 
   public Driver(String[] args) {
     this.args = args;
@@ -40,6 +53,10 @@ public class Driver {
     options.addOption(dbPath, "db-path", true, "db path");
     options.addOption(dataset, "dataset", true, "dataset for naming the layer");
     options.addOption(containIDPath, "containId-path", true, "path for containID.txt");
+
+    options.addOption(MAX_HOPNUM, "MAX_HOPNUM", true, "MAX_HOPNUM of RisoTree");
+    options.addOption(PNPathAndPreffix, "PNPathAndPreffix", true,
+        "Path Neighbor file path preffix");
   }
 
   public void parser() {
@@ -57,26 +74,33 @@ public class Driver {
       }
 
       if (cmd.hasOption(function)) {
-        String functionName = cmd.getOptionValue(function);
-        if (functionName.equals(risoTreeSkeleton)) {
-          String graphPathVal = cmd.getOptionValue(graphPath);
-          String entityPathVal = cmd.getOptionValue(entityPath);
-          String labelListPathVal = cmd.getOptionValue(labelListPath);
-          String dbPathVal = cmd.getOptionValue(dbPath);
-          String datasetVal = cmd.getOptionValue(dataset);
-
-          LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(new Config(), true);
-          loadDataNoOSM.batchRTreeInsertOneHopAware(dbPathVal, datasetVal, graphPathVal,
-              entityPathVal, labelListPathVal);
-        } else if (functionName.equals(containID)) {
-          Construct_RisoTree construct_RisoTree = new Construct_RisoTree(new Config(), true);
-          construct_RisoTree.generateContainSpatialID(cmd.getOptionValue(dbPath),
-              cmd.getOptionValue(dataset), cmd.getOptionValue(containIDPath));
+        String functionNameString = cmd.getOptionValue(function);
+        FunctionName functionName = getFunctionEnum(functionNameString);
+        switch (functionName) {
+          case tree:
+            new LoadDataNoOSM(new Config(), true).batchRTreeInsertOneHopAware(
+                cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
+                cmd.getOptionValue(graphPath), cmd.getOptionValue(entityPath),
+                cmd.getOptionValue(labelListPath));
+            break;
+          case containID:
+            new Construct_RisoTree(new Config(), true).generateContainSpatialID(
+                cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
+                cmd.getOptionValue(containIDPath));
+            break;
+          case constructPN:
+            new Construct_RisoTree(new Config(), true).constructPNTime(
+                cmd.getOptionValue(containIDPath), cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),
+                Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
+                cmd.getOptionValue(PNPathAndPreffix));
+            break;
+          default:
+            Utility.print(String.format("Function %s does not exist!", functionNameString));
+            break;
         }
       }
-    } catch (
-
-    Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
     }
