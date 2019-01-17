@@ -580,6 +580,89 @@ public class Construct_RisoTree {
   }
 
   /**
+   * One hop is directly loaded into db. Two hops is constructed based on one hop loaded, and it is
+   * written to file for future batchinsert. Such function has to be run separately for one hop and
+   * two hops.
+   */
+  public static void constructPNTime(String containIDPath, String graph_path,
+      String label_list_path, int MAX_HOPNUM, String PNDirectory) {
+    try {
+      HashMap<Integer, Long> constructTime = new HashMap<>();
+      Utility.print("read contain map from " + containIDPath);
+      HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
+      Utility.print("read graph from " + graph_path);
+      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+      Utility.print("read label list from " + label_list_path);
+      ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
+      GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
+      // for one hop omit because already constructed in RTree construction phase. Refer to
+      // ConstructPN for source code.
+
+      // more than one hop
+      Transaction tx2 = dbservice.beginTx();
+      int hop = 2;
+      while (hop <= MAX_HOPNUM) {
+        Utility.print(String.format("construct %d hop", hop));
+        FileWriter writer2 = new FileWriter(new File(PNPath + "_" + hop));
+        String regex = "PN";
+        for (int i = 0; i < hop - 1; i++)
+          regex += "_\\d+";
+        regex += "$";
+
+        long curHopTime = 0;
+        long start = System.currentTimeMillis();
+        for (long nodeID : containIDMap.keySet()) {
+          writer2.write(nodeID + "\n");
+          Node node = dbservice.getNodeById(nodeID);
+          Map<String, Object> properties = node.getAllProperties();
+
+          for (String key : properties.keySet()) {
+            if (key.matches(regex)) {
+              int[] curPathNeighbors = (int[]) properties.get(key);
+              TreeSet<Integer> nextPathNeighbors = new TreeSet<Integer>();
+              for (int curNeighborID : curPathNeighbors)
+                for (int id : graph.get(curNeighborID))
+                  nextPathNeighbors.add(id);
+
+              HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors =
+                  new HashMap<Integer, ArrayList<Integer>>();
+              for (int neighborID : nextPathNeighbors) {
+                int label = labelList.get(neighborID);
+                if (pathLabelNeighbors.containsKey(label))
+                  pathLabelNeighbors.get(label).add(neighborID);
+                else {
+                  ArrayList<Integer> arrayList = new ArrayList<Integer>();
+                  arrayList.add(neighborID);
+                  pathLabelNeighbors.put(label, arrayList);
+                }
+              }
+
+              for (int pathEndLabel : pathLabelNeighbors.keySet()) {
+                String propertyName = String.format("%s_%d", key, pathEndLabel);
+                ArrayList<Integer> arrayList = pathLabelNeighbors.get(pathEndLabel);
+                int[] array = new int[arrayList.size()];
+                for (int i = 0; i < arrayList.size(); i++)
+                  array[i] = arrayList.get(i);
+
+                writer2.write(String.format("%s,%s\n", propertyName, arrayList));
+              }
+            }
+          }
+        }
+        writer2.close();
+        hop++;
+      }
+      tx2.success();
+      tx2.close();
+
+      dbservice.shutdown();
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+
+  /**
    * Generate the map of neo4j RisoTree leaf level id and spatial objects graph id.
    */
   public static void generateContainSpatialID() {
