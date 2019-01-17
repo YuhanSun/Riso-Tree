@@ -1077,9 +1077,9 @@ public class RTreeIndex implements SpatialIndexWriter {
     HashMap<String, int[]> pathNeighbors = getLocInGraph(geomRootNode);
     for (Node indexNode : indexNodes) {
       int GD = getGD(indexNode, pathNeighbors);
-      Utility.print(GD);
       double area = getArea(getIndexNodeEnvelope(indexNode));
       double SGD = 0.000000001 * area + GD;
+      Utility.print(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
       if (result == null || SGD < smallestSGD) {
         result = indexNode;
         smallestSGD = SGD;
