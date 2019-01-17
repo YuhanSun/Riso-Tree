@@ -149,10 +149,34 @@ public class RTreeIndex implements SpatialIndexWriter {
     if (countChildren(parent, RTreeRelationshipTypes.RTREE_REFERENCE) >= maxNodeReferences) {
       insertInLeaf(parent, geomNode);
       splitAndAdjustPathBoundingBox(parent);
-    } else {
+    } else { // no split case, done for RisoTree.
       if (insertInLeaf(parent, geomNode)) {
         // bbox enlargement needed
         adjustPathBoundingBox(parent);
+      }
+      // adjustGraphLoc(parent, geomNode);// yuhan
+    }
+  }
+
+  /**
+   * Adjust the PNs of the parent node on the leaf level. yuhan
+   *
+   * @param parent
+   * @param geomNode
+   */
+  private void adjustGraphLoc(Node parent, Node geomNode) {
+    HashMap<String, int[]> parentLoc = getLocInGraph(parent);
+    HashMap<String, int[]> childLoc = getLocInGraph(geomNode);
+    for (String key : childLoc.keySet()) {
+      int[] childPN = childLoc.get(key);
+      int[] parentPN = parentLoc.get(key);
+      if (parentPN == null) {
+        parent.setProperty(key, childPN);
+        continue;
+      }
+      int[] expandPN = Utility.sortedArrayMerge(childPN, parentPN);
+      if (expandPN.length > parentPN.length) {
+        parent.setProperty(key, expandPN);
       }
     }
   }
@@ -993,6 +1017,8 @@ public class RTreeIndex implements SpatialIndexWriter {
       chooseSmallestGDCount++;
       Node node = chooseIndexNodeWithSmallestArea(indexNodes);
       Node res = chooseIndexnodeWithSmallestGD(indexNodes, geomRootNode);
+      Utility.print(node);
+      Utility.print(res);
       if (node.equals(res) == false) {
         differentTimes++;
       }
@@ -1035,15 +1061,28 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
   }
 
+  /**
+   * Compute the GD by considering area of the indexNode. The reason is that GDs are often the same
+   * for all indexNodes. Coefficient of area is a very small value (0.000000001), so it only works
+   * when GDs are the same. Make sure that the coefficient * max(area) < 1, it will work as wanted.
+   *
+   * @param indexNodes
+   * @param geomRootNode
+   * @return
+   */
   private Node chooseIndexnodeWithSmallestGD(List<Node> indexNodes, Node geomRootNode) {
     Node result = null;
-    int smallestGD = Integer.MAX_VALUE;
+    double smallestSGD = Double.MAX_VALUE;
+    Utility.print("count: " + indexNodes.size());
     HashMap<String, int[]> pathNeighbors = getLocInGraph(geomRootNode);
     for (Node indexNode : indexNodes) {
       int GD = getGD(indexNode, pathNeighbors);
-      if (result == null || GD < smallestGD) {
+      Utility.print(GD);
+      double area = getArea(getIndexNodeEnvelope(indexNode));
+      double SGD = 0.000000001 * area + GD;
+      if (result == null || SGD < smallestSGD) {
         result = indexNode;
-        smallestGD = GD;
+        smallestSGD = SGD;
       }
     }
     return result;
@@ -1331,6 +1370,14 @@ public class RTreeIndex implements SpatialIndexWriter {
    */
   private Node reconnectTwoChildGroups(Node indexNode, List<NodeWithEnvelope> group1,
       List<NodeWithEnvelope> group2, RelationshipType relationshipType) {
+    // yuhan
+    // remove the PN property and reconstruct in addChild() function
+    for (String property : indexNode.getAllProperties().keySet()) {
+      if (property.contains(PN_PROP_PREFFIX)) {
+        indexNode.removeProperty(property);
+      }
+    }
+
     // reset bounding box and add new children
     indexNode.removeProperty(INDEX_PROP_BBOX);
     for (NodeWithEnvelope entry : group1) {
@@ -1356,7 +1403,21 @@ public class RTreeIndex implements SpatialIndexWriter {
     layerNode.createRelationshipTo(newRoot, RTreeRelationshipTypes.RTREE_ROOT);
   }
 
+  /**
+   * Add the child to a parent node by creating a relationship. Update the mbr accordingly. For
+   * RisoTree update PNs.
+   * 
+   * @param parent
+   * @param type
+   * @param newChild
+   * @return is the mbr of parent changed?
+   */
   private boolean addChild(Node parent, RelationshipType type, Node newChild) {
+    // yuhan
+    if (type.name().equals(RTreeRelationshipTypes.RTREE_REFERENCE.name())) {
+      adjustGraphLoc(parent, newChild);
+    }
+
     Envelope childEnvelope = getChildNodeEnvelope(newChild, type);
     double[] childBBox = new double[] {childEnvelope.getMinX(), childEnvelope.getMinY(),
         childEnvelope.getMaxX(), childEnvelope.getMaxY()};
@@ -1554,10 +1615,13 @@ public class RTreeIndex implements SpatialIndexWriter {
   private int totalGeometryCount = 0;
   private boolean countSaved = false;
 
-  // the value for graph and spatial ratio
+  // ########### RisoTree ###########
+  // the value for spatial coefficient
   private double alpha = 1.0;
   private int chooseSmallestGDCount = 0;
   private int differentTimes = 0;
+
+  public final static String PN_PROP_PREFFIX = "PN";
 
   // Private classes
   private class WarmUpVisitor implements SpatialIndexVisitor {
