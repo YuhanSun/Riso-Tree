@@ -31,9 +31,11 @@ public class Neo4jGraphUtility {
       Utility.print(dbPath + " does not exist!");
       System.exit(-1);
     }
-    GraphDatabaseService dbservice =
-        new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
-    return dbservice;
+    return getDatabaseServiceNotExistCreate(dbPath);
+  }
+
+  public static GraphDatabaseService getDatabaseServiceNotExistCreate(String dbPath) {
+    return new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
   }
 
 }
