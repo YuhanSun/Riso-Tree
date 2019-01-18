@@ -584,8 +584,8 @@ public class Construct_RisoTree {
    * written to file for future batchinsert. Such function has to be run separately for one hop and
    * two hops.
    */
-  public static void constructPNTime(String containIDPath, String graph_path,
-      String label_list_path, int MAX_HOPNUM, String PNDirectory) {
+  public void constructPNTime(String containIDPath, String db_path, String graph_path,
+      String label_list_path, int MAX_HOPNUM, String PNPathAndPreffix) {
     try {
       HashMap<Integer, Long> constructTime = new HashMap<>();
       Utility.print("read contain map from " + containIDPath);
@@ -603,16 +603,16 @@ public class Construct_RisoTree {
       int hop = 2;
       while (hop <= MAX_HOPNUM) {
         Utility.print(String.format("construct %d hop", hop));
-        FileWriter writer2 = new FileWriter(new File(PNPath + "_" + hop));
+        FileWriter writer2 = new FileWriter(new File(PNPathAndPreffix + "_" + hop + ".txt"));
         String regex = "PN";
         for (int i = 0; i < hop - 1; i++)
           regex += "_\\d+";
         regex += "$";
 
         long curHopTime = 0;
-        long start = System.currentTimeMillis();
         for (long nodeID : containIDMap.keySet()) {
           writer2.write(nodeID + "\n");
+          long start = System.currentTimeMillis();
           Node node = dbservice.getNodeById(nodeID);
           Map<String, Object> properties = node.getAllProperties();
 
@@ -637,6 +637,8 @@ public class Construct_RisoTree {
                 }
               }
 
+              curHopTime += System.currentTimeMillis() - start;
+
               for (int pathEndLabel : pathLabelNeighbors.keySet()) {
                 String propertyName = String.format("%s_%d", key, pathEndLabel);
                 ArrayList<Integer> arrayList = pathLabelNeighbors.get(pathEndLabel);
@@ -646,16 +648,19 @@ public class Construct_RisoTree {
 
                 writer2.write(String.format("%s,%s\n", propertyName, arrayList));
               }
+
+              start = System.currentTimeMillis();
             }
           }
         }
         writer2.close();
+        constructTime.put(hop, curHopTime);
         hop++;
       }
       tx2.success();
       tx2.close();
-
       dbservice.shutdown();
+      Utility.print(constructTime);
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
