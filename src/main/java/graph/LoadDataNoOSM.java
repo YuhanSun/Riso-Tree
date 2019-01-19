@@ -34,6 +34,7 @@ import commons.Entity;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.RTreeRel;
+import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.RTreeUtility;
 import commons.Utility;
@@ -158,7 +159,6 @@ public class LoadDataNoOSM {
       // }
       //
       // LoadNonSpatialEntity();
-      //
       // GetSpatialNodeMap();
       //
       // LoadGraphEdges();
@@ -190,11 +190,10 @@ public class LoadDataNoOSM {
    * calculate count of spatial vertices enclosed by the MBR for each non-leaf R-Tree node. This is
    * important in the query algorithm
    */
-  public static void CalculateCount() {
+  public void CalculateCount(String dbPath, String dataset) {
     Utility.print("Calculate spatial cardinality");
     try {
-      GraphDatabaseService databaseService =
-          new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+      GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
       Transaction tx = databaseService.beginTx();
 
       Iterable<Node> geometry_nodes = RTreeUtility.getAllGeometries(databaseService, dataset);
@@ -274,11 +273,81 @@ public class LoadDataNoOSM {
     }
   }
 
+  public void LoadGraphEdges(String mapPath, String dbPath, String graphPath) {
+    BatchInserter inserter = null;
+    try {
+      Utility.print("read map from " + mapPath);
+      Map<String, String> id_map = OwnMethods.ReadMap(mapPath);
+      Map<String, String> config = new HashMap<String, String>();
+      config.put("dbms.pagecache.memory", "100g");
+      Utility.print("batch insert into: " + dbPath);
+      if (!OwnMethods.pathExist(dbPath)) {
+        throw new Exception(String.format("db path %s does not exist!", dbPath));
+      }
+      inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
+
+      Utility.print("read graph from " + graphPath);
+      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+      for (int i = 0; i < graph.size(); i++) {
+        ArrayList<Integer> neighbors = graph.get(i);
+        int start_neo4j_id = Integer.parseInt(id_map.get(String.valueOf(i)));
+        for (int j = 0; j < neighbors.size(); j++) {
+          int neighbor = neighbors.get(j);
+          if (i < neighbor) {
+            int end_neo4j_id = Integer.parseInt(id_map.get(String.valueOf(neighbor)));
+            inserter.createRelationship(start_neo4j_id, end_neo4j_id, GraphRel.GRAPH_LINK, null);
+          }
+        }
+      }
+      inserter.shutdown();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      if (inserter != null)
+        inserter.shutdown();
+      System.exit(-1);
+    }
+  }
+
   /**
    * Attach spatial node map to file node_map.txt
    */
   public static void GetSpatialNodeMap() {
     Utility.print("Get spatial vertices map");
+    try {
+      Map<Object, Object> id_map = new TreeMap<Object, Object>();
+
+      GraphDatabaseService databaseService =
+          new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+      Transaction tx = databaseService.beginTx();
+      ResourceIterator<Node> spatial_nodes = databaseService.findNodes(GraphLabel.GRAPH_1);
+
+      while (spatial_nodes.hasNext()) {
+        Node node = spatial_nodes.next();
+        long neo4jId = node.getId();
+        int graphId = (Integer) node.getProperty("id");
+        id_map.put(graphId, neo4jId);
+      }
+
+      tx.success();
+      tx.close();
+      databaseService.shutdown();
+
+      Utility.print("Write spatial node map to " + mapPath + "\n");
+      OwnMethods.WriteMap(mapPath, true, id_map);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+
+  /**
+   * Attach spatial node map to file node_map.txt. Must run after LoadNonSpatialEntity.
+   *
+   * @param dbPath
+   */
+  public void GetSpatialNodeMap(String dbPath, String mapPath) {
     try {
       Map<Object, Object> id_map = new TreeMap<Object, Object>();
 
@@ -325,6 +394,43 @@ public class LoadDataNoOSM {
 
       Map<String, String> config = new HashMap<String, String>();
       config.put("dbms.pagecache.memory", "6g");
+
+      Utility.print("Batch insert into: " + dbPath);
+      BatchInserter inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
+
+      for (int i = 0; i < entities.size(); i++) {
+        Entity entity = entities.get(i);
+        if (entity.IsSpatial == false) {
+          Map<String, Object> properties = new HashMap<String, Object>();
+          properties.put("id", entity.id);
+          int labelID = labelList.get(i);
+          Label label = DynamicLabel.label(String.format("GRAPH_%d", labelID));
+          Long pos_id = inserter.createNode(properties, label);
+          id_map.put(entity.id, pos_id);
+        }
+      }
+      inserter.shutdown();
+      Utility.print("Write non-spatial node map to " + mapPath + "\n");
+      OwnMethods.WriteMap(mapPath, false, id_map);
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+
+  public void LoadNonSpatialEntity(String entityPath, String labelListPath, String dbPath,
+      String mapPath) {
+    try {
+      Utility.print("Read entity from: " + entityPath);
+      ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+
+      Utility.print("Read label list from: " + labelListPath);
+      ArrayList<Integer> labelList = OwnMethods.readIntegerArray(labelListPath);
+
+      Map<Object, Object> id_map = new TreeMap<Object, Object>();
+
+      Map<String, String> config = new HashMap<String, String>();
+      config.put("dbms.pagecache.memory", "20g");
 
       Utility.print("Batch insert into: " + dbPath);
       BatchInserter inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
