@@ -14,7 +14,9 @@ public class Driver {
 
   // function names
   private static enum FunctionName {
-    tree, containID, constructPN
+    tree, containID, // tree construction
+    LoadNonSpatialEntity, GetSpatialNodeMap, LoadGraphEdges, CalculateCount, LoadAll, // graph load
+    constructPN, loadPN, // PN load
   }
 
   private static FunctionName getFunctionEnum(String function) {
@@ -40,6 +42,9 @@ public class Driver {
   // Construct_RisoTree
   private String containIDPath = "c";
 
+  // Load data
+  private String mapPath = "mapPath";
+
   private String MAX_HOPNUM = "MAX_HOPNUM";
   private String PNPathAndPreffix = "PNPreffix";
 
@@ -53,6 +58,7 @@ public class Driver {
     options.addOption(dbPath, "db-path", true, "db path");
     options.addOption(dataset, "dataset", true, "dataset for naming the layer");
     options.addOption(containIDPath, "containId-path", true, "path for containID.txt");
+    options.addOption(mapPath, "map path", true, "path for the map from entity id to neo4j id");
 
     options.addOption(MAX_HOPNUM, "MAX_HOPNUM", true, "MAX_HOPNUM of RisoTree");
     options.addOption(PNPathAndPreffix, "PNPathAndPreffix", true,
@@ -88,12 +94,46 @@ public class Driver {
                 cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
                 cmd.getOptionValue(containIDPath));
             break;
+
+          case LoadNonSpatialEntity:
+            new LoadDataNoOSM(new Config(), true).LoadNonSpatialEntity(
+                cmd.getOptionValue(entityPath), cmd.getOptionValue(labelListPath),
+                cmd.getOptionValue(dbPath), cmd.getOptionValue(mapPath));
+            break;
+          case GetSpatialNodeMap:
+            new LoadDataNoOSM(new Config(), true).GetSpatialNodeMap(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(mapPath));
+            break;
+          case LoadGraphEdges:
+            new LoadDataNoOSM(new Config(), true).LoadGraphEdges(cmd.getOptionValue(mapPath),
+                cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath));
+            break;
+          case CalculateCount:
+            new LoadDataNoOSM(new Config(), true).CalculateCount(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(dataset));
+            break;
+          case LoadAll: // load all cases in graph load
+            new LoadDataNoOSM(new Config(), true).LoadNonSpatialEntity(
+                cmd.getOptionValue(entityPath), cmd.getOptionValue(labelListPath),
+                cmd.getOptionValue(dbPath), cmd.getOptionValue(mapPath));
+            new LoadDataNoOSM(new Config(), true).GetSpatialNodeMap(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(mapPath));
+            new LoadDataNoOSM(new Config(), true).LoadGraphEdges(cmd.getOptionValue(mapPath),
+                cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath));
+            new LoadDataNoOSM(new Config(), true).CalculateCount(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(dataset));
+            break;
+
           case constructPN:
             new Construct_RisoTree(new Config(), true).constructPNTime(
                 cmd.getOptionValue(containIDPath), cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),
                 Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
                 cmd.getOptionValue(PNPathAndPreffix));
+            break;
+          case loadPN:
+            new Construct_RisoTree(new Config(), true).LoadPN(cmd.getOptionValue(PNPathAndPreffix),
+                Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)), cmd.getOptionValue(dbPath));
             break;
           default:
             Utility.print(String.format("Function %s does not exist!", functionNameString));
