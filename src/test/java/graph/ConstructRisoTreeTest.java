@@ -1,34 +1,24 @@
 package graph;
 
-import static org.junit.Assert.*;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import javax.sound.sampled.Line;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.ResourceIterable;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
-import osm.OSM_Utility;
 import commons.Config.system;
 import commons.Labels;
-import commons.Labels.OSMLabel;
 import commons.Labels.RTreeRel;
 import commons.Utility;
 
@@ -73,9 +63,8 @@ public class ConstructRisoTreeTest {
   }
 
   @Test
-  public void constructPNTimeTest() {
-    Construct_RisoTree construct_RisoTree = new Construct_RisoTree();
-    ArrayList<Long> constructTime = construct_RisoTree.constructPNTime();
+  public void constructPNTimeTest() throws Exception {
+    ArrayList<Long> constructTime = Construct_RisoTree.constructPNTime();
     Utility.print(constructTime);
   }
 
@@ -168,7 +157,7 @@ public class ConstructRisoTreeTest {
   }
 
   @Test
-  public void readContainIDMapTest() {
+  public void readContainIDMapTest() throws Exception {
     HashMap<Long, ArrayList<Integer>> containIDMap =
         Construct_RisoTree.readContainIDMap(containIDPath);
     for (long key : containIDMap.keySet()) {

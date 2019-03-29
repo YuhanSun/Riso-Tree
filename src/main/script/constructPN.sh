@@ -27,7 +27,11 @@ java -Xmx100g -jar ${jar_path} -h
 # echo "java -Xmx100g -jar ${jar_path} -f containID -dp ${db_path} -d ${dataset} -c ${containID_path}"
 # java -Xmx100g -jar ${jar_path} -f containID -dp ${db_path} -d ${dataset} -c ${containID_path}
 
-###### Construct Path Neighbors for leaf nodes ######
 MAX_HOPNUM="2"
 PNPathAndPreffix="${data_dir}/PathNeighbors_${tree_type}"
-java -Xmx100g -jar ${jar_path} -f constructPN -dp ${db_path} -c ${containID_path} -gp ${graph_path} -lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix}
+
+###### Construct Path Neighbors for leaf nodes ######
+# java -Xmx100g -jar ${jar_path} -f constructPN -dp ${db_path} -c ${containID_path} -gp ${graph_path} -lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix}
+
+###### Load PathNeighbor into db ######
+java -Xmx100g -jar ${jar_path} -f loadPN -PNPreffix ${PNPathAndPreffix} -MAX_HOPNUM ${MAX_HOPNUM} -dp ${db_path}
