@@ -1037,7 +1037,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       double enlargementNeeded = getAreaEnlargement(indexNode, geomRootNode);
 
       // yuhan
-      if (Math.abs(alpha - 1.0) < 0.000000000001) {
+      if (Math.abs(alpha - 1.0) > 0.000000000001) {
         int GD = getGD(indexNode, locInGraph);
         enlargementNeeded = alpha * enlargementNeeded + (1 - alpha) * (double) GD;
       }
@@ -1360,7 +1360,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   }
 
   /**
-   * Add grou1 into indexNode and group2 into newIndexNode
+   * Add group1 into indexNode and group2 into newIndexNode
    *
    * @param indexNode
    * @param group1
@@ -1616,9 +1616,11 @@ public class RTreeIndex implements SpatialIndexWriter {
   private boolean countSaved = false;
 
   // ########### RisoTree ###########
-  // the value for spatial coefficient
+  /**
+   * The value for spatial coefficient. Set to 1.0 if do not want to consider graph distance.
+   */
   private double alpha = 1.0;
-  private int chooseSmallestGDCount = 0;
+  private int chooseSmallestGDCount = 0;//
   private int differentTimes = 0;
 
   public final static String PN_PROP_PREFFIX = "PN";
