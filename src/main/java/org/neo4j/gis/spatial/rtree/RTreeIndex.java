@@ -1098,7 +1098,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   private HashMap<String, int[]> getLocInGraph(Node node) {
     HashMap<String, int[]> pathNeighbors = new HashMap<>();
     for (String key : node.getPropertyKeys()) {
-      if (key.contains("PN_")) {
+      if (key.contains(PN_PROP_PREFFIX)) {
         pathNeighbors.put(key, (int[]) node.getProperty(key));
       }
     }
@@ -1623,7 +1623,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   private int chooseSmallestGDCount = 0;//
   private int differentTimes = 0;
 
-  public final static String PN_PROP_PREFFIX = "PN";
+  public final static String PN_PROP_PREFFIX = "PN_";
 
   // Private classes
   private class WarmUpVisitor implements SpatialIndexVisitor {
