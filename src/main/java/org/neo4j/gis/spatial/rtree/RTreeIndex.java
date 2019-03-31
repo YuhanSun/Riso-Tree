@@ -154,13 +154,17 @@ public class RTreeIndex implements SpatialIndexWriter {
         // bbox enlargement needed
         adjustPathBoundingBox(parent);
       }
-      // adjustGraphLoc(parent, geomNode);// yuhan
+      if (!spatialOnly) {
+        adjustGraphLoc(parent, geomNode);// yuhan
+      }
     }
   }
 
   /**
-   * Adjust the PNs of the parent node on the leaf level. yuhan
+   * Adjust the PNs of the parent node on the leaf level. Currently no label paths is stored on
+   * non-leaf nodes.
    *
+   * @author yuhan
    * @param parent
    * @param geomNode
    */
@@ -1011,23 +1015,31 @@ public class RTreeIndex implements SpatialIndexWriter {
       }
     }
 
+    // more than one leaf nodes contains geomRootNode
     if (indexNodes.size() > 1) {
       // return chooseIndexNodeWithSmallestArea(indexNodes);
       // yuhan
-      chooseSmallestGDCount++;
       Node node = chooseIndexNodeWithSmallestArea(indexNodes);
-      Node res = chooseIndexnodeWithSmallestGD(indexNodes, geomRootNode);
-      Utility.print(node);
-      Utility.print(res);
-      if (node.equals(res) == false) {
-        differentTimes++;
+      if (!spatialOnly) {
+        chooseSmallestGDCount++;
+        Node nodeWithSmallestGD = chooseIndexnodeWithSmallestGD(indexNodes, geomRootNode);
+        if (node.equals(nodeWithSmallestGD) == false) {
+          differentTimes++;
+        }
+        node = nodeWithSmallestGD;
       }
-      return res;
+      // Utility.print(node);
+      // Utility.print(res);
+      return node;
     } else if (indexNodes.size() == 1) {
       return indexNodes.get(0);
     }
 
-    HashMap<String, int[]> locInGraph = getLocInGraph(geomRootNode);
+    // No leaf node contains geomRootNode
+    HashMap<String, int[]> locInGraph = null;
+    if (!spatialOnly) {
+      locInGraph = getLocInGraph(geomRootNode);
+    }
     // pick the child that needs the minimum enlargement to include the new geometry
     double minimumEnlargement = Double.POSITIVE_INFINITY;
     relationships =
@@ -1037,7 +1049,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       double enlargementNeeded = getAreaEnlargement(indexNode, geomRootNode);
 
       // yuhan
-      if (Math.abs(alpha - 1.0) > 0.000000000001) {
+      if (!spatialOnly) {
         int GD = getGD(indexNode, locInGraph);
         enlargementNeeded = alpha * enlargementNeeded + (1 - alpha) * (double) GD;
       }
@@ -1052,6 +1064,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
 
     if (indexNodes.size() > 1) {
+      // This happens very rarely because it requires two enlargement to be exactly the same.
       return chooseIndexNodeWithSmallestArea(indexNodes);
     } else if (indexNodes.size() == 1) {
       return indexNodes.get(0);
@@ -1063,9 +1076,11 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   /**
    * Compute the GD by considering area of the indexNode. The reason is that GDs are often the same
-   * for all indexNodes. Coefficient of area is a very small value (0.000000001), so it only works
-   * when GDs are the same. Make sure that the coefficient * max(area) < 1, it will work as wanted.
+   * for all indexNodes. To handle the equality problem, we consider the area of indexNode.
+   * Coefficient of area is a very small value (0.000000001), so it only works when GDs are the
+   * same. Make sure that the coefficient * max(area) < 1, it will work as wanted.
    *
+   * @author yuhan
    * @param indexNodes
    * @param geomRootNode
    * @return
@@ -1372,9 +1387,11 @@ public class RTreeIndex implements SpatialIndexWriter {
       List<NodeWithEnvelope> group2, RelationshipType relationshipType) {
     // yuhan
     // remove the PN property and reconstruct in addChild() function
-    for (String property : indexNode.getAllProperties().keySet()) {
-      if (property.contains(PN_PROP_PREFFIX)) {
-        indexNode.removeProperty(property);
+    if (!spatialOnly) {
+      for (String property : indexNode.getAllProperties().keySet()) {
+        if (property.contains(PN_PROP_PREFFIX)) {
+          indexNode.removeProperty(property);
+        }
       }
     }
 
@@ -1414,7 +1431,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    */
   private boolean addChild(Node parent, RelationshipType type, Node newChild) {
     // yuhan
-    if (type.name().equals(RTreeRelationshipTypes.RTREE_REFERENCE.name())) {
+    if (spatialOnly == false && type.name().equals(RTreeRelationshipTypes.RTREE_REFERENCE.name())) {
       adjustGraphLoc(parent, newChild);
     }
 
@@ -1620,7 +1637,18 @@ public class RTreeIndex implements SpatialIndexWriter {
    * The value for spatial coefficient. Set to 1.0 if do not want to consider graph distance.
    */
   private double alpha = 1.0;
-  private int chooseSmallestGDCount = 0;//
+
+  /*
+   * Control whether the PN comes into effect. It is set along with alpha. If alpha = 1.0, this
+   * value should be true. Otherwise, false.
+   */
+  private boolean spatialOnly = true;
+
+  private int chooseSmallestGDCount = 0;
+
+  /**
+   * how many times GraphDist works when there are more than one nodes contain the geom object.
+   */
   private int differentTimes = 0;
 
   public final static String PN_PROP_PREFFIX = "PN_";
