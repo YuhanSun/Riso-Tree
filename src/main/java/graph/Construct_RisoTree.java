@@ -511,25 +511,11 @@ public class Construct_RisoTree {
       // for one hop
       Transaction tx = dbservice.beginTx();
       for (long nodeId : containIDMap.keySet()) {
-        // boolean flag = false;
-        // if (nodeId == 5774037)
-        // {
-        // OwnMethods.Print(nodeId);
-        // flag = true;
-        // }
-
         writer1.write(nodeId + "\n");
         TreeSet<Integer> pathNeighbors = new TreeSet<Integer>();
         for (int spaID : containIDMap.get(nodeId)) {
           for (int neighborID : graph.get(spaID)) {
             pathNeighbors.add(neighborID);
-            // if(flag)
-            // {
-            // if (neighborID == 32437)
-            // {
-            // OwnMethods.Print(String.format("spa id %d has neighbor %d", spaID, neighborID));
-            // }
-            // }
           }
         }
 
@@ -627,6 +613,8 @@ public class Construct_RisoTree {
       System.exit(-1);
     }
   }
+
+
 
   /**
    * One hop is directly loaded into db. Two hops is constructed based on one hop loaded, and it is

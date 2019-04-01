@@ -3,6 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<properties>
+		<!-- neo4j spatial usage -->
 		<neo4j.version>3.1.1</neo4j.version>
 		<neo4j.java.version>1.8</neo4j.java.version>
 		<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
@@ -18,6 +19,10 @@
 		<bundle.namespace>org.neo4j.gis</bundle.namespace>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<github.global.server>github</github.global.server>
+		
+		<!--  general neo4j usage -->
+		
+		<neo4j.org.version>3.4.0</neo4j.org.version>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -181,7 +186,7 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-lucene-index</artifactId>
-			<version>3.1.1</version>
+			<version>${neo4j.version}</version>
 		</dependency>
 
 		<!-- <dependency> <groupId>org.neo4j</groupId> <artifactId>neo4j-spatial</artifactId> 
@@ -193,7 +198,7 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
-			<version>3.1.1</version>
+			<version>${neo4j.version}</version>
 		</dependency>
 
 		<dependency>
@@ -211,7 +216,7 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-cypher</artifactId>
-			<version>3.1.1</version>
+			<version>${neo4j.org.version}</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/junit/junit -->

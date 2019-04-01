@@ -8,8 +8,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.TreeSet;
-import org.neo4j.cypher.internal.spi.v3_1.codegen.GeneratedMethodStructure;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
@@ -20,15 +18,14 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
+import commons.Config.Explain_Or_Profile;
+import commons.Config.system;
 import commons.Labels;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
 import commons.Utility;
-import commons.Config.Explain_Or_Profile;
-import commons.Config.system;
-import osm.OSM_Utility;
 
 /**
  * The class use NL_hopnum_label to organize neighbors. Not used any more.

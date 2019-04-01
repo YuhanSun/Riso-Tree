@@ -167,6 +167,13 @@ public class Driver {
 
 
   public static void main(String[] args) {
+    // args = new String[] {"-h"};
+    // construct rtree.
+    args = new String[] {"-f", "constructRTreeWikidata", "-dp",
+        "D:/Neo4jData/neo4jDatabases/database-0c3f32e4-025a-4a22-a4cd-a9b979a9adf8/installation-3.4.9/data/databases/graph.db",
+        "-d", "wikidata", "-ep", "D:/Project_Data/wikidata-20180308-truthy-BETA.nt/entity.txt"};
+
+
     Utility.print(Arrays.toString(args));
     Driver driver = new Driver(args);
     driver.parser();
