@@ -629,7 +629,7 @@ public class LoadDataNoOSM {
     }
   }
 
-  public void constructRTreeWikidata(String dbPath, String dataset, String eitytyPath) {
+  public void constructRTreeWikidata(String dbPath, String dataset, String entityPath) {
     try {
       Utility.print("Read entity from: " + entityPath);
       ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
