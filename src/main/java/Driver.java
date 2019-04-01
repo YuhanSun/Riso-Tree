@@ -17,6 +17,11 @@ public class Driver {
     tree, containID, // tree construction
     LoadNonSpatialEntity, GetSpatialNodeMap, LoadGraphEdges, CalculateCount, LoadAll, // graph load
     constructPN, loadPN, // PN load
+
+    /**
+     * for wikidata
+     */
+    constructRTreeWikidata,
   }
 
   private static FunctionName getFunctionEnum(String function) {
@@ -134,6 +139,14 @@ public class Driver {
           case loadPN:
             new Construct_RisoTree(new Config(), true).LoadPN(cmd.getOptionValue(PNPathAndPreffix),
                 Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)), cmd.getOptionValue(dbPath));
+            break;
+
+          /**
+           * for wikidata
+           */
+          case constructRTreeWikidata:
+            new LoadDataNoOSM(new Config(), true).constructRTreeWikidata(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath));
             break;
           default:
             Utility.print(String.format("Function %s does not exist!", functionNameString));

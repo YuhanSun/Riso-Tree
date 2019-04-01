@@ -629,6 +629,61 @@ public class LoadDataNoOSM {
     }
   }
 
+  public void constructRTreeWikidata(String dbPath, String dataset, String eitytyPath) {
+    try {
+      Utility.print("Read entity from: " + entityPath);
+      ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+
+      String layerName = dataset;
+      Utility.print("Connect to dbPath: " + dbPath);
+      GraphDatabaseService databaseService =
+          new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+      Utility.print("dataset:" + dataset + "\ndatabase:" + dbPath);
+      SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
+
+      Transaction tx = databaseService.beginTx();
+      EditableLayer layer =
+          spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
+
+      ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
+      for (Entity entity : entities) {
+        if (entity.IsSpatial) {
+          Node node = databaseService.getNodeById(entity.id);
+          geomNodes.add(node);
+        }
+      }
+
+      long start = System.currentTimeMillis();
+      layer.addAll(geomNodes);
+
+      Utility.print("in memory time: " + (System.currentTimeMillis() - start));
+      Utility.print("number of spatial objects: " + geomNodes.size());
+
+      start = System.currentTimeMillis();
+      tx.success();
+      tx.close();
+      Utility.print("commit time: " + (System.currentTimeMillis() - start));
+
+      start = System.currentTimeMillis();
+      spatialDatabaseService.getDatabase().shutdown();
+      Utility.print("shut down time: " + (System.currentTimeMillis() - start));
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+
+  /**
+   * Create spatial nodes and spatial index from any empty db. Label list assumes that each node has
+   * one label.
+   *
+   * @param dbPath
+   * @param dataset
+   * @param graphPath
+   * @param entityPath
+   * @param labelListPath
+   */
   public void batchRTreeInsertOneHopAware(String dbPath, String dataset, String graphPath,
       String entityPath, String labelListPath) {
     Utility.print("Batch insert RTree one-hop aware");
