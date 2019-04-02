@@ -15,8 +15,7 @@
 
 
 		<!-- general neo4j usage -->
-		<neo4j.version>3.2.5</neo4j.version>
-		<neo4j.org.version>3.2.5</neo4j.org.version>
+		<neo4j.org.version>3.4.12</neo4j.org.version>
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -182,7 +181,7 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-lucene-index</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j.org.version}</version>
 		</dependency>
 		
 		<dependency>
@@ -200,7 +199,7 @@
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
-			<version>${neo4j.version}</version>
+			<version>${neo4j.org.version}</version>
 		</dependency>
 
 		<dependency>
