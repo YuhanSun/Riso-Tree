@@ -529,7 +529,7 @@ public class LoadDataNoOSM {
       // SimplePointLayer simplePointLayer =
       // spatialDatabaseService.createSimplePointLayer(layerName);
       EditableLayer layer =
-          spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
+          spatialDatabaseService.getOrCreateSimplePointLayer(layerName, null, lon_name, lat_name);
       // org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
 
       ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
@@ -588,7 +588,7 @@ public class LoadDataNoOSM {
       // SimplePointLayer simplePointLayer =
       // spatialDatabaseService.createSimplePointLayer(layerName);
       EditableLayer layer =
-          spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
+          spatialDatabaseService.getOrCreateSimplePointLayer(layerName, null, lon_name, lat_name);
       // org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
 
       ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
@@ -643,7 +643,7 @@ public class LoadDataNoOSM {
 
       Transaction tx = databaseService.beginTx();
       EditableLayer layer =
-          spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
+          spatialDatabaseService.getOrCreateSimplePointLayer(layerName, null, lon_name, lat_name);
 
       ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
       for (Entity entity : entities) {
@@ -708,7 +708,7 @@ public class LoadDataNoOSM {
       // SimplePointLayer simplePointLayer =
       // spatialDatabaseService.createSimplePointLayer(layerName);
       EditableLayer layer =
-          spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
+          spatialDatabaseService.getOrCreateSimplePointLayer(layerName, null, lon_name, lat_name);
       // org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
 
       ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
@@ -799,7 +799,7 @@ public class LoadDataNoOSM {
     Transaction tx = databaseService.beginTx();
     // SimplePointLayer simplePointLayer = spatialDatabaseService.createSimplePointLayer(layerName);
     EditableLayer layer =
-        spatialDatabaseService.getOrCreatePointLayer(layerName, lon_name, lat_name);
+        spatialDatabaseService.getOrCreateSimplePointLayer(layerName, null, lon_name, lat_name);
     // org.neo4j.gis.spatial.Layer layer = spatialDatabaseService.getLayer(layerName);
 
     ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
