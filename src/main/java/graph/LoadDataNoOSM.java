@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 import org.neo4j.gis.spatial.EditableLayer;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
 import org.neo4j.graphdb.Direction;
@@ -57,6 +58,8 @@ public class LoadDataNoOSM {
 
   static String dir = "/hdd/code/yuhansun/data";
   // static String dir = "/Users/zhouyang/Google Drive/Projects/tmp/risotree/Yelp";
+
+  private static final Logger LOGGER = Logger.getLogger(LoadDataNoOSM.class.getName());
 
   static void iniParametersServer() {
     dataset = Config.Datasets.Patents_100_random_20.name();
@@ -629,6 +632,38 @@ public class LoadDataNoOSM {
     }
   }
 
+  /**
+   * For test purpose, to test constructRTreeWikidata.
+   * 
+   * @param dbPath
+   * @param entityPath
+   * @throws Exception
+   */
+  public void loadSpatialEntity(String dbPath, String entityPath) throws Exception {
+    LOGGER.info(String.format("load from %s to %s", entityPath, dbPath));
+
+    Utility.print("Read entity from: " + entityPath);
+    ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+    Utility.print("Connect to dbPath: " + dbPath);
+    BatchInserter inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile());
+    for (Entity entity : entities) {
+      if (entity.IsSpatial) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(lon_name, entity.lon);
+        properties.put(lat_name, entity.lat);
+        inserter.createNode(entity.id, properties, Label.label("test"));
+      }
+    }
+    inserter.shutdown();
+  }
+
+  /**
+   * Construct RTree for the Wikidata. Nodes have been created already.
+   *
+   * @param dbPath
+   * @param dataset
+   * @param entityPath
+   */
   public void constructRTreeWikidata(String dbPath, String dataset, String entityPath) {
     try {
       Utility.print("Read entity from: " + entityPath);
@@ -642,8 +677,7 @@ public class LoadDataNoOSM {
       SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 
       Transaction tx = databaseService.beginTx();
-      EditableLayer layer =
-          spatialDatabaseService.getOrCreateSimplePointLayer(layerName, null, lon_name, lat_name);
+      EditableLayer layer = createLayer(layerName, spatialDatabaseService);
 
       ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
       for (Entity entity : entities) {
@@ -672,6 +706,10 @@ public class LoadDataNoOSM {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  public EditableLayer createLayer(String layerName, SpatialDatabaseService service) {
+    return service.getOrCreateSimplePointLayer(layerName, null, lon_name, lat_name);
   }
 
   /**
