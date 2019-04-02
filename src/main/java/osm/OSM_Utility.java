@@ -1,29 +1,23 @@
 package osm;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import org.neo4j.cypher.internal.compiler.v3_1.codegen.setStaticField;
 import org.neo4j.gis.spatial.Layer;
 import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
-import org.neo4j.gis.spatial.osm.OSMDataset.OSMNode;
 import org.neo4j.gis.spatial.pipes.GeoPipeline;
-import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import com.vividsolutions.jts.geom.Envelope;
-import commons.Labels.*;
+import commons.Labels.OSMLabel;
+import commons.Labels.OSMRelation;
 import commons.Utility;
 
 
