@@ -170,7 +170,7 @@ public class Driver {
     // args = new String[] {"-h"};
     // construct rtree.
     // args = new String[] {"-f", "constructRTreeWikidata", "-dp",
-    // "D:/Neo4jData/neo4jDatabases/database-0c3f32e4-025a-4a22-a4cd-a9b979a9adf8/installation-3.4.9/data/databases/graph.db",
+    // "D:/Neo4jData/neo4jDatabases/database-ae5a632c-076d-42a6-ac8d-61f8f72af7f9/installation-3.4.12/data/databases/graph.db",
     // "-d", "wikidata", "-ep", "D:/Project_Data/wikidata-20180308-truthy-BETA.nt/entity.txt"};
 
 
