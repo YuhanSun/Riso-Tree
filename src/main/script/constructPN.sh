@@ -18,7 +18,7 @@ code_dir="${dir}/code"
 db_path="${data_dir}/neo4j-community-3.1.1/data/databases/graph.db"
 graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
-label_path="${data_dir}/label.txt"
+label_path="${data_dir}/graph_label.txt"
 containID_path="${data_dir}/containID.txt"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
@@ -33,10 +33,13 @@ PNPathAndPreffix="${data_dir}/PathNeighbors"
 # convert single graph to bidirectional
 java -Xmx100g -jar ${jar_path} -f convertSingleToBidirectinalGraph -dataDir ${data_dir}
 
-java -Xmx100g -jar ${jar_path} -f containID -dp ${db_path} -d ${dataset} -c ${containID_path}
+java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
+	-dp ${db_path} -d ${dataset} -c ${containID_path}
 
 ###### Wikidata Construct Path Neighbors for leaf nodes ######
-# java -Xmx100g -jar ${jar_path} -f constructPN -dp ${db_path} -c ${containID_path} -gp ${graph_path} -lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix}
+java -Xmx100g -jar ${jar_path} -f wikiConstructPNTime \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} \
+	-lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix}
 
 ###### Load PathNeighbor into db ######
 # java -Xmx100g -jar ${jar_path} -f loadPN -PNPreffix ${PNPathAndPreffix} -MAX_HOPNUM ${MAX_HOPNUM} -dp ${db_path}
