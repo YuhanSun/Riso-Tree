@@ -21,7 +21,7 @@ import commons.DrawRectangles;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.RTreeUtility;
-import commons.Utility;
+import commons.Util;
 
 public class DrawRectanglesFrame extends JFrame {
 
@@ -124,11 +124,11 @@ public class DrawRectanglesFrame extends JFrame {
   public static DrawRectanglesFrame visualizeChildrenMBR(Node node, int width) {
     List<MyRectangle> rectangles = new ArrayList<>();
     double[] bbox = (double[]) node.getProperty("bbox");
-    Utility.print("bbox: " + Arrays.toString(bbox));
+    Util.println("bbox: " + Arrays.toString(bbox));
     MyRectangle spaceExtend = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
     double height = (bbox[3] - bbox[1]) / (bbox[2] - bbox[0]) * width;
     MyRectangle drawExtend = new MyRectangle(0, 0, width, height);
-    Utility.print("draw extend: " + drawExtend);
+    Util.println("draw extend: " + drawExtend);
 
     Iterable<Relationship> rels = node.getRelationships();
     Iterator<Relationship> iterator = rels.iterator();

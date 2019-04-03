@@ -22,7 +22,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import commons.Utility;
+import commons.Util;
 
 /**
  * load spatial entity into osm layer and build the R-tree index not used any more
@@ -70,11 +70,11 @@ public class LoadData {
         Node node = record.getGeomNode();
         System.out.println(geometry.toString());
         System.out.println(node.getAllProperties());
-        Utility.print(node.getId());
+        Util.println(node.getId());
         i++;
       }
       tx.success();
-      Utility.print("count: " + i);
+      Util.println("count: " + i);
       // SearchFilter searchQuery = new SearchIntersectWindow(layer, new Envelope(0, 0, 1, 1));
       // spatialIndex.searchIndex(searchQuery);
       // SearchResults results = searchQuery.getResults();

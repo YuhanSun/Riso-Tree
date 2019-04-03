@@ -7,7 +7,7 @@ import java.util.Random;
 import commons.Config;
 import commons.Config.system;
 import commons.Query_Graph;
-import commons.Utility;
+import commons.Util;
 
 public class ExperimentLabelCount {
 
@@ -76,7 +76,7 @@ public class ExperimentLabelCount {
     String oriQueryGraphPath = querygraphDir + oriDataset + "\\5.txt";
     // OwnMethods.Print(query_Graphs.size());
     for (int labelCount : labelCountList) {
-      ArrayList<Query_Graph> query_Graphs = Utility.ReadQueryGraph_Spa(oriQueryGraphPath, 10);
+      ArrayList<Query_Graph> query_Graphs = Util.ReadQueryGraph_Spa(oriQueryGraphPath, 10);
       String curDataset = "Gowalla_" + labelCount;
       String curQueryGraphPath = querygraphDir + curDataset + "\\5.txt";
 
@@ -87,7 +87,7 @@ public class ExperimentLabelCount {
             query_Graph.label_list[i] = random.nextInt(labelCount) + 2;
         }
       }
-      Utility.WriteQueryGraph(curQueryGraphPath, query_Graphs);
+      Util.WriteQueryGraph(curQueryGraphPath, query_Graphs);
     }
   }
 

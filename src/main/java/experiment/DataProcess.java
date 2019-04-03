@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.TreeSet;
 import commons.Config;
 import commons.OwnMethods;
-import commons.Utility;
+import commons.Util;
 import commons.Config.system;
 
 public class DataProcess {
@@ -76,14 +76,14 @@ public class DataProcess {
     String singleGraphPath = String.format("%s/%s/graph_single.txt", dataDirectory, dataset);
     String bidirectionGraphPath = String.format("%s/%s/graph.txt", dataDirectory, dataset);
 
-    Utility.print("read single graph from " + singleGraphPath);
+    Util.println("read single graph from " + singleGraphPath);
     ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(singleGraphPath);
 
-    Utility.print("generate bidirectional graph");
+    Util.println("generate bidirectional graph");
     ArrayList<TreeSet<Integer>> bidirectionalGraph =
         OwnMethods.singleDirectionalToBidirectionalGraph(graph);
 
-    Utility.print("output birectional graph to " + bidirectionGraphPath);
+    Util.println("output birectional graph to " + bidirectionGraphPath);
     OwnMethods.writeGraphTreeSet(bidirectionalGraph, bidirectionGraphPath);
   }
 

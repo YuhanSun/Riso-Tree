@@ -190,7 +190,7 @@ public class Experiment {
     int limit = -1;
 
     String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
-    ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+    ArrayList<Query_Graph> queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     Query_Graph query_Graph = queryGraphs.get(query_id);
 
     String result_detail_path = null, result_avg_path = null;
@@ -256,7 +256,7 @@ public class Experiment {
         query_Graph.spa_predicate[j] = rectangle;
 
         if (!TEST_FORMAT) {
-          Utility.print(String.format("%d : %s", i, rectangle.toString()));
+          Util.println(String.format("%d : %s", i, rectangle.toString()));
 
           start = System.currentTimeMillis();
           Result result = hmbr.Query(query_Graph, limit);
@@ -297,10 +297,10 @@ public class Experiment {
 
       write_line = String.valueOf(selectivity) + "\t";
       write_line +=
-          String.format("%d\t%d\t", Utility.Average(count), Utility.Average(time_get_iterator));
+          String.format("%d\t%d\t", Util.Average(count), Util.Average(time_get_iterator));
       write_line +=
-          String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-      write_line += String.format("%d\n", Utility.Average(access));
+          String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+      write_line += String.format("%d\n", Util.Average(access));
       if (!TEST_FORMAT)
         OwnMethods.WriteFile(result_avg_path, true, write_line);
 
@@ -337,7 +337,7 @@ public class Experiment {
 
       String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
       ArrayList<Query_Graph> queryGraphs =
-          Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+          Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
       Query_Graph query_Graph = queryGraphs.get(query_id);
 
       String result_detail_path = null, result_avg_path = null;
@@ -425,7 +425,7 @@ public class Experiment {
           query_Graph.spa_predicate[j] = rectangle;
 
           if (!TEST_FORMAT) {
-            Utility.print(String.format("%d : %s", i, rectangle.toString()));
+            Util.println(String.format("%d : %s", i, rectangle.toString()));
 
             start = System.currentTimeMillis();
             risoTreeQuery.QueryHMBR(query_Graph, -1);
@@ -460,11 +460,11 @@ public class Experiment {
 
         write_line = String.valueOf(selectivity) + "\t";
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
-        write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+            String.format("%d\t%d\t", Util.Average(count), Util.Average(range_query_time));
+        write_line += String.format("%d\t", Util.Average(time_get_iterator));
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-        write_line += String.format("%d\n", Utility.Average(access));
+            String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+        write_line += String.format("%d\n", Util.Average(access));
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_avg_path, true, write_line);
 
@@ -497,13 +497,13 @@ public class Experiment {
       long time;
       int limit = -1;
 
-      Utility.print("read map from " + graph_pos_map_path);
+      Util.println("read map from " + graph_pos_map_path);
       long[] graph_pos_map_list = OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 
       String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
-      Utility.print("read query graph from " + querygraph_path);
+      Util.println("read query graph from " + querygraph_path);
       ArrayList<Query_Graph> queryGraphs =
-          Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+          Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
       Query_Graph query_Graph = queryGraphs.get(query_id);
 
       String result_detail_path = null, result_avg_path = null;
@@ -556,10 +556,10 @@ public class Experiment {
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_detail_path, true, write_line);
 
-        Utility.print("read query rectangle from " + queryrect_path);
+        Util.println("read query rectangle from " + queryrect_path);
         ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
 
-        Utility.print("initialize RisoTreeQueryPN \ndbpath: " + db_path + "\n dataset: " + dataset
+        Util.println("initialize RisoTreeQueryPN \ndbpath: " + db_path + "\n dataset: " + dataset
             + "\n MAX_HOPNUM: " + MAX_HOPNUM);
 
         RisoTreeQueryPN risoTreeQueryPN = null;
@@ -596,8 +596,8 @@ public class Experiment {
 
           if (!TEST_FORMAT) {
             // OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
-            Utility.print(query_Graph);
-            Utility.print(query_Graph.spa_predicate);
+            Util.println(query_Graph);
+            Util.println(query_Graph.spa_predicate);
 
             // prehot the database
             Result result = risoTreeQueryPN.dbservice.execute("match (n) where id(n) = 0 return n");
@@ -613,7 +613,7 @@ public class Experiment {
             total_time.add(time);
             count.add(risoTreeQueryPN.result_count);
             access.add(risoTreeQueryPN.page_hit_count);
-            Utility.print("Page access:" + risoTreeQueryPN.page_hit_count);
+            Util.println("Page access:" + risoTreeQueryPN.page_hit_count);
             range_query_time.add(risoTreeQueryPN.range_query_time);
 
             write_line = String.format("%d\t%d\t", count.get(i), range_query_time.get(i));
@@ -638,11 +638,11 @@ public class Experiment {
 
         write_line = String.valueOf(selectivity) + "\t";
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
-        write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+            String.format("%d\t%d\t", Util.Average(count), Util.Average(range_query_time));
+        write_line += String.format("%d\t", Util.Average(time_get_iterator));
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-        write_line += String.format("%d\n", Utility.Average(access));
+            String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+        write_line += String.format("%d\n", Util.Average(access));
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_avg_path, true, write_line);
 
@@ -677,7 +677,7 @@ public class Experiment {
 
       String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
       ArrayList<Query_Graph> queryGraphs =
-          Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+          Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
       Query_Graph query_Graph = queryGraphs.get(query_id);
 
       String result_detail_path = null, result_avg_path = null;
@@ -765,7 +765,7 @@ public class Experiment {
           query_Graph.spa_predicate[j] = rectangle;
 
           if (!TEST_FORMAT) {
-            Utility.print(String.format("%d : %s", i, rectangle.toString()));
+            Util.println(String.format("%d : %s", i, rectangle.toString()));
 
             start = System.currentTimeMillis();
             risoTreeQuery.Query(query_Graph, -1);
@@ -776,7 +776,7 @@ public class Experiment {
             total_time.add(time);
             count.add(risoTreeQuery.result_count);
             access.add(risoTreeQuery.page_hit_count);
-            Utility.print("Page access:" + risoTreeQuery.page_hit_count);
+            Util.println("Page access:" + risoTreeQuery.page_hit_count);
             range_query_time.add(risoTreeQuery.range_query_time);
 
             write_line = String.format("%d\t%d\t", count.get(i), range_query_time.get(i));
@@ -801,11 +801,11 @@ public class Experiment {
 
         write_line = String.valueOf(selectivity) + "\t";
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
-        write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+            String.format("%d\t%d\t", Util.Average(count), Util.Average(range_query_time));
+        write_line += String.format("%d\t", Util.Average(time_get_iterator));
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-        write_line += String.format("%d\n", Utility.Average(access));
+            String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+        write_line += String.format("%d\n", Util.Average(access));
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_avg_path, true, write_line);
 
@@ -832,9 +832,9 @@ public class Experiment {
       int limit = -1;
 
       String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
-      Utility.print("read query graph from " + querygraph_path);
+      Util.println("read query graph from " + querygraph_path);
       ArrayList<Query_Graph> queryGraphs =
-          Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+          Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
       Query_Graph query_Graph = queryGraphs.get(query_id);
 
       String result_detail_path = null, result_avg_path = null;
@@ -888,9 +888,9 @@ public class Experiment {
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_detail_path, true, write_line);
 
-        Utility.print("read query rectangle from " + queryrect_path);
+        Util.println("read query rectangle from " + queryrect_path);
         ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
-        Utility.print("initialize Naive_Neo4j_Match with db_path: " + db_path);
+        Util.println("initialize Naive_Neo4j_Match with db_path: " + db_path);
         Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
         for (int i = 0; i < experimentCount; i++) {
           MyRectangle rectangle = queryrect.get(i);
@@ -904,8 +904,8 @@ public class Experiment {
 
           if (!TEST_FORMAT) {
             // OwnMethods.Print(String.format("%d : %s", i, rectangle.toString()));
-            Utility.print(query_Graph);
-            Utility.print(query_Graph.spa_predicate);
+            Util.println(query_Graph);
+            Util.println(query_Graph.spa_predicate);
 
             // prehot the database
             Result result =
@@ -952,10 +952,10 @@ public class Experiment {
 
         write_line = String.valueOf(selectivity) + "\t";
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(count), Utility.Average(time_get_iterator));
+            String.format("%d\t%d\t", Util.Average(count), Util.Average(time_get_iterator));
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-        write_line += String.format("%d\n", Utility.Average(access));
+            String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+        write_line += String.format("%d\n", Util.Average(access));
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_avg_path, true, write_line);
 
@@ -995,7 +995,7 @@ public class Experiment {
     int limit = -1;
 
     String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
-    ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+    ArrayList<Query_Graph> queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     Query_Graph query_Graph = queryGraphs.get(query_id);
 
     String result_detail_path = null, result_avg_path = null;
@@ -1073,7 +1073,7 @@ public class Experiment {
         query_Graph.spa_predicate[j] = rectangle;
 
         if (!TEST_FORMAT) {
-          Utility.print(String.format("%d : %s", i, rectangle.toString()));
+          Util.println(String.format("%d : %s", i, rectangle.toString()));
 
           start = System.currentTimeMillis();
           spa_First_list.query_Block(query_Graph, -1);
@@ -1109,11 +1109,11 @@ public class Experiment {
 
       write_line = String.valueOf(selectivity) + "\t";
       write_line +=
-          String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
-      write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+          String.format("%d\t%d\t", Util.Average(count), Util.Average(range_query_time));
+      write_line += String.format("%d\t", Util.Average(time_get_iterator));
       write_line +=
-          String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-      write_line += String.format("%d\n", Utility.Average(access));
+          String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+      write_line += String.format("%d\n", Util.Average(access));
       if (!TEST_FORMAT)
         OwnMethods.WriteFile(result_avg_path, true, write_line);
 
@@ -1143,7 +1143,7 @@ public class Experiment {
     int nodeCount = 4;
 
     String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
-    ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+    ArrayList<Query_Graph> queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     Query_Graph query_Graph = queryGraphs.get(query_id);
 
     String result_detail_path = null, result_avg_path = null;
@@ -1217,7 +1217,7 @@ public class Experiment {
         query_Graph.spa_predicate[j] = rectangle;
 
         if (!TEST_FORMAT) {
-          Utility.print(String.format("%d : %s", i, rectangle.toString()));
+          Util.println(String.format("%d : %s", i, rectangle.toString()));
 
           start = System.currentTimeMillis();
           spa_First_list.query(query_Graph, -1);
@@ -1249,15 +1249,15 @@ public class Experiment {
 
       write_line = String.valueOf(selectivity) + "\t";
       write_line +=
-          String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
-      write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+          String.format("%d\t%d\t", Util.Average(count), Util.Average(range_query_time));
+      write_line += String.format("%d\t", Util.Average(time_get_iterator));
       write_line +=
-          String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-      write_line += String.format("%d\n", Utility.Average(access));
+          String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+      write_line += String.format("%d\n", Util.Average(access));
       if (!TEST_FORMAT)
         OwnMethods.WriteFile(result_avg_path, true, write_line);
 
-      long larger_time = Utility.Average(total_time);
+      long larger_time = Util.Average(total_time);
       if (larger_time * experimentCount > 450 * 1000)
         experimentCount =
             (int) (experimentCount * 0.5 / (larger_time * experimentCount / 450.0 / 1000.0));
@@ -1284,7 +1284,7 @@ public class Experiment {
     int limit = -1;
 
     String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
-    ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+    ArrayList<Query_Graph> queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     Query_Graph query_Graph = queryGraphs.get(query_id);
 
     String result_detail_path = null, result_avg_path = null;
@@ -1333,8 +1333,8 @@ public class Experiment {
         OwnMethods.WriteFile(result_detail_path, true, write_line);
 
       ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
-      Utility.print(db_path);
-      Utility.print(dataset);
+      Util.println(db_path);
+      Util.println(dataset);
       SpatialFirst spa_First = new SpatialFirst(db_path, dataset);
 
       ArrayList<Long> range_query_time = new ArrayList<Long>();
@@ -1355,7 +1355,7 @@ public class Experiment {
         query_Graph.spa_predicate[j] = rectangle;
 
         if (!TEST_FORMAT) {
-          Utility.print(String.format("%d : %s", i, rectangle.toString()));
+          Util.println(String.format("%d : %s", i, rectangle.toString()));
 
           start = System.currentTimeMillis();
           spa_First.query(query_Graph, -1);
@@ -1389,11 +1389,11 @@ public class Experiment {
 
       write_line = String.valueOf(selectivity) + "\t";
       write_line +=
-          String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
-      write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+          String.format("%d\t%d\t", Util.Average(count), Util.Average(range_query_time));
+      write_line += String.format("%d\t", Util.Average(time_get_iterator));
       write_line +=
-          String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-      write_line += String.format("%d\n", Utility.Average(access));
+          String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+      write_line += String.format("%d\n", Util.Average(access));
       if (!TEST_FORMAT)
         OwnMethods.WriteFile(result_avg_path, true, write_line);
 

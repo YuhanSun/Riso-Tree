@@ -14,7 +14,7 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import commons.Labels.RTreeRel;
 import commons.Neo4jGraphUtility;
-import commons.Utility;
+import commons.Util;
 
 public class Maintenance {
 
@@ -145,7 +145,7 @@ public class Maintenance {
         return Integer.parseInt(string.replaceFirst("GRAPH_", ""));
       }
     }
-    Utility.print("Node " + node + " has no label of format \"GRAPH_\\d\"");
+    Util.println("Node " + node + " has no label of format \"GRAPH_\\d\"");
     node.getGraphDatabase().shutdown();
     System.exit(-1);
     return -1;

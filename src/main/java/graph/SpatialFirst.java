@@ -22,7 +22,7 @@ import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
-import commons.Utility;
+import commons.Util;
 import commons.Config.system;
 
 /**
@@ -264,11 +264,11 @@ public class SpatialFirst {
       Transaction tx = spatialFirst.dbservice.beginTx();
       Node rootNode = RTreeUtility.getRTreeRoot(spatialFirst.dbservice, dataset_test);
       LinkedList<Node> result = spatialFirst.rangeQuery(rootNode, queryRectangle);
-      Utility.print(String.format("Result size: %d", result.size()));
+      Util.println(String.format("Result size: %d", result.size()));
       for (Node node : result) {
         Node graph_node =
             node.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();
-        Utility.print(graph_node.getId());
+        Util.println(graph_node.getId());
       }
       tx.success();
       tx.close();
@@ -287,7 +287,7 @@ public class SpatialFirst {
       int pos = 1;
       long id = 100;
       String query = spatialFirst.formSubgraphQuery(query_Graph, -1, 0, spa_predicates, pos, id);
-      Utility.print(query);
+      Util.println(query);
       spatialFirst.dbservice.shutdown();
     } catch (Exception e) {
       e.printStackTrace();
@@ -343,7 +343,7 @@ public class SpatialFirst {
         break;
     }
     query_id = 5;
-    queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+    queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     query_Graph = queryGraphs.get(query_id);
     queryRectangle = new MyRectangle(-80.119514, 26.183659, -80.112102, 26.191071);// 10
     // static MyRectangle queryRectangle = new MyRectangle(-84.468680, 33.879658, -84.428434,

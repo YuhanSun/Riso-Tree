@@ -6,7 +6,7 @@ import java.util.HashSet;
 import commons.Config;
 import commons.Entity;
 import commons.OwnMethods;
-import commons.Utility;
+import commons.Util;
 import commons.Config.Datasets;
 import commons.Config.system;
 
@@ -75,7 +75,7 @@ public class Analyze {
 
   public static void main(String[] args) {
     // TODO Auto-generated method stub
-    Utility.print(config.getDatasetName());
+    Util.println(config.getDatasetName());
     config.setDatasetName(Datasets.Yelp_100.toString());
     initParameters();
     getAverageDegree();
@@ -85,21 +85,21 @@ public class Analyze {
   }
 
   public static void getSpatialEntityCount() {
-    Utility.print("read entity from " + entityPath);
+    Util.println("read entity from " + entityPath);
     int spaCount = OwnMethods.GetSpatialEntityCount(entityPath);
-    Utility.print("spatial count: " + spaCount);
+    Util.println("spatial count: " + spaCount);
   }
 
   public static void getAverageDegree() {
-    Utility.print("read graph from " + graphPath);
+    Util.println("read graph from " + graphPath);
     ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
     int edgeCount = 0;
     for (ArrayList<Integer> neighbors : graph) {
       edgeCount += neighbors.size();
     }
-    Utility.print("node count: " + graph.size());
-    Utility.print("edge count: " + edgeCount);
-    Utility.print("average edge count: " + (double) edgeCount / graph.size());
+    Util.println("node count: " + graph.size());
+    Util.println("edge count: " + edgeCount);
+    Util.println("average edge count: " + (double) edgeCount / graph.size());
   }
 
   public static void get1HopNeighborCount() {
@@ -114,7 +114,7 @@ public class Analyze {
       int count = 0;
       int i = 0;
       for (ArrayList<Integer> list : graph) {
-        Utility.print(i);
+        Util.println(i);
         HashSet<Integer> hop2Neighbors = new HashSet<>();
         for (int neighborId : list) {
           for (int id : graph.get(neighborId))
@@ -123,7 +123,7 @@ public class Analyze {
         count += hop2Neighbors.size();
         i++;
       }
-      Utility.print("count: " + count);
+      Util.println("count: " + count);
     }
 
   }

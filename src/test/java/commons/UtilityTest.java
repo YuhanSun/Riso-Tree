@@ -38,13 +38,13 @@ public class UtilityTest {
   public void arraysDifferenceCountTest() {
     int[] arraySource = new int[] {0, 2, 5, 8, 9, 11, 12};
     int[] arrayTarget = new int[] {1, 3, 5, 7, 9};
-    assertEquals(5, Utility.arraysDifferenceCount(arraySource, arrayTarget));
+    assertEquals(5, Util.arraysDifferenceCount(arraySource, arrayTarget));
   }
 
   @Test
   public void distanceConvertTest() {
     float lat1 = 10, lat = 12, lon1 = 0, lon2 = 2;
-    Utility.print("Distance:" + Utility.distFrom(lat1, lon1, lat, lon2));
+    Util.println("Distance:" + Util.distFrom(lat1, lon1, lat, lon2));
   }
 
   @Test
@@ -52,68 +52,68 @@ public class UtilityTest {
     // double x = 0, y = 0;
     double x = 1.5, y = 1.5;
     MyRectangle rectangle = new MyRectangle(1, 1, 2, 2);
-    Utility.print(Utility.distance(x, y, rectangle));
+    Util.println(Util.distance(x, y, rectangle));
   }
 
   @Test
   public void distanceRRTest() {
     MyRectangle rectangle1 = new MyRectangle(1, 1, 2, 2);
     MyRectangle rectangle2 = new MyRectangle(0, 3, 0, 3);
-    Utility.print(Utility.distance(rectangle1, rectangle2));
+    Util.println(Util.distance(rectangle1, rectangle2));
   }
 
   @Test
   public void groupSumTest() {
     ArrayList<Integer> input = new ArrayList<Integer>(Arrays.asList(0, 1, 2));
-    ArrayList<Integer> result = Utility.groupSum(0, 2, input, 3);
-    Utility.print(result);
+    ArrayList<Integer> result = Util.groupSum(0, 2, input, 3);
+    Util.println(result);
   }
 
   @Test
   public void distanceQueryTest() {
-    Utility.print(entityPath);
+    Util.println(entityPath);
     ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
     double distance = 10;
 
     STRtree stRtree = OwnMethods.ConstructSTRee(entities);
     long start = System.currentTimeMillis();
     MyPoint point = new MyPoint(500, 500);
-    LinkedList<Entity> result = Utility.distanceQuery(stRtree, point, distance);
+    LinkedList<Entity> result = Util.distanceQuery(stRtree, point, distance);
     long time = System.currentTimeMillis() - start;
-    Utility.print(String.format("time using index: %d", time));
-    Utility.print("result size: " + result.size());
+    Util.println(String.format("time using index: %d", time));
+    Util.println("result size: " + result.size());
 
     start = System.currentTimeMillis();
     int count = 0;
     for (Entity entity : entities)
-      if (Utility.distance(entity.lon, entity.lat, point.x, point.y) <= distance)
+      if (Util.distance(entity.lon, entity.lat, point.x, point.y) <= distance)
         count++;
     time = System.currentTimeMillis() - start;
-    Utility.print("time no index: " + time);
-    Utility.print("result size " + count);
+    Util.println("time no index: " + time);
+    Util.println("result size " + count);
   }
 
   @Test
   public void sortedListIntersectTest() {
     ArrayList<Integer> l1 = new ArrayList<>(Arrays.asList(1, 2, 4));
     int[] l2 = {3};
-    Utility.print(Utility.sortedListIntersect(l1, l2));
+    Util.println(Util.sortedListIntersect(l1, l2));
 
     l1 = new ArrayList<>();
     l1.add(1);
     int[] l3 = {1, 2, 3, 4};
-    Utility.print(Utility.sortedListIntersect(l1, l3));
+    Util.println(Util.sortedListIntersect(l1, l3));
   }
 
   @Test
   public void isSortedIntersectTest() {
     ArrayList<Integer> l1 = new ArrayList<>(Arrays.asList(1, 2, 4));
     ArrayList<Integer> l2 = new ArrayList<>(Arrays.asList(3));
-    Utility.print(Utility.isSortedIntersect(l1, l2));
+    Util.println(Util.isSortedIntersect(l1, l2));
 
     l1 = new ArrayList<>(Arrays.asList(1, 2, 4));
     l2 = new ArrayList<>(Arrays.asList(2));
-    Utility.print(Utility.isSortedIntersect(l1, l2));
+    Util.println(Util.isSortedIntersect(l1, l2));
   }
 
   /**
@@ -122,13 +122,13 @@ public class UtilityTest {
   @Test
   public void arrayListToArrayIntTest() {
     ArrayList<Integer> arrayList = null;
-    Utility.print(Utility.arrayListToArrayInt(arrayList));
+    Util.println(Util.arrayListToArrayInt(arrayList));
 
     arrayList = new ArrayList<>();
-    Utility.print(Arrays.toString(Utility.arrayListToArrayInt(arrayList)));
+    Util.println(Arrays.toString(Util.arrayListToArrayInt(arrayList)));
 
     arrayList = new ArrayList<>(Arrays.asList(0, 1));
-    Utility.print(Arrays.toString(Utility.arrayListToArrayInt(arrayList)));
+    Util.println(Arrays.toString(Util.arrayListToArrayInt(arrayList)));
   }
 
   /**
@@ -138,12 +138,12 @@ public class UtilityTest {
   public void sortedArrayMergeTest() {
     int[] i1 = new int[] {0, 2, 4};
     int[] i2 = new int[] {0, 2, 4};
-    Utility.print(Arrays.toString(Utility.sortedArrayMerge(i1, i2)));
+    Util.println(Arrays.toString(Util.sortedArrayMerge(i1, i2)));
 
     i2 = new int[] {0, 1, 2};
-    Utility.print(Arrays.toString(Utility.sortedArrayMerge(i1, i2)));
+    Util.println(Arrays.toString(Util.sortedArrayMerge(i1, i2)));
 
     i2 = new int[] {1, 4, 5};
-    Utility.print(Arrays.toString(Utility.sortedArrayMerge(i1, i2)));
+    Util.println(Arrays.toString(Util.sortedArrayMerge(i1, i2)));
   }
 }

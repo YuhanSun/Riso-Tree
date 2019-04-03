@@ -9,7 +9,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import commons.Config;
 import commons.Config.system;
-import commons.Utility;
+import commons.Util;
 
 public class LoadDataNoOSMTest {
 
@@ -91,12 +91,12 @@ public class LoadDataNoOSMTest {
   public void nodeMapTest() {
     Transaction tx = databaseService.beginTx();
     Node node = databaseService.getNodeById(78589);
-    Utility.print(node);
-    Utility.print(node.getAllProperties());
+    Util.println(node);
+    Util.println(node.getAllProperties());
 
     node = databaseService.getNodeById(10353);
-    Utility.print(node);
-    Utility.print(node.getAllProperties());
+    Util.println(node);
+    Util.println(node.getAllProperties());
 
     tx.success();
     tx.close();

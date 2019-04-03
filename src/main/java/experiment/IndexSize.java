@@ -22,7 +22,7 @@ import commons.Entity;
 import commons.Labels.RTreeRel;
 import commons.OwnMethods;
 import commons.RTreeUtility;
-import commons.Utility;
+import commons.Util;
 import graph.Construct_RisoTree;
 
 public class IndexSize {
@@ -108,7 +108,7 @@ public class IndexSize {
   public static void graphSize() {
     try {
       ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
-      Utility.print(OwnMethods.getGraphSize(graph));
+      Util.println(OwnMethods.getGraphSize(graph));
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -146,7 +146,7 @@ public class IndexSize {
         nodeID = Long.parseLong(line);
       }
       reader.close();
-      Utility.print("2 hop size:" + count * 4 + " bytes");
+      Util.println("2 hop size:" + count * 4 + " bytes");
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -158,7 +158,7 @@ public class IndexSize {
   public static void getTwoHopIndexSize() {
     try {
       int count = 0;// count of integers stored in each list
-      Utility.print(db_path);
+      Util.println(db_path);
       GraphDatabaseService databaseService =
           new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
       Transaction tx = databaseService.beginTx();
@@ -173,7 +173,7 @@ public class IndexSize {
             count++;
           }
       }
-      Utility.print("Two hop index:" + count * 4 + " bytes");
+      Util.println("Two hop index:" + count * 4 + " bytes");
       tx.success();
       tx.close();
       databaseService.shutdown();
@@ -188,7 +188,7 @@ public class IndexSize {
   public static void getOneHopIndexFromFile() {
     try {
       String indexPath = PNPath + "_1";
-      Utility.print("read index from " + indexPath);
+      Util.println("read index from " + indexPath);
       BufferedReader reader = new BufferedReader(new FileReader(new File(indexPath)));
       String line = null;
       line = reader.readLine();
@@ -215,7 +215,7 @@ public class IndexSize {
         nodeID = Long.parseLong(line);
       }
       reader.close();
-      Utility.print("1 hop size:" + count * 4 + " bytes");
+      Util.println("1 hop size:" + count * 4 + " bytes");
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -227,7 +227,7 @@ public class IndexSize {
   public static void getOneHopIndexSize() {
     try {
       int count = 0;// count of integers stored in each list
-      Utility.print(db_path);
+      Util.println(db_path);
       GraphDatabaseService databaseService =
           new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
       Transaction tx = databaseService.beginTx();
@@ -242,7 +242,7 @@ public class IndexSize {
             count++;
           }
       }
-      Utility.print("One hop index:" + count * 4 + " bytes");
+      Util.println("One hop index:" + count * 4 + " bytes");
       tx.success();
       tx.close();
       databaseService.shutdown();
@@ -256,7 +256,7 @@ public class IndexSize {
    */
   public static void getRTreeSize() {
     try {
-      Utility.print(db_path);
+      Util.println(db_path);
       GraphDatabaseService databaseService =
           new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
       Transaction tx = databaseService.beginTx();
@@ -282,7 +282,7 @@ public class IndexSize {
       ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
       int spaCount = OwnMethods.GetSpatialEntityCount(entities);
       count += spaCount;
-      Utility.print("RTree size:" + count * 5 * 4 + " bytes");
+      Util.println("RTree size:" + count * 5 * 4 + " bytes");
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -296,7 +296,7 @@ public class IndexSize {
     try {
       int size = 0;
       int visitedNodeCount = 0;
-      Utility.print(db_path);
+      Util.println(db_path);
       GraphDatabaseService databaseService =
           new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
       Transaction tx = databaseService.beginTx();
@@ -311,7 +311,7 @@ public class IndexSize {
               int NL_size = (Integer) node.getProperty(NL_size_propertyname);
               size += NL_size;
             } else
-              Utility.print(String.format("Not has %s", NL_size_propertyname));
+              Util.println(String.format("Not has %s", NL_size_propertyname));
           }
         }
       }
@@ -348,8 +348,8 @@ public class IndexSize {
       tx.close();
       databaseService.shutdown();
 
-      Utility.print(String.format("visited node count: %d", visitedNodeCount));
-      Utility.print(String.format("index size:%d", size * 4));
+      Util.println(String.format("visited node count: %d", visitedNodeCount));
+      Util.println(String.format("index size:%d", size * 4));
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -361,7 +361,7 @@ public class IndexSize {
     try {
       int size = 0;
       int visitedNodeCount = 0;
-      Utility.print(db_path);
+      Util.println(db_path);
       GraphDatabaseService databaseService =
           new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
       Transaction tx = databaseService.beginTx();
@@ -387,8 +387,8 @@ public class IndexSize {
       tx.close();
       databaseService.shutdown();
 
-      Utility.print(String.format("visited node count: %d", visitedNodeCount));
-      Utility.print(String.format("index size:%d", size));
+      Util.println(String.format("visited node count: %d", visitedNodeCount));
+      Util.println(String.format("index size:%d", size));
     } catch (Exception e) {
       e.printStackTrace();
     }

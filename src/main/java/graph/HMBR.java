@@ -10,7 +10,7 @@ import commons.Config;
 import commons.Labels;
 import commons.MyRectangle;
 import commons.Query_Graph;
-import commons.Utility;
+import commons.Util;
 
 public class HMBR {
 
@@ -169,7 +169,7 @@ public class HMBR {
 
     String query = FormCypherQuery(query_Graph, limit, minhop_index, true);
 
-    Utility.print(query);
+    Util.println(query);
     Result result = dbservice.execute(query);
     return result;
   }

@@ -28,7 +28,7 @@ import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
-import commons.Utility;
+import commons.Util;
 import commons.Config.Explain_Or_Profile;
 import commons.Neo4jGraphUtility;
 import knn.Element;
@@ -424,7 +424,7 @@ public class RisoTreeQueryPN {
     // query += String.format(" id(a%d) in %s\n", pos, ids.toString());
 
     query += ")\n";
-    Utility.print(String.format("spa_ids size: %d", ids.size()));
+    Util.println(String.format("spa_ids size: %d", ids.size()));
 
     // NL_id_list
     // for ( int key : NL_hopnum.keySet())
@@ -852,7 +852,7 @@ public class RisoTreeQueryPN {
    */
   public void Query(Query_Graph query_Graph, int limit) {
     try {
-      Utility.print("Initialize variables for query");
+      Util.println("Initialize variables for query");
       range_query_time = 0;
       get_iterator_time = 0;
       iterate_time = 0;
@@ -905,7 +905,7 @@ public class RisoTreeQueryPN {
 
       if (outputLevelInfo) {
         logWriteLine = String.format("min_hop: %s\nNL_property: %s", min_hop, PN_size_propertyname);
-        Utility.print(logWriteLine);
+        Util.println(logWriteLine);
         OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
       }
 
@@ -955,12 +955,12 @@ public class RisoTreeQueryPN {
         if (outputLevelInfo) {
           logWriteLine = String.format("level %d time: %d", level_index,
               System.currentTimeMillis() - startLevel);
-          Utility.print(logWriteLine);
+          Util.println(logWriteLine);
           OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
         }
 
         if (overlap_MBR_list.isEmpty() == true) {
-          Utility.print("No result satisfy the query.");
+          Util.println("No result satisfy the query.");
           tx.success();
           tx.close();
           return;
@@ -1043,7 +1043,7 @@ public class RisoTreeQueryPN {
 
             if (outputLevelInfo) {
               logWriteLine = String.format("spa_card %d %f", key, spa_card);
-              Utility.print(logWriteLine);
+              Util.println(logWriteLine);
               OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
             }
 
@@ -1061,7 +1061,7 @@ public class RisoTreeQueryPN {
                 if (outputLevelInfo) {
                   logWriteLine = String.format("%d %d %s estimate size: %f", key, neighbor_id,
                       properName, card);
-                  Utility.print(logWriteLine);
+                  Util.println(logWriteLine);
                   OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
                 }
               }
@@ -1070,7 +1070,7 @@ public class RisoTreeQueryPN {
           if (outputLevelInfo) {
             logWriteLine = String.format("level %d min card : %f", level_index,
                 Math.min(min_spa_card, min_NL_card));
-            Utility.print(logWriteLine);
+            Util.println(logWriteLine);
             OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
           }
 
@@ -1104,18 +1104,18 @@ public class RisoTreeQueryPN {
                 String.format("NL_serialize time: %d\n", System.currentTimeMillis() - start1);
             logWriteLine += String.format("level %d time: %d\n", level_index,
                 System.currentTimeMillis() - startLevel);
-            Utility.print(logWriteLine);
+            Util.println(logWriteLine);
             OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
           }
 
           // if PN is more selective than spatial predicate
           if (forceGraphFirst) {
-            Utility.print("force graph first even min PN size is " + realMinPNSize);
+            Util.println("force graph first even min PN size is " + realMinPNSize);
             realMinPNSize = 0;
           }
 
           if (realMinPNSize < min_spa_card) {
-            Utility.print("PN is more selective");
+            Util.println("PN is more selective");
             int index = 0;
             ArrayList<Long> id_pos_list = new ArrayList<Long>();
             double idIndex = 0;
@@ -1125,11 +1125,11 @@ public class RisoTreeQueryPN {
               id_pos_list.add(graph_pos_map_list[id]);
               index++;
               if (index == 500) {
-                Utility.print("Executed percentage: " + idIndex / min_NL_list.size());
+                Util.println("Executed percentage: " + idIndex / min_NL_list.size());
                 String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile,
                     spa_predicates, min_NL_neighbor_id, id_pos_list);
                 if (outputQuery) {
-                  Utility.print(query);
+                  Util.println(query);
                   OwnMethods.WriteFile(logPath, true, query + "\n");
                 }
 
@@ -1143,7 +1143,7 @@ public class RisoTreeQueryPN {
                   cur_count++;
                   Map<String, Object> row = result.next();
                   if (outputResult)
-                    Utility.print(row);
+                    Util.println(row);
                 }
                 iterate_time += System.currentTimeMillis() - start;
 
@@ -1151,12 +1151,12 @@ public class RisoTreeQueryPN {
                 ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
                 page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
                 if (outputExecutionPlan) {
-                  Utility.print(planDescription);
+                  Util.println(planDescription);
 
-                  Utility
-                      .print("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
+                  Util
+                      .println("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
                   if (planDescription.hasProfilerStatistics())
-                    Utility.print("cypher statistics: "
+                    Util.println("cypher statistics: "
                         + planDescription.getProfilerStatistics().getDbHits());
                   else
                     throw new Exception("planDescription has no statistics!!");
@@ -1170,17 +1170,17 @@ public class RisoTreeQueryPN {
 
             if (outputLevelInfo) {
               logWriteLine = "id list size: " + id_pos_list.size();
-              Utility.print(logWriteLine);
+              Util.println(logWriteLine);
               OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
             }
 
             if (id_pos_list.size() != 0) {
-              Utility.print("Executed percentage: " + idIndex / min_NL_list.size());
+              Util.println("Executed percentage: " + idIndex / min_NL_list.size());
               String query = formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile,
                   spa_predicates, min_NL_neighbor_id, id_pos_list);
 
               if (outputQuery) {
-                Utility.print(query);
+                Util.println(query);
                 OwnMethods.WriteFile(logPath, true, query + "\n");
               }
 
@@ -1194,7 +1194,7 @@ public class RisoTreeQueryPN {
                 cur_count++;
                 Map<String, Object> row = result.next();
                 if (outputResult)
-                  Utility.print(row);
+                  Util.println(row);
               }
               iterate_time += System.currentTimeMillis() - start;
 
@@ -1202,11 +1202,11 @@ public class RisoTreeQueryPN {
               ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
               page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
               if (outputExecutionPlan) {
-                Utility.print(planDescription);
+                Util.println(planDescription);
 
-                Utility.print("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
+                Util.println("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
                 if (planDescription.hasProfilerStatistics())
-                  Utility.print(
+                  Util.println(
                       "cypher statistics: " + planDescription.getProfilerStatistics().getDbHits());
                 else
                   throw new Exception("planDescription has no statistics!!");
@@ -1247,13 +1247,13 @@ public class RisoTreeQueryPN {
               levelTime += time;
 
               if (ids.size() != 0) {
-                Utility.print("Execute percentage: " + nodeIndex / overlap_MBR_list.size());
+                Util.println("Execute percentage: " + nodeIndex / overlap_MBR_list.size());
                 start = System.currentTimeMillis();
                 String query = formSubgraphQuery_ForSpatialFirst_Block(query_Graph, limit,
                     Explain_Or_Profile.Profile, spa_predicates, minSpaID, ids,
                     min_hop.get(minSpaID), node);
                 if (outputQuery) {
-                  Utility.print(query);
+                  Util.println(query);
                   OwnMethods.WriteFile(logPath, true, query + "\n");
                 }
 
@@ -1266,7 +1266,7 @@ public class RisoTreeQueryPN {
                   cur_count++;
                   Map<String, Object> row = result.next();
                   if (outputResult)
-                    Utility.print(row);
+                    Util.println(row);
                 }
                 iterate_time += System.currentTimeMillis() - start;
 
@@ -1274,12 +1274,12 @@ public class RisoTreeQueryPN {
                 ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
                 page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
                 if (outputExecutionPlan) {
-                  Utility.print(planDescription);
+                  Util.println(planDescription);
 
-                  Utility
-                      .print("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
+                  Util
+                      .println("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
                   if (planDescription.hasProfilerStatistics())
-                    Utility.print("cypher statistics: "
+                    Util.println("cypher statistics: "
                         + planDescription.getProfilerStatistics().getDbHits());
                   else
                     throw new Exception("planDescription has no statistics!!");
@@ -1292,7 +1292,7 @@ public class RisoTreeQueryPN {
               logWriteLine = String.format("level %d\n", level_index);
               logWriteLine += String.format("Located in nodes: %d\n", located_in_count);
               logWriteLine += String.format("level %d time: %d", level_index, levelTime);
-              Utility.print(logWriteLine);
+              Util.println(logWriteLine);
               OwnMethods.WriteFile(logPath, true, logWriteLine + "\n\n");
             }
             tx.success();
@@ -1387,7 +1387,7 @@ public class RisoTreeQueryPN {
     // query += String.format(" id(a%d) in %s\n", pos, ids.toString());
 
     query += ")\n";
-    Utility.print(String.format("spa_ids size: %d", ids.size()));
+    Util.println(String.format("spa_ids size: %d", ids.size()));
 
     // HMBR
     // for ( int key : spa_predicates.keySet())
@@ -1435,7 +1435,7 @@ public class RisoTreeQueryPN {
           query += String.format(" or id(a%d) = %d", key, pos_id_list.get(i));
         query += " )\n";
         // query += String.format(" and id(a%d) in %s\n", key, pos_id_list.toString());
-        Utility.print(String.format("%s size is %d", id_list_property_name, pos_id_list.size()));
+        Util.println(String.format("%s size is %d", id_list_property_name, pos_id_list.size()));
       }
     }
 
@@ -1722,7 +1722,7 @@ public class RisoTreeQueryPN {
             }
             double[] bbox = (double[]) child.getProperty("bbox");
             MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
-            queue.add(new Element(child, Utility.distance(queryLoc, MBR)));
+            queue.add(new Element(child, Util.distance(queryLoc, MBR)));
 
           }
         }
@@ -1739,7 +1739,7 @@ public class RisoTreeQueryPN {
             else {
               double lon = (Double) object;
               double lat = (Double) geom.getProperty(lat_name);
-              queue.add(new Element(geom, Utility.distance(queryLoc, new MyPoint(lon, lat))));
+              queue.add(new Element(geom, Util.distance(queryLoc, new MyPoint(lon, lat))));
             }
           }
         }
@@ -1841,7 +1841,7 @@ public class RisoTreeQueryPN {
 
       if (outputLevelInfo) {
         logWriteLine = String.format("min_hop: %s\nNL_property: %s", min_hop, NL_size_propertyname);
-        Utility.print(logWriteLine);
+        Util.println(logWriteLine);
         OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
       }
 
@@ -1924,7 +1924,7 @@ public class RisoTreeQueryPN {
 
         if (outputLevelInfo) {
           logWriteLine = String.format("level %d", level_index);
-          Utility.print(logWriteLine);
+          Util.println(logWriteLine);
           OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
         }
 
@@ -1943,7 +1943,7 @@ public class RisoTreeQueryPN {
 
           if (outputLevelInfo) {
             logWriteLine = String.format("spa_card %d %f", key, spa_card);
-            Utility.print(logWriteLine);
+            Util.println(logWriteLine);
             OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
           }
 
@@ -1958,7 +1958,7 @@ public class RisoTreeQueryPN {
             if (outputLevelInfo) {
               logWriteLine = String.format("NL_size %d %d %s", key, neighbor_id,
                   NL_cards_vector.get(neighbor_id).toString());
-              Utility.print(logWriteLine);
+              Util.println(logWriteLine);
               OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
             }
           }
@@ -1967,12 +1967,12 @@ public class RisoTreeQueryPN {
         if (outputLevelInfo) {
           logWriteLine = String.format("level %d min card : %f", level_index,
               Math.min(min_spa_card, min_NL_card));
-          Utility.print(logWriteLine);
+          Util.println(logWriteLine);
           OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
         }
 
         if (overlap_MBR_list.isEmpty() == true) {
-          Utility.print("No result satisfy the query.");
+          Util.println("No result satisfy the query.");
           return;
         }
 
@@ -2000,7 +2000,7 @@ public class RisoTreeQueryPN {
               String.format("NL_serialize time: %d\n", System.currentTimeMillis() - start1);
           logWriteLine += String.format("level %d time: %d\n", level_index,
               System.currentTimeMillis() - startLevel);
-          Utility.print(logWriteLine);
+          Util.println(logWriteLine);
           OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
         }
         range_query_time += System.currentTimeMillis() - startLevel;
@@ -2019,7 +2019,7 @@ public class RisoTreeQueryPN {
                 String query = formSubgraphQuery_HMBR(query_Graph, -1, Explain_Or_Profile.Profile,
                     spa_predicates, min_NL_neighbor_id, id_pos_list, min_hop_array);
                 if (outputQuery) {
-                  Utility.print(query);
+                  Util.println(query);
                   OwnMethods.WriteFile(logPath, true, query + "\n");
                 }
 
@@ -2033,7 +2033,7 @@ public class RisoTreeQueryPN {
                   cur_count++;
                   Map<String, Object> row = result.next();
                   if (outputResult)
-                    Utility.print(row);
+                    Util.println(row);
                 }
                 iterate_time += System.currentTimeMillis() - start;
 
@@ -2041,7 +2041,7 @@ public class RisoTreeQueryPN {
                 ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
                 page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
                 if (outputExecutionPlan) {
-                  Utility.print(planDescription);
+                  Util.println(planDescription);
                   OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
                 }
                 index = 0;
@@ -2051,7 +2051,7 @@ public class RisoTreeQueryPN {
 
             if (outputLevelInfo) {
               logWriteLine = "id list size: " + id_pos_list.size();
-              Utility.print(logWriteLine);
+              Util.println(logWriteLine);
               OwnMethods.WriteFile(logPath, true, logWriteLine + "\n");
             }
 
@@ -2060,7 +2060,7 @@ public class RisoTreeQueryPN {
                   spa_predicates, min_NL_neighbor_id, id_pos_list, min_hop_array);
 
               if (outputQuery) {
-                Utility.print(query);
+                Util.println(query);
                 OwnMethods.WriteFile(logPath, true, query + "\n");
               }
 
@@ -2074,7 +2074,7 @@ public class RisoTreeQueryPN {
                 cur_count++;
                 Map<String, Object> row = result.next();
                 if (outputResult)
-                  Utility.print(row);
+                  Util.println(row);
               }
               iterate_time += System.currentTimeMillis() - start;
 
@@ -2082,7 +2082,7 @@ public class RisoTreeQueryPN {
               ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
               page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
               if (outputExecutionPlan) {
-                Utility.print(planDescription);
+                Util.println(planDescription);
                 OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
               }
             }
@@ -2119,7 +2119,7 @@ public class RisoTreeQueryPN {
                     Explain_Or_Profile.Profile, spa_predicates, minSpaID, ids,
                     min_hop.get(minSpaID), node, min_hop_array);
                 if (outputQuery) {
-                  Utility.print(query);
+                  Util.println(query);
                   OwnMethods.WriteFile(logPath, true, query + "\n");
                 }
 
@@ -2132,7 +2132,7 @@ public class RisoTreeQueryPN {
                   cur_count++;
                   Map<String, Object> row = result.next();
                   if (outputResult)
-                    Utility.print(row);
+                    Util.println(row);
                 }
                 iterate_time += System.currentTimeMillis() - start;
 
@@ -2140,7 +2140,7 @@ public class RisoTreeQueryPN {
                 ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
                 page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
                 if (outputExecutionPlan) {
-                  Utility.print(planDescription);
+                  Util.println(planDescription);
                   OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
                 }
               }
@@ -2149,7 +2149,7 @@ public class RisoTreeQueryPN {
               logWriteLine = String.format("level %d\n", level_index);
               logWriteLine += String.format("Located in nodes: %d\n", located_in_count);
               logWriteLine += String.format("level %d time: %d", level_index, levelTime);
-              Utility.print(logWriteLine);
+              Util.println(logWriteLine);
               OwnMethods.WriteFile(logPath, true, logWriteLine + "\n\n");
             }
             return;
@@ -2280,7 +2280,7 @@ public class RisoTreeQueryPN {
             pn.add(element);
           isFirst = false;
         } else
-          pn = Utility.sortedListIntersect(pn, l);
+          pn = Util.sortedListIntersect(pn, l);
       }
       pnMap.put(id, pn);
     }
@@ -2330,7 +2330,7 @@ public class RisoTreeQueryPN {
         for (Relationship relationship : rels) {
           Node child = relationship.getEndNode();
           MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-          if (Utility.distance(mbr, right.rectangle) <= distance)
+          if (Util.distance(mbr, right.rectangle) <= distance)
             leftChildren.add(new NodeAndRec(child, mbr));
         }
 
@@ -2338,13 +2338,13 @@ public class RisoTreeQueryPN {
         for (Relationship relationship : rels) {
           Node child = relationship.getEndNode();
           MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-          if (Utility.distance(mbr, left.rectangle) <= distance)
+          if (Util.distance(mbr, left.rectangle) <= distance)
             rightChildern.add(new NodeAndRec(child, mbr));
         }
 
         for (NodeAndRec leftChild : leftChildren)
           for (NodeAndRec rightChild : rightChildern)
-            if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
+            if (Util.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
               long id1 = leftChild.node.getId();
               long id2 = rightChild.node.getId();
               if (id1 != id2)
@@ -2366,7 +2366,7 @@ public class RisoTreeQueryPN {
           for (Relationship relationship : rels) {
             Node child = relationship.getEndNode();
             MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-            if (Utility.distance(mbr, right.rectangle) <= distance)
+            if (Util.distance(mbr, right.rectangle) <= distance)
               leftChildren.add(new NodeAndRec(child, mbr));
           }
 
@@ -2374,13 +2374,13 @@ public class RisoTreeQueryPN {
           for (Relationship relationship : rels) {
             Node child = relationship.getEndNode();
             MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-            if (Utility.distance(mbr, left.rectangle) <= distance)
+            if (Util.distance(mbr, left.rectangle) <= distance)
               rightChildern.add(new NodeAndRec(child, mbr));
           }
 
           for (NodeAndRec leftChild : leftChildren) {
             for (NodeAndRec rightChild : rightChildern) {
-              if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
+              if (Util.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
                 NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
                 nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
                 nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);
@@ -2400,7 +2400,7 @@ public class RisoTreeQueryPN {
             }
             check_paths_time += System.currentTimeMillis() - start1;
             MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-            if (Utility.distance(mbr, right.rectangle) <= distance)
+            if (Util.distance(mbr, right.rectangle) <= distance)
               leftChildren.add(new NodeAndRec(child, mbr));
           }
 
@@ -2414,13 +2414,13 @@ public class RisoTreeQueryPN {
             }
             check_paths_time += System.currentTimeMillis() - start1;
             MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-            if (Utility.distance(mbr, left.rectangle) <= distance)
+            if (Util.distance(mbr, left.rectangle) <= distance)
               rightChildern.add(new NodeAndRec(child, mbr));
           }
 
           for (NodeAndRec leftChild : leftChildren) {
             for (NodeAndRec rightChild : rightChildern) {
-              if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
+              if (Util.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
                 NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
                 nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
                 nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);
@@ -2448,7 +2448,7 @@ public class RisoTreeQueryPN {
       HashMap<Integer, ArrayList<Integer>> pnListLeft,
       HashMap<Integer, ArrayList<Integer>> pnListRight) {
     for (int id : overlapVertices) {
-      if (Utility.isSortedIntersect(pnListLeft.get(id), pnListRight.get(id)) == false)
+      if (Util.isSortedIntersect(pnListLeft.get(id), pnListRight.get(id)) == false)
         return false;
     }
     return true;
@@ -2502,7 +2502,7 @@ public class RisoTreeQueryPN {
         for (Relationship relationship : rels) {
           Node child = relationship.getEndNode();
           MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-          if (Utility.distance(mbr, right.rectangle) <= distance)
+          if (Util.distance(mbr, right.rectangle) <= distance)
             leftChildren.add(new NodeAndRec(child, mbr));
         }
 
@@ -2510,13 +2510,13 @@ public class RisoTreeQueryPN {
         for (Relationship relationship : rels) {
           Node child = relationship.getEndNode();
           MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-          if (Utility.distance(mbr, left.rectangle) <= distance)
+          if (Util.distance(mbr, left.rectangle) <= distance)
             rightChildern.add(new NodeAndRec(child, mbr));
         }
 
         for (NodeAndRec leftChild : leftChildren)
           for (NodeAndRec rightChild : rightChildern)
-            if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
+            if (Util.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
               long id1 = leftChild.node.getId();
               long id2 = rightChild.node.getId();
               if (id1 != id2)
@@ -2538,7 +2538,7 @@ public class RisoTreeQueryPN {
           for (Relationship relationship : rels) {
             Node child = relationship.getEndNode();
             MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-            if (Utility.distance(mbr, right.rectangle) <= distance)
+            if (Util.distance(mbr, right.rectangle) <= distance)
               leftChildren.add(new NodeAndRec(child, mbr));
           }
 
@@ -2546,13 +2546,13 @@ public class RisoTreeQueryPN {
           for (Relationship relationship : rels) {
             Node child = relationship.getEndNode();
             MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-            if (Utility.distance(mbr, left.rectangle) <= distance)
+            if (Util.distance(mbr, left.rectangle) <= distance)
               rightChildern.add(new NodeAndRec(child, mbr));
           }
 
           for (NodeAndRec leftChild : leftChildren) {
             for (NodeAndRec rightChild : rightChildern) {
-              if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
+              if (Util.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
                 NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
                 nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
                 nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);
@@ -2573,7 +2573,7 @@ public class RisoTreeQueryPN {
             }
             check_paths_time += System.currentTimeMillis() - start1;
             MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-            if (Utility.distance(mbr, right.rectangle) <= distance) {
+            if (Util.distance(mbr, right.rectangle) <= distance) {
               leftChildren.add(new NodeAndRec(child, mbr));
               start1 = System.currentTimeMillis();
               HashMap<Integer, ArrayList<Integer>> pn = constructPN(child, lp, overlapVertices);
@@ -2593,7 +2593,7 @@ public class RisoTreeQueryPN {
             }
             check_paths_time += System.currentTimeMillis() - start1;
             MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-            if (Utility.distance(mbr, left.rectangle) <= distance) {
+            if (Util.distance(mbr, left.rectangle) <= distance) {
               rightChildern.add(new NodeAndRec(child, mbr));
               start1 = System.currentTimeMillis();
               HashMap<Integer, ArrayList<Integer>> pn = constructPN(child, rp, overlapVertices);
@@ -2611,7 +2611,7 @@ public class RisoTreeQueryPN {
               long start1 = System.currentTimeMillis();
               boolean isIntersect = isIntersect(overlapVertices, pnLeft, pnRight);
               check_overlap_time += System.currentTimeMillis() - start1;
-              if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance
+              if (Util.distance(leftChild.rectangle, rightChild.rectangle) <= distance
                   && isIntersect) {
                 NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
                 nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
@@ -2656,14 +2656,14 @@ public class RisoTreeQueryPN {
       HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
 
       long start = System.currentTimeMillis();
-      Utility.print(pos);
-      Utility.print(spaPathsMap);
+      Util.println(pos);
+      Util.println(spaPathsMap);
       List<Long[]> idPairs = this.spatialJoinRTreeOverlap(distance, pos, spaPathsMap);
       // List<Long[]> idPairs = this.spatialJoinRTree(distance, pos, spaPathsMap);
       join_time = System.currentTimeMillis() - start;
       join_result_count = idPairs.size();
-      Utility.print("join time: " + join_time);
-      Utility.print("join count: " + idPairs.size());
+      Util.println("join time: " + join_time);
+      Util.println("join count: " + idPairs.size());
 
       for (Long[] idPair : idPairs) {
         start = System.currentTimeMillis();

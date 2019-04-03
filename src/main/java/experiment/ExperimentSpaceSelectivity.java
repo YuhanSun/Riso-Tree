@@ -17,7 +17,7 @@ import commons.Config;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
-import commons.Utility;
+import commons.Util;
 import commons.Config.system;
 import graph.Naive_Neo4j_Match;
 import graph.Neo4j_API;
@@ -280,8 +280,8 @@ public class ExperimentSpaceSelectivity {
             if (total_range.min_x < 0) {
               double sideLength = Math.sqrt((double) area);
               sideLength *= 1000;
-              double deltaLongitude = Utility.distToLongitude(sideLength);
-              double deltaLatitude = Utility.distToLatitude(sideLength, centerX, centerY);
+              double deltaLongitude = Util.distToLongitude(sideLength);
+              double deltaLatitude = Util.distToLatitude(sideLength, centerX, centerY);
               double offsetLon = deltaLongitude / 2.0;
               double offsetLat = deltaLatitude / 2.0;
               write_line = String.format("%f\t%f\t%f\t%f\n", centerX - offsetLon,
@@ -342,7 +342,7 @@ public class ExperimentSpaceSelectivity {
               break;
           }
 
-          Utility.print("Write query rectangles to " + output_path);
+          Util.println("Write query rectangles to " + output_path);
           String write_line = "";
           for (int j = 0; j < experiment_count; j++) {
             MyRectangle rectangle =
@@ -369,7 +369,7 @@ public class ExperimentSpaceSelectivity {
 
       String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
       ArrayList<Query_Graph> queryGraphs =
-          Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+          Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
       Query_Graph query_Graph = queryGraphs.get(query_id);
 
       String result_detail_path = null, result_avg_path = null;
@@ -430,7 +430,7 @@ public class ExperimentSpaceSelectivity {
           query_Graph.spa_predicate[j] = rectangle;
 
           if (!TEST_FORMAT) {
-            Utility.print(String.format("%d : %s", i, rectangle.toString()));
+            Util.println(String.format("%d : %s", i, rectangle.toString()));
 
             Result result =
                 naive_Neo4j_Match.neo4j_API.graphDb.execute("match (n) where id(n) = 0 return n");
@@ -476,10 +476,10 @@ public class ExperimentSpaceSelectivity {
 
         write_line = String.valueOf(area) + "\t";
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(count), Utility.Average(time_get_iterator));
+            String.format("%d\t%d\t", Util.Average(count), Util.Average(time_get_iterator));
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-        write_line += String.format("%d\n", Utility.Average(access));
+            String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+        write_line += String.format("%d\n", Util.Average(access));
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_avg_path, true, write_line);
 
@@ -523,7 +523,7 @@ public class ExperimentSpaceSelectivity {
 
       String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
       ArrayList<Query_Graph> queryGraphs =
-          Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+          Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
       Query_Graph query_Graph = queryGraphs.get(query_id);
 
       String result_detail_path = null, result_avg_path = null;
@@ -609,7 +609,7 @@ public class ExperimentSpaceSelectivity {
           query_Graph.spa_predicate[j] = rectangle;
 
           if (!TEST_FORMAT) {
-            Utility.print(String.format("%d : %s", i, rectangle.toString()));
+            Util.println(String.format("%d : %s", i, rectangle.toString()));
 
             start = System.currentTimeMillis();
             risoTreeQueryPN.Query(query_Graph, -1);
@@ -620,7 +620,7 @@ public class ExperimentSpaceSelectivity {
             total_time.add(time);
             count.add(risoTreeQueryPN.result_count);
             access.add(risoTreeQueryPN.page_hit_count);
-            Utility.print("Page access:" + risoTreeQueryPN.page_hit_count);
+            Util.println("Page access:" + risoTreeQueryPN.page_hit_count);
             range_query_time.add(risoTreeQueryPN.range_query_time);
 
             write_line = String.format("%d\t%d\t", count.get(i), range_query_time.get(i));
@@ -645,11 +645,11 @@ public class ExperimentSpaceSelectivity {
 
         write_line = String.valueOf(area) + "\t";
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(count), Utility.Average(range_query_time));
-        write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+            String.format("%d\t%d\t", Util.Average(count), Util.Average(range_query_time));
+        write_line += String.format("%d\t", Util.Average(time_get_iterator));
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-        write_line += String.format("%d\n", Utility.Average(access));
+            String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+        write_line += String.format("%d\n", Util.Average(access));
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_avg_path, true, write_line);
 

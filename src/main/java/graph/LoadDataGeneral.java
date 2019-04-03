@@ -22,7 +22,7 @@ import commons.Entity;
 import commons.Labels;
 import commons.OwnMethods;
 import commons.RTreeUtility;
-import commons.Utility;
+import commons.Util;
 import commons.Config.system;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
@@ -97,7 +97,7 @@ public class LoadDataGeneral {
    * important in the query algorithm
    */
   public static void CalculateCount() {
-    Utility.print("Calculate spatial cardinality");
+    Util.println("Calculate spatial cardinality");
     try {
       GraphDatabaseService databaseService =
           new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
@@ -149,7 +149,7 @@ public class LoadDataGeneral {
   }
 
   public static void LoadGraphEdges() {
-    Utility.print("Load graph edges\n");
+    Util.println("Load graph edges\n");
     BatchInserter inserter = null;
     try {
       Map<String, String> id_map = OwnMethods.ReadMap(map_path);
@@ -182,8 +182,8 @@ public class LoadDataGeneral {
    * node, including id and location
    */
   public static void GetSpatialNodeMap() {
-    Utility
-        .print("Get spatial vertices map and \n transfer osm node property to spatial vertices\n");
+    Util
+        .println("Get spatial vertices map and \n transfer osm node property to spatial vertices\n");
     try {
       Map<Object, Object> id_map = new TreeMap<Object, Object>();
 
@@ -204,7 +204,7 @@ public class LoadDataGeneral {
 
       tx = databaseService.beginTx();
       for (int i = 0; i < ids.size(); i++) {
-        Utility.print(i);
+        Util.println(i);
         long id = ids.get(i);
         Node point = databaseService.getNodeById(id);
         long entity_id = (Long) point.getProperty("node_osm_id");
@@ -241,7 +241,7 @@ public class LoadDataGeneral {
    * set all spatial vertices with label GRAPH_1
    */
   public static void set_Spatial_Label() {
-    Utility.print("Set spatial label\n");
+    Util.println("Set spatial label\n");
     GraphDatabaseService dbservice =
         new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
     try {
@@ -273,7 +273,7 @@ public class LoadDataGeneral {
    */
   static void LoadNonSpatialEntity() {
     try {
-      Utility.print(String.format("LoadNonSpatialEntity\n from %s\n%s\n to %s\n", entity_path,
+      Util.println(String.format("LoadNonSpatialEntity\n from %s\n%s\n to %s\n", entity_path,
           label_list_path, db_path));
 
       ArrayList<Entity> entities = OwnMethods.ReadEntity(entity_path);

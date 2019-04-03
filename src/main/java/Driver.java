@@ -6,7 +6,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import commons.Config;
-import commons.Utility;
+import commons.Util;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
 
@@ -77,7 +77,7 @@ public class Driver {
       cmd = parser.parse(options, args);
       Option[] options = cmd.getOptions();
       for (Option option : options) {
-        Utility.print(String.format("<%s, %s>", option, option.getValue()));
+        Util.println(String.format("<%s, %s>", option, option.getValue()));
       }
 
       if (cmd.hasOption("h")) {
@@ -149,7 +149,7 @@ public class Driver {
                 cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath));
             break;
           default:
-            Utility.print(String.format("Function %s does not exist!", functionNameString));
+            Util.println(String.format("Function %s does not exist!", functionNameString));
             break;
         }
       }
@@ -174,7 +174,7 @@ public class Driver {
     // "-d", "wikidata", "-ep", "D:/Project_Data/wikidata-20180308-truthy-BETA.nt/entity.txt"};
 
 
-    Utility.print(Arrays.toString(args));
+    Util.println(Arrays.toString(args));
     Driver driver = new Driver(args);
     driver.parser();
   }

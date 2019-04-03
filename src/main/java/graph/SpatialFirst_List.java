@@ -28,7 +28,7 @@ import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
-import commons.Utility;
+import commons.Util;
 
 /**
  * Implements SpatialFirst with NL_list. Two versions are implemented, simple version and blocked
@@ -365,7 +365,7 @@ public class SpatialFirst_List {
               result_count += profile.getRows();
               page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
               // OwnMethods.Print(planDescription);
-              Utility.print(String.format("%d, %d", id, cur_count));
+              Util.println(String.format("%d, %d", id, cur_count));
             }
           } else {
             range_query_time += System.currentTimeMillis() - start_1;
@@ -375,7 +375,7 @@ public class SpatialFirst_List {
 
       tx.success();
       tx.close();
-      Utility.print(String.format("locate in count:%d", located_in_count));
+      Util.println(String.format("locate in count:%d", located_in_count));
       // OwnMethods.Print(String.format("result size: %d", result_count));
       // OwnMethods.Print(String.format("time: %d", System.currentTimeMillis() - start));
       // return result;
@@ -454,7 +454,7 @@ public class SpatialFirst_List {
     // query += String.format(" id(a%d) in %s\n", pos, ids.toString());
 
     query += ")\n";
-    Utility.print(String.format("spa_ids size: %d", ids.size()));
+    Util.println(String.format("spa_ids size: %d", ids.size()));
 
     // NL_id_list
     // for ( int key : NL_hopnum.keySet())
@@ -547,7 +547,7 @@ public class SpatialFirst_List {
 
       long start_1 = System.currentTimeMillis();
       Node rootNode = RTreeUtility.getRTreeRoot(dbservice, dataset);
-      Utility.print("query range: " + min_queryRectangle);
+      Util.println("query range: " + min_queryRectangle);
       LinkedList<Node> rangeQueryResult = this.rangeQuery(rootNode, min_queryRectangle);
       range_query_time = System.currentTimeMillis() - start_1;
 
@@ -577,7 +577,7 @@ public class SpatialFirst_List {
           start_1 = System.currentTimeMillis();
           String query = formSubgraphQuery_Block(query_Graph, limit, Explain_Or_Profile.Profile,
               spa_predicates, min_pos, ids, NL_hopnum, rtree_node);
-          Utility.print(query);
+          Util.println(query);
 
           Result result = dbservice.execute(query);
           get_iterator_time += System.currentTimeMillis() - start_1;
@@ -604,7 +604,7 @@ public class SpatialFirst_List {
           }
         }
       }
-      Utility.print("range query result count: " + located_in_count);
+      Util.println("range query result count: " + located_in_count);
 
       tx.success();
       tx.close();
@@ -661,7 +661,7 @@ public class SpatialFirst_List {
             Node child = relationship.getEndNode();
             double[] bbox = (double[]) child.getProperty("bbox");
             MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
-            queue.add(new Element(child, Utility.distance(queryLoc, MBR)));
+            queue.add(new Element(child, Util.distance(queryLoc, MBR)));
           }
         }
         // tree leaf node
@@ -677,7 +677,7 @@ public class SpatialFirst_List {
             else {
               double lon = (Double) object;
               double lat = (Double) geom.getProperty(lat_name);
-              queue.add(new Element(geom, Utility.distance(queryLoc, new MyPoint(lon, lat))));
+              queue.add(new Element(geom, Util.distance(queryLoc, new MyPoint(lon, lat))));
             }
           }
         }
@@ -746,7 +746,7 @@ public class SpatialFirst_List {
       for (Relationship relationship : rels) {
         Node child = relationship.getEndNode();
         MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-        if (Utility.distance(mbr, right.rectangle) <= distance)
+        if (Util.distance(mbr, right.rectangle) <= distance)
           leftChildren.add(new NodeAndRec(child, mbr));
       }
 
@@ -754,14 +754,14 @@ public class SpatialFirst_List {
       for (Relationship relationship : rels) {
         Node child = relationship.getEndNode();
         MyRectangle mbr = RTreeUtility.getNodeMBR(child);
-        if (Utility.distance(mbr, left.rectangle) <= distance)
+        if (Util.distance(mbr, left.rectangle) <= distance)
           rightChildern.add(new NodeAndRec(child, mbr));
       }
 
       if (left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)) {
         for (NodeAndRec leftChild : leftChildren)
           for (NodeAndRec rightChild : rightChildern)
-            if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
+            if (Util.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
               long id1 = leftChild.node.getId();
               long id2 = rightChild.node.getId();
               if (id1 != id2)
@@ -770,7 +770,7 @@ public class SpatialFirst_List {
       } else {
         for (NodeAndRec leftChild : leftChildren) {
           for (NodeAndRec rightChild : rightChildern) {
-            if (Utility.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
+            if (Util.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
               NodeAndRec[] nodeAndRecs = new NodeAndRec[2];
               nodeAndRecs[0] = new NodeAndRec(leftChild.node, leftChild.rectangle);
               nodeAndRecs[1] = new NodeAndRec(rightChild.node, rightChild.rectangle);

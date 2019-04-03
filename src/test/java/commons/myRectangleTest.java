@@ -20,9 +20,9 @@ public class myRectangleTest {
     MyRectangle bbox = new MyRectangle("[-73.971444, 40.762827, -73.971444, 40.762827]");
     MyRectangle intersectRect = bbox.intersect(queryRect);
     if (intersectRect == null)
-      Utility.print("Null");
+      Util.println("Null");
     else
-      Utility.print(intersectRect);
+      Util.println(intersectRect);
   }
 
   @Test

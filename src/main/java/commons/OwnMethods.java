@@ -129,14 +129,14 @@ public class OwnMethods {
       int hopNum = Integer.parseInt(lineList[1]);
 
       for (int nodeGraphID = 0; nodeGraphID < nodeCount; nodeGraphID++) {
-        Utility.print(nodeGraphID);
+        Util.println(nodeGraphID);
         line = reader.readLine();
         String[] list_hmbr = line.split(";");
         for (int j = 0; j < hopNum; j++) {
           long nodeNeo4jID = graphNeo4jIDMap.get(nodeGraphID);
           Node node = databaseService.getNodeById(nodeNeo4jID);
           String start = list_hmbr[j].substring(0, 1);
-          Utility.print(start);
+          Util.println(start);
           if (start.equals("1") == true) {
             String rect = list_hmbr[j].substring(3, list_hmbr[j].length() - 1);
             String[] liString = rect.split(",");
@@ -148,7 +148,7 @@ public class OwnMethods {
             node.setProperty(String.format("HMBR_%d_%s", j + 1, miny_name), miny);
             node.setProperty(String.format("HMBR_%d_%s", j + 1, maxx_name), maxx);
             node.setProperty(String.format("HMBR_%d_%s", j + 1, maxy_name), maxy);
-            Utility.print("set");
+            Util.println("set");
           }
         }
         if (nodeGraphID % 100000 == 0) {
@@ -266,7 +266,7 @@ public class OwnMethods {
       else
         labelList.add(0);
     }
-    Utility.print("Write label list to: " + labelListPath);
+    Util.println("Write label list to: " + labelListPath);
     OwnMethods.WriteArray(labelListPath, labelList);
   }
 
@@ -309,10 +309,10 @@ public class OwnMethods {
       return map;
 
     } catch (Exception e) {
-      Utility.print(line);
+      Util.println(line);
       e.printStackTrace();
     }
-    Utility.print("nothing in ReadMap(" + filename + ")");
+    Util.println("nothing in ReadMap(" + filename + ")");
     return map;
   }
 
@@ -337,7 +337,7 @@ public class OwnMethods {
       // TODO: handle exception
       e.printStackTrace();
     }
-    Utility.print("nothing in ReadMap(" + filename + ")");
+    Util.println("nothing in ReadMap(" + filename + ")");
     return null;
   }
 
@@ -409,7 +409,7 @@ public class OwnMethods {
       // TODO: handle exception
       e.printStackTrace();
     }
-    Utility.print("GetExecutionPlanTree return null!");
+    Util.println("GetExecutionPlanTree return null!");
     return null;
   }
 
@@ -434,7 +434,7 @@ public class OwnMethods {
           if (plan_name.equals("NodeByLabelScan")) {
             Set<String> identifiers = child_plan.getIdentifiers();
             if (identifiers.size() != 1) {
-              Utility.print(plan.toString());
+              Util.println(plan.toString());
               throw new Exception(
                   String.format("%s\n has more than one identifier", child_plan.toString()));
             }
@@ -446,7 +446,7 @@ public class OwnMethods {
           {
             Map<String, Object> arguments = child_plan.getArguments();
             if (arguments.containsKey("ExpandExpression") == false) {
-              Utility.print(plan.toString());
+              Util.println(plan.toString());
               throw new Exception(child_plan.toString() + "has no ExpandExpression");
             }
             String expression = arguments.get("ExpandExpression").toString();
@@ -551,9 +551,9 @@ public class OwnMethods {
           for (int neighbor : neighbors) {
             int neighbor_index = subgraph_ids.indexOf(neighbor);
             if (neighbor_index == -1) {
-              Utility
-                  .print(neighbor + " in " + id + "'s neighbors " + neighbors + " does not exist");
-              Utility.print("All the ids in the subgraph are" + subgraph_ids);
+              Util
+                  .println(neighbor + " in " + id + "'s neighbors " + neighbors + " does not exist");
+              Util.println("All the ids in the subgraph are" + subgraph_ids);
               throw new Exception("neighbors does not exist in subgraph_ids");
             } else {
               if (i < neighbor_index) {
@@ -572,7 +572,7 @@ public class OwnMethods {
       e.printStackTrace();
     }
 
-    Utility.print("GenerateRandomGraph return null");
+    Util.println("GenerateRandomGraph return null");
     return null;
   }
 
@@ -749,7 +749,7 @@ public class OwnMethods {
         graph.add(line);
       }
     } catch (Exception e) {
-      Utility.print(str);
+      Util.println(str);
       e.printStackTrace();
     }
     return graph;
@@ -813,7 +813,7 @@ public class OwnMethods {
       }
       reader.close();
     } catch (Exception e) {
-      Utility.print(String.format("error happens in entity id %d", id));
+      Util.println(String.format("error happens in entity id %d", id));
       e.printStackTrace();
       System.exit(-1);
     }
@@ -1104,8 +1104,8 @@ public class OwnMethods {
       count = Integer.parseInt(str);
       reader.close();
     } catch (Exception e) {
-      Utility.print(String.format("error happens in entity id %d", id));
-      Utility.print(str);
+      Util.println(String.format("error happens in entity id %d", id));
+      Util.println(str);
       e.printStackTrace();
       System.exit(-1);
     }
@@ -1133,8 +1133,8 @@ public class OwnMethods {
       }
       reader.close();
     } catch (Exception e) {
-      Utility.print(String.format("error happens in entity id %d", id));
-      Utility.print(str);
+      Util.println(String.format("error happens in entity id %d", id));
+      Util.println(str);
       e.printStackTrace();
       System.exit(-1);
     }

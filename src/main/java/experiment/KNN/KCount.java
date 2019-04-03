@@ -9,7 +9,7 @@ import commons.Entity;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
-import commons.Utility;
+import commons.Util;
 import commons.Config.Datasets;
 import commons.Config.system;
 import graph.RisoTreeQueryPN;
@@ -99,7 +99,7 @@ public class KCount {
     }
 
     String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
-    queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, 10);
+    queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, 10);
 
     entities = OwnMethods.ReadEntity(entityPath);
     ArrayList<Integer> ids = OwnMethods.readIntegerArray(queryrectCenterPath);
@@ -112,7 +112,7 @@ public class KCount {
     spaCount = OwnMethods.GetSpatialEntityCount(entityPath);
     entityCount = OwnMethods.getEntityCount(entityPath);
 
-    Utility.print("read map from " + graph_pos_map_path);
+    Util.println("read map from " + graph_pos_map_path);
     graph_pos_map_list = OwnMethods.ReadMap(graph_pos_map_path, entityCount);
   }
 
@@ -151,7 +151,7 @@ public class KCount {
       long start;
       long time;
 
-      Utility.print("read map from " + graph_pos_map_path);
+      Util.println("read map from " + graph_pos_map_path);
       long[] graph_pos_map_list = OwnMethods.ReadMap(graph_pos_map_path, entityCount);
 
       String result_detail_path = null, result_avg_path = null;
@@ -170,8 +170,8 @@ public class KCount {
           break;
       }
 
-      Utility.print(result_avg_path);
-      Utility.print(result_detail_path);
+      Util.println(result_avg_path);
+      Util.println(result_detail_path);
 
 
       String write_line = String.format("%s\tqueryID: %d\n", dataset, query_id);
@@ -222,8 +222,8 @@ public class KCount {
           query_Graph.spa_predicate[j] = rectangle;
 
           if (!TEST_FORMAT) {
-            Utility.print(query_Graph);
-            Utility.print(String.format("%d : %s", i, rectangle.toString()));
+            Util.println(query_Graph);
+            Util.println(String.format("%d : %s", i, rectangle.toString()));
 
             start = System.currentTimeMillis();
             risoTreeQueryPN.LAGAQ_KNN(query_Graph, K);
@@ -234,7 +234,7 @@ public class KCount {
             total_time.add(time);
             visited_spatial_count.add((long) risoTreeQueryPN.visit_spatial_object_count);
             page_hit.add(risoTreeQueryPN.page_hit_count);
-            Utility.print("Page access:" + risoTreeQueryPN.page_hit_count);
+            Util.println("Page access:" + risoTreeQueryPN.page_hit_count);
             time_queue.add(risoTreeQueryPN.queue_time);
             time_checkPaths.add(risoTreeQueryPN.check_paths_time);
 
@@ -260,13 +260,13 @@ public class KCount {
         risoTreeQueryPN.dbservice.shutdown();
 
         write_line = String.valueOf(K) + "\t";
-        write_line += String.format("%d\t%d\t", Utility.Average(visited_spatial_count),
-            Utility.Average(time_queue));
-        write_line += String.format("%d\t%d\t", Utility.Average(time_checkPaths),
-            Utility.Average(time_get_iterator));
+        write_line += String.format("%d\t%d\t", Util.Average(visited_spatial_count),
+            Util.Average(time_queue));
+        write_line += String.format("%d\t%d\t", Util.Average(time_checkPaths),
+            Util.Average(time_get_iterator));
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-        write_line += String.format("%d\n", Utility.Average(page_hit));
+            String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+        write_line += String.format("%d\n", Util.Average(page_hit));
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_avg_path, true, write_line);
 
@@ -343,7 +343,7 @@ public class KCount {
           query_Graph.spa_predicate[j] = rectangle;
 
           if (!TEST_FORMAT) {
-            Utility.print(String.format("%d : %s", i, rectangle.toString()));
+            Util.println(String.format("%d : %s", i, rectangle.toString()));
 
             start = System.currentTimeMillis();
             spatialFirst.LAGAQ_KNN(query_Graph, K);
@@ -354,7 +354,7 @@ public class KCount {
             total_time.add(time);
             visited_spatial_count.add((long) spatialFirst.visit_spatial_object_count);
             page_hit.add(spatialFirst.page_hit_count);
-            Utility.print("Page access:" + spatialFirst.page_hit_count);
+            Util.println("Page access:" + spatialFirst.page_hit_count);
             time_queue.add(spatialFirst.queue_time);
 
             write_line = String.format("%d\t%d\t", visited_spatial_count.get(i), time_queue.get(i));
@@ -378,12 +378,12 @@ public class KCount {
         spatialFirst.dbservice.shutdown();
 
         write_line = String.valueOf(K) + "\t";
-        write_line += String.format("%d\t%d\t", Utility.Average(visited_spatial_count),
-            Utility.Average(time_queue));
-        write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+        write_line += String.format("%d\t%d\t", Util.Average(visited_spatial_count),
+            Util.Average(time_queue));
+        write_line += String.format("%d\t", Util.Average(time_get_iterator));
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-        write_line += String.format("%d\n", Utility.Average(page_hit));
+            String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+        write_line += String.format("%d\n", Util.Average(page_hit));
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_avg_path, true, write_line);
 

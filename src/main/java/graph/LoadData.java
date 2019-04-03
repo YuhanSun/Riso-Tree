@@ -106,7 +106,7 @@ public class LoadData {
       Map<Object, Object> map = new TreeMap<Object, Object>();
       for (Node node : geometry_nodes) {
         Long geom_id = node.getId();
-        Utility.print(geom_id);
+        Util.println(geom_id);
         long osm_id = (Long) node.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING)
             .getStartNode().getProperty("node_osm_id");
         map.put(geom_id, osm_id);
@@ -215,7 +215,7 @@ public class LoadData {
           new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
       Transaction tx = databaseService.beginTx();
       Node check_node = databaseService.getNodeById(3849874);
-      Utility.print(check_node.getAllProperties());
+      Util.println(check_node.getAllProperties());
 
       tx.success();
       tx.close();
@@ -353,7 +353,7 @@ public class LoadData {
 
       tx = databaseService.beginTx();
       for (int i = 0; i < ids.size(); i++) {
-        Utility.print(i);
+        Util.println(i);
         long id = ids.get(i);
         Node point = databaseService.getNodeById(id);
         long entity_id = (Long) point.getProperty("node_osm_id");
@@ -393,7 +393,7 @@ public class LoadData {
   public static void LoadNonSpatialEntity() {
     String entity_path =
         String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
-    Utility.print(String.format("LoadNonSpatialEntity\n from %s to %s", entity_path, db_path));
+    Util.println(String.format("LoadNonSpatialEntity\n from %s to %s", entity_path, db_path));
     LoadNonSpatialEntity(entity_path, db_path, map_path);
   }
 

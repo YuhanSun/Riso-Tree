@@ -18,7 +18,7 @@ import commons.Config.Explain_Or_Profile;
 import commons.Config.system;
 import scala.util.control.Exception;
 import commons.Query_Graph;
-import commons.Utility;
+import commons.Util;
 
 public class Naive_Neo4j_Match_Test {
 
@@ -77,7 +77,7 @@ public class Naive_Neo4j_Match_Test {
   public static void tearDownAfterClass() throws java.lang.Exception {}
 
   public static void iniQueryInput() {
-    ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+    ArrayList<Query_Graph> queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     query_Graph = queryGraphs.get(query_id);
 
     // ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
@@ -113,7 +113,7 @@ public class Naive_Neo4j_Match_Test {
         break;
     }
 
-    ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+    ArrayList<Query_Graph> queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     Query_Graph query_Graph = queryGraphs.get(query_id);
 
     ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
@@ -124,11 +124,11 @@ public class Naive_Neo4j_Match_Test {
         break;
     query_Graph.spa_predicate[j] = rectangle;
 
-    Utility.print(query_Graph);
-    Utility.print(query_Graph.spa_predicate);
-    Utility.print("database path: " + db_path);
+    Util.println(query_Graph);
+    Util.println(query_Graph.spa_predicate);
+    Util.println("database path: " + db_path);
     if (!OwnMethods.pathExist(db_path)) {
-      Utility.print(db_path + " does not exist!");
+      Util.println(db_path + " does not exist!");
       System.exit(-1);
     }
     Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
@@ -139,7 +139,7 @@ public class Naive_Neo4j_Match_Test {
       Map<String, Object> row = result.next();
       // OwnMethods.Print(result.next());
     }
-    Utility.print(count);
+    Util.println(count);
   }
 
   @Test
@@ -149,7 +149,7 @@ public class Naive_Neo4j_Match_Test {
     String querygraph_path =
         "/mnt/hgfs/Google_Drive/Projects/risotree/query/query_graph/labelCount/Gowalla_25/5.txt";
 
-    ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+    ArrayList<Query_Graph> queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     Query_Graph query_Graph = queryGraphs.get(query_id);
 
     int j = 0;
@@ -162,8 +162,8 @@ public class Naive_Neo4j_Match_Test {
     Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
     Result result = naive_Neo4j_Match.SubgraphMatch_Spa_API(query_Graph, 100);
     while (result.hasNext())
-      Utility.print(result.next());
-    Utility.print(result.getExecutionPlanDescription());
+      Util.println(result.next());
+    Util.println(result.getExecutionPlanDescription());
   }
 
   @Test
@@ -171,14 +171,14 @@ public class Naive_Neo4j_Match_Test {
     double distance = 0.1;
     Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
     OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
-    Utility.print(query_Graph);
+    Util.println(query_Graph);
     ArrayList<Integer> pos = new ArrayList<>();
     for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
       if (query_Graph.Has_Spa_Predicate[i])
         pos.add(i);
     String query =
         naive_Neo4j_Match.formQueryJoin(query_Graph, pos, distance, Explain_Or_Profile.Profile);
-    Utility.print(query);
+    Util.println(query);
   }
 
   @Test
@@ -186,16 +186,16 @@ public class Naive_Neo4j_Match_Test {
     double distance = 0.00001;
     Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
     OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
-    Utility.print(query_Graph);
+    Util.println(query_Graph);
     long start = System.currentTimeMillis();
     List<Long[]> res = naive_Neo4j_Match.LAGAQ_Join(query_Graph, distance);
     long time = System.currentTimeMillis() - start;
-    Utility.print("distance: " + distance);
-    Utility.print("total time: " + time);
-    Utility.print("get iterator time: " + naive_Neo4j_Match.get_iterator_time);
-    Utility.print("iterate time: " + naive_Neo4j_Match.iterate_time);
-    Utility.print("result count: " + naive_Neo4j_Match.result_count);
-    Utility.print("result count: " + res.size());
+    Util.println("distance: " + distance);
+    Util.println("total time: " + time);
+    Util.println("get iterator time: " + naive_Neo4j_Match.get_iterator_time);
+    Util.println("iterate time: " + naive_Neo4j_Match.iterate_time);
+    Util.println("result count: " + naive_Neo4j_Match.result_count);
+    Util.println("result count: " + res.size());
     naive_Neo4j_Match.neo4j_API.ShutDown();
   }
 }

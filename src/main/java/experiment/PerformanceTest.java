@@ -12,7 +12,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Config.system;
 import commons.OwnMethods;
-import commons.Utility;
+import commons.Util;
 
 public class PerformanceTest {
 
@@ -86,10 +86,10 @@ public class PerformanceTest {
       long iteratorTime = System.currentTimeMillis() - start1;
 
       long time = System.currentTimeMillis() - start;
-      Utility.print(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
+      Util.println(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
 
       ExecutionPlanDescription description = result.getExecutionPlanDescription();
-      Utility.print(description);
+      Util.println(description);
 
       tx.success();
       tx.close();
@@ -135,10 +135,10 @@ public class PerformanceTest {
         long iteratorTime = System.currentTimeMillis() - start1;
 
         long time = System.currentTimeMillis() - start;
-        Utility.print(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
+        Util.println(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
 
         ExecutionPlanDescription description = result.getExecutionPlanDescription();
-        Utility.print(description);
+        Util.println(description);
 
         tx.success();
         tx.close();
@@ -172,7 +172,7 @@ public class PerformanceTest {
         long iteratorTime = System.currentTimeMillis() - start1;
 
         long time = System.currentTimeMillis() - start;
-        Utility.print(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
+        Util.println(String.format("%d %d %d", getIteratorTime, iteratorTime, time));
         tx.success();
         tx.close();
         databaseService.shutdown();
@@ -204,7 +204,7 @@ public class PerformanceTest {
           count++;
         }
         long time = System.currentTimeMillis() - start;
-        Utility.print(String.format("%s:%d", label.toString(), time));
+        Util.println(String.format("%s:%d", label.toString(), time));
         // OwnMethods.Print(String.format("%s:%f", label.toString(), time / count));
         tx.success();
         tx.close();

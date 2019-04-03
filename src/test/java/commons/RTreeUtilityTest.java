@@ -55,14 +55,14 @@ public class RTreeUtilityTest {
 
   @Test
   public void getRootTest() {
-    Utility.print(db_path);
+    Util.println(db_path);
     GraphDatabaseService databaseService =
         new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
     Transaction tx = databaseService.beginTx();
     String layer_name = "Patents_100_random_80";
-    Utility.print(layer_name);
+    Util.println(layer_name);
     Node node = RTreeUtility.getRTreeRoot(databaseService, layer_name);
-    Utility.print(node);
+    Util.println(node);
 
     // ResourceIterable<Label> labels = databaseService.getAllLabels();
     // for ( Label label : labels)
@@ -77,7 +77,7 @@ public class RTreeUtilityTest {
 
   @Test
   public void getHeightTest() {
-    Utility.print(db_path);
+    Util.println(db_path);
     GraphDatabaseService databaseService =
         new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
     Transaction tx = databaseService.beginTx();
@@ -85,9 +85,9 @@ public class RTreeUtilityTest {
 
     // Node node = databaseService.getNodeById(758295);
 
-    Utility.print(RTreeUtility.getHeight(node));
+    Util.println(RTreeUtility.getHeight(node));
 
-    Utility.print(node.getAllProperties());
+    Util.println(node.getAllProperties());
 
     tx.success();
     tx.close();

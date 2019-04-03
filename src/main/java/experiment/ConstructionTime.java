@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import commons.Config;
 import commons.OwnMethods;
-import commons.Utility;
+import commons.Util;
 import commons.Config.system;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
@@ -138,7 +138,7 @@ public class ConstructionTime {
       // String resultPath = dir + "/constructionTimeDataset.txt";
 
       if (!OwnMethods.pathExist(resultDir)) {
-        Utility.print(resultDir + " does not exist!");
+        Util.println(resultDir + " does not exist!");
         System.exit(-1);
       }
 

@@ -24,7 +24,7 @@ import commons.Config;
 import commons.Labels;
 import commons.OwnMethods;
 import commons.RTreeUtility;
-import commons.Utility;
+import commons.Util;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.OSMLabel;
@@ -118,7 +118,7 @@ public class Graph_Switch {
           int neighbor = neighbors.get(j);
           if (i < neighbor) {
             long end_neo4j_id = Long.parseLong(id_map.get(String.valueOf(neighbor)));
-            Utility.print(String.format("%d\t%d", start_neo4j_id, end_neo4j_id));
+            Util.println(String.format("%d\t%d", start_neo4j_id, end_neo4j_id));
             inserter.createRelationship(start_neo4j_id, end_neo4j_id, GraphRel.GRAPH_LINK, null);
           }
         }
@@ -183,7 +183,7 @@ public class Graph_Switch {
       while (result.hasNext()) {
         Map<String, Object> map = result.next();
         Node node = (Node) map.get("n");
-        Utility.print(node.getAllProperties());
+        Util.println(node.getAllProperties());
       }
 
       tx.success();
@@ -206,13 +206,13 @@ public class Graph_Switch {
     try {
 
       ArrayList<Integer> label_list = OwnMethods.readIntegerArray(label_list_path);
-      Utility.print(String.format("label_list size %d", label_list.size()));
+      Util.println(String.format("label_list size %d", label_list.size()));
 
       TreeSet<Integer> nonSpaIDs = new TreeSet<Integer>();
       for (int i = 0; i < label_list.size(); i++)
         if (label_list.get(i).equals(1) == false)
           nonSpaIDs.add(i);
-      Utility.print(String.format("spaIDs size %d", nonSpaIDs.size()));
+      Util.println(String.format("spaIDs size %d", nonSpaIDs.size()));
 
       String map_path =
           String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
@@ -220,11 +220,11 @@ public class Graph_Switch {
       Map<Long, Long> map = new TreeMap<Long, Long>();
       for (String key : map_str.keySet())
         map.put(Long.parseLong(key), Long.parseLong(map_str.get(key)));
-      Utility.print(String.format("map size %d", map.size()));
+      Util.println(String.format("map size %d", map.size()));
 
       inserter = BatchInserters.inserter(new File(db_path), config);
       for (int id : nonSpaIDs) {
-        Utility.print(id);
+        Util.println(id);
         long pos_id = map.get((long) id);
         inserter.setNodeLabels(pos_id, GraphLabel.GRAPH_0);
       }
@@ -247,13 +247,13 @@ public class Graph_Switch {
     try {
 
       ArrayList<Integer> label_list = OwnMethods.readIntegerArray(label_list_path);
-      Utility.print(String.format("label_list size %d", label_list.size()));
+      Util.println(String.format("label_list size %d", label_list.size()));
 
       TreeSet<Integer> spaIDs = new TreeSet<Integer>();
       for (int i = 0; i < label_list.size(); i++)
         if (label_list.get(i).equals(1))
           spaIDs.add(i);
-      Utility.print(String.format("spaIDs size %d", spaIDs.size()));
+      Util.println(String.format("spaIDs size %d", spaIDs.size()));
 
       String map_path =
           String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map.txt", dataset);
@@ -261,11 +261,11 @@ public class Graph_Switch {
       Map<Long, Long> map = new TreeMap<Long, Long>();
       for (String key : map_str.keySet())
         map.put(Long.parseLong(key), Long.parseLong(map_str.get(key)));
-      Utility.print(String.format("map size %d", map.size()));
+      Util.println(String.format("map size %d", map.size()));
 
       inserter = BatchInserters.inserter(new File(db_path), config);
       for (int id : spaIDs) {
-        Utility.print(id);
+        Util.println(id);
         long pos_id = map.get((long) id);
         inserter.setNodeLabels(pos_id, OSMLabel.OSM_NODE);
       }
@@ -288,13 +288,13 @@ public class Graph_Switch {
     try {
 
       ArrayList<Integer> label_list = OwnMethods.readIntegerArray(label_list_path);
-      Utility.print(String.format("label_list size %d", label_list.size()));
+      Util.println(String.format("label_list size %d", label_list.size()));
 
       TreeSet<Integer> spaIDs = new TreeSet<Integer>();
       for (int i = 0; i < label_list.size(); i++)
         if (label_list.get(i).equals(1))
           spaIDs.add(i);
-      Utility.print(String.format("spaIDs size %d", spaIDs.size()));
+      Util.println(String.format("spaIDs size %d", spaIDs.size()));
 
       String map_path =
           String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/node_map_RTree.txt", dataset);
@@ -302,11 +302,11 @@ public class Graph_Switch {
       Map<Long, Long> map = new TreeMap<Long, Long>();
       for (String key : map_str.keySet())
         map.put(Long.parseLong(key), Long.parseLong(map_str.get(key)));
-      Utility.print(String.format("map size %d", map.size()));
+      Util.println(String.format("map size %d", map.size()));
 
       inserter = BatchInserters.inserter(new File(db_path), config);
       for (int id : spaIDs) {
-        Utility.print(id);
+        Util.println(id);
         long pos_id = map.get((long) id);
         inserter.setNodeLabels(pos_id, GraphLabel.GRAPH_1);
       }
@@ -391,7 +391,7 @@ public class Graph_Switch {
       // for graph vertices
       ResourceIterator<Node> nonspatialNodes = dbservice.findNodes(GraphLabel.GRAPH_0);
       while (nonspatialNodes.hasNext()) {
-        Utility.print(index);
+        Util.println(index);
         index++;
         Node node = nonspatialNodes.next();
         map.put((long) (Integer) node.getProperty("id"), node.getId());
@@ -402,7 +402,7 @@ public class Graph_Switch {
       tx = dbservice.beginTx();
       Iterable<Node> leafNodes = RTreeUtility.getAllGeometries(dbservice, dataset);
       for (Node leafNode : leafNodes) {
-        Utility.print(index);
+        Util.println(index);
         index++;
         map.put(leafNode.getProperty("id"), leafNode.getId());
       }
@@ -430,7 +430,7 @@ public class Graph_Switch {
       Iterable<Node> leafNodes = RTreeUtility.getAllGeometries(dbservice, dataset);
       int index = 0;
       for (Node leafNode : leafNodes) {
-        Utility.print(index);
+        Util.println(index);
         index++;
         Node osmNode =
             leafNode.getSingleRelationship(OSMRelation.GEOM, Direction.INCOMING).getStartNode();

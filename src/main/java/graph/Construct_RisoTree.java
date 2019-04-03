@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -18,13 +19,15 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
+import commons.ArrayUtil;
 import commons.Config;
 import commons.Config.system;
 import commons.Labels.RTreeRel;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.RTreeUtility;
-import commons.Utility;
+import commons.RisoTreeUtil;
+import commons.Util;
 
 /**
  * 
@@ -34,6 +37,8 @@ import commons.Utility;
 public class Construct_RisoTree {
 
   static Config config = new Config();
+  static final String PNPrefix = config.PNPrefix;
+
   static String dataset, version;
   static system systemName;
   static int MAX_HOPNUM;
@@ -275,7 +280,7 @@ public class Construct_RisoTree {
       int hop = 1;
 
       String indexPath = PNPath + "_" + hop;
-      Utility.print("read index from " + indexPath);
+      Util.println("read index from " + indexPath);
       Map<String, String> config = new HashMap<String, String>();
       config.put("dbms.pagecache.memory", "100g");
       if (!OwnMethods.pathExist(db_path))
@@ -311,7 +316,7 @@ public class Construct_RisoTree {
         if (line == null)
           break;
         nodeID = Long.parseLong(line);
-        Utility.print(nodeID);
+        Util.println(nodeID);
       }
       inserter.shutdown();
     } catch (Exception e) {
@@ -327,7 +332,7 @@ public class Construct_RisoTree {
     try {
       for (int hop = 2; hop <= MAX_HOPNUM; hop++) {
         String indexPath = PNPathAndPreffix + "_" + hop + ".txt";
-        Utility.print("read index from " + indexPath);
+        Util.println("read index from " + indexPath);
         BufferedReader reader = new BufferedReader(new FileReader(new File(indexPath)));
         Map<String, String> config = new HashMap<String, String>();
         config.put("dbms.pagecache.memory", "100g");
@@ -364,7 +369,7 @@ public class Construct_RisoTree {
           if (line == null)
             break;
           nodeID = Long.parseLong(line);
-          Utility.print(nodeID);
+          Util.println(nodeID);
         }
         reader.close();
         inserter.shutdown();
@@ -384,11 +389,11 @@ public class Construct_RisoTree {
    */
   public static ArrayList<Long> constructPNTime() throws Exception {
     ArrayList<Long> constructTime = new ArrayList<Long>();
-    Utility.print("read contain map from " + containIDPath);
+    Util.println("read contain map from " + containIDPath);
     HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
-    Utility.print("read graph from " + graph_path);
+    Util.println("read graph from " + graph_path);
     ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
-    Utility.print("read label list from " + label_list_path);
+    Util.println("read label list from " + label_list_path);
     ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
     // FileWriter writer1 = new FileWriter(new File(PNPath + "_"+1));
     HashMap<Long, HashMap<String, ArrayList<Integer>>> PN =
@@ -398,7 +403,7 @@ public class Construct_RisoTree {
       PN.put(nodeID, new HashMap<String, ArrayList<Integer>>());
 
     // for one hop
-    Utility.print("construct 1 hop");
+    Util.println("construct 1 hop");
     long start = System.currentTimeMillis();
     for (long nodeId : containIDMap.keySet()) {
       // OwnMethods.Print(nodeId);
@@ -429,7 +434,7 @@ public class Construct_RisoTree {
       }
     }
     long onehopTime = System.currentTimeMillis() - start;
-    Utility.print("one hop time:" + onehopTime);
+    Util.println("one hop time:" + onehopTime);
     constructTime.add(onehopTime);
     // writer1.close();
 
@@ -438,7 +443,7 @@ public class Construct_RisoTree {
     while (hop <= MAX_HOPNUM)
     // int hop = 2;
     {
-      Utility.print(String.format("construct %d hop", hop));
+      Util.println(String.format("construct %d hop", hop));
       // FileWriter writer2 = new FileWriter(new File(PNPath+"_"+hop));
       // String regex = "PN";
       // for ( int i = 0; i < hop - 1; i++)
@@ -485,7 +490,7 @@ public class Construct_RisoTree {
         }
       }
       long twohopTime = System.currentTimeMillis() - start;
-      Utility.print("two hop time:" + twohopTime);
+      Util.println("two hop time:" + twohopTime);
       constructTime.add(twohopTime);
       // writer2.close();
       hop++;
@@ -500,11 +505,11 @@ public class Construct_RisoTree {
    */
   public static void constructPN() {
     try {
-      Utility.print("read contain map from " + containIDPath);
+      Util.println("read contain map from " + containIDPath);
       HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
-      Utility.print("read graph from " + graph_path);
+      Util.println("read graph from " + graph_path);
       ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
-      Utility.print("read label list from " + label_list_path);
+      Util.println("read label list from " + label_list_path);
       ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
       GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
       FileWriter writer1 = new FileWriter(new File(PNPath + "_" + 1));
@@ -562,7 +567,7 @@ public class Construct_RisoTree {
         regex += "$";
 
         for (long nodeID : containIDMap.keySet()) {
-          Utility.print(nodeID);
+          Util.println(nodeID);
           writer2.write(nodeID + "\n");
           Node node = dbservice.getNodeById(nodeID);
           Map<String, Object> properties = node.getAllProperties();
@@ -614,7 +619,151 @@ public class Construct_RisoTree {
     }
   }
 
+  public void wikiConstructPNTime(String containIDPath, String db_path, String graph_path,
+      String label_list_path, int MAX_HOPNUM, String PNPathAndPreffix) {
+    try {
+      Util.println("read contain map from " + containIDPath);
+      HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
+      Util.println("read graph from " + graph_path);
+      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+      Util.println("read label list from " + label_list_path);
+      ArrayList<ArrayList<Integer>> label_list = OwnMethods.ReadGraph(label_list_path);
+      GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
 
+      // HashMap<Integer, Long> constructTime = wikiConstructPNTime(containIDMap, labelStringMap,
+      // dbservice, graph, label_list, MAX_HOPNUM, PNPathAndPreffix);
+      // Utility.print(constructTime);
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+
+  public static HashMap<Integer, Long> wikiConstructPNTime(
+      HashMap<Long, ArrayList<Integer>> containIDMap, String[] labelStringMap,
+      GraphDatabaseService dbservice, ArrayList<ArrayList<Integer>> graph,
+      ArrayList<ArrayList<Integer>> label_list, int MAX_HOPNUM, String PNPathAndPreffix)
+      throws Exception {
+    HashMap<Integer, Long> constructTime = new HashMap<>();
+
+    // 1-hop
+    FileWriter writer1 = new FileWriter(new File(PNPathAndPreffix + "_" + 1));
+    Transaction tx = dbservice.beginTx();
+    for (long nodeId : containIDMap.keySet()) {
+      writer1.write(nodeId + "\n");
+      TreeSet<Integer> pathNeighbors = new TreeSet<Integer>();
+      for (int spaID : containIDMap.get(nodeId)) {
+        for (int neighborID : graph.get(spaID)) {
+          pathNeighbors.add(neighborID);
+        }
+      }
+
+      HashMap<Integer, ArrayList<Integer>> pathLabelNeighbor =
+          dividedByLabels(pathNeighbors, label_list);
+
+      Node node = dbservice.getNodeById(nodeId);
+      for (int pathLabel : pathLabelNeighbor.keySet()) {
+        String labelStr = labelStringMap[pathLabel];
+        String propertyName = String.format("%s_%s", PNPrefix, labelStr);
+        ArrayList<Integer> arrayList = pathLabelNeighbor.get(pathLabel);
+        int[] array = ArrayUtil.listToArrayInt(arrayList);
+
+        node.setProperty(propertyName, array);
+        node.setProperty(propertyName + "_size", array.length);
+        writer1.write(String.format("%s,%s\n", propertyName, arrayList));
+      }
+    }
+    writer1.close();
+    tx.success();
+    tx.close();
+
+    // more than one hop
+    Transaction tx2 = dbservice.beginTx();
+    int hop = 2;
+    while (hop <= MAX_HOPNUM) {
+      Util.println(String.format("construct %d hop", hop));
+      FileWriter writer2 = new FileWriter(new File(PNPathAndPreffix + "_" + hop + ".txt"));
+
+      long curHopTime = 0;
+      for (long nodeID : containIDMap.keySet()) {
+        writer2.write(nodeID + "\n");
+        long start = System.currentTimeMillis();
+        Node node = dbservice.getNodeById(nodeID);
+        Map<String, Object> properties = node.getAllProperties();
+
+        for (String key : properties.keySet()) {
+          if (RisoTreeUtil.isPNProperty(key) && StringUtils.countMatches(key, '_') == (hop - 1)) {
+            int[] curPathNeighbors = (int[]) properties.get(key);
+            TreeSet<Integer> nextPathNeighbors = getNextPathNeighborsInSet(curPathNeighbors, graph);
+
+            HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors =
+                dividedByLabels(nextPathNeighbors, label_list);
+
+            curHopTime += System.currentTimeMillis() - start;
+
+            for (int pathEndLabel : pathLabelNeighbors.keySet()) {
+              String propertyName = getAttachName(key, pathEndLabel, labelStringMap);
+              ArrayList<Integer> arrayList = pathLabelNeighbors.get(pathEndLabel);
+              int[] array = ArrayUtil.listToArrayInt(arrayList);
+              node.setProperty(propertyName, array);
+              node.setProperty(propertyName + "_size", array.length);
+
+              writer2.write(String.format("%s,%s\n", propertyName, arrayList));
+            }
+
+            start = System.currentTimeMillis();
+          }
+        }
+      }
+      writer2.close();
+      constructTime.put(hop, curHopTime);
+      hop++;
+    }
+    tx2.success();
+    tx2.close();
+    dbservice.shutdown();
+    return constructTime;
+  }
+
+  private static String getAttachName(String key, int pathEndLabel, String[] labelStringMap) {
+    String labelStr = labelStringMap[pathEndLabel];
+    return String.format("%s_%s", key, labelStr);
+
+  }
+
+  private static HashMap<Integer, ArrayList<Integer>> dividedByLabels(
+      TreeSet<Integer> nextPathNeighbors, ArrayList<ArrayList<Integer>> label_list) {
+    HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors =
+        new HashMap<Integer, ArrayList<Integer>>();
+    for (int neighborID : nextPathNeighbors) {
+      for (int label : label_list.get(neighborID)) {
+        if (pathLabelNeighbors.containsKey(label))
+          pathLabelNeighbors.get(label).add(neighborID);
+        else {
+          ArrayList<Integer> arrayList = new ArrayList<Integer>();
+          arrayList.add(neighborID);
+          pathLabelNeighbors.put(label, arrayList);
+        }
+      }
+    }
+    return pathLabelNeighbors;
+  }
+
+  /**
+   * Get the neighbors for the next hop from a set of vertexes.
+   *
+   * @param curPathNeighbors
+   * @param graph
+   * @return
+   */
+  private static TreeSet<Integer> getNextPathNeighborsInSet(int[] curPathNeighbors,
+      ArrayList<ArrayList<Integer>> graph) {
+    TreeSet<Integer> nextPathNeighbors = new TreeSet<>();
+    for (int curNeighborID : curPathNeighbors)
+      for (int id : graph.get(curNeighborID))
+        nextPathNeighbors.add(id);
+    return null;
+  }
 
   /**
    * One hop is directly loaded into db. Two hops is constructed based on one hop loaded, and it is
@@ -625,11 +774,11 @@ public class Construct_RisoTree {
       String label_list_path, int MAX_HOPNUM, String PNPathAndPreffix) {
     try {
       HashMap<Integer, Long> constructTime = new HashMap<>();
-      Utility.print("read contain map from " + containIDPath);
+      Util.println("read contain map from " + containIDPath);
       HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
-      Utility.print("read graph from " + graph_path);
+      Util.println("read graph from " + graph_path);
       ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
-      Utility.print("read label list from " + label_list_path);
+      Util.println("read label list from " + label_list_path);
       ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
       GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
       // for one hop omit because already constructed in RTree construction phase. Refer to
@@ -639,7 +788,7 @@ public class Construct_RisoTree {
       Transaction tx2 = dbservice.beginTx();
       int hop = 2;
       while (hop <= MAX_HOPNUM) {
-        Utility.print(String.format("construct %d hop", hop));
+        Util.println(String.format("construct %d hop", hop));
         FileWriter writer2 = new FileWriter(new File(PNPathAndPreffix + "_" + hop + ".txt"));
         String regex = "PN";
         for (int i = 0; i < hop - 1; i++)
@@ -697,10 +846,44 @@ public class Construct_RisoTree {
       tx2.success();
       tx2.close();
       dbservice.shutdown();
-      Utility.print(constructTime);
+      Util.println(constructTime);
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
+    }
+  }
+
+  public static void wikiGenerateContainSpatialID(String db_path, String dataset,
+      String containIDPath) {
+    try {
+      GraphDatabaseService dbservice =
+          new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+      HashMap<Long, TreeSet<Long>> containIDMap = new HashMap<>();
+      Transaction tx = dbservice.beginTx();
+      List<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(dbservice, dataset);
+      for (Node node : nodes) {
+        long parentID = node.getId();
+        Iterable<Relationship> rels =
+            node.getRelationships(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
+        TreeSet<Long> containIDs = new TreeSet<>();
+        for (Relationship relationship : rels) {
+          // Use the id() rather .id to identify a node because wikidata .id is QId.
+          long childID = relationship.getEndNode().getId();
+          containIDs.add(childID);
+        }
+        containIDMap.put(parentID, containIDs);
+      }
+      tx.success();
+      tx.close();
+      dbservice.shutdown();
+
+      FileWriter writer = new FileWriter(new File(containIDPath));
+      for (long id : containIDMap.keySet())
+        writer.write(String.format("%d,%s\n", id, containIDMap.get(id).toString()));
+      writer.close();
+
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 

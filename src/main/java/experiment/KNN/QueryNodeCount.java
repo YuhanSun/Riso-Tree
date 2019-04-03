@@ -9,7 +9,7 @@ import commons.Entity;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
-import commons.Utility;
+import commons.Util;
 import commons.Config.Datasets;
 import commons.Config.system;
 import graph.RisoTreeQueryPN;
@@ -101,7 +101,7 @@ public class QueryNodeCount {
     spaCount = OwnMethods.GetSpatialEntityCount(entityPath);
     entityCount = OwnMethods.getEntityCount(entityPath);
 
-    Utility.print("read map from " + graph_pos_map_path);
+    Util.println("read map from " + graph_pos_map_path);
     graph_pos_map_list = OwnMethods.ReadMap(graph_pos_map_path, entityCount);
   }
 
@@ -164,7 +164,7 @@ public class QueryNodeCount {
       for (int nodeCount : nodeCountList) {
         String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
         ArrayList<Query_Graph> queryGraphs =
-            Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+            Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
         Query_Graph query_Graph = queryGraphs.get(query_id);
 
         write_line = nodeCount + "\n" + head_line;
@@ -200,8 +200,8 @@ public class QueryNodeCount {
           query_Graph.spa_predicate[j] = rectangle;
 
           if (!TEST_FORMAT) {
-            Utility.print(query_Graph);
-            Utility.print(String.format("%d : %s", i, rectangle.toString()));
+            Util.println(query_Graph);
+            Util.println(String.format("%d : %s", i, rectangle.toString()));
 
             start = System.currentTimeMillis();
             risoTreeQueryPN.LAGAQ_KNN(query_Graph, K);
@@ -212,7 +212,7 @@ public class QueryNodeCount {
             total_time.add(time);
             visited_spatial_count.add((long) risoTreeQueryPN.visit_spatial_object_count);
             page_hit.add(risoTreeQueryPN.page_hit_count);
-            Utility.print("Page access:" + risoTreeQueryPN.page_hit_count);
+            Util.println("Page access:" + risoTreeQueryPN.page_hit_count);
             time_queue.add(risoTreeQueryPN.queue_time);
             time_checkPaths.add(risoTreeQueryPN.check_paths_time);
 
@@ -238,13 +238,13 @@ public class QueryNodeCount {
         risoTreeQueryPN.dbservice.shutdown();
 
         write_line = String.valueOf(nodeCount) + "\t";
-        write_line += String.format("%d\t%d\t", Utility.Average(visited_spatial_count),
-            Utility.Average(time_queue));
-        write_line += String.format("%d\t%d\t", Utility.Average(time_checkPaths),
-            Utility.Average(time_get_iterator));
+        write_line += String.format("%d\t%d\t", Util.Average(visited_spatial_count),
+            Util.Average(time_queue));
+        write_line += String.format("%d\t%d\t", Util.Average(time_checkPaths),
+            Util.Average(time_get_iterator));
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-        write_line += String.format("%d\n", Utility.Average(page_hit));
+            String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+        write_line += String.format("%d\n", Util.Average(page_hit));
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_avg_path, true, write_line);
 
@@ -288,7 +288,7 @@ public class QueryNodeCount {
       for (int nodeCount : nodeCountList) {
         String querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
         ArrayList<Query_Graph> queryGraphs =
-            Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+            Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
         Query_Graph query_Graph = queryGraphs.get(query_id);
 
         write_line = nodeCount + "\n" + head_line;
@@ -323,8 +323,8 @@ public class QueryNodeCount {
           query_Graph.spa_predicate[j] = rectangle;
 
           if (!TEST_FORMAT) {
-            Utility.print(query_Graph);
-            Utility.print(String.format("%d : %s", i, rectangle.toString()));
+            Util.println(query_Graph);
+            Util.println(String.format("%d : %s", i, rectangle.toString()));
 
             start = System.currentTimeMillis();
             spatialFirst.LAGAQ_KNN(query_Graph, K);
@@ -335,7 +335,7 @@ public class QueryNodeCount {
             total_time.add(time);
             visited_spatial_count.add((long) spatialFirst.visit_spatial_object_count);
             page_hit.add(spatialFirst.page_hit_count);
-            Utility.print("Page access:" + spatialFirst.page_hit_count);
+            Util.println("Page access:" + spatialFirst.page_hit_count);
             time_queue.add(spatialFirst.queue_time);
 
             write_line = String.format("%d\t%d\t", visited_spatial_count.get(i), time_queue.get(i));
@@ -359,12 +359,12 @@ public class QueryNodeCount {
         spatialFirst.dbservice.shutdown();
 
         write_line = String.valueOf(nodeCount) + "\t";
-        write_line += String.format("%d\t%d\t", Utility.Average(visited_spatial_count),
-            Utility.Average(time_queue));
-        write_line += String.format("%d\t", Utility.Average(time_get_iterator));
+        write_line += String.format("%d\t%d\t", Util.Average(visited_spatial_count),
+            Util.Average(time_queue));
+        write_line += String.format("%d\t", Util.Average(time_get_iterator));
         write_line +=
-            String.format("%d\t%d\t", Utility.Average(time_iterate), Utility.Average(total_time));
-        write_line += String.format("%d\n", Utility.Average(page_hit));
+            String.format("%d\t%d\t", Util.Average(time_iterate), Util.Average(total_time));
+        write_line += String.format("%d\n", Util.Average(page_hit));
         if (!TEST_FORMAT)
           OwnMethods.WriteFile(result_avg_path, true, write_line);
 

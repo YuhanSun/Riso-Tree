@@ -20,7 +20,7 @@ import commons.Config;
 import commons.Config.system;
 import commons.Labels.OSMLabel;
 import commons.Labels.RTreeRel;
-import commons.Utility;
+import commons.Util;
 
 public class OSM_UtilityTest {
 
@@ -80,13 +80,13 @@ public class OSM_UtilityTest {
 
   @Test
   public void getReferenceTest() {
-    Utility.print(db_path);
+    Util.println(db_path);
     GraphDatabaseService databaseService =
         new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
     Transaction tx = databaseService.beginTx();
     ResourceIterator<Node> referenceNodes = databaseService.findNodes(OSMLabel.OSM_NODE);
     while (referenceNodes.hasNext())
-      Utility.print(referenceNodes.next().getAllProperties());
+      Util.println(referenceNodes.next().getAllProperties());
   }
 
   @Test
@@ -102,8 +102,8 @@ public class OSM_UtilityTest {
           head.getRelationships(RTreeRel.LAYER, Direction.OUTGOING);
       for (Relationship relationship : relationships) {
         Node rtree_layer_node = relationship.getEndNode();
-        Utility.print(rtree_layer_node);
-        Utility.print(rtree_layer_node.getAllProperties());
+        Util.println(rtree_layer_node);
+        Util.println(rtree_layer_node.getAllProperties());
       }
     }
   }

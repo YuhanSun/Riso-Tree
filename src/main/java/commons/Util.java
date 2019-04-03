@@ -14,7 +14,7 @@ import java.util.Set;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-public class Utility {
+public class Util {
 
   /**
    * Compute the how many elements in source but not in target. Both arrays are sorted.
@@ -176,7 +176,7 @@ public class Utility {
     List<Entity> rangeResult = stRtree.query(searchEnv);
     LinkedList<Entity> result = new LinkedList<Entity>();
     for (Entity entity : rangeResult) {
-      if (Utility.distance(entity.lon, entity.lat, point.x, point.y) <= distance)
+      if (Util.distance(entity.lon, entity.lat, point.x, point.y) <= distance)
         result.add(entity);
     }
     return result;
@@ -365,7 +365,7 @@ public class Utility {
       }
       reader.close();
     } catch (Exception e) {
-      Utility.print(line);
+      Util.println(line);
       e.printStackTrace();
       return null;
     }
@@ -387,11 +387,11 @@ public class Utility {
       line = reader.readLine();
       String[] line_list = line.split(" ");
       if (line_list.length != 3) {
-        Utility.print(String.format("%s first line parameters number mismatch!", datagraph_path));
+        Util.println(String.format("%s first line parameters number mismatch!", datagraph_path));
         return null;
       }
       if (line_list[0].equals("t") == false) {
-        Utility.print(String.format("%s format no 't' at the beginning!", datagraph_path));
+        Util.println(String.format("%s format no 't' at the beginning!", datagraph_path));
         return null;
       }
       int node_count = Integer.parseInt(line_list[2]);// first line contains total number of nodes
@@ -399,11 +399,11 @@ public class Utility {
         line = reader.readLine();
         line_list = line.split(" ");
         if (line_list.length != 3) {
-          Utility.print(String.format("node line parameters number mismatch!"));
+          Util.println(String.format("node line parameters number mismatch!"));
           return null;
         }
         if (line_list[0].equals("v") == false) {
-          Utility.print("node line does not start with 'v'");
+          Util.println("node line does not start with 'v'");
         }
         int label = Integer.parseInt(line_list[2]);
         if (label_cardinality.containsKey(label))
@@ -413,7 +413,7 @@ public class Utility {
       }
       reader.close();
     } catch (Exception e) {
-      Utility.print(line);
+      Util.println(line);
       e.printStackTrace();
       if (reader != null)
         try {
@@ -442,11 +442,11 @@ public class Utility {
         line = reader.readLine();
         String[] line_list = line.split(" ");
         if (line_list.length != 4) {
-          Utility.print(String.format("query graph first line parameters number mismatch!"));
+          Util.println(String.format("query graph first line parameters number mismatch!"));
           return null;
         }
         if (line_list[0].equals("t") == false) {
-          Utility.print("query graph first line does begin with 't'!");
+          Util.println("query graph first line does begin with 't'!");
           return null;
         }
         int node_count = Integer.parseInt(line_list[2]);
@@ -456,8 +456,8 @@ public class Utility {
           line_list = line.split(" ");
           int node_id = Integer.parseInt(line_list[0]);
           if (node_id != i) {
-            Utility.print(String.format("node_id not consistent with line index at %d", i));
-            Utility.print(line);
+            Util.println(String.format("node_id not consistent with line index at %d", i));
+            Util.println(line);
             return null;
           }
 
@@ -475,7 +475,7 @@ public class Utility {
       }
       reader.close();
     } catch (Exception e) {
-      Utility.print(line);
+      Util.println(line);
       e.printStackTrace();
     }
     return query_Graphs;
@@ -525,7 +525,7 @@ public class Utility {
       }
       reader.close();
     } catch (Exception e) {
-      Utility.print(line);
+      Util.println(line);
       e.printStackTrace();
     }
     return query_Graphs;
@@ -563,7 +563,7 @@ public class Utility {
       }
       fileWriter.close();
     } catch (Exception e) {
-      Utility.print(line);
+      Util.println(line);
       e.printStackTrace();
     }
   }
@@ -587,11 +587,11 @@ public class Utility {
         line = reader.readLine();
         String[] line_list = line.split(" ");
         if (line_list.length != 4) {
-          Utility.print(String.format("query graph first line parameters number mismatch!"));
+          Util.println(String.format("query graph first line parameters number mismatch!"));
           return null;
         }
         if (line_list[0].equals("t") == false) {
-          Utility.print("query graph first line does begin with 't'!");
+          Util.println("query graph first line does begin with 't'!");
           return null;
         }
         int node_count = Integer.parseInt(line_list[2]);
@@ -601,8 +601,8 @@ public class Utility {
           line_list = line.split(" ");
           int node_id = Integer.parseInt(line_list[0]);
           if (node_id != i) {
-            Utility.print(String.format("node_id not consistent with line index at %d", i));
-            Utility.print(line);
+            Util.println(String.format("node_id not consistent with line index at %d", i));
+            Util.println(line);
             return null;
           }
 
@@ -621,7 +621,7 @@ public class Utility {
       }
       reader.close();
     } catch (Exception e) {
-      Utility.print(line);
+      Util.println(line);
       e.printStackTrace();
     }
     return query_Graphs;
@@ -644,11 +644,11 @@ public class Utility {
       while ((line = reader.readLine()) != null) {
         String[] line_list = line.split(" ");
         if (line_list.length != 4) {
-          Utility.print(String.format("query graph first line parameters number mismatch!"));
+          Util.println(String.format("query graph first line parameters number mismatch!"));
           return null;
         }
         if (line_list[0].equals("t") == false) {
-          Utility.print("query graph first line does begin with 't'!");
+          Util.println("query graph first line does begin with 't'!");
           return null;
         }
         int node_count = Integer.parseInt(line_list[2]);
@@ -658,8 +658,8 @@ public class Utility {
           line_list = line.split(" ");
           int node_id = Integer.parseInt(line_list[0]);
           if (node_id != i) {
-            Utility.print(String.format("node_id not consistent with line index at %d", i));
-            Utility.print(line);
+            Util.println(String.format("node_id not consistent with line index at %d", i));
+            Util.println(line);
             return null;
           }
 
@@ -677,7 +677,7 @@ public class Utility {
         query_Graphs.add(query_Graph);
       }
     } catch (Exception e) {
-      Utility.print(line);
+      Util.println(line);
       e.printStackTrace();
     }
     return query_Graphs;
@@ -788,7 +788,7 @@ public class Utility {
     return query;
   }
 
-  public static void print(Object o) {
+  public static void println(Object o) {
     System.out.println(o);
   }
 

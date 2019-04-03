@@ -35,7 +35,7 @@ public class Neo4jGraphUtilityTest {
       testNode = testNodes.next();
       break;
     }
-    Utility.print(testNode);
+    Util.println(testNode);
     HashSet<Node> neighbors = Neo4jGraphUtility.getGraphNeighbors(testNode);
     for (Node node : neighbors) {
       System.out.println(node.getLabels());

@@ -14,7 +14,7 @@ import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import commons.Neo4jGraphUtility;
-import commons.Utility;
+import commons.Util;
 
 public class MaintenanceTest {
 
@@ -41,10 +41,10 @@ public class MaintenanceTest {
       testNode = testNodes.next();
       break;
     }
-    Utility.print(testNode);
+    Util.println(testNode);
     HashMap<String, HashSet<Node>> PNMap = Maintenance.getPN(dbservice, testNode, 2);
-    Utility.print(PNMap);
-    Utility.print(PNMap.remove("PN"));
+    Util.println(PNMap);
+    Util.println(PNMap.remove("PN"));
     for (String propertyName : PNMap.keySet()) {
       HashSet<Node> nodes = PNMap.get(propertyName);
       HashSet<Long> idsInMap = new HashSet<>();
@@ -61,7 +61,7 @@ public class MaintenanceTest {
       }
       query += " where id(n) = " + testNode.getId();
       query += String.format(" return id(a%d) as res", i - 1);
-      Utility.print(query);
+      Util.println(query);
       Result result = dbservice.execute(query);
       HashSet<Long> idsFromQuery = new HashSet<>();
       while (result.hasNext()) {
@@ -69,10 +69,10 @@ public class MaintenanceTest {
         idsFromQuery.add(id);
       }
       if (idsInMap.size() != idsFromQuery.size()) {
-        Utility.print("size different");
+        Util.println("size different");
       }
-      Set<Long> diff = Utility.setDiff(idsInMap, idsFromQuery);
-      Utility.print("diff = " + diff);
+      Set<Long> diff = Util.setDiff(idsInMap, idsFromQuery);
+      Util.println("diff = " + diff);
     }
     tx.success();
     tx.close();
@@ -87,7 +87,7 @@ public class MaintenanceTest {
       testNode = testNodes.next();
       break;
     }
-    Utility.print(testNode);
+    Util.println(testNode);
     int labelId = Maintenance.getNodeLabelId(testNode);
     tx.success();
     tx.close();
@@ -98,7 +98,7 @@ public class MaintenanceTest {
   public void getReversePropertyNameTest() {
     String[] labelStrings = new String[] {"0", "10", "1"};
     String res = Maintenance.getReversePropertyName(labelStrings);
-    Utility.print(res);
+    Util.println(res);
   }
 
 }

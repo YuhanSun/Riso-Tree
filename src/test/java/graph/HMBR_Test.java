@@ -11,7 +11,7 @@ import commons.Config;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
-import commons.Utility;
+import commons.Util;
 import commons.Config.system;
 
 public class HMBR_Test {
@@ -69,7 +69,7 @@ public class HMBR_Test {
         break;
     }
 
-    ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+    ArrayList<Query_Graph> queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     Query_Graph query_Graph = queryGraphs.get(query_id);
 
     ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
@@ -84,9 +84,9 @@ public class HMBR_Test {
     Result result = hmbr.Query(query_Graph, -1);
     int count = 0;
     while (result.hasNext()) {
-      Utility.print(result.next());
+      Util.println(result.next());
       count++;
     }
-    Utility.print(String.format("Result size : %s", count));
+    Util.println(String.format("Result size : %s", count));
   }
 }

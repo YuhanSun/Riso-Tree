@@ -11,7 +11,7 @@ import commons.Config;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
-import commons.Utility;
+import commons.Util;
 import commons.Config.system;
 
 public class RisoTreeQueryTest {
@@ -69,7 +69,7 @@ public class RisoTreeQueryTest {
 
   @Test
   public void queryTest() {
-    ArrayList<Query_Graph> queryGraphs = Utility.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
+    ArrayList<Query_Graph> queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     Query_Graph query_Graph = queryGraphs.get(query_id);
 
     ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
@@ -89,11 +89,11 @@ public class RisoTreeQueryTest {
     }
     RisoTreeQuery risoTreeQuery = new RisoTreeQuery(db_path, dataset, graph_pos_map_list);
     risoTreeQuery.Query(query_Graph, -1);
-    Utility.print("Result count:" + risoTreeQuery.result_count);
-    Utility.print("Page access:" + risoTreeQuery.page_hit_count);
-    Utility.print("range query time:" + risoTreeQuery.range_query_time);
-    Utility.print("get iterator time:" + risoTreeQuery.get_iterator_time);
-    Utility.print("iterate time:" + risoTreeQuery.iterate_time);
+    Util.println("Result count:" + risoTreeQuery.result_count);
+    Util.println("Page access:" + risoTreeQuery.page_hit_count);
+    Util.println("range query time:" + risoTreeQuery.range_query_time);
+    Util.println("get iterator time:" + risoTreeQuery.get_iterator_time);
+    Util.println("iterate time:" + risoTreeQuery.iterate_time);
 
     risoTreeQuery.dbservice.shutdown();
   }
