@@ -24,6 +24,7 @@ public class Driver {
     /**
      * for wikidata
      */
+    wikiGenerateContainSpatialID, // one time prepare
     wikiConstructRTree, wikiConstructPNTime,
   }
 
@@ -160,6 +161,10 @@ public class Driver {
             new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath));
             break;
+          case wikiGenerateContainSpatialID:
+            Construct_RisoTree.wikiGenerateContainSpatialID(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(dataset), cmd.getOptionValue(containIDPath));
+            break;
           case wikiConstructPNTime:
             new Construct_RisoTree(new Config(), true).wikiConstructPNTime(
                 cmd.getOptionValue(containIDPath), cmd.getOptionValue(dbPath),
@@ -167,7 +172,7 @@ public class Driver {
                 cmd.getOptionValue(labelStrMapPath),
                 Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
                 cmd.getOptionValue(PNPathAndPreffix));
-
+            break;
           default:
             Util.println(String.format("Function %s does not exist!", functionNameString));
             break;

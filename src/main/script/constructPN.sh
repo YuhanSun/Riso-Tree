@@ -5,7 +5,7 @@
 
 # server
 dir="/hdd/code/yuhansun"
-dataset="Patents_100_random_20"
+dataset="wikidata"
 data_dir="${dir}/data/${dataset}"
 code_dir="${dir}/code"
 
