@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -14,6 +15,8 @@ public class Driver {
 
   // function names
   private static enum FunctionName {
+    convertSingleToBidirectinalGraph, // data preprocess
+
     tree, containID, // tree construction
     LoadNonSpatialEntity, GetSpatialNodeMap, LoadGraphEdges, CalculateCount, LoadAll, // graph load
     constructPN, loadPN, // PN load
@@ -43,6 +46,7 @@ public class Driver {
   private String labelListPath = "lp";
   private String dbPath = "dp";
   private String dataset = "d";
+  private String dataDir = "dataDir";
 
   // Construct_RisoTree
   private String containIDPath = "c";
@@ -58,6 +62,7 @@ public class Driver {
     this.args = args;
     options.addOption(help, "help", false, "show help.");
     options.addOption(function, "function", true, "function name");
+    options.addOption(dataDir, "data directory", true, "the directory includes all data files");
     options.addOption(graphPath, "graph-path", true, "graph path");
     options.addOption(entityPath, "entity-path", true, "entity path");
     options.addOption(labelListPath, "labellist-path", true, "label list path");
@@ -92,6 +97,9 @@ public class Driver {
         String functionNameString = cmd.getOptionValue(function);
         FunctionName functionName = getFunctionEnum(functionNameString);
         switch (functionName) {
+          case convertSingleToBidirectinalGraph:
+            DataProcess.convertSingleToBidirectinalGraph(cmd.getOptionValue(dataDir));
+            break;
           case tree:
             new LoadDataNoOSM(new Config(), true).batchRTreeInsertOneHopAware(
                 cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
@@ -185,11 +193,12 @@ public class Driver {
     // "D:/Neo4jData/neo4jDatabases/database-ae5a632c-076d-42a6-ac8d-61f8f72af7f9/installation-3.4.12/data/databases/graph.db",
     // "-d", "wikidata", "-ep", "D:/Project_Data/wikidata-20180308-truthy-BETA.nt/entity.txt"};
 
-    // Util.println(Arrays.toString(args));
-    // Driver driver = new Driver(args);
-    // driver.parser();
+    // run only once.
+    // DataProcess.convertSingleToBidirectinalGraph();
+    Util.println(Arrays.toString(args));
+    Driver driver = new Driver(args);
+    driver.parser();
 
-    DataProcess.convertSingleToBidirectinalGraph();
   }
 
 }

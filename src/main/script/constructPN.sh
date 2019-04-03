@@ -25,17 +25,17 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
 # java -Xmx100g -jar ${jar_path} -h
 
-# echo "java -Xmx100g -jar ${jar_path} -f containID -dp ${db_path} -d ${dataset} -c ${containID_path}"
-# java -Xmx100g -jar ${jar_path} -f containID -dp ${db_path} -d ${dataset} -c ${containID_path}
+
 
 MAX_HOPNUM="2"
 PNPathAndPreffix="${data_dir}/PathNeighbors"
 
 # convert single graph to bidirectional
-java -Xmx100g -jar ${jar_path}
+java -Xmx100g -jar ${jar_path} -f convertSingleToBidirectinalGraph -dataDir ${data_dir}
 
+java -Xmx100g -jar ${jar_path} -f containID -dp ${db_path} -d ${dataset} -c ${containID_path}
 
-###### Construct Path Neighbors for leaf nodes ######
+###### Wikidata Construct Path Neighbors for leaf nodes ######
 # java -Xmx100g -jar ${jar_path} -f constructPN -dp ${db_path} -c ${containID_path} -gp ${graph_path} -lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix}
 
 ###### Load PathNeighbor into db ######

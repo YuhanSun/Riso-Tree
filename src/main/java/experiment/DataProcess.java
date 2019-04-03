@@ -3,13 +3,15 @@ package experiment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 import commons.Config;
 import commons.Config.system;
 import commons.GraphUtil;
 import commons.OwnMethods;
-import commons.Util;
 
 public class DataProcess {
+
+  private static final Logger LOGGER = Logger.getLogger(DataProcess.class.getName());
 
   static Config config = new Config();
   static String dataset = config.getDatasetName();
@@ -74,17 +76,24 @@ public class DataProcess {
 
     // server version
     dataDirectory = "/hdd/code/yuhansun/data/wikidata";
-    String singleGraphPath = String.format("%s/graph_single.txt", dataDirectory);
-    String bidirectionGraphPath = String.format("%s/graph.txt", dataDirectory);
+    convertSingleToBidirectinalGraph(dataDirectory);
+  }
 
-    Util.println("read single graph from " + singleGraphPath);
+  public static void convertSingleToBidirectinalGraph(String homeDir) {
+    String singleGraphPath = String.format("%s/graph_single.txt", homeDir);
+    String bidirectionGraphPath = String.format("%s/graph.txt", homeDir);
+    convertSingleToBidirectinalGraph(singleGraphPath, bidirectionGraphPath);
+  }
+
+  public static void convertSingleToBidirectinalGraph(String singleGraphPath,
+      String bidirectionGraphPath) {
     ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(singleGraphPath);
 
-    Util.println("generate bidirectional graph");
+    LOGGER.info("generate bidirectional graph");
     ArrayList<TreeSet<Integer>> bidirectionalGraph =
         OwnMethods.singleDirectionalToBidirectionalGraph(graph);
 
-    Util.println("output birectional graph to " + bidirectionGraphPath);
+    LOGGER.info("output birectional graph to " + bidirectionGraphPath);
     OwnMethods.writeGraphTreeSet(bidirectionalGraph, bidirectionGraphPath);
   }
 
