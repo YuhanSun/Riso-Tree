@@ -46,6 +46,7 @@ public class Driver {
 
   // Construct_RisoTree
   private String containIDPath = "c";
+  private String labelStrMapPath = "labelStrMapPath";
 
   // Load data
   private String mapPath = "mapPath";
@@ -64,6 +65,9 @@ public class Driver {
     options.addOption(dataset, "dataset", true, "dataset for naming the layer");
     options.addOption(containIDPath, "containId-path", true, "path for containID.txt");
     options.addOption(mapPath, "map path", true, "path for the map from entity id to neo4j id");
+    options.addOption(labelStrMapPath, "labelStrMapPath", true,
+        "the map from graph id to String label (name)");
+
 
     options.addOption(MAX_HOPNUM, "MAX_HOPNUM", true, "MAX_HOPNUM of RisoTree");
     options.addOption(PNPathAndPreffix, "PNPathAndPreffix", true,
@@ -148,6 +152,14 @@ public class Driver {
             new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath));
             break;
+          case wikiConstructPNTime:
+            new Construct_RisoTree(new Config(), true).wikiConstructPNTime(
+                cmd.getOptionValue(containIDPath), cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),
+                cmd.getOptionValue(labelStrMapPath),
+                Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
+                cmd.getOptionValue(PNPathAndPreffix));
+
           default:
             Util.println(String.format("Function %s does not exist!", functionNameString));
             break;
