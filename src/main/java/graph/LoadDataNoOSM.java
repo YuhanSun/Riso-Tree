@@ -32,6 +32,7 @@ import commons.Config;
 import commons.Config.Datasets;
 import commons.Config.system;
 import commons.Entity;
+import commons.GraphUtil;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.RTreeRel;
@@ -254,7 +255,7 @@ public class LoadDataNoOSM {
       Util.println("batch insert into: " + dbPath);
       inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
 
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
       for (int i = 0; i < graph.size(); i++) {
         ArrayList<Integer> neighbors = graph.get(i);
         int start_neo4j_id = Integer.parseInt(id_map.get(String.valueOf(i)));
@@ -290,7 +291,7 @@ public class LoadDataNoOSM {
       inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
 
       Util.println("read graph from " + graphPath);
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
       for (int i = 0; i < graph.size(); i++) {
         ArrayList<Integer> neighbors = graph.get(i);
         int start_neo4j_id = Integer.parseInt(id_map.get(String.valueOf(i)));
@@ -580,7 +581,7 @@ public class LoadDataNoOSM {
       ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 
       Util.println("Read graph from: " + graphPath);
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
 
       Util.println("Read label list from: " + labelListPath);
       ArrayList<Integer> labelList = OwnMethods.readIntegerArray(labelListPath);
@@ -730,7 +731,7 @@ public class LoadDataNoOSM {
       ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 
       Util.println("Read graph from: " + graphPath);
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
 
       Util.println("Read label list from: " + labelListPath);
       ArrayList<Integer> labelList = OwnMethods.readIntegerArray(labelListPath);

@@ -19,6 +19,7 @@ import org.neo4j.graphdb.traversal.Traverser;
 import commons.Config;
 import commons.Config.system;
 import commons.Entity;
+import commons.GraphUtil;
 import commons.Labels.RTreeRel;
 import commons.OwnMethods;
 import commons.RTreeUtility;
@@ -107,7 +108,7 @@ public class IndexSize {
 
   public static void graphSize() {
     try {
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
       Util.println(OwnMethods.getGraphSize(graph));
 
     } catch (Exception e) {

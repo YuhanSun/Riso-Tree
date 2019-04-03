@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.TreeSet;
 import commons.Config;
 import commons.Config.system;
+import commons.GraphUtil;
 import commons.OwnMethods;
 import commons.Util;
 
@@ -77,7 +78,7 @@ public class DataProcess {
     String bidirectionGraphPath = String.format("%s/graph.txt", dataDirectory);
 
     Util.println("read single graph from " + singleGraphPath);
-    ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(singleGraphPath);
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(singleGraphPath);
 
     Util.println("generate bidirectional graph");
     ArrayList<TreeSet<Integer>> bidirectionalGraph =

@@ -30,6 +30,7 @@ import commons.Labels.GraphRel;
 import commons.Labels.OSMLabel;
 import commons.Labels.OSMRelation;
 import commons.Config.system;
+import commons.GraphUtil;
 import osm.OSM_Utility;
 
 /**
@@ -104,7 +105,7 @@ public class Graph_Switch {
           String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph.txt", dataset);
 
       Map<String, String> id_map = OwnMethods.ReadMap(map_path);
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graph_path);
 
       Map<String, String> config = new HashMap<String, String>();
       config.put("dbms.pagecache.memory", "6g");

@@ -397,7 +397,7 @@ public class Construct_RisoTree {
     Util.println("read contain map from " + containIDPath);
     HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
     Util.println("read graph from " + graph_path);
-    ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graph_path);
     Util.println("read label list from " + label_list_path);
     ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
     // FileWriter writer1 = new FileWriter(new File(PNPath + "_"+1));
@@ -513,7 +513,7 @@ public class Construct_RisoTree {
       Util.println("read contain map from " + containIDPath);
       HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
       Util.println("read graph from " + graph_path);
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graph_path);
       Util.println("read label list from " + label_list_path);
       ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
       GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
@@ -780,7 +780,7 @@ public class Construct_RisoTree {
       Util.println("read contain map from " + containIDPath);
       HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
       Util.println("read graph from " + graph_path);
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graph_path);
       Util.println("read label list from " + label_list_path);
       ArrayList<Integer> labelList = OwnMethods.readIntegerArray(label_list_path);
       GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);

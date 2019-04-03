@@ -81,7 +81,7 @@ public class GraphUtil {
 
   /**
    * Read graph from a file.
-   * 
+   *
    * @param graph_path
    * @return
    */

@@ -26,6 +26,7 @@ import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config;
 import commons.Entity;
+import commons.GraphUtil;
 import commons.Labels.OSMRelation;
 import commons.Query_Graph;
 import commons.RTreeUtility;
@@ -442,7 +443,7 @@ public class Prepare {
     }
 
     Util.println("read graph from " + graph_path);
-    ArrayList<ArrayList<Integer>> datagraph = OwnMethods.ReadGraph(graph_path);
+    ArrayList<ArrayList<Integer>> datagraph = GraphUtil.ReadGraph(graph_path);
     if (entities == null) {
       Util.println("read entity from " + entityPath);
       entities = OwnMethods.ReadEntity(entityPath);

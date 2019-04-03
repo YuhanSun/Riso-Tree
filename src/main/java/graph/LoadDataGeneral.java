@@ -19,6 +19,7 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.Config;
 import commons.Entity;
+import commons.GraphUtil;
 import commons.Labels;
 import commons.OwnMethods;
 import commons.RTreeUtility;
@@ -157,7 +158,7 @@ public class LoadDataGeneral {
       config.put("dbms.pagecache.memory", "6g");
       inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
 
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graph_path);
       for (int i = 0; i < graph.size(); i++) {
         ArrayList<Integer> neighbors = graph.get(i);
         int start_neo4j_id = Integer.parseInt(id_map.get(String.valueOf(i)));

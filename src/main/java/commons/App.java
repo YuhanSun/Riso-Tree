@@ -245,8 +245,8 @@ public class App {
     String graphPath2 = String
         .format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/graph_entity_newformat.txt", dataset);
 
-    ArrayList<ArrayList<Integer>> graph1 = OwnMethods.ReadGraph(graphPath1);
-    ArrayList<ArrayList<Integer>> graph2 = OwnMethods.ReadGraph(graphPath2);
+    ArrayList<ArrayList<Integer>> graph1 = GraphUtil.ReadGraph(graphPath1);
+    ArrayList<ArrayList<Integer>> graph2 = GraphUtil.ReadGraph(graphPath2);
 
     for (int i = 0; i < graph1.size(); i++)
       if (graph1.get(i).size() != graph2.get(i).size())

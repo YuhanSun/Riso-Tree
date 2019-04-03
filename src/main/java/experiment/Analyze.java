@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import commons.Config;
 import commons.Entity;
+import commons.GraphUtil;
 import commons.OwnMethods;
 import commons.Util;
 import commons.Config.Datasets;
@@ -92,7 +93,7 @@ public class Analyze {
 
   public static void getAverageDegree() {
     Util.println("read graph from " + graphPath);
-    ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
     int edgeCount = 0;
     for (ArrayList<Integer> neighbors : graph) {
       edgeCount += neighbors.size();
@@ -110,7 +111,7 @@ public class Analyze {
     for (String dataset : dataset_a) {
       config.setDatasetName(dataset);
       initParameters();
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graphPath);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
       int count = 0;
       int i = 0;
       for (ArrayList<Integer> list : graph) {

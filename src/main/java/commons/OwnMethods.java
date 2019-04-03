@@ -551,8 +551,8 @@ public class OwnMethods {
           for (int neighbor : neighbors) {
             int neighbor_index = subgraph_ids.indexOf(neighbor);
             if (neighbor_index == -1) {
-              Util
-                  .println(neighbor + " in " + id + "'s neighbors " + neighbors + " does not exist");
+              Util.println(
+                  neighbor + " in " + id + "'s neighbors " + neighbors + " does not exist");
               Util.println("All the ids in the subgraph are" + subgraph_ids);
               throw new Exception("neighbors does not exist in subgraph_ids");
             } else {
@@ -715,44 +715,6 @@ public class OwnMethods {
       e.printStackTrace();
       System.exit(-1);
     }
-  }
-
-  /**
-   * Read graph from a file.
-   * 
-   * @param graph_path
-   * @return
-   */
-  public static ArrayList<ArrayList<Integer>> ReadGraph(String graph_path) {
-    ArrayList<ArrayList<Integer>> graph = null;
-    BufferedReader reader = null;
-    String str = "";
-    try {
-      reader = new BufferedReader(new FileReader(new File(graph_path)));
-      str = reader.readLine();
-      int node_count = Integer.parseInt(str);
-      graph = new ArrayList<ArrayList<Integer>>(node_count);
-      while ((str = reader.readLine()) != null) {
-        String[] l_str = str.split(",");
-        // int id = Integer.parseInt(l_str[0]);
-        int neighbor_count = Integer.parseInt(l_str[1]);
-        ArrayList<Integer> line = new ArrayList<Integer>(neighbor_count);
-        if (neighbor_count == 0) {
-          graph.add(line);
-          continue;
-        }
-        int i = 2;
-        while (i < l_str.length) {
-          line.add(Integer.parseInt(l_str[i]));
-          ++i;
-        }
-        graph.add(line);
-      }
-    } catch (Exception e) {
-      Util.println(str);
-      e.printStackTrace();
-    }
-    return graph;
   }
 
   public static boolean ReachabilityQuery(ArrayList<ArrayList<Integer>> graph,
