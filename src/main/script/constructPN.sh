@@ -1,4 +1,5 @@
 #!/bin/bash
+./package.sh
 
 # tree_type="Gleene_1.0"
 
