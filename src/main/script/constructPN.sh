@@ -22,8 +22,8 @@ label_path="${data_dir}/label.txt"
 containID_path="${data_dir}/containID.txt"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
-echo "java -Xmx100g -jar ${jar_path} -h"
-java -Xmx100g -jar ${jar_path} -h
+
+# java -Xmx100g -jar ${jar_path} -h
 
 # echo "java -Xmx100g -jar ${jar_path} -f containID -dp ${db_path} -d ${dataset} -c ${containID_path}"
 # java -Xmx100g -jar ${jar_path} -f containID -dp ${db_path} -d ${dataset} -c ${containID_path}
