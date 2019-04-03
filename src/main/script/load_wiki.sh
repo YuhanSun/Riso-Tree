@@ -22,7 +22,7 @@ code_dir="${dir}/code"
 
 
 # server setup
-# db_path="${data_dir}/neo4j-community-3.4.12/data/databases/graph.db"
+db_path="${data_dir}/neo4j-community-3.4.12/data/databases/graph.db"
 
 # common setup
 # graph_path="${data_dir}/graph.txt"
