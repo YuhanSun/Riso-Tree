@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeSet;
 import commons.Config;
+import commons.Config.system;
 import commons.OwnMethods;
 import commons.Util;
-import commons.Config.system;
 
 public class DataProcess {
 
@@ -72,9 +72,9 @@ public class DataProcess {
     // String bidirectionGraphPath = String.format("%s\\%s\\graph.txt", dataDirectory, dataset);
 
     // server version
-    dataDirectory = "/hdd2/data/ysun138/RisoTree";
-    String singleGraphPath = String.format("%s/%s/graph_single.txt", dataDirectory, dataset);
-    String bidirectionGraphPath = String.format("%s/%s/graph.txt", dataDirectory, dataset);
+    dataDirectory = "/hdd/code/yuhansun/data/wikidata";
+    String singleGraphPath = String.format("%s/graph_single.txt", dataDirectory);
+    String bidirectionGraphPath = String.format("%s/graph.txt", dataDirectory);
 
     Util.println("read single graph from " + singleGraphPath);
     ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(singleGraphPath);

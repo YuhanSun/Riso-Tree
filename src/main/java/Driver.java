@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -7,6 +6,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import commons.Config;
 import commons.Util;
+import experiment.DataProcess;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
 
@@ -185,10 +185,11 @@ public class Driver {
     // "D:/Neo4jData/neo4jDatabases/database-ae5a632c-076d-42a6-ac8d-61f8f72af7f9/installation-3.4.12/data/databases/graph.db",
     // "-d", "wikidata", "-ep", "D:/Project_Data/wikidata-20180308-truthy-BETA.nt/entity.txt"};
 
+    // Util.println(Arrays.toString(args));
+    // Driver driver = new Driver(args);
+    // driver.parser();
 
-    Util.println(Arrays.toString(args));
-    Driver driver = new Driver(args);
-    driver.parser();
+    DataProcess.convertSingleToBidirectinalGraph();
   }
 
 }
