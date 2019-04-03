@@ -21,7 +21,7 @@ public class Driver {
     /**
      * for wikidata
      */
-    constructRTreeWikidata,
+    wikiConstructRTree, wikiConstructPNTime,
   }
 
   private static FunctionName getFunctionEnum(String function) {
@@ -144,8 +144,8 @@ public class Driver {
           /**
            * for wikidata
            */
-          case constructRTreeWikidata:
-            new LoadDataNoOSM(new Config(), true).constructRTreeWikidata(cmd.getOptionValue(dbPath),
+          case wikiConstructRTree:
+            new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath));
             break;
           default:

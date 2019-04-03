@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -22,10 +23,12 @@ import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.ArrayUtil;
 import commons.Config;
 import commons.Config.system;
+import commons.GraphUtil;
 import commons.Labels.RTreeRel;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.RTreeUtility;
+import commons.ReadWriteUtil;
 import commons.RisoTreeUtil;
 import commons.Util;
 
@@ -35,6 +38,8 @@ import commons.Util;
  *
  */
 public class Construct_RisoTree {
+
+  private static final Logger LOGGER = Logger.getLogger(Construct_RisoTree.class.getName());
 
   static Config config = new Config();
   static final String PNPrefix = config.PNPrefix;
@@ -620,19 +625,17 @@ public class Construct_RisoTree {
   }
 
   public void wikiConstructPNTime(String containIDPath, String db_path, String graph_path,
-      String label_list_path, int MAX_HOPNUM, String PNPathAndPreffix) {
+      String label_list_path, String labelStringMapPath, int MAX_HOPNUM, String PNPathAndPreffix) {
     try {
-      Util.println("read contain map from " + containIDPath);
       HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
-      Util.println("read graph from " + graph_path);
-      ArrayList<ArrayList<Integer>> graph = OwnMethods.ReadGraph(graph_path);
-      Util.println("read label list from " + label_list_path);
-      ArrayList<ArrayList<Integer>> label_list = OwnMethods.ReadGraph(label_list_path);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graph_path);
+      ArrayList<ArrayList<Integer>> label_list = GraphUtil.ReadGraph(label_list_path);
       GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
+      String[] labelStringMap = ReadWriteUtil.readMapAsArray(labelStringMapPath, 50000000);
 
-      // HashMap<Integer, Long> constructTime = wikiConstructPNTime(containIDMap, labelStringMap,
-      // dbservice, graph, label_list, MAX_HOPNUM, PNPathAndPreffix);
-      // Utility.print(constructTime);
+      HashMap<Integer, Long> constructTime = wikiConstructPNTime(containIDMap, labelStringMap,
+          dbservice, graph, label_list, MAX_HOPNUM, PNPathAndPreffix);
+      Util.println(constructTime);
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
@@ -1671,8 +1674,8 @@ public class Construct_RisoTree {
 
   public static HashMap<Long, ArrayList<Integer>> readContainIDMap(String filePath)
       throws Exception {
+    LOGGER.info("read contain map from " + containIDPath);
     HashMap<Long, ArrayList<Integer>> containIDMap = new HashMap<Long, ArrayList<Integer>>();
-
     BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)));
     String line = null;
     while ((line = reader.readLine()) != null) {

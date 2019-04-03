@@ -84,7 +84,7 @@ public class LoadDataNoOSMTest {
   public void constructRTreeWikidataTest() throws Exception {
     LoadDataNoOSM loadDataNoOSM = new LoadDataNoOSM(new Config(), true);
     loadDataNoOSM.loadSpatialEntity(db_path, entityPath);
-    loadDataNoOSM.constructRTreeWikidata(db_path, dataset, entityPath);
+    loadDataNoOSM.wikiConstructRTree(db_path, dataset, entityPath);
   }
 
   @Test
