@@ -16,6 +16,15 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 public class Util {
 
+  public static boolean pathExist(String path) {
+    File file = new File(path);
+
+    if (file.exists())
+      return true;
+    else
+      return false;
+  }
+
   /**
    * Compute the how many elements in source but not in target. Both arrays are sorted.
    *
