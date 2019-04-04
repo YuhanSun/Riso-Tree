@@ -27,7 +27,7 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 # java -Xmx100g -jar ${jar_path} -h
 
 MAX_HOPNUM="2"
-PNPathAndPreffix="${data_dir}/PathNeighbors"
+PNPathAndPrefix="${data_dir}/PathNeighbors"
 
 # convert single graph to bidirectional
 # java -Xmx100g -jar ${jar_path} -f convertSingleToBidirectinalGraph -dataDir ${data_dir}
@@ -36,9 +36,17 @@ PNPathAndPreffix="${data_dir}/PathNeighbors"
 # 	-dp ${db_path} -d ${dataset} -c ${containID_path}
 
 ###### Wikidata Construct Path Neighbors for leaf nodes ######
-java -Xmx100g -jar ${jar_path} -f wikiConstructPNTime \
+# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTime \
+# 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+# 	-lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPrefix ${PNPathAndPrefix}
+
+java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	-lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix}
+	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix}
+java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix}
+
 
 ###### Load PathNeighbor into db ######
-# java -Xmx100g -jar ${jar_path} -f loadPN -PNPreffix ${PNPathAndPreffix} -MAX_HOPNUM ${MAX_HOPNUM} -dp ${db_path}
+# java -Xmx100g -jar ${jar_path} -f loadPN -PNPrefix ${PNPathAndPrefix} -MAX_HOPNUM ${MAX_HOPNUM} -dp ${db_path}

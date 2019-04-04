@@ -39,7 +39,8 @@ public class Config {
   private String Rect_maxx_name = "maxx";
   private String Rect_maxy_name = "maxy";
 
-  public static String PNPrefix = "PN";
+  public final static String PNPrefix = "PN";
+  public final static String PNSizePrefix = "PNSize";
 
   public void setDatasetName(String pName) {
     this.dataset = pName;

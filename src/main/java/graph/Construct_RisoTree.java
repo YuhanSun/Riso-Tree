@@ -42,7 +42,8 @@ public class Construct_RisoTree {
   private static final Logger LOGGER = Logger.getLogger(Construct_RisoTree.class.getName());
 
   static Config config = new Config();
-  static final String PNPrefix = config.PNPrefix;
+  static final String PNPrefix = Config.PNPrefix;
+  static final String PNSizePrefix = Config.PNSizePrefix;
 
   static String dataset, version;
   static system systemName;
@@ -60,6 +61,8 @@ public class Construct_RisoTree {
   static String PNPath;
 
   static ArrayList<Integer> labels;// all labels in the graph
+
+  private final static int PNLogCount = 3000;
 
 
   static void initParametersServer() {
@@ -328,6 +331,66 @@ public class Construct_RisoTree {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  /**
+   * Load specific hop of path neighbor from a given file. The path file will be
+   * PNPathAndPreffix_hop.txt.
+   *
+   * @param PNPathAndPreffix
+   * @param hop
+   * @param db_path
+   * @throws Exception
+   */
+  public static void wikiLoadPN(String PNPathAndPreffix, int hop, String db_path) throws Exception {
+    String indexPath = PNPathAndPreffix + "_" + hop + ".txt";
+    LOGGER.info("read index from " + indexPath);
+    BufferedReader reader = new BufferedReader(new FileReader(new File(indexPath)));
+    Map<String, String> config = new HashMap<String, String>();
+    config.put("dbms.pagecache.memory", "100g");
+    if (!Util.pathExist(db_path)) {
+      Util.close(reader);
+      throw new Exception(db_path + " does not exist!");
+    }
+    BatchInserter inserter = BatchInserters.inserter(new File(db_path).getAbsoluteFile(), config);
+
+    String line = null;
+    line = reader.readLine();
+    long nodeID = Long.parseLong(line);
+    int index = 0;
+
+    while (true) {
+      Map<String, Object> properties = inserter.getNodeProperties(nodeID);
+      while ((line = reader.readLine()) != null) {
+        if (line.matches("\\d+$") == false) { // path neighbor lines
+          String[] lineList = line.split(",", 2);
+          String key = lineList[0];
+
+          String content = lineList[1];
+          String[] contentList = content.substring(1, content.length() - 1).split(", ");
+
+          int[] value = new int[contentList.length];
+          for (int i = 0; i < contentList.length; i++)
+            value[i] = Integer.parseInt(contentList[i]);
+          properties.put(key, value);
+          properties.put(key + "_size", value.length);
+        } else {
+          break;
+        }
+      }
+      inserter.setNodeProperties(nodeID, properties);
+      index++;
+      if (index % PNLogCount == 0) {
+        LOGGER.info("" + index);
+      }
+
+      if (line == null) {
+        break;
+      }
+      nodeID = Long.parseLong(line);
+    }
+    Util.close(reader);
+    Util.close(inserter);
   }
 
   /**
@@ -624,7 +687,143 @@ public class Construct_RisoTree {
     }
   }
 
-  public void wikiConstructPNTime(String containIDPath, String db_path, String graph_path,
+  public static void wikiConstructPNSingleHop(String containIDPath, String db_path,
+      String graph_path, String label_list_path, String labelStringMapPath, int hop,
+      String PNPathAndPreffix) throws Exception {
+    HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graph_path);
+    ArrayList<ArrayList<Integer>> label_list = GraphUtil.ReadGraph(label_list_path);
+    String[] labelStringMap = ReadWriteUtil.readMapAsArray(labelStringMapPath, 50000000);
+
+    long constructTime = 0;
+    if (hop == 0) {
+      constructTime =
+          wikiConstructPNTimeZeroHop(containIDMap, labelStringMap, label_list, PNPathAndPreffix);
+    } else if (hop > 0) {
+      GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
+      constructTime = wikiConstructPNTimeMultiHop(containIDMap, labelStringMap, dbservice, graph,
+          label_list, hop, PNPathAndPreffix);
+    } else {
+      throw new Exception(String.format("hop = %d is invalid!", hop));
+    }
+
+    Util.println("construction time: " + constructTime);
+  }
+
+  public static long wikiConstructPNTimeZeroHop(HashMap<Long, ArrayList<Integer>> containIDMap,
+      String[] labelStringMap, ArrayList<ArrayList<Integer>> label_list, String PNPathAndPreffix)
+      throws Exception {
+    // 1-hop
+    LOGGER.info("construct 0-hop");
+    long start = System.currentTimeMillis();
+    FileWriter writer1 = new FileWriter(new File(getPNFilePath(PNPathAndPreffix, 0)));
+    int index = 0;
+    for (long nodeId : containIDMap.keySet()) {
+      index++;
+      if (index % PNLogCount == 0) {
+        LOGGER.info("" + index);
+      }
+      writer1.write(nodeId + "\n");
+      // 0-hop path neighbors are spatial objects themselves.
+      TreeSet<Integer> pathNeighbors = new TreeSet<>(containIDMap.get(nodeId));
+      HashMap<Integer, ArrayList<Integer>> pathLabelNeighbor =
+          dividedByLabels(pathNeighbors, label_list);
+      outPathLabelNeighbors(pathLabelNeighbor, PNPrefix, writer1, labelStringMap);
+    }
+    Util.close(writer1);
+    return System.currentTimeMillis() - start;
+  }
+
+  private static long wikiConstructPNTimeMultiHop(HashMap<Long, ArrayList<Integer>> containIDMap,
+      String[] labelStringMap, GraphDatabaseService dbservice, ArrayList<ArrayList<Integer>> graph,
+      ArrayList<ArrayList<Integer>> label_list, int hop, String PNPathAndPreffix) throws Exception {
+    // more than one hop
+    Transaction tx2 = dbservice.beginTx();
+    LOGGER.info(String.format("construct %d hop", hop));
+    FileWriter writer2 = new FileWriter(new File(getPNFilePath(PNPathAndPreffix, hop)));
+
+    int index = 0;
+    long start = System.currentTimeMillis();
+    for (long nodeID : containIDMap.keySet()) {
+      index++;
+      if (index % PNLogCount == 0) {
+        LOGGER.info("" + index);
+      }
+
+      writer2.write(nodeID + "\n");
+      Node node = dbservice.getNodeById(nodeID);
+      constructPNOutputForNode(node, labelStringMap, graph, label_list, hop, writer2);
+
+    }
+    Util.close(writer2);
+    tx2.success();
+    tx2.close();
+    return System.currentTimeMillis() - start;
+  }
+
+  private static void constructPNOutputForNode(Node node, String[] labelStringMap,
+      ArrayList<ArrayList<Integer>> graph, ArrayList<ArrayList<Integer>> label_list, int hop,
+      FileWriter writer2) throws Exception {
+    Map<String, Object> properties = node.getAllProperties();
+    for (String key : properties.keySet()) {
+      if (RisoTreeUtil.isPNProperty(key) && StringUtils.countMatches(key, '_') == (hop)) {
+        int[] curPathNeighbors = (int[]) properties.get(key);
+        TreeSet<Integer> nextPathNeighbors = getNextPathNeighborsInSet(curPathNeighbors, graph);
+        HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors =
+            dividedByLabels(nextPathNeighbors, label_list);
+        outPathLabelNeighbors(pathLabelNeighbors, key, writer2, labelStringMap);
+      }
+    }
+  }
+
+  private static void outPathLabelNeighbors(HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors,
+      String key, FileWriter writer2, String[] labelStringMap) throws Exception {
+    for (int pathEndLabel : pathLabelNeighbors.keySet()) {
+      String propertyName = getAttachName(key, pathEndLabel, labelStringMap);
+      ArrayList<Integer> arrayList = pathLabelNeighbors.get(pathEndLabel);
+      writer2.write(String.format("%s,%s\n", propertyName, arrayList));
+    }
+  }
+
+  // private static long wikiConstructPNTimeOneHop(HashMap<Long, ArrayList<Integer>> containIDMap,
+  // String[] labelStringMap, GraphDatabaseService dbservice, ArrayList<ArrayList<Integer>> graph,
+  // ArrayList<ArrayList<Integer>> label_list, String PNPathAndPreffix) throws Exception {
+  // // 1-hop
+  // LOGGER.info("construct 1-hop");
+  // long start = System.currentTimeMillis();
+  // FileWriter writer1 = new FileWriter(new File(getPNFilePath(PNPathAndPreffix, 1)));
+  // Transaction tx = dbservice.beginTx();
+  // int index = 0;
+  // for (long nodeId : containIDMap.keySet()) {
+  // index++;
+  // if (index % 2000 == 0) {
+  // LOGGER.info("" + index);
+  // }
+  // writer1.write(nodeId + "\n");
+  // TreeSet<Integer> pathNeighbors = new TreeSet<>();
+  // for (int spaID : containIDMap.get(nodeId)) {
+  // for (int neighborID : graph.get(spaID)) {
+  // pathNeighbors.add(neighborID);
+  // }
+  // }
+  //
+  // HashMap<Integer, ArrayList<Integer>> pathLabelNeighbor =
+  // dividedByLabels(pathNeighbors, label_list);
+  //
+  // for (int pathLabel : pathLabelNeighbor.keySet()) {
+  // String labelStr = labelStringMap[pathLabel];
+  // String propertyName = String.format("%s_%s", PNPrefix, labelStr);
+  // ArrayList<Integer> arrayList = pathLabelNeighbor.get(pathLabel);
+  // writer1.write(String.format("%s,%s\n", propertyName, arrayList));
+  // }
+  // }
+  // Util.close(writer1);
+  // tx.success();
+  // tx.close();
+  // return System.currentTimeMillis() - start;
+  // }
+
+  public static void wikiConstructPNTime(String containIDPath, String db_path, String graph_path,
       String label_list_path, String labelStringMapPath, int MAX_HOPNUM, String PNPathAndPreffix) {
     try {
       HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
@@ -650,11 +849,17 @@ public class Construct_RisoTree {
     HashMap<Integer, Long> constructTime = new HashMap<>();
 
     // 1-hop
-    FileWriter writer1 = new FileWriter(new File(PNPathAndPreffix + "_" + 1));
+    LOGGER.info("construct 1-hop");
+    FileWriter writer1 = new FileWriter(new File(getPNFilePath(PNPathAndPreffix, 1)));
     Transaction tx = dbservice.beginTx();
+    int index = 0;
     for (long nodeId : containIDMap.keySet()) {
+      index++;
+      if (index % 2000 == 0) {
+        LOGGER.info("" + index);
+      }
       writer1.write(nodeId + "\n");
-      TreeSet<Integer> pathNeighbors = new TreeSet<Integer>();
+      TreeSet<Integer> pathNeighbors = new TreeSet<>();
       for (int spaID : containIDMap.get(nodeId)) {
         for (int neighborID : graph.get(spaID)) {
           pathNeighbors.add(neighborID);
@@ -685,10 +890,16 @@ public class Construct_RisoTree {
     int hop = 2;
     while (hop <= MAX_HOPNUM) {
       Util.println(String.format("construct %d hop", hop));
-      FileWriter writer2 = new FileWriter(new File(PNPathAndPreffix + "_" + hop + ".txt"));
+      FileWriter writer2 = new FileWriter(new File(getPNFilePath(PNPathAndPreffix, hop)));
+
 
       long curHopTime = 0;
+      index = 0;
       for (long nodeID : containIDMap.keySet()) {
+        index++;
+        if (index % 10000 == 0) {
+          LOGGER.info("" + index);
+        }
         writer2.write(nodeID + "\n");
         long start = System.currentTimeMillis();
         Node node = dbservice.getNodeById(nodeID);
@@ -854,6 +1065,10 @@ public class Construct_RisoTree {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  public static String getPNFilePath(String PNPathAndPreffix, int hop) {
+    return String.format("%s_%d.txt", PNPathAndPreffix, hop);
   }
 
   public static void wikiGenerateContainSpatialID(String db_path, String dataset,
