@@ -1888,7 +1888,7 @@ public class Construct_RisoTree {
 
   public static HashMap<Long, ArrayList<Integer>> readContainIDMap(String filePath)
       throws Exception {
-    LOGGER.info("read contain map from " + containIDPath);
+    LOGGER.info("read contain map from " + filePath);
     HashMap<Long, ArrayList<Integer>> containIDMap = new HashMap<Long, ArrayList<Integer>>();
     BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)));
     String line = null;
