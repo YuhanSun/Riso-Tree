@@ -20,6 +20,7 @@ graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
 label_path="${data_dir}/graph_label.txt"
 containID_path="${data_dir}/containID.txt"
+labelStrMapPath="${data_dir}/entity_string_label.txt"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
@@ -36,7 +37,7 @@ PNPathAndPreffix="${data_dir}/PathNeighbors"
 
 ###### Wikidata Construct Path Neighbors for leaf nodes ######
 java -Xmx100g -jar ${jar_path} -f wikiConstructPNTime \
-	-dp ${db_path} -c ${containID_path} -gp ${graph_path} \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
 	-lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix}
 
 ###### Load PathNeighbor into db ######
