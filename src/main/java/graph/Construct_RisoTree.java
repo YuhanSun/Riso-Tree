@@ -703,6 +703,7 @@ public class Construct_RisoTree {
       GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
       constructTime = wikiConstructPNTimeMultiHop(containIDMap, labelStringMap, dbservice, graph,
           label_list, hop, PNPathAndPreffix);
+      Util.close(dbservice);
     } else {
       throw new Exception(String.format("hop = %d is invalid!", hop));
     }
