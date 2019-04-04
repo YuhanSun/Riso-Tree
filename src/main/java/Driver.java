@@ -184,6 +184,7 @@ public class Driver {
           case wikiLoadPN:
             Construct_RisoTree.wikiLoadPN(cmd.getOptionValue(PNPathAndPrefix),
                 Integer.parseInt(cmd.getOptionValue(hop)), cmd.getOptionValue(dbPath));
+            break;
           default:
             Util.println(String.format("Function %s does not exist!", functionNameString));
             break;
