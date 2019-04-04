@@ -59,7 +59,7 @@ public class Driver {
 
   private String MAX_HOPNUM = "MAX_HOPNUM";
   private String hop = "hop";
-  private String PNPathAndPreffix = "PNPreffix";
+  private String PNPathAndPrefix = "PNPrefix";
 
 
   public Driver(String[] args) {
@@ -80,8 +80,7 @@ public class Driver {
 
     options.addOption(MAX_HOPNUM, "MAX_HOPNUM", true, "MAX_HOPNUM of RisoTree");
     options.addOption(hop, "hop", true, "hop");
-    options.addOption(PNPathAndPreffix, "PNPathAndPreffix", true,
-        "Path Neighbor file path preffix");
+    options.addOption(PNPathAndPrefix, "PNPathAndPrefix", true, "Path Neighbor file path preffix");
   }
 
   public void parser() {
@@ -151,10 +150,10 @@ public class Driver {
                 cmd.getOptionValue(containIDPath), cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),
                 Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
-                cmd.getOptionValue(PNPathAndPreffix));
+                cmd.getOptionValue(PNPathAndPrefix));
             break;
           case loadPN:
-            new Construct_RisoTree(new Config(), true).LoadPN(cmd.getOptionValue(PNPathAndPreffix),
+            new Construct_RisoTree(new Config(), true).LoadPN(cmd.getOptionValue(PNPathAndPrefix),
                 Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)), cmd.getOptionValue(dbPath));
             break;
 
@@ -174,16 +173,16 @@ public class Driver {
                 cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath),
                 cmd.getOptionValue(labelListPath), cmd.getOptionValue(labelStrMapPath),
                 Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
-                cmd.getOptionValue(PNPathAndPreffix));
+                cmd.getOptionValue(PNPathAndPrefix));
             break;
           case wikiConstructPNTimeSingleHop:
             Construct_RisoTree.wikiConstructPNSingleHop(cmd.getOptionValue(containIDPath),
                 cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath),
                 cmd.getOptionValue(labelListPath), cmd.getOptionValue(labelStrMapPath),
-                Integer.parseInt(cmd.getOptionValue(hop)), cmd.getOptionValue(PNPathAndPreffix));
+                Integer.parseInt(cmd.getOptionValue(hop)), cmd.getOptionValue(PNPathAndPrefix));
             break;
           case wikiLoadPN:
-            Construct_RisoTree.wikiLoadPN(cmd.getOptionValue(PNPathAndPreffix),
+            Construct_RisoTree.wikiLoadPN(cmd.getOptionValue(PNPathAndPrefix),
                 Integer.parseInt(cmd.getOptionValue(hop)), cmd.getOptionValue(dbPath));
           default:
             Util.println(String.format("Function %s does not exist!", functionNameString));
