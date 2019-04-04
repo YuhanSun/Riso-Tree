@@ -52,9 +52,17 @@ PNPathAndPrefix="${data_dir}/PathNeighbors"
 # java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
 # 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
 # 	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix}
-java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
+# java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
+# 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+# 	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix}
+
+# 2-hop
+java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix}
+	-lp ${label_path} -hop 2 -PNPrefix ${PNPathAndPrefix}
+# java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
+# 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+# 	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix}
 
 
 ###### Load PathNeighbor into db ######
