@@ -29,7 +29,7 @@ public class ReadWriteUtil {
    * @throws Exception
    */
   public static String[] readMapAsArray(String filepath, int size) throws Exception {
-    LOGGER.info(String.format("read Label map from %s with size ", filepath, size));
+    LOGGER.info(String.format("read Label map from %s with size %d", filepath, size));
     BufferedReader reader = new BufferedReader(new FileReader(filepath));
     String line = null;
     String[] map = new String[size];
