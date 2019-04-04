@@ -15,7 +15,7 @@ code_dir="${dir}/code"
 # data_dir="${dir}/${dataset}"
 # code_dir="/Users/zhouyang/Google_Drive/Projects/github_code"
 
-db_path="${data_dir}/neo4j-community-3.1.1/data/databases/graph.db"
+db_path="${data_dir}/neo4j-community-3.4.12/data/databases/graph.db"
 graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
 label_path="${data_dir}/graph_label.txt"

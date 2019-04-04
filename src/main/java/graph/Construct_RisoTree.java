@@ -895,8 +895,7 @@ public class Construct_RisoTree {
    */
   public static void generateContainSpatialID() {
     try {
-      GraphDatabaseService dbservice =
-          new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+      GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
       HashMap<Long, TreeSet<Integer>> containIDMap = new HashMap<Long, TreeSet<Integer>>();
       Transaction tx = dbservice.beginTx();
       List<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(dbservice, dataset);
