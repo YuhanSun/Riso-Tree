@@ -976,7 +976,7 @@ public class Construct_RisoTree {
     for (int curNeighborID : curPathNeighbors)
       for (int id : graph.get(curNeighborID))
         nextPathNeighbors.add(id);
-    return null;
+    return nextPathNeighbors;
   }
 
   /**
