@@ -373,7 +373,7 @@ public class Construct_RisoTree {
           for (int i = 0; i < contentList.length; i++)
             value[i] = Integer.parseInt(contentList[i]);
           properties.put(key, value);
-          properties.put(key + "_size", value.length);
+          properties.put(RisoTreeUtil.getPNSizeName(key), value.length);
         } else {
           break;
         }
