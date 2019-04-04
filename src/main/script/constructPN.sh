@@ -25,8 +25,6 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
 # java -Xmx100g -jar ${jar_path} -h
 
-
-
 MAX_HOPNUM="2"
 PNPathAndPreffix="${data_dir}/PathNeighbors"
 
