@@ -31,7 +31,7 @@ MAX_HOPNUM="2"
 PNPathAndPreffix="${data_dir}/PathNeighbors"
 
 # convert single graph to bidirectional
-java -Xmx100g -jar ${jar_path} -f convertSingleToBidirectinalGraph -dataDir ${data_dir}
+# java -Xmx100g -jar ${jar_path} -f convertSingleToBidirectinalGraph -dataDir ${data_dir}
 
 java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
 	-dp ${db_path} -d ${dataset} -c ${containID_path}
