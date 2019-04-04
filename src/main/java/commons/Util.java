@@ -11,10 +11,47 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.unsafe.batchinsert.BatchInserter;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 public class Util {
+
+  private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
+
+  public static void close(BufferedReader reader) throws Exception {
+    LOGGER.info("close reader...");
+    if (reader != null) {
+      reader.close();
+    }
+    LOGGER.info("reader is closed.");
+  }
+
+  public static void close(FileWriter writer) throws Exception {
+    LOGGER.info("close writer...");
+    if (writer != null) {
+      writer.close();
+    }
+    LOGGER.info("writer is closed.");
+  }
+
+  public static void close(BatchInserter inserter) {
+    LOGGER.info("shut down batch inserter...");
+    if (inserter != null) {
+      inserter.shutdown();
+    }
+    LOGGER.info("shut down is done.");
+  }
+
+  public static void close(GraphDatabaseService service) throws Exception {
+    LOGGER.info("shut down graph database service...");
+    if (service != null) {
+      service.shutdown();
+    }
+    LOGGER.info("service is shut down successfully.");
+  }
 
   public static boolean pathExist(String path) {
     File file = new File(path);
