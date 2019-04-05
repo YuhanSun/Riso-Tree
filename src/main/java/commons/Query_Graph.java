@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 public class Query_Graph {
   public int[] label_list;
+  public String[] label_list_string;
+
   public ArrayList<ArrayList<Integer>> graph;
   public MyRectangle[] spa_predicate;
   public boolean[] Has_Spa_Predicate;
