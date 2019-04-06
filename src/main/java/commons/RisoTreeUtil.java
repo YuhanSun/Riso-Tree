@@ -11,4 +11,8 @@ public class RisoTreeUtil {
   public static String getPNSizeName(String PNName) {
     return StringUtils.replace(PNName, Config.PNPrefix, Config.PNSizePrefix, 1);
   }
+
+  public static String getAttachName(String prefix, String attachment) {
+    return prefix + "_" + attachment;
+  }
 }

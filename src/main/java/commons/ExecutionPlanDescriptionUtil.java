@@ -9,7 +9,7 @@ import org.neo4j.graphdb.ExecutionPlanDescription;
 
 public class ExecutionPlanDescriptionUtil {
   public static enum PlanExecutionType {
-    Filter, ExpandAll, NodeByLabelScan, Other,
+    Filter, Expand, NodeByLabelScan, Other,
   }
 
   public static enum ArgKey {
@@ -36,8 +36,8 @@ public class ExecutionPlanDescriptionUtil {
   }
 
   public static PlanExecutionType getPlanExecutionType(String keyword) {
-    if (keyword.equals("Expand(All)")) {
-      return PlanExecutionType.ExpandAll;
+    if (keyword.contains("Expand")) {
+      return PlanExecutionType.Expand;
     } else {
       try {
         return PlanExecutionType.valueOf(keyword);
@@ -68,7 +68,7 @@ public class ExecutionPlanDescriptionUtil {
 
   public static boolean isUseful(ExecutionPlanDescription planDescription) {
     PlanExecutionType type = getPlanExecutionType(planDescription.getName());
-    if (type.equals(PlanExecutionType.ExpandAll)) {
+    if (type.equals(PlanExecutionType.Expand)) {
       return true;
     }
     return false;

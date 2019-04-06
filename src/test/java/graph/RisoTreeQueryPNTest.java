@@ -1,8 +1,6 @@
 package graph;
 
-import static org.junit.Assert.*;
 import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,21 +8,22 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import CypherMiddleWare.CypherDecoder;
 import commons.Config;
+import commons.Config.Explain_Or_Profile;
+import commons.Config.system;
 import commons.MyRectangle;
+import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Util;
-import commons.Config.Explain_Or_Profile;
-import commons.Config.system;
-import commons.Entity;
 
 public class RisoTreeQueryPNTest {
 
@@ -36,6 +35,8 @@ public class RisoTreeQueryPNTest {
 
   static String db_path, entityPath, graph_pos_map_path;
   static String querygraphDir, spaPredicateDir;
+
+  String homeDir;
 
   // query input
   static Query_Graph query_Graph;
@@ -53,6 +54,13 @@ public class RisoTreeQueryPNTest {
   static int name_suffix = 77;// Yelp_100 0.001
 
   static String queryrect_path = null, querygraph_path = null, queryrectCenterPath = null;
+
+  @Before
+  public void setUp() {
+    ClassLoader classLoader = getClass().getClassLoader();
+    File file = new File(classLoader.getResource("").getFile());
+    homeDir = file.getAbsolutePath();
+  }
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -89,8 +97,8 @@ public class RisoTreeQueryPNTest {
       default:
         break;
     }
-    Util.println("iniQueryInput");
-    iniQueryInput();
+    // Util.println("iniQueryInput");
+    // iniQueryInput();
   }
 
   public static void iniQueryInput() {
@@ -128,6 +136,31 @@ public class RisoTreeQueryPNTest {
   @Test
   public void recognizePathsTest() {
     RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(db_path, dataset, null, MAX_HOPNUM);
+    HashMap<Integer, HashMap<Integer, HashSet<String>>> paths =
+        risoTreeQueryPN.recognizePaths(query_Graph);
+    for (int key : paths.keySet())
+      Util.println(String.format("%d:%s", key, paths.get(key)));
+
+    risoTreeQueryPN.dbservice.shutdown();
+  }
+
+  @Test
+  public void recognizePathsStringLabelTest() {
+    String dbPath = homeDir + "/data/graph.db";
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseServiceNotExistCreate(dbPath);
+    String query = "match (a:A)-->(b:B)<--(c:TEST) where a.type = 0 return a, b, c limit 10";
+    query = "MATCH (c:C)--(a:A)-[b]-(spatialnode:Spatial) WHERE "
+        + "22.187478257613602 <= spatialnode.lat <= 22.225842149771214 AND "
+        + "113.50180238485339 <= spatialnode.lon <= 113.56607615947725 " + "RETURN * LIMIT 10";
+    query =
+        "MATCH (a:`heritage designation`)-->(b:B)-[c]-(spatialnode:museum), (a)--(spatialnode) WHERE 22.187478257613602 <= spatialnode.lat <= 22.225842149771214 AND 113.50180238485339 <= spatialnode.lon <= 113.56607615947725 RETURN spatialnode LIMIT 5";
+    Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, "spatialnode",
+        "(22.187478257613602, 113.50180238485339, 22.225842149771214, 113.56607615947725)",
+        service);
+    Util.println(query_Graph);
+    Util.println(Arrays.toString(query_Graph.label_list_string));
+
+    RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, null, 3);
     HashMap<Integer, HashMap<Integer, HashSet<String>>> paths =
         risoTreeQueryPN.recognizePaths(query_Graph);
     for (int key : paths.keySet())

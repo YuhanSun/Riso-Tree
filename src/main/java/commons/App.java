@@ -3,8 +3,17 @@ package commons;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import org.neo4j.cypher.internal.frontend.v3_4.ast.Match;
+import org.neo4j.cypher.internal.frontend.v3_4.ast.Query;
+import org.neo4j.cypher.internal.frontend.v3_4.ast.SingleQuery;
+import org.neo4j.cypher.internal.frontend.v3_4.ast.Statement;
+import org.neo4j.cypher.internal.frontend.v3_4.parser.CypherParser;
+import org.neo4j.cypher.internal.v3_4.expressions.EveryPath;
+import org.neo4j.cypher.internal.v3_4.expressions.Pattern;
 import org.neo4j.gis.spatial.Layer;
 import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
@@ -23,6 +32,7 @@ import commons.Config.system;
 import commons.Labels.GraphLabel;
 import graph.SpatialFirst;
 import osm.OSM_Utility;
+import scala.collection.JavaConversions;
 
 public class App {
 
@@ -80,6 +90,8 @@ public class App {
 
   public static void main(String[] args) {
 
+    ServiceTest();
+    // CypherQueryTest();
     // initVariablesForTest();
     // Naive();
     // test();
@@ -96,20 +108,72 @@ public class App {
     // getLeafStatisticalInfo();
   }
 
+  public static void ServiceTest() {
+    String query3 = "match (a:A)-->(b:B)<--(c:TEST) where a.type = 0 return a, b, c limit 10";
+    String dbPath = "D:\\temp/graph.db";
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseServiceNotExistCreate(dbPath);
+    Result result = service.execute("explain " + query3);
+    // while (result.hasNext()) {
+    // Util.println(result.next());
+    // }
+    ExecutionPlanDescription executionPlanDescription = result.getExecutionPlanDescription();
+    Util.println(executionPlanDescription);
+    List<ExecutionPlanDescription> plans =
+        ExecutionPlanDescriptionUtil.getRequired(executionPlanDescription);
+    for (ExecutionPlanDescription planDescription : plans) {
+      Util.println(planDescription.getArguments());
+      Util.println(planDescription.getIdentifiers());
+      Util.println(planDescription.getName());;
+    }
+    service.shutdown();
+  }
+
   public static void CypherQueryTest() {
-    // CypherParser parser = new CypherParser();
-    // String query1 = "start a = node(*) match p = (a)--(b)--(c),q = (c)--(d) return p,q limit 10";
-    // String query2 =
-    // "start a = node(*) match (a)--(b)--(c:TEST) where a.type = 0 return a, b, c limit 10";
-    // String query3 = "match (a)--(b)--(c:TEST) where a.type = 0 return a, b, c limit 10";
-    //
-    //
-    // org.neo4j.cypher.internal.frontend.v3_4.ast.Statement statement = parser.parse(query3, null);
-    // Query query = (Query) statement;
-    // Util.println(query);
-    // Util.println(query.part().productElement(0).toString());
-    // Util.println(statement.returnColumns());
-    // Util.println(statement);
+    CypherParser parser = new CypherParser();
+    String query1 = "start a = node(*) match p = (a)--(b)--(c),q = (c)--(d) return p,q limit 10";
+    String query2 =
+        "start a = node(*) match (a)--(b)--(c:TEST) where a.type = 0 return a, b, c limit 10";
+    String query3 = "match (a:A)--(b:B)--(c:TEST) where a.type = 0 return a, b, c limit 10";
+
+    Statement statement = parser.parse(query3, null);
+    Query query = (Query) statement;
+    Util.println(query);
+    // query.
+
+    SingleQuery singleQuery = (SingleQuery) query.part();
+    Util.println(singleQuery);
+    Object object = singleQuery.productElement(0);
+    Util.println(object.getClass());
+
+    Collection collection = JavaConversions.asJavaCollection((scala.collection.Iterable) object);
+    Util.println(collection);
+    Util.println(collection.getClass());
+
+    Iterator iterator = collection.iterator();
+    while (iterator.hasNext()) {
+      Object object2 = iterator.next();
+      if (object2.getClass().equals(Match.class)) {
+        Match match = (Match) object2;
+        Pattern pattern = match.pattern();
+        Util.println(pattern);
+        List list = JavaConversions.seqAsJavaList(pattern.patternParts());
+        for (Object object3 : list) {
+          if (object3.getClass().equals(EveryPath.class)) {
+            EveryPath everyPath = (EveryPath) object3;
+          }
+          Util.println(object3.getClass());
+        }
+
+        break;
+      }
+
+    }
+
+    // Util.println(collection);
+    // QueryPart queryPart = query.part().productElement(0);
+    // Util.println(queryPart.);
+
+    Util.println(statement.returnColumns());
   }
 
   public static void getLeafStatisticalInfo() throws Exception {

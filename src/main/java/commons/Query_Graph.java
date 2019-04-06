@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Query_Graph {
+
+  public static enum LabelType {
+    STRING, INT,
+  }
+
+  public LabelType labelType;
+
   public int[] label_list;
   public String[] label_list_string;
 
@@ -16,6 +23,11 @@ public class Query_Graph {
   public int highestSelectivityLabel;
 
   public Query_Graph(int node_count) {
+    this(node_count, LabelType.INT);
+  }
+
+  public Query_Graph(int node_count, LabelType labelType) {
+    this.labelType = labelType;
     label_list = new int[node_count];
     graph = new ArrayList<ArrayList<Integer>>(node_count);
     for (int i = 0; i < node_count; i++)
@@ -27,6 +39,8 @@ public class Query_Graph {
   public Query_Graph(String string) {
     String[] lStrings = string.split("\n");
     int nodeCount = lStrings.length;
+    labelType = LabelType.INT;
+
     label_list = new int[nodeCount];
     graph = new ArrayList<ArrayList<Integer>>(nodeCount);
     for (int i = 0; i < nodeCount; i++)
@@ -60,6 +74,10 @@ public class Query_Graph {
     }
 
     return string;
+  }
+
+  public String getNodeLabelString(int id) {
+    return labelType.equals(LabelType.INT) ? String.valueOf(label_list[id]) : label_list_string[id];
   }
 
   public void iniStatistic() {

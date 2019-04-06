@@ -46,7 +46,9 @@ public class CypherDecoderTest {
         "MATCH (a:`heritage designation`)-[b]-(spatialnode:museum) WHERE 22.187478257613602 <= spatialnode.lat <= 22.225842149771214 AND 113.50180238485339 <= spatialnode.lon <= 113.56607615947725 RETURN spatialnode LIMIT 5";
     Util.println(query);
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseServiceNotExistCreate(dbPath);
-    Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, service);
+    Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, "spatialnode",
+        "(22.187478257613602, 113.50180238485339, 22.225842149771214, 113.56607615947725)",
+        service);
     Util.println(query_Graph);
     Util.println(Arrays.toString(query_Graph.label_list_string));
 
