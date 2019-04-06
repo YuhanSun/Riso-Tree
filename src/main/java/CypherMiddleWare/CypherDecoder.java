@@ -10,29 +10,32 @@ import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import commons.ExecutionPlanDescriptionUtil;
+import commons.MyRectangle;
 import commons.Query_Graph;
+import commons.Query_Graph.LabelType;
 import commons.Util;
 
 public class CypherDecoder {
 
 
-  public static Query_Graph getQueryGraph(String query, GraphDatabaseService service) {
+  public static Query_Graph getQueryGraph(String query, String spatialNode, String rectangleStr,
+      GraphDatabaseService service) {
     String[] nodeStrings = getNodeStrings(query);
     HashMap<String, Integer> nodeVariableIdMap = getNodeVariableIdMap(nodeStrings);
-    Util.println(nodeVariableIdMap);
     String[] labelList = getQueryLabelList(nodeVariableIdMap, nodeStrings);
-    Util.println(Arrays.toString(labelList));
     Result result = service.execute(query);
     ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
     Util.println(planDescription);
     List<ExecutionPlanDescription> plans =
         ExecutionPlanDescriptionUtil.getRequired(planDescription);
     ArrayList<ArrayList<Integer>> graphStructure = getGraphStructure(plans, nodeVariableIdMap);
-    Util.println(graphStructure);
 
-    Query_Graph query_Graph = new Query_Graph(nodeVariableIdMap.size());
+    Query_Graph query_Graph = new Query_Graph(nodeVariableIdMap.size(), LabelType.STRING);
     query_Graph.graph = graphStructure;
     query_Graph.label_list_string = labelList;
+    int spatialId = nodeVariableIdMap.get(spatialNode);
+    query_Graph.Has_Spa_Predicate[spatialId] = true;
+    query_Graph.spa_predicate[spatialId] = new MyRectangle(rectangleStr);
 
     return query_Graph;
   }
@@ -82,10 +85,12 @@ public class CypherDecoder {
     int id = 0;
     for (String string : nodeStrings) {
       if (string.contains(":")) {
-        nodeVariableIdMap.put(getLabel(StringUtils.split(string, ":")[0]), id);
-      } else {
-        nodeVariableIdMap.put(getLabel(string), id);
+        string = StringUtils.split(string, ":")[0];
       }
+      if (nodeVariableIdMap.containsKey(string)) {
+        continue;
+      }
+      nodeVariableIdMap.put(getLabel(string), id);
       id++;
     }
     return nodeVariableIdMap;
