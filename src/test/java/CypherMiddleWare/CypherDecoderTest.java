@@ -41,7 +41,7 @@ public class CypherDecoderTest {
   }
 
   @Test
-  public void getQueryGraphTest() {
+  public void getQueryGraphTest() throws Exception {
     query =
         "MATCH (a:`heritage designation`)-[b]-(spatialnode:museum) WHERE 22.187478257613602 <= spatialnode.lat <= 22.225842149771214 AND 113.50180238485339 <= spatialnode.lon <= 113.56607615947725 RETURN spatialnode LIMIT 5";
     Util.println(query);
@@ -52,7 +52,7 @@ public class CypherDecoderTest {
     Util.println(query_Graph);
     Util.println(Arrays.toString(query_Graph.label_list_string));
 
-    service.shutdown();
+    Util.close(service);
   }
 
 }

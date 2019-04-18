@@ -6,7 +6,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import commons.MyRectangle;
 
-public class myRectangleTest {
+public class MyRectangleTest {
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {}
