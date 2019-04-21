@@ -1078,7 +1078,9 @@ public class RTreeIndex implements SpatialIndexWriter {
    * Compute the GD by considering area of the indexNode. The reason is that GDs are often the same
    * for all indexNodes. To handle the equality problem, we consider the area of indexNode.
    * Coefficient of area is a very small value (0.000000001), so it only works when GDs are the
-   * same. Make sure that the coefficient * max(area) < 1, it will work as wanted.
+   * same. Make sure that the coefficient * max(area) < 1, it will work as wanted. The reason of
+   * doing this is it can happen very often that no indexNodes share a common path neighbor with
+   * geom. So use the area as the tiebreaker.
    *
    * @author yuhan
    * @param indexNodes
@@ -1120,6 +1122,13 @@ public class RTreeIndex implements SpatialIndexWriter {
     return pathNeighbors;
   }
 
+  /**
+   * Compute the PN expansion if insert the geom into the indexNode.
+   * 
+   * @param indexNode
+   * @param pathNeighbors
+   * @return
+   */
   private int getGD(Node indexNode, HashMap<String, int[]> pathNeighbors) {
     int GD = 0;
     for (String key : pathNeighbors.keySet()) {
@@ -1166,6 +1175,11 @@ public class RTreeIndex implements SpatialIndexWriter {
   }
 
   /**
+   * Insert a geomRootNode to the indexNode. Will adjust MBR and graphloc if necessary in addChild()
+   * function.
+   *
+   * @param indexNode a leaf node
+   * @param geomRootNode the object to be inserted
    * @return is enlargement needed?
    */
   private boolean insertInLeaf(Node indexNode, Node geomRootNode) {
@@ -1173,14 +1187,16 @@ public class RTreeIndex implements SpatialIndexWriter {
   }
 
   private void splitAndAdjustPathBoundingBox(Node indexNode) {
-    // create a new node and distribute the entries
+    // create a new node and distribute the entries.
+    // entries are distributed evenly into indexNode and newIndexNode respectively.
     Node newIndexNode =
         splitMode.equals(GREENES_SPLIT) ? greenesSplit(indexNode) : quadraticSplit(indexNode);
     Node parent = getIndexNodeParent(indexNode);
     // System.out.println("spitIndex " + newIndexNode.getId());
     // System.out.println("parent " + parent.getId());
     if (parent == null) {
-      // if indexNode is the root
+      // if indexNode is the root, create a new root, maintain the RTree schema and adjust PN and
+      // mbr.
       createNewRoot(indexNode, newIndexNode);
     } else {
       expandParentBoundingBoxAfterNewChild(parent,
@@ -1410,6 +1426,14 @@ public class RTreeIndex implements SpatialIndexWriter {
     return newIndexNode;
   }
 
+  /**
+   * Create a new node as the new root. Add oldRoot and newIndexNode as children of such new node.
+   * Keep the schema of LayerNode--RootNode correct. Remove the original relationship to oldRoot and
+   * add a new relationship to newRoot. Adjust PN and mbr is done in addChild().
+   *
+   * @param oldRoot
+   * @param newIndexNode
+   */
   private void createNewRoot(Node oldRoot, Node newIndexNode) {
     Node newRoot = database.createNode();
     addChild(newRoot, RTreeRelationshipTypes.RTREE_CHILD, oldRoot);
@@ -1422,7 +1446,8 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   /**
    * Add the child to a parent node by creating a relationship. Update the mbr accordingly. For
-   * RisoTree update PNs.
+   * RisoTree (spatialOnly == false) update PNs. Only the leaf node will be adjusted for now. No
+   * non-leaf node has PN.
    * 
    * @param parent
    * @param type
@@ -1431,6 +1456,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    */
   private boolean addChild(Node parent, RelationshipType type, Node newChild) {
     // yuhan
+    // only adustGraphLoc when the parent is a leaf node.
     if (spatialOnly == false && type.name().equals(RTreeRelationshipTypes.RTREE_REFERENCE.name())) {
       adjustGraphLoc(parent, newChild);
     }
