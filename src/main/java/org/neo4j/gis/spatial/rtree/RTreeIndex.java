@@ -1689,7 +1689,8 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   // ########### RisoTree ###########
   /**
-   * The value for spatial coefficient. Set to 1.0 if do not want to consider graph distance.
+   * The value for spatial coefficient. Set to 1.0 if do not want to consider graph distance in the
+   * noContain case.
    */
   private double alpha = 1.0;
 
