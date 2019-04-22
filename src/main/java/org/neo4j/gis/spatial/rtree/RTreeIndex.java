@@ -43,6 +43,7 @@ import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
+import commons.RisoTreeUtil;
 import commons.Utility;
 
 /**
@@ -1142,7 +1143,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   private HashMap<String, int[]> getLocInGraph(Node node) {
     HashMap<String, int[]> pathNeighbors = new HashMap<>();
     for (String key : node.getPropertyKeys()) {
-      if (key.contains(PN_PROP_PREFFIX)) {
+      if (RisoTreeUtil.isPNProperty(key)) {
         pathNeighbors.put(key, (int[]) node.getProperty(key));
       }
     }
@@ -1431,9 +1432,9 @@ public class RTreeIndex implements SpatialIndexWriter {
     // yuhan
     // remove the PN property and reconstruct in addChild() function
     if (!spatialOnly) {
-      for (String property : indexNode.getAllProperties().keySet()) {
-        if (property.contains(PN_PROP_PREFFIX)) {
-          indexNode.removeProperty(property);
+      for (String key : indexNode.getAllProperties().keySet()) {
+        if (RisoTreeUtil.isPNProperty(key)) {
+          indexNode.removeProperty(key);
         }
       }
     }
