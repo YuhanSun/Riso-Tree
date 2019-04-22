@@ -23,8 +23,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.neo4j.gis.spatial.rtree.filter.SearchFilter;
 import org.neo4j.gis.spatial.rtree.filter.SearchResults;
@@ -245,9 +247,12 @@ public class RTreeIndex implements SpatialIndexWriter {
       add(n.node);
     }
 
-    System.out
-        .println("chooseIndexnodeWithSmallestGD is called " + chooseSmallestGDCount + " times");
-    System.out.println(differentTimes + " are different");
+    LOGGER.info("chooseIndexnodeWithSmallestGD is called " + chooseSmallestGDCount + " times");
+    LOGGER.info(differentTimes + " are different");
+
+    LOGGER.info("noContainCount happens " + noContainCount + "times");
+    LOGGER.info(String.format(" %d are the same while %d are different.", noContainSame,
+        noContainDifferent));
 
     // }
 
@@ -1042,11 +1047,26 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
     // pick the child that needs the minimum enlargement to include the new geometry
     double minimumEnlargement = Double.POSITIVE_INFINITY;
+
+    // for evaluation comparison purpose, yuhan
+    noContainCount++;
+    double minimumEnlargementSpatial = Double.POSITIVE_INFINITY;
+    List<Node> minimumNodesSpatial = new LinkedList<>();
+
     relationships =
         parentIndexNode.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
     for (Relationship relation : relationships) {
       Node indexNode = relation.getEndNode();
       double enlargementNeeded = getAreaEnlargement(indexNode, geomRootNode);
+
+      // for comparison, yuhan
+      if (enlargementNeeded < minimumEnlargementSpatial) {
+        minimumNodesSpatial.clear();
+        minimumNodesSpatial.add(indexNode);
+        minimumEnlargementSpatial = enlargementNeeded;
+      } else if (enlargementNeeded == minimumEnlargementSpatial) {
+        minimumNodesSpatial.add(indexNode);
+      }
 
       // yuhan
       if (!spatialOnly) {
@@ -1067,6 +1087,13 @@ public class RTreeIndex implements SpatialIndexWriter {
       // This happens very rarely because it requires two enlargement to be exactly the same.
       return chooseIndexNodeWithSmallestArea(indexNodes);
     } else if (indexNodes.size() == 1) {
+      // for comparison, yuhan
+      if (indexNodes.get(0).equals(minimumNodesSpatial.get(0))) {
+        noContainSame++;
+      } else {
+        noContainDifferent++;
+      }
+
       return indexNodes.get(0);
     } else {
       // this shouldn't happen
@@ -1658,6 +1685,8 @@ public class RTreeIndex implements SpatialIndexWriter {
   private int totalGeometryCount = 0;
   private boolean countSaved = false;
 
+  private final static Logger LOGGER = Logger.getLogger(RTreeIndex.class.getName());
+
   // ########### RisoTree ###########
   /**
    * The value for spatial coefficient. Set to 1.0 if do not want to consider graph distance.
@@ -1676,6 +1705,13 @@ public class RTreeIndex implements SpatialIndexWriter {
    * how many times GraphDist works when there are more than one nodes contain the geom object.
    */
   private int differentTimes = 0;
+
+  /**
+   * how many times the chooseSubTree() function goes into the no contain case.
+   */
+  private int noContainCount = 0;
+  private int noContainSame = 0; // Spatial only and SGD takes the same subtree.
+  private int noContainDifferent = 0; // Spatial only and SGD takes different subtrees.
 
   public final static String PN_PROP_PREFFIX = "PN_";
 
