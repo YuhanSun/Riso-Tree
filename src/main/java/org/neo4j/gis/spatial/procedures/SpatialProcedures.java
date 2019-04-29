@@ -17,14 +17,29 @@
  */
 package org.neo4j.gis.spatial.procedures;
 
-import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.xml.stream.XMLStreamException;
 import org.neo4j.cypher.internal.compiler.v3_1.GeographicPoint;
-import org.neo4j.gis.spatial.*;
+import org.neo4j.gis.spatial.EditableLayer;
+import org.neo4j.gis.spatial.EditableLayerImpl;
+import org.neo4j.gis.spatial.GeometryEncoder;
+import org.neo4j.gis.spatial.Layer;
+import org.neo4j.gis.spatial.ShapefileImporter;
+import org.neo4j.gis.spatial.SimplePointLayer;
+import org.neo4j.gis.spatial.SpatialDatabaseRecord;
+import org.neo4j.gis.spatial.SpatialDatabaseService;
+import org.neo4j.gis.spatial.SpatialTopologyUtils;
+import org.neo4j.gis.spatial.WKBGeometryEncoder;
+import org.neo4j.gis.spatial.WKTGeometryEncoder;
 import org.neo4j.gis.spatial.encoders.SimpleGraphEncoder;
 import org.neo4j.gis.spatial.encoders.SimplePointEncoder;
 import org.neo4j.gis.spatial.encoders.SimplePropertyEncoder;
@@ -38,9 +53,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.spatial.CRS;
-import org.neo4j.kernel.api.proc.ProcedureSignature;
-import org.neo4j.kernel.impl.proc.Procedures;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
@@ -48,13 +60,13 @@ import org.neo4j.procedure.PerformsWrites;
 import org.neo4j.procedure.Procedure;
 import org.opengis.referencing.ReferenceIdentifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 
 /*
  * TODO: don't pass raw coordinates, take an object which can be a property-container,
@@ -142,18 +154,18 @@ public class SpatialProcedures {
     }
   }
 
-  @Procedure("spatial.procedures")
-  public Stream<NameResult> listProcedures() {
-    Procedures procedures =
-        ((GraphDatabaseAPI) db).getDependencyResolver().resolveDependency(Procedures.class);
-    Stream.Builder<NameResult> builder = Stream.builder();
-    for (ProcedureSignature proc : procedures.getAllProcedures()) {
-      if (proc.name().namespace()[0].equals("spatial")) {
-        builder.accept(new NameResult(proc.name().toString(), proc.toString()));
-      }
-    }
-    return builder.build();
-  }
+  // @Procedure("spatial.procedures")
+  // public Stream<NameResult> listProcedures() {
+  // Procedures procedures =
+  // ((GraphDatabaseAPI) db).getDependencyResolver().resolveDependency(Procedures.class);
+  // Stream.Builder<NameResult> builder = Stream.builder();
+  // for (ProcedureSignature proc : procedures.getAllProcedures()) {
+  // if (proc.name().namespace()[0].equals("spatial")) {
+  // builder.accept(new NameResult(proc.name().toString(), proc.toString()));
+  // }
+  // }
+  // return builder.build();
+  // }
 
   @Procedure("spatial.layers")
   @PerformsWrites // TODO FIX - due to lazy evaluation of index count, updated during later reads,
