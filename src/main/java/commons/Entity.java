@@ -23,7 +23,7 @@ public class Entity {
    * @param lon
    * @param lat
    */
-  Entity(int id) {
+  public Entity(int id) {
     this.IsSpatial = false;
     this.lon = 0.0;
     this.lat = 0.0;

@@ -19,6 +19,43 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 public class Util {
 
+  /**
+   * Get the boundary of all the entities.
+   * 
+   * @param entities
+   * @return
+   */
+  public static MyRectangle GetEntityRange(ArrayList<Entity> entities) {
+    Entity p_Entity;
+    MyRectangle range = null;
+    int i = 0;
+    while (i < entities.size()) {
+      p_Entity = entities.get(i);
+      if (p_Entity.IsSpatial) {
+        range = new MyRectangle(p_Entity.lon, p_Entity.lat, p_Entity.lon, p_Entity.lat);
+        break;
+      }
+      ++i;
+    }
+    while (i < entities.size()) {
+      p_Entity = entities.get(i);
+      if (p_Entity.lon < range.min_x) {
+        range.min_x = p_Entity.lon;
+      }
+      if (p_Entity.lat < range.min_y) {
+        range.min_y = p_Entity.lat;
+      }
+      if (p_Entity.lon > range.max_x) {
+        range.max_x = p_Entity.lon;
+      }
+      if (p_Entity.lat > range.max_y) {
+        range.max_y = p_Entity.lat;
+      }
+      ++i;
+    }
+    return range;
+  }
+
   private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
 
   public static void close(BufferedReader reader) throws Exception {
