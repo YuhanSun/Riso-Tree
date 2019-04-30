@@ -7,6 +7,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import commons.Config;
 import commons.Util;
+import dataprocess.Wikidata;
 import experiment.DataProcess;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
@@ -24,6 +25,8 @@ public class Driver {
     /**
      * for wikidata
      */
+    wikisetZeroOneHopPNForSpatialNodes,
+
     wikiGenerateContainSpatialID, // one time prepare
     wikiConstructRTree, wikiConstructPNTime, //
     wikiConstructPNTimeSingleHop, wikiLoadPN,//
@@ -160,6 +163,9 @@ public class Driver {
           /**
            * for wikidata
            */
+          case wikisetZeroOneHopPNForSpatialNodes:
+            Wikidata.setZeroOneHopPNForSpatialNodes(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(graphPath));
           case wikiConstructRTree:
             new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath));

@@ -10,10 +10,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
+import org.neo4j.unsafe.batchinsert.BatchInserters;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
@@ -57,6 +59,18 @@ public class Util {
   }
 
   private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
+
+  public static BatchInserter getBatchInserter(String dbPath) throws Exception {
+    Map<String, String> config = new HashMap<String, String>();
+    config.put("dbms.pagecache.memory", "100");
+    return BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
+  }
+
+  public static BatchInserter getBatchInserter(String dbPath, Map<String, String> config)
+      throws Exception {
+    LOGGER.info(String.format("Get batchinserter from %s, with config\n%s", dbPath, config));
+    return BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
+  }
 
   public static void close(BufferedReader reader) throws Exception {
     LOGGER.info("close reader...");

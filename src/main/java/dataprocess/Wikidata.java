@@ -35,11 +35,13 @@ import com.google.common.base.CharMatcher;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import commons.ArrayUtil;
 import commons.Config;
 import commons.Entity;
 import commons.GraphUtil;
 import commons.Neo4jGraphUtility;
 import commons.ReadWriteUtil;
+import commons.RisoTreeUtil;
 import commons.Util;
 
 public class Wikidata {
@@ -572,6 +574,73 @@ public class Wikidata {
     Util.close(inserter);
   }
 
+  public static void setZeroOneHopPNForSpatialNodes(String dbPath, String graphPath) {
+    BatchInserter inserter = null;
+    try {
+      inserter = Util.getBatchInserter(dbPath);
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
+      setZeroOneHopPNForSpatialNodes(inserter, graph);
+    } catch (Exception e) {
+      Util.close(inserter);
+      e.printStackTrace();
+    }
+  }
+
+  public static void setZeroOneHopPNForSpatialNodes(BatchInserter inserter,
+      ArrayList<ArrayList<Integer>> graph) {
+    long id = 0;
+    for (ArrayList<Integer> neighbors : graph) {
+      Iterable<Label> labels = inserter.getNodeLabels(id);
+      setZeroHopPN(inserter, id, labels);
+      setOneHopPN(inserter, id, neighbors, labels);
+      id++;
+    }
+  }
+
+  private static void setOneHopPN(BatchInserter inserter, Long id, ArrayList<Integer> neighbors,
+      Iterable<Label> labels) {
+    // initialize all zero hop PN prefix
+    List<String> zeroHopPrefixes = new LinkedList<>();
+    for (Label label : labels) {
+      String zeroHopPrefix = RisoTreeUtil.getAttachName(Config.PNPrefix, label.name());
+      zeroHopPrefixes.add(zeroHopPrefix);
+    }
+
+    HashMap<String, ArrayList<Integer>> pathLabelNeighbors = dividedByLabels(inserter, neighbors);
+    for (String key : pathLabelNeighbors.keySet()) {
+      for (String zeroPrefix : zeroHopPrefixes) {
+        String oneHopKey = RisoTreeUtil.getAttachName(zeroPrefix, key);
+        int[] array = ArrayUtil.listToArrayInt(pathLabelNeighbors.get(zeroPrefix));
+        inserter.setNodeProperty(id, oneHopKey, array);
+      }
+    }
+  }
+
+  private static HashMap<String, ArrayList<Integer>> dividedByLabels(BatchInserter inserter,
+      ArrayList<Integer> nextPathNeighbors) {
+    HashMap<String, ArrayList<Integer>> pathLabelNeighbors = new HashMap<>();
+    for (int neighborID : nextPathNeighbors) {
+      Iterable<Label> labels = inserter.getNodeLabels(neighborID);
+      for (Label label : labels) {
+        if (pathLabelNeighbors.containsKey(label.name()))
+          pathLabelNeighbors.get(label.name()).add(neighborID);
+        else {
+          ArrayList<Integer> arrayList = new ArrayList<Integer>(nextPathNeighbors.size());
+          arrayList.add(neighborID);
+          pathLabelNeighbors.put(label.name(), arrayList);
+        }
+      }
+    }
+    return pathLabelNeighbors;
+  }
+
+  private static void setZeroHopPN(BatchInserter inserter, long id, Iterable<Label> labels) {
+    for (Label label : labels) {
+      String propertyName = RisoTreeUtil.getAttachName(Config.PNPrefix, label.name());
+      inserter.setNodeProperty(id, propertyName, id);
+    }
+  }
+
   private static Map<String, RelationshipType> createStringToRelationshipTypeMap(String filepath) {
     LOGGER.info("create the string to relationType map from " + filepath);
     Map<String, RelationshipType> map = new HashMap<>();
@@ -590,7 +659,8 @@ public class Wikidata {
   }
 
   /**
-   * Load all entities and generate the id map.
+   * Load all entities without generating id because the node whose graphId = 0 will be in the
+   * neo4jId = 0.
    *
    * @param entities
    * @param labelList
