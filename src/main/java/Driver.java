@@ -166,6 +166,7 @@ public class Driver {
           case wikisetZeroOneHopPNForSpatialNodes:
             Wikidata.setZeroOneHopPNForSpatialNodes(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(graphPath));
+            break;
           case wikiConstructRTree:
             new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath));

@@ -2,7 +2,7 @@
 ./package.sh
 # tree_type="Gleene_1.0"
 
-dataset="wikidata"
+dataset="wikidata_risotree"
 
 # server
 dir="/hdd/code/yuhansun"
@@ -24,8 +24,8 @@ code_dir="${dir}/code"
 # server setup
 db_path="${data_dir}/neo4j-community-3.4.12/data/databases/graph.db"
 
-# common setup
-# graph_path="${data_dir}/graph.txt"
+
+graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
 # label_path="${data_dir}/label.txt"
 containID_path="${data_dir}/containID.txt"
@@ -39,5 +39,7 @@ java -Xmx100g -jar ${jar_path} -h
 # MAX_HOPNUM="2"
 # PNPathAndPreffix="${data_dir}/PathNeighbors_${tree_type}"
 # java -Xmx100g -jar ${jar_path} -f LoadAll -ep ${entity_path} -dp ${db_path} -c ${containID_path} -gp ${graph_path} -lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix} -mapPath ${map_path} -d ${dataset}
-java -Xmx100g -jar ${jar_path} -f wikiConstructRTree -dp ${db_path} -d ${dataset} -ep ${entity_path}
+java -Xmx100g -jar ${jar_path} -f wikisetZeroOneHopPNForSpatialNodes -dp ${db_path} -gp ${graph_path}
+
+# java -Xmx100g -jar ${jar_path} -f constructRTreeWikidata -dp ${db_path} -d ${dataset} -ep ${entity_path}
 
