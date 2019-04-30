@@ -62,8 +62,8 @@ public class Util {
 
   public static BatchInserter getBatchInserter(String dbPath) throws Exception {
     Map<String, String> config = new HashMap<String, String>();
-    config.put("dbms.pagecache.memory", "100");
-    return BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
+    config.put("dbms.pagecache.memory", "100g");
+    return getBatchInserter(dbPath, config);
   }
 
   public static BatchInserter getBatchInserter(String dbPath, Map<String, String> config)

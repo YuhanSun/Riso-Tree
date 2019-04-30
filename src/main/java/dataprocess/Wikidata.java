@@ -580,6 +580,7 @@ public class Wikidata {
       inserter = Util.getBatchInserter(dbPath);
       ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
       setZeroOneHopPNForSpatialNodes(inserter, graph);
+      Util.close(inserter);
     } catch (Exception e) {
       Util.close(inserter);
       e.printStackTrace();
