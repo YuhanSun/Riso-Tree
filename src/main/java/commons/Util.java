@@ -60,6 +60,18 @@ public class Util {
 
   private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
 
+  public static HashMap<Integer, Integer> histogram(List<Integer> list) {
+    HashMap<Integer, Integer> res = new HashMap<>();
+    for (int element : list) {
+      if (res.containsKey(element)) {
+        res.put(element, res.get(element) + 1);
+      } else {
+        res.put(element, 1);
+      }
+    }
+    return res;
+  }
+
   public static BatchInserter getBatchInserter(String dbPath) throws Exception {
     Map<String, String> config = new HashMap<String, String>();
     config.put("dbms.pagecache.memory", "100g");

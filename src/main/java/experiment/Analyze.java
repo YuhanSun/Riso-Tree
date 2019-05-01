@@ -3,13 +3,19 @@ package experiment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import commons.Config;
-import commons.Entity;
-import commons.GraphUtil;
-import commons.OwnMethods;
-import commons.Util;
 import commons.Config.Datasets;
 import commons.Config.system;
+import commons.GraphUtil;
+import commons.Neo4jGraphUtility;
+import commons.OwnMethods;
+import commons.ReadWriteUtil;
+import commons.RisoTreeUtil;
+import commons.Util;
 
 /**
  * This is used for analyze experiment results in the RisoTree Paper.
@@ -83,6 +89,28 @@ public class Analyze {
     // getSpatialEntityCount();
     // get2HopNeighborCount();
 
+  }
+
+  public static void getPNSizeDistribution(String dbPath, String outputPath) {
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    int graphNodeCount = Config.graphNodeCount;
+    Map<Object, Object> histgram = new TreeMap<>();
+    for (int id = 0; id < graphNodeCount; id++) {
+      Node node = service.getNodeById(id);
+      getNodePNSizeDistribution(node, histgram);
+    }
+    ReadWriteUtil.WriteMap(outputPath, false, histgram);
+  }
+
+  private static void getNodePNSizeDistribution(Node node, Map<Object, Object> histgram) {
+    Map<String, Object> properties = node.getAllProperties();
+    for (String key : properties.keySet()) {
+      if (RisoTreeUtil.isPNProperty(key)) {
+        int size = ((int[]) properties.get(key)).length;
+        int count = (int) histgram.getOrDefault(size, 0);
+        histgram.put(size, count + 1);
+      }
+    }
   }
 
   public static void getSpatialEntityCount() {

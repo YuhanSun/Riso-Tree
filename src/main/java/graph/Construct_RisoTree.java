@@ -687,6 +687,18 @@ public class Construct_RisoTree {
     }
   }
 
+  /**
+   * Construct PN and output it to file.
+   *
+   * @param containIDPath
+   * @param db_path
+   * @param graph_path
+   * @param label_list_path
+   * @param labelStringMapPath
+   * @param hop
+   * @param PNPathAndPreffix
+   * @throws Exception
+   */
   public static void wikiConstructPNSingleHop(String containIDPath, String db_path,
       String graph_path, String label_list_path, String labelStringMapPath, int hop,
       String PNPathAndPreffix) throws Exception {
