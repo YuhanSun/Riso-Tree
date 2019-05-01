@@ -1,12 +1,14 @@
 package commons;
 
 import static org.junit.Assert.assertEquals;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.unsafe.batchinsert.BatchInserter;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config.system;
 
@@ -16,6 +18,7 @@ public class UtilityTest {
   static String dataset = config.getDatasetName();
   static system systemName = config.getSystemName();
   static String entityPath;
+  static String homeDir = null;
 
   @Before
   public void setUp() throws Exception {
@@ -29,10 +32,24 @@ public class UtilityTest {
       default:
         break;
     }
+
+    ClassLoader classLoader = getClass().getClassLoader();
+    File file = new File(classLoader.getResource("").getFile());
+    homeDir = file.getAbsolutePath();
   }
 
   @After
   public void tearDown() throws Exception {}
+
+  @Test
+  public void getBatchInserterTest() throws Exception {
+    String dbPath = homeDir + "/graph.db";
+    BatchInserter inserter = Util.getBatchInserter(dbPath);
+    // Map<String, String> config = new HashMap<String, String>();
+    // config.put("dbms.pagecache.memory", "100g");
+    // BatchInserter inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
+    Util.close(inserter);
+  }
 
   @Test
   public void arraysDifferenceCountTest() {

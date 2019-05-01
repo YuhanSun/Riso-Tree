@@ -4,7 +4,7 @@
 
 	<properties>
 		<!-- neo4j spatial usage -->
-		<neo4j.version>3.1.1</neo4j.version>
+		<neo4j.version>3.4.12</neo4j.version>
 		<neo4j.java.version>1.8</neo4j.java.version>
 		<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
 		<maven-gpg-plugin.version>1.4</maven-gpg-plugin.version>
@@ -174,7 +174,6 @@
 				<enabled>true</enabled>
 			</releases>
 		</repository>
-
 	</repositories>
 
 
@@ -297,12 +296,7 @@
 			<version>1.18.1</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.neo4j</groupId>
-			<artifactId>neo4j-graphviz</artifactId>
-			<version>${neo4j.version}</version>
-			<scope>provided</scope>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.hamcrest</groupId>
 			<artifactId>hamcrest-core</artifactId>
