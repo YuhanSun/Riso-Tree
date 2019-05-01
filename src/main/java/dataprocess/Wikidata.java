@@ -595,6 +595,9 @@ public class Wikidata {
       setZeroHopPN(inserter, id, labels);
       setOneHopPN(inserter, id, neighbors, labels);
       id++;
+      if (id % logInterval == 0) {
+        LOGGER.info("" + id);
+      }
     }
   }
 
