@@ -591,16 +591,17 @@ public class Wikidata {
       ArrayList<ArrayList<Integer>> graph) {
     long id = 0;
     for (ArrayList<Integer> neighbors : graph) {
+      if (id % logInterval == 0) {
+        LOGGER.info("" + id);
+      }
       if (inserter.getNodeProperties(id).containsKey(lon_name) == false) {
+        id++;
         continue;
       }
       Iterable<Label> labels = inserter.getNodeLabels(id);
       setZeroHopPN(inserter, id, labels);
       setOneHopPN(inserter, id, neighbors, labels);
       id++;
-      if (id % logInterval == 0) {
-        LOGGER.info("" + id);
-      }
     }
   }
 
