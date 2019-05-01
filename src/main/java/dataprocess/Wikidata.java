@@ -591,6 +591,9 @@ public class Wikidata {
       ArrayList<ArrayList<Integer>> graph) {
     long id = 0;
     for (ArrayList<Integer> neighbors : graph) {
+      if (inserter.getNodeProperties(id).containsKey(lon_name) == false) {
+        continue;
+      }
       Iterable<Label> labels = inserter.getNodeLabels(id);
       setZeroHopPN(inserter, id, labels);
       setOneHopPN(inserter, id, neighbors, labels);
@@ -639,6 +642,7 @@ public class Wikidata {
   }
 
   private static void setZeroHopPN(BatchInserter inserter, long id, Iterable<Label> labels) {
+    LOGGER.info("insert 0-hop path neighbors");
     for (Label label : labels) {
       String propertyName = RisoTreeUtil.getAttachName(Config.PNPrefix, label.name());
       inserter.setNodeProperty(id, propertyName, id);
