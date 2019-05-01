@@ -609,9 +609,9 @@ public class Wikidata {
 
     HashMap<String, ArrayList<Integer>> pathLabelNeighbors = dividedByLabels(inserter, neighbors);
     for (String key : pathLabelNeighbors.keySet()) {
+      int[] array = ArrayUtil.listToArrayInt(pathLabelNeighbors.get(key));
       for (String zeroPrefix : zeroHopPrefixes) {
         String oneHopKey = RisoTreeUtil.getAttachName(zeroPrefix, key);
-        int[] array = ArrayUtil.listToArrayInt(pathLabelNeighbors.get(zeroPrefix));
         inserter.setNodeProperty(id, oneHopKey, array);
       }
     }
