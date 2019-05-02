@@ -8,6 +8,7 @@ import org.apache.commons.cli.Options;
 import commons.Config;
 import commons.Util;
 import dataprocess.Wikidata;
+import experiment.Analyze;
 import experiment.DataProcess;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
@@ -21,6 +22,11 @@ public class Driver {
     tree, containID, // tree construction
     LoadNonSpatialEntity, GetSpatialNodeMap, LoadGraphEdges, CalculateCount, LoadAll, // graph load
     constructPN, loadPN, // PN load
+
+    /**
+     * analyze
+     */
+    getPNSizeDistribution,
 
     /**
      * for wikidata
@@ -65,6 +71,8 @@ public class Driver {
   private String hop = "hop";
   private String PNPathAndPrefix = "PNPrefix";
 
+  // Analyze
+  private String outputPath = "outputPath";
 
   public Driver(String[] args) {
     this.args = args;
@@ -87,6 +95,9 @@ public class Driver {
     options.addOption(MAX_HOPNUM, "MAX_HOPNUM", true, "MAX_HOPNUM of RisoTree");
     options.addOption(hop, "hop", true, "hop");
     options.addOption(PNPathAndPrefix, "PNPathAndPrefix", true, "Path Neighbor file path preffix");
+
+    // Analyze
+    options.addOption(outputPath, "outputPath", true, "The output path for analyze");
   }
 
   public void parser() {
@@ -164,8 +175,14 @@ public class Driver {
             break;
 
           /**
-           * for wikidata
+           * analyze
            */
+          case getPNSizeDistribution:
+            Analyze.getPNSizeDistribution(cmd.getOptionValue(dbPath), cmd.getOptionValue(opt));
+
+            /**
+             * for wikidata
+             */
           case wikisetZeroOneHopPNForSpatialNodes:
             Wikidata.setZeroOneHopPNForSpatialNodes(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),
