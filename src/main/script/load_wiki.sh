@@ -27,7 +27,8 @@ db_path="${data_dir}/neo4j-community-3.4.12/data/databases/graph.db"
 
 graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
-# label_path="${data_dir}/label.txt"
+label_path="${data_dir}/graph_label.txt"
+entityStringLabelMapPath="${data_dir}/entity_string_label.txt"
 containID_path="${data_dir}/containID.txt"
 map_path="${data_dir}/node_map_RTree.txt"
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
@@ -39,7 +40,7 @@ java -Xmx100g -jar ${jar_path} -h
 # MAX_HOPNUM="2"
 # PNPathAndPreffix="${data_dir}/PathNeighbors_${tree_type}"
 # java -Xmx100g -jar ${jar_path} -f LoadAll -ep ${entity_path} -dp ${db_path} -c ${containID_path} -gp ${graph_path} -lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix} -mapPath ${map_path} -d ${dataset}
-java -Xmx100g -jar ${jar_path} -f wikisetZeroOneHopPNForSpatialNodes -dp ${db_path} -gp ${graph_path}
+java -Xmx100g -jar ${jar_path} -f wikisetZeroOneHopPNForSpatialNodes -dp ${db_path} -gp ${graph_path} -lp ${label_path} -entityStringLabelMapPath ${entityStringLabelMapPath}
 
 # java -Xmx100g -jar ${jar_path} -f constructRTreeWikidata -dp ${db_path} -d ${dataset} -ep ${entity_path}
 
