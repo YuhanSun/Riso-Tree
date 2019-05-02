@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 import commons.Config;
 import commons.Config.Datasets;
 import commons.Config.system;
@@ -91,14 +92,18 @@ public class Analyze {
 
   }
 
-  public static void getPNSizeDistribution(String dbPath, String outputPath) {
+  public static void getPNSizeDistribution(String dbPath, String outputPath) throws Exception {
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
     int graphNodeCount = Config.graphNodeCount;
     Map<Object, Object> histgram = new TreeMap<>();
+    Transaction tx = service.beginTx();
     for (int id = 0; id < graphNodeCount; id++) {
       Node node = service.getNodeById(id);
       getNodePNSizeDistribution(node, histgram);
     }
+    tx.success();
+    tx.close();
+    Util.close(service);
     ReadWriteUtil.WriteMap(outputPath, false, histgram);
   }
 
