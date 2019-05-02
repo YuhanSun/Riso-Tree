@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
@@ -27,6 +28,8 @@ import commons.Util;
  *
  */
 public class Analyze {
+  private static final Logger logger = Logger.getLogger(Analyze.class.getName());
+
   static Config config = new Config();
   static system systemName;
   static String version, dataset, lon_name, lat_name;
