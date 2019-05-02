@@ -16,4 +16,4 @@ entity_path="${data_dir}/entity.txt"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
-java -Xmx100g -jar ${jar_path} -f constructRTreeWikidata -dp ${db_path} -d ${dataset} -ep ${entity_path}
+java -Xmx100g -jar ${jar_path} -f getPNSizeDistribution -dp ${db_path} -d ${dataset} -ep ${entity_path}

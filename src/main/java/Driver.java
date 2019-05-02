@@ -178,7 +178,8 @@ public class Driver {
            * analyze
            */
           case getPNSizeDistribution:
-            Analyze.getPNSizeDistribution(cmd.getOptionValue(dbPath), cmd.getOptionValue(opt));
+            Analyze.getPNSizeDistribution(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(outputPath));
 
             /**
              * for wikidata
