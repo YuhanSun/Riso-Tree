@@ -3,6 +3,7 @@ package experiment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -14,6 +15,7 @@ import commons.Config.system;
 import commons.GraphUtil;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
+import commons.RTreeUtility;
 import commons.ReadWriteUtil;
 import commons.RisoTreeUtil;
 import commons.Util;
@@ -92,13 +94,13 @@ public class Analyze {
 
   }
 
-  public static void getPNSizeDistribution(String dbPath, String outputPath) throws Exception {
+  public static void getPNSizeDistribution(String dbPath, String dataset, String outputPath)
+      throws Exception {
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
-    int graphNodeCount = Config.graphNodeCount;
     Map<Object, Object> histgram = new TreeMap<>();
     Transaction tx = service.beginTx();
-    for (int id = 0; id < graphNodeCount; id++) {
-      Node node = service.getNodeById(id);
+    List<Node> leafNodes = RTreeUtility.getRTreeLeafLevelNodes(service, dataset);
+    for (Node node : leafNodes) {
       getNodePNSizeDistribution(node, histgram);
     }
     tx.success();
