@@ -136,21 +136,19 @@ public class ReadWriteUtil {
    * @param filename
    * @param app append or not
    * @param map
+   * @throws Exception
    */
-  public static void WriteMap(String filename, boolean app, Map<Object, Object> map) {
-    try {
-      FileWriter fWriter = new FileWriter(filename, app);
-      Set<Entry<Object, Object>> set = map.entrySet();
-      Iterator<Entry<Object, Object>> iterator = set.iterator();
-      while (iterator.hasNext()) {
-        Entry<Object, Object> element = iterator.next();
-        fWriter.write(
-            String.format("%s,%s\n", element.getKey().toString(), element.getValue().toString()));
-      }
-      fWriter.close();
-    } catch (Exception e) {
-      // TODO: handle exception
+  public static void WriteMap(String filename, boolean app, Map<Object, Object> map)
+      throws Exception {
+    FileWriter fWriter = new FileWriter(filename, app);
+    Set<Entry<Object, Object>> set = map.entrySet();
+    Iterator<Entry<Object, Object>> iterator = set.iterator();
+    while (iterator.hasNext()) {
+      Entry<Object, Object> element = iterator.next();
+      fWriter.write(
+          String.format("%s,%s\n", element.getKey().toString(), element.getValue().toString()));
     }
+    fWriter.close();
   }
 
   public static void WriteFile(String filename, boolean app, String str) {

@@ -180,10 +180,10 @@ public class Driver {
           case getPNSizeDistribution:
             Analyze.getPNSizeDistribution(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(outputPath));
-
-            /**
-             * for wikidata
-             */
+            break;
+          /**
+           * for wikidata
+           */
           case wikisetZeroOneHopPNForSpatialNodes:
             Wikidata.setZeroOneHopPNForSpatialNodes(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),
