@@ -666,6 +666,10 @@ public class LoadDataNoOSM {
    */
   public void wikiConstructRTree(String dbPath, String dataset, String entityPath) {
     try {
+      if (!Util.pathExist(dbPath) || !Util.pathExist(entityPath)) {
+        throw new Exception("input path does not exist!");
+      }
+
       Util.println("Read entity from: " + entityPath);
       ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
 
