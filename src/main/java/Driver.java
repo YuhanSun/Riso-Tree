@@ -59,6 +59,7 @@ public class Driver {
 
   // Load data
   private String mapPath = "mapPath";
+  private String entityStringLabelMapPath = "entityStringLabelMapPath";
 
   private String MAX_HOPNUM = "MAX_HOPNUM";
   private String hop = "hop";
@@ -79,6 +80,8 @@ public class Driver {
     options.addOption(mapPath, "map path", true, "path for the map from entity id to neo4j id");
     options.addOption(labelStrMapPath, "labelStrMapPath", true,
         "the map from graph id to String label (name)");
+    options.addOption(entityStringLabelMapPath, "entityStringLabelMapPath", true,
+        "the map from entity id to String label (name)");
 
 
     options.addOption(MAX_HOPNUM, "MAX_HOPNUM", true, "MAX_HOPNUM of RisoTree");
@@ -165,7 +168,8 @@ public class Driver {
            */
           case wikisetZeroOneHopPNForSpatialNodes:
             Wikidata.setZeroOneHopPNForSpatialNodes(cmd.getOptionValue(dbPath),
-                cmd.getOptionValue(graphPath));
+                cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),
+                cmd.getOptionValue(entityStringLabelMapPath));
             break;
           case wikiConstructRTree:
             new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
@@ -211,11 +215,11 @@ public class Driver {
 
 
   public static void main(String[] args) {
-    // args = new String[] {"-h"};
     // construct rtree.
-    // args = new String[] {"-f", "constructRTreeWikidata", "-dp",
-    // "D:/Neo4jData/neo4jDatabases/database-ae5a632c-076d-42a6-ac8d-61f8f72af7f9/installation-3.4.12/data/databases/graph.db",
-    // "-d", "wikidata", "-ep", "D:/Project_Data/wikidata-20180308-truthy-BETA.nt/entity.txt"};
+    // String dataDir = "D:\\\\Project_Data\\\\wikidata-20180308-truthy-BETA.nt";
+    // args = new String[] {"-f", "wikisetZeroOneHopPNForSpatialNodes", "-dp", "D:\\temp\\graph.db",
+    // "-gp", dataDir + "\\graph.txt", "-lp", dataDir + "\\graph_label.txt",
+    // "-entityStringLabelMapPath", dataDir + "\\entity_string_label.txt"};
 
     // run only once.
     // DataProcess.convertSingleToBidirectinalGraph();

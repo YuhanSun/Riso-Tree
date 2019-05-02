@@ -574,12 +574,19 @@ public class Wikidata {
     Util.close(inserter);
   }
 
-  public static void setZeroOneHopPNForSpatialNodes(String dbPath, String graphPath) {
+  public static void setZeroOneHopPNForSpatialNodes(String dbPath, String graphPath,
+      String labelPath, String entityStringLabelMapPath) {
     BatchInserter inserter = null;
     try {
-      inserter = Util.getBatchInserter(dbPath);
+      if (!Util.pathExist(dbPath) || !Util.pathExist(graphPath) || !Util.pathExist(labelPath)
+          || !Util.pathExist(entityStringLabelMapPath)) {
+        throw new Exception("input path does not exist!");
+      }
       ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
-      setZeroOneHopPNForSpatialNodes(inserter, graph);
+      ArrayList<ArrayList<Integer>> graphLabels = GraphUtil.ReadGraph(labelPath);
+      String[] labelStringMap = readLabelMap(entityStringLabelMapPath);
+      inserter = Util.getBatchInserter(dbPath);
+      setZeroOneHopPNForSpatialNodes(inserter, graph, graphLabels, labelStringMap);
       Util.close(inserter);
     } catch (Exception e) {
       Util.close(inserter);
@@ -588,9 +595,12 @@ public class Wikidata {
   }
 
   public static void setZeroOneHopPNForSpatialNodes(BatchInserter inserter,
-      ArrayList<ArrayList<Integer>> graph) {
-    long id = 0;
+      ArrayList<ArrayList<Integer>> graph, ArrayList<ArrayList<Integer>> graphLabels,
+      String[] labelStringMap) {
+    int id = 0;
     for (ArrayList<Integer> neighbors : graph) {
+      LOGGER.info(String.format("id = %d", id));
+
       if (id % logInterval == 0) {
         LOGGER.info("" + id);
       }
@@ -598,55 +608,66 @@ public class Wikidata {
         id++;
         continue;
       }
-      Iterable<Label> labels = inserter.getNodeLabels(id);
-      setZeroHopPN(inserter, id, labels);
-      setOneHopPN(inserter, id, neighbors, labels);
+      ArrayList<Integer> nodeLabels = graphLabels.get(id);
+      setZeroHopPN(inserter, id, nodeLabels, labelStringMap);
+      setOneHopPN(inserter, id, neighbors, nodeLabels, graphLabels, labelStringMap);
       id++;
     }
   }
 
-  private static void setOneHopPN(BatchInserter inserter, Long id, ArrayList<Integer> neighbors,
-      Iterable<Label> labels) {
+  private static void setOneHopPN(BatchInserter inserter, int id, ArrayList<Integer> neighbors,
+      Iterable<Integer> labels, ArrayList<ArrayList<Integer>> graphLabels,
+      String[] labelStringMap) {
     // initialize all zero hop PN prefix
     List<String> zeroHopPrefixes = new LinkedList<>();
-    for (Label label : labels) {
-      String zeroHopPrefix = RisoTreeUtil.getAttachName(Config.PNPrefix, label.name());
+    for (int labelId : labels) {
+      String zeroHopPrefix = RisoTreeUtil.getAttachName(Config.PNPrefix, labelStringMap[labelId]);
       zeroHopPrefixes.add(zeroHopPrefix);
     }
+    LOGGER.info(String.format("zeroHopPrefixes is %s", zeroHopPrefixes));
 
-    HashMap<String, ArrayList<Integer>> pathLabelNeighbors = dividedByLabels(inserter, neighbors);
+    HashMap<String, ArrayList<Integer>> pathLabelNeighbors =
+        dividedByLabels(neighbors, graphLabels, labelStringMap);
+    LOGGER.info(String.format("pathLabelNeighbors is %s", pathLabelNeighbors));
     for (String key : pathLabelNeighbors.keySet()) {
       int[] array = ArrayUtil.listToArrayInt(pathLabelNeighbors.get(key));
       for (String zeroPrefix : zeroHopPrefixes) {
         String oneHopKey = RisoTreeUtil.getAttachName(zeroPrefix, key);
+        LOGGER.info(String.format("set 1-hop property <%s,%s>", oneHopKey, Arrays.toString(array)));
         inserter.setNodeProperty(id, oneHopKey, array);
       }
     }
   }
 
-  private static HashMap<String, ArrayList<Integer>> dividedByLabels(BatchInserter inserter,
-      ArrayList<Integer> nextPathNeighbors) {
+  private static HashMap<String, ArrayList<Integer>> dividedByLabels(
+      ArrayList<Integer> nextPathNeighbors, ArrayList<ArrayList<Integer>> graphLabels,
+      String[] labelStringMap) {
     HashMap<String, ArrayList<Integer>> pathLabelNeighbors = new HashMap<>();
     for (int neighborID : nextPathNeighbors) {
-      Iterable<Label> labels = inserter.getNodeLabels(neighborID);
-      for (Label label : labels) {
-        if (pathLabelNeighbors.containsKey(label.name()))
-          pathLabelNeighbors.get(label.name()).add(neighborID);
+      ArrayList<Integer> labels = graphLabels.get(neighborID);
+      for (int labelId : labels) {
+        String labelStr = labelStringMap[labelId];
+        if (pathLabelNeighbors.containsKey(labelStr))
+          pathLabelNeighbors.get(labelStr).add(neighborID);
         else {
           ArrayList<Integer> arrayList = new ArrayList<Integer>(nextPathNeighbors.size());
           arrayList.add(neighborID);
-          pathLabelNeighbors.put(label.name(), arrayList);
+          pathLabelNeighbors.put(labelStr, arrayList);
         }
       }
     }
     return pathLabelNeighbors;
   }
 
-  private static void setZeroHopPN(BatchInserter inserter, long id, Iterable<Label> labels) {
-    LOGGER.info("insert 0-hop path neighbors");
-    for (Label label : labels) {
-      String propertyName = RisoTreeUtil.getAttachName(Config.PNPrefix, label.name());
-      inserter.setNodeProperty(id, propertyName, id);
+  private static void setZeroHopPN(BatchInserter inserter, int id, Iterable<Integer> labels,
+      String[] labelStringMap) {
+    for (int labelId : labels) {
+      String labelStr = labelStringMap[labelId];
+      String propertyName = RisoTreeUtil.getAttachName(Config.PNPrefix, labelStr);
+      int[] value = new int[] {id};
+      LOGGER
+          .info(String.format("set 0-hop property <%s,%s>", propertyName, Arrays.toString(value)));
+      inserter.setNodeProperty(id, propertyName, value);
     }
   }
 
