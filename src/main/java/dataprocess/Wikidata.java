@@ -575,7 +575,7 @@ public class Wikidata {
   }
 
   public static void setZeroOneHopPNForSpatialNodes(String dbPath, String graphPath,
-      String labelPath, String entityStringLabelMapPath) {
+      String labelPath, String entityStringLabelMapPath, int maxPNSize) {
     BatchInserter inserter = null;
     try {
       if (!Util.pathExist(dbPath) || !Util.pathExist(graphPath) || !Util.pathExist(labelPath)
@@ -586,7 +586,7 @@ public class Wikidata {
       ArrayList<ArrayList<Integer>> graphLabels = GraphUtil.ReadGraph(labelPath);
       String[] labelStringMap = readLabelMap(entityStringLabelMapPath);
       inserter = Util.getBatchInserter(dbPath);
-      setZeroOneHopPNForSpatialNodes(inserter, graph, graphLabels, labelStringMap);
+      setZeroOneHopPNForSpatialNodes(inserter, graph, graphLabels, labelStringMap, maxPNSize);
       Util.close(inserter);
     } catch (Exception e) {
       Util.close(inserter);
@@ -596,7 +596,7 @@ public class Wikidata {
 
   public static void setZeroOneHopPNForSpatialNodes(BatchInserter inserter,
       ArrayList<ArrayList<Integer>> graph, ArrayList<ArrayList<Integer>> graphLabels,
-      String[] labelStringMap) {
+      String[] labelStringMap, int maxPNSize) {
     int id = 0;
     for (ArrayList<Integer> neighbors : graph) {
       LOGGER.info(String.format("id = %d", id));
@@ -610,14 +610,14 @@ public class Wikidata {
       }
       ArrayList<Integer> nodeLabels = graphLabels.get(id);
       setZeroHopPN(inserter, id, nodeLabels, labelStringMap);
-      setOneHopPN(inserter, id, neighbors, nodeLabels, graphLabels, labelStringMap);
+      setOneHopPN(inserter, id, neighbors, nodeLabels, graphLabels, labelStringMap, maxPNSize);
       id++;
     }
   }
 
   private static void setOneHopPN(BatchInserter inserter, int id, ArrayList<Integer> neighbors,
-      Iterable<Integer> labels, ArrayList<ArrayList<Integer>> graphLabels,
-      String[] labelStringMap) {
+      Iterable<Integer> labels, ArrayList<ArrayList<Integer>> graphLabels, String[] labelStringMap,
+      int maxPNSize) {
     // initialize all zero hop PN prefix
     List<String> zeroHopPrefixes = new LinkedList<>();
     for (int labelId : labels) {
@@ -627,7 +627,7 @@ public class Wikidata {
     LOGGER.info(String.format("zeroHopPrefixes is %s", zeroHopPrefixes));
 
     HashMap<String, ArrayList<Integer>> pathLabelNeighbors =
-        dividedByLabels(neighbors, graphLabels, labelStringMap);
+        dividedByLabels(neighbors, graphLabels, labelStringMap, maxPNSize);
     LOGGER.info(String.format("pathLabelNeighbors is %s", pathLabelNeighbors));
     for (String key : pathLabelNeighbors.keySet()) {
       int[] array = ArrayUtil.listToArrayInt(pathLabelNeighbors.get(key));
@@ -641,7 +641,7 @@ public class Wikidata {
 
   private static HashMap<String, ArrayList<Integer>> dividedByLabels(
       ArrayList<Integer> nextPathNeighbors, ArrayList<ArrayList<Integer>> graphLabels,
-      String[] labelStringMap) {
+      String[] labelStringMap, int maxPNSize) {
     HashMap<String, ArrayList<Integer>> pathLabelNeighbors = new HashMap<>();
     for (int neighborID : nextPathNeighbors) {
       ArrayList<Integer> labels = graphLabels.get(neighborID);
