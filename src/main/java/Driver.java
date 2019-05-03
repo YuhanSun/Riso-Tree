@@ -178,7 +178,7 @@ public class Driver {
            * analyze
            */
           case getPNSizeDistribution:
-            Analyze.getPNSizeDistribution(cmd.getOptionValue(dbPath),
+            Analyze.getPNSizeDistribution(cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
                 cmd.getOptionValue(outputPath));
             break;
           /**
@@ -233,11 +233,12 @@ public class Driver {
 
 
   public static void main(String[] args) {
-    // construct rtree.
-    // String dataDir = "D:\\\\Project_Data\\\\wikidata-20180308-truthy-BETA.nt";
-    // args = new String[] {"-f", "wikisetZeroOneHopPNForSpatialNodes", "-dp", "D:\\temp\\graph.db",
-    // "-gp", dataDir + "\\graph.txt", "-lp", dataDir + "\\graph_label.txt",
-    // "-entityStringLabelMapPath", dataDir + "\\entity_string_label.txt"};
+    String dataDir = "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt";
+
+    // Analyze
+    args = new String[] {"-f", "getPNSizeDistribution", "-dp",
+        dataDir + "\\neo4j-community-3.4.12_risotree\\data\\databases\\graph.db", "-d", "wikidata",
+        "-outputPath", dataDir + "/PNdistribution.txt"};
 
     // run only once.
     // DataProcess.convertSingleToBidirectinalGraph();

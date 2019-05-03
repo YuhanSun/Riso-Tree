@@ -103,8 +103,13 @@ public class Analyze {
     Map<Object, Object> histgram = new TreeMap<>();
     Transaction tx = service.beginTx();
     List<Node> leafNodes = RTreeUtility.getRTreeLeafLevelNodes(service, dataset);
+    int index = 0;
     for (Node node : leafNodes) {
       getNodePNSizeDistribution(node, histgram);
+      index++;
+      if (index % 10000 == 0) {
+        logger.info("" + index);
+      }
     }
     tx.success();
     tx.close();
@@ -119,6 +124,7 @@ public class Analyze {
         int size = ((int[]) properties.get(key)).length;
         int count = (int) histgram.getOrDefault(size, 0);
         histgram.put(size, count + 1);
+        // logger.info(String.format("size: %d, count: %d", size, count));
       }
     }
   }
