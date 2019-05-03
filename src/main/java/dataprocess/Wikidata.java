@@ -630,6 +630,10 @@ public class Wikidata {
         dividedByLabels(neighbors, graphLabels, labelStringMap, maxPNSize);
     LOGGER.info(String.format("pathLabelNeighbors is %s", pathLabelNeighbors));
     for (String key : pathLabelNeighbors.keySet()) {
+      ArrayList<Integer> arrayList = pathLabelNeighbors.get(key);
+      if (arrayList.size() == 0) { // the removal case
+        continue;
+      }
       int[] array = ArrayUtil.listToArrayInt(pathLabelNeighbors.get(key));
       for (String zeroPrefix : zeroHopPrefixes) {
         String oneHopKey = RisoTreeUtil.getAttachName(zeroPrefix, key);
@@ -647,10 +651,21 @@ public class Wikidata {
       ArrayList<Integer> labels = graphLabels.get(neighborID);
       for (int labelId : labels) {
         String labelStr = labelStringMap[labelId];
-        if (pathLabelNeighbors.containsKey(labelStr))
-          pathLabelNeighbors.get(labelStr).add(neighborID);
-        else {
-          ArrayList<Integer> arrayList = new ArrayList<Integer>(nextPathNeighbors.size());
+        if (pathLabelNeighbors.containsKey(labelStr)) {
+          ArrayList<Integer> value = pathLabelNeighbors.get(labelStr);
+          if (value.size() == 0) { // PN has already reached the maxPNSize
+            continue;
+          }
+
+          if (value.size() == maxPNSize - 1) { // PN will reach the maxPNSize after this insertion
+            value = new ArrayList<>();
+            pathLabelNeighbors.put(labelStr, value);
+            continue;
+          }
+
+          value.add(neighborID);
+        } else {
+          ArrayList<Integer> arrayList = new ArrayList<Integer>(maxPNSize);
           arrayList.add(neighborID);
           pathLabelNeighbors.put(labelStr, arrayList);
         }

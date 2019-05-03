@@ -71,6 +71,8 @@ public class Driver {
   private String hop = "hop";
   private String PNPathAndPrefix = "PNPrefix";
 
+  private String maxPNSize = "maxPNSize";
+
   // Analyze
   private String outputPath = "outputPath";
 
@@ -95,6 +97,8 @@ public class Driver {
     options.addOption(MAX_HOPNUM, "MAX_HOPNUM", true, "MAX_HOPNUM of RisoTree");
     options.addOption(hop, "hop", true, "hop");
     options.addOption(PNPathAndPrefix, "PNPathAndPrefix", true, "Path Neighbor file path preffix");
+
+    options.addOption(maxPNSize, "maxPNSize", true, "Path Neighbor maximum size");
 
     // Analyze
     options.addOption(outputPath, "outputPath", true, "The output path for analyze");
@@ -187,7 +191,8 @@ public class Driver {
           case wikisetZeroOneHopPNForSpatialNodes:
             Wikidata.setZeroOneHopPNForSpatialNodes(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),
-                cmd.getOptionValue(entityStringLabelMapPath));
+                cmd.getOptionValue(entityStringLabelMapPath),
+                Integer.parseInt(cmd.getOptionValue(maxPNSize)));
             break;
           case wikiConstructRTree:
             new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
