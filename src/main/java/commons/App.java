@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,11 +91,11 @@ public class App {
 
   public static void main(String[] args) {
 
-    ServiceTest();
+    // ServiceTest();
     // CypherQueryTest();
     // initVariablesForTest();
     // Naive();
-    // test();
+    test();
     // batchRTreeInsert();
     // generateLabelList();
     // rangeQueryCompare();
@@ -204,46 +205,16 @@ public class App {
   }
 
   public static void test() {
-    // Utility.print(80/100.0);
-    String string = "PN_0";
-    // String[] l = string.split("PN");
-    // Utility.print(l);
-    // string = l[1];
-    string = string.replaceFirst("PN", "");
-    Util.println(string);
-
-    String[] l = string.split("_");
-    Util.println(l);
-    Util.println(l.length);
-    // ArrayList<Integer> test = new ArrayList<>();
-    // test.toString();
-
-    // double distance = 0.000001;
-    // String string = String.format("%s", String.valueOf(distance * distance));
-    // OwnMethods.Print(string);
-
-    // String string = String.format("%1$d", 1);
-    // OwnMethods.Print(string);
-
-    // GraphDatabaseService databaseService = new GraphDatabaseFactory()
-    // .newEmbeddedDatabase(new File(db_path));
-    // Transaction tx = databaseService.beginTx();
-    //// Node node = databaseService.getNodeById(1294918);
-    // Node node = databaseService.getNodeById(7);
-    //
-    // OwnMethods.Print(node.getAllProperties());
-    //// Iterable<Relationship> rels = node.getRelationships();
-    //// for ( Relationship relationship : rels)
-    //// {
-    ////// OwnMethods.Print(relationship);
-    //// Node geom = relationship.getEndNode();
-    //// OwnMethods.Print(geom.getAllProperties());
-    //// break;
-    //// }
-    //
-    // tx.success();
-    // tx.close();
-    // databaseService.shutdown();
+    HashMap<Integer, ArrayList<Integer>> map = new HashMap<>();
+    map.put(0, new ArrayList<>());
+    ArrayList<Integer> arrayList = map.get(0);
+    arrayList.add(1);
+    arrayList.add(2);
+    Util.println(arrayList);
+    Util.println(map.get(0));
+    arrayList = new ArrayList<>();
+    Util.println(arrayList);
+    Util.println(map.get(0));
   }
 
   public static void restartNeo4jJava() {
