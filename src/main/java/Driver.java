@@ -238,12 +238,12 @@ public class Driver {
 
 
   public static void main(String[] args) {
-    String dataDir = "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt";
-
-    // Analyze
-    args = new String[] {"-f", "getPNSizeDistribution", "-dp",
-        dataDir + "\\neo4j-community-3.4.12_risotree\\data\\databases\\graph.db", "-d", "wikidata",
-        "-outputPath", dataDir + "/PNdistribution.txt"};
+    // String dataDir = "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt";
+    //
+    // // Analyze
+    // args = new String[] {"-f", "getPNSizeDistribution", "-dp",
+    // dataDir + "\\neo4j-community-3.4.12_risotree\\data\\databases\\graph.db", "-d", "wikidata",
+    // "-outputPath", dataDir + "/PNdistribution.txt"};
 
     // run only once.
     // DataProcess.convertSingleToBidirectinalGraph();
