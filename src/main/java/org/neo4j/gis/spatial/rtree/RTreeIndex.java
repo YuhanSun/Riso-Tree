@@ -165,7 +165,7 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   /**
    * Adjust the PNs of the parent node on the leaf level. Currently no label paths is stored on
-   * non-leaf nodes.
+   * non-leaf nodes. So the function is not called recursively.
    *
    * @author yuhan
    * @param parent
@@ -176,13 +176,29 @@ public class RTreeIndex implements SpatialIndexWriter {
     HashMap<String, int[]> childLoc = getLocInGraph(geomNode);
     for (String key : childLoc.keySet()) {
       int[] childPN = childLoc.get(key);
+
+      if (childPN.length == 0) {
+        // childPN is the ignored PN, so directly make parent PN ignored.
+        parent.setProperty(key, childPN);
+        continue;
+      }
+
       int[] parentPN = parentLoc.get(key);
       if (parentPN == null) {
         parent.setProperty(key, childPN);
         continue;
       }
+
+      if (parentPN.length == 0) {
+        continue;
+      }
+
+      // both PNs are not ignored
       int[] expandPN = Util.sortedArrayMerge(childPN, parentPN);
-      if (expandPN.length > parentPN.length) {
+      if (expandPN.length > parentPN.length) { // if PN is really expanded
+        if (expandPN.length >= MaxPNSize) {
+          expandPN = new int[] {};
+        }
         parent.setProperty(key, expandPN);
       }
     }
@@ -1694,6 +1710,8 @@ public class RTreeIndex implements SpatialIndexWriter {
    * noContain case.
    */
   private double alpha = 1.0;
+
+  private int MaxPNSize = 100;
 
   /*
    * Control whether the PN comes into effect. It is set along with alpha. If alpha = 1.0, this

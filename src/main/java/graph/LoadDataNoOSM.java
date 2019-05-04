@@ -658,7 +658,8 @@ public class LoadDataNoOSM {
   }
 
   /**
-   * Construct RTree for the Wikidata. Nodes have been created already.
+   * Construct RTree for the Wikidata. Nodes have been created already. Nodes can possess multiple
+   * labels.
    *
    * @param dbPath
    * @param dataset
@@ -670,17 +671,14 @@ public class LoadDataNoOSM {
         throw new Exception("input path does not exist!");
       }
 
-      Util.println("Read entity from: " + entityPath);
-      ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
+      ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
 
       String layerName = dataset;
-      Util.println("Connect to dbPath: " + dbPath);
-      GraphDatabaseService databaseService =
-          new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
-      Util.println("dataset:" + dataset + "\ndatabase:" + dbPath);
+      GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
       SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
 
       Transaction tx = databaseService.beginTx();
+      LOGGER.info("create layer: " + layerName);
       EditableLayer layer = createLayer(layerName, spatialDatabaseService);
 
       ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
