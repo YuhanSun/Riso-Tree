@@ -196,7 +196,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       // both PNs are not ignored
       int[] expandPN = Util.sortedArrayMerge(childPN, parentPN);
       if (expandPN.length > parentPN.length) { // if PN is really expanded
-        if (expandPN.length >= MaxPNSize) {
+        if (expandPN.length > MaxPNSize) {
           expandPN = new int[] {};
         }
         parent.setProperty(key, expandPN);
@@ -1167,7 +1167,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   }
 
   /**
-   * Compute the PN expansion if insert the geom into the indexNode.
+   * Compute the PN expansion if insert the geom into the indexNode. Consider the ignored PN.
    * 
    * @param indexNode
    * @param pathNeighbors
@@ -1177,11 +1177,27 @@ public class RTreeIndex implements SpatialIndexWriter {
     int GD = 0;
     for (String key : pathNeighbors.keySet()) {
       int[] indexNodePathNeighbor = (int[]) indexNode.getProperty(key, null);
+      int[] pn = pathNeighbors.get(key);
       if (indexNodePathNeighbor == null) {
-        GD += pathNeighbors.get(key).length;
+        if (pn.length == 0) { // pn is ignored
+          GD += MaxPNSize;
+        } else {
+          GD += pathNeighbors.get(key).length;
+        }
         continue;
       }
-      GD += Util.arraysDifferenceCount(pathNeighbors.get(key), indexNodePathNeighbor);
+
+      if (indexNodePathNeighbor.length == 0) { // indexNode is ignored, GD keeps.
+        continue;
+      }
+
+      // indexNodePN exists and not ignored.
+      if (pn.length == 0) {
+        GD += MaxPNSize - indexNodePathNeighbor.length;
+      } else {
+        // mark here, current is fine, may be improved.
+        GD += Util.arraysDifferenceCount(pathNeighbors.get(key), indexNodePathNeighbor);
+      }
     }
     return GD;
   }

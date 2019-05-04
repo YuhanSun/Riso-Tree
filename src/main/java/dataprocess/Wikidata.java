@@ -657,7 +657,7 @@ public class Wikidata {
             continue;
           }
 
-          if (value.size() == maxPNSize - 1) { // PN will reach the maxPNSize after this insertion
+          if (value.size() == maxPNSize) { // PN will reach the maxPNSize after this insertion
             value = new ArrayList<>();
             pathLabelNeighbors.put(labelStr, value);
             continue;
