@@ -60,6 +60,12 @@ public class Util {
 
   private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
 
+  public static void checkPathExist(String filepath) throws Exception {
+    if (!Util.pathExist(filepath)) {
+      throw new Exception(filepath + " does not exist!");
+    }
+  }
+
   public static BufferedReader getBufferedReader(String path) throws Exception {
     LOGGER.info("Get reader from " + path);
     return new BufferedReader(new FileReader(path));

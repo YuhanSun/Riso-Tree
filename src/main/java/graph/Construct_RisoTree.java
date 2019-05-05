@@ -703,6 +703,12 @@ public class Construct_RisoTree {
   public static void wikiConstructPNSingleHop(String containIDPath, String db_path,
       String graph_path, String label_list_path, String labelStringMapPath, int hop,
       String PNPathAndPreffix, int maxPNSize) throws Exception {
+    Util.checkPathExist(containIDPath);
+    Util.checkPathExist(db_path);
+    Util.checkPathExist(graph_path);
+    Util.checkPathExist(label_list_path);
+    Util.checkPathExist(labelStringMapPath);
+
     HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
     ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graph_path);
     ArrayList<ArrayList<Integer>> label_list = GraphUtil.ReadGraph(label_list_path);
@@ -1130,8 +1136,7 @@ public class Construct_RisoTree {
   public static void wikiGenerateContainSpatialID(String db_path, String dataset,
       String containIDPath) {
     try {
-      GraphDatabaseService dbservice =
-          new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
+      GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
       HashMap<Long, TreeSet<Long>> containIDMap = new HashMap<>();
       Transaction tx = dbservice.beginTx();
       List<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(dbservice, dataset);
@@ -1152,8 +1157,9 @@ public class Construct_RisoTree {
       dbservice.shutdown();
 
       FileWriter writer = new FileWriter(new File(containIDPath));
-      for (long id : containIDMap.keySet())
+      for (long id : containIDMap.keySet()) {
         writer.write(String.format("%d,%s\n", id, containIDMap.get(id).toString()));
+      }
       writer.close();
 
     } catch (Exception e) {
