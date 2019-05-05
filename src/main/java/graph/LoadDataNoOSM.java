@@ -710,7 +710,7 @@ public class LoadDataNoOSM {
 
   public EditableLayer createLayer(String layerName, SpatialDatabaseService service) {
     // return service.getOrCreateSimplePointLayer(layerName, null, lon_name, lat_name);
-    return (EditableLayer) service.getLayer(layerName);
+    return (EditableLayer) service.createSimplePointLayer(layerName, lon_name, lat_name);
   }
 
   /**
