@@ -54,13 +54,18 @@ java -Xmx100g -jar ${jar_path} -h
 # MAX_HOPNUM="2"
 # PNPathAndPreffix="${data_dir}/PathNeighbors_${tree_type}"
 # java -Xmx100g -jar ${jar_path} -f LoadAll -ep ${entity_path} -dp ${db_path} -c ${containID_path} -gp ${graph_path} -lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix} -mapPath ${map_path} -d ${dataset}
-java -Xmx100g -jar ${jar_path} \
- -f wikisetZeroOneHopPNForSpatialNodes \
- -dp ${db_path} \
- -gp ${graph_path} \
- -lp ${label_path} \
- -entityStringLabelMapPath ${entityStringLabelMapPath} \
- -maxPNSize 100
 
-# java -Xmx100g -jar ${jar_path} -f constructRTreeWikidata -dp ${db_path} -d ${dataset} -ep ${entity_path}
+# java -Xmx100g -jar ${jar_path} \
+#  -f wikisetZeroOneHopPNForSpatialNodes \
+#  -dp ${db_path} \
+#  -gp ${graph_path} \
+#  -lp ${label_path} \
+#  -entityStringLabelMapPath ${entityStringLabelMapPath} \
+#  -maxPNSize 100
+
+java -Xmx100g -jar ${jar_path} \
+	-f constructRTreeWikidata \
+	-dp ${db_path} \
+	-d ${dataset} \
+	-ep ${entity_path}
 

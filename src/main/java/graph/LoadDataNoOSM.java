@@ -667,12 +667,10 @@ public class LoadDataNoOSM {
    */
   public void wikiConstructRTree(String dbPath, String dataset, String entityPath) {
     try {
-      if (!Util.pathExist(dbPath) || !Util.pathExist(entityPath)) {
-        throw new Exception("input path does not exist!");
-      }
+      Util.checkPathExist(dbPath);
+      Util.checkPathExist(entityPath);
 
       ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
-
       String layerName = dataset;
       GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
       SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
