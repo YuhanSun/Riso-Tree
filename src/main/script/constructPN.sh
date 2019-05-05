@@ -59,7 +59,7 @@ PNPathAndPrefix="${data_dir}/PathNeighbors"
 # 2-hop
 java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	-lp ${label_path} -hop 2 -PNPrefix ${PNPathAndPrefix}
+	-lp ${label_path} -hop 2 -PNPrefix ${PNPathAndPrefix} -maxPNSize 100
 # java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
 # 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
 # 	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix}
