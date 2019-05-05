@@ -11,6 +11,6 @@ workingDbPath="${data_dir}/neo4j-community-3.4.12"
 
 # modify this line most of the time
 
-backupDbPath="${data_dir}/neo4j-community-3.4.12_node_edges"
-rm -r ${workingDbPath}
-cp -a ${backupDbPath} ${workingDbPath}
+backupDbPath="${data_dir}/neo4j-community-3.4.12_spatial_node_one_hop"
+rm -r "${workingDbPath}/"
+cp -a "${backupDbPath}/" "${workingDbPath}/"
