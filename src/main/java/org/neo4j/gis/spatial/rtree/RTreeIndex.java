@@ -267,8 +267,10 @@ public class RTreeIndex implements SpatialIndexWriter {
     LOGGER.info("chooseIndexnodeWithSmallestGD is called " + chooseSmallestGDCount + " times");
     LOGGER.info(differentTimes + " are different");
 
-    LOGGER.info("noContainCount happens " + noContainCount + "times");
-    LOGGER.info(String.format(" %d are the same while %d are different.", noContainSame,
+    LOGGER.info(String.format("getGD() is called %d times", getGDCount));
+
+    LOGGER.info("noContainCount happens " + noContainCount + " times");
+    LOGGER.info(String.format("%d are the same while %d are different.", noContainSame,
         noContainDifferent));
 
     // }
@@ -1174,6 +1176,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    * @return
    */
   private int getGD(Node indexNode, HashMap<String, int[]> pathNeighbors) {
+    getGDCount++;
     int GD = 0;
     for (String key : pathNeighbors.keySet()) {
       int[] indexNodePathNeighbor = (int[]) indexNode.getProperty(key, null);
@@ -1736,6 +1739,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   private boolean spatialOnly = true;
 
   private int chooseSmallestGDCount = 0;
+  private int getGDCount = 0;
 
   /**
    * how many times GraphDist works when there are more than one nodes contain the geom object.
