@@ -64,7 +64,7 @@ java -Xmx100g -jar ${jar_path} -h
 #  -maxPNSize 100
 
 java -Xmx100g -jar ${jar_path} \
-	-f constructRTreeWikidata \
+	-f wikiConstructRTree \
 	-dp ${db_path} \
 	-d ${dataset} \
 	-ep ${entity_path}
