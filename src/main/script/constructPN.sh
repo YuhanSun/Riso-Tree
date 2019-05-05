@@ -35,7 +35,7 @@ PNPathAndPrefix="${data_dir}/PathNeighbors"
 # java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
 # 	-dp ${db_path} -d ${dataset} -c ${containID_path}
 
-###### Wikidata Construct Path Neighbors for leaf nodes ######
+###### Wikidata Construct Path Neighbors for leaf nodes ###### (not used)
 # java -Xmx100g -jar ${jar_path} -f wikiConstructPNTime \
 # 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
 # 	-lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPrefix ${PNPathAndPrefix}

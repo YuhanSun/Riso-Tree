@@ -697,11 +697,12 @@ public class Construct_RisoTree {
    * @param labelStringMapPath
    * @param hop
    * @param PNPathAndPreffix
+   * @param maxPNSize
    * @throws Exception
    */
   public static void wikiConstructPNSingleHop(String containIDPath, String db_path,
       String graph_path, String label_list_path, String labelStringMapPath, int hop,
-      String PNPathAndPreffix) throws Exception {
+      String PNPathAndPreffix, int maxPNSize) throws Exception {
     HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
     ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graph_path);
     ArrayList<ArrayList<Integer>> label_list = GraphUtil.ReadGraph(label_list_path);
@@ -714,7 +715,7 @@ public class Construct_RisoTree {
     } else if (hop > 0) {
       GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
       constructTime = wikiConstructPNTimeMultiHop(containIDMap, labelStringMap, dbservice, graph,
-          label_list, hop, PNPathAndPreffix);
+          label_list, hop, PNPathAndPreffix, maxPNSize);
       Util.close(dbservice);
     } else {
       throw new Exception(String.format("hop = %d is invalid!", hop));
@@ -740,16 +741,30 @@ public class Construct_RisoTree {
       // 0-hop path neighbors are spatial objects themselves.
       TreeSet<Integer> pathNeighbors = new TreeSet<>(containIDMap.get(nodeId));
       HashMap<Integer, ArrayList<Integer>> pathLabelNeighbor =
-          dividedByLabels(pathNeighbors, label_list);
+          dividedByLabels(pathNeighbors, label_list, Integer.MAX_VALUE);
       outPathLabelNeighbors(pathLabelNeighbor, PNPrefix, writer1, labelStringMap);
     }
     Util.close(writer1);
     return System.currentTimeMillis() - start;
   }
 
+  /**
+   * Construct PN (hop > 0), without considering ignored PN.
+   *
+   * @param containIDMap
+   * @param labelStringMap
+   * @param dbservice
+   * @param graph
+   * @param label_list
+   * @param hop
+   * @param PNPathAndPreffix
+   * @return
+   * @throws Exception
+   */
   private static long wikiConstructPNTimeMultiHop(HashMap<Long, ArrayList<Integer>> containIDMap,
       String[] labelStringMap, GraphDatabaseService dbservice, ArrayList<ArrayList<Integer>> graph,
-      ArrayList<ArrayList<Integer>> label_list, int hop, String PNPathAndPreffix) throws Exception {
+      ArrayList<ArrayList<Integer>> label_list, int hop, String PNPathAndPreffix, int maxPNSize)
+      throws Exception {
     // more than one hop
     Transaction tx2 = dbservice.beginTx();
     LOGGER.info(String.format("construct %d hop", hop));
@@ -765,7 +780,7 @@ public class Construct_RisoTree {
 
       writer2.write(nodeID + "\n");
       Node node = dbservice.getNodeById(nodeID);
-      constructPNOutputForNode(node, labelStringMap, graph, label_list, hop, writer2);
+      constructPNOutputForNode(node, labelStringMap, graph, label_list, hop, writer2, maxPNSize);
 
     }
     Util.close(writer2);
@@ -776,14 +791,17 @@ public class Construct_RisoTree {
 
   private static void constructPNOutputForNode(Node node, String[] labelStringMap,
       ArrayList<ArrayList<Integer>> graph, ArrayList<ArrayList<Integer>> label_list, int hop,
-      FileWriter writer2) throws Exception {
+      FileWriter writer2, int maxPNSize) throws Exception {
     Map<String, Object> properties = node.getAllProperties();
     for (String key : properties.keySet()) {
       if (RisoTreeUtil.isPNProperty(key) && StringUtils.countMatches(key, '_') == (hop)) {
         int[] curPathNeighbors = (int[]) properties.get(key);
+        if (curPathNeighbors.length == 0) {
+          continue; // this PN is ignored.
+        }
         TreeSet<Integer> nextPathNeighbors = getNextPathNeighborsInSet(curPathNeighbors, graph);
         HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors =
-            dividedByLabels(nextPathNeighbors, label_list);
+            dividedByLabels(nextPathNeighbors, label_list, maxPNSize);
         outPathLabelNeighbors(pathLabelNeighbors, key, writer2, labelStringMap);
       }
     }
@@ -836,8 +854,21 @@ public class Construct_RisoTree {
   // return System.currentTimeMillis() - start;
   // }
 
+  /**
+   * It is replaced by wikiConstructPNSingleHop.
+   *
+   * @param containIDPath
+   * @param db_path
+   * @param graph_path
+   * @param label_list_path
+   * @param labelStringMapPath
+   * @param MAX_HOPNUM
+   * @param PNPathAndPreffix
+   * @param maxPNSize
+   */
   public static void wikiConstructPNTime(String containIDPath, String db_path, String graph_path,
-      String label_list_path, String labelStringMapPath, int MAX_HOPNUM, String PNPathAndPreffix) {
+      String label_list_path, String labelStringMapPath, int MAX_HOPNUM, String PNPathAndPreffix,
+      int maxPNSize) {
     try {
       HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
       ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graph_path);
@@ -880,7 +911,7 @@ public class Construct_RisoTree {
       }
 
       HashMap<Integer, ArrayList<Integer>> pathLabelNeighbor =
-          dividedByLabels(pathNeighbors, label_list);
+          dividedByLabels(pathNeighbors, label_list, Integer.MAX_VALUE);
 
       Node node = dbservice.getNodeById(nodeId);
       for (int pathLabel : pathLabelNeighbor.keySet()) {
@@ -924,7 +955,7 @@ public class Construct_RisoTree {
             TreeSet<Integer> nextPathNeighbors = getNextPathNeighborsInSet(curPathNeighbors, graph);
 
             HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors =
-                dividedByLabels(nextPathNeighbors, label_list);
+                dividedByLabels(nextPathNeighbors, label_list, Integer.MAX_VALUE);
 
             curHopTime += System.currentTimeMillis() - start;
 
@@ -959,18 +990,30 @@ public class Construct_RisoTree {
   }
 
   private static HashMap<Integer, ArrayList<Integer>> dividedByLabels(
-      TreeSet<Integer> nextPathNeighbors, ArrayList<ArrayList<Integer>> label_list) {
+      TreeSet<Integer> nextPathNeighbors, ArrayList<ArrayList<Integer>> label_list, int maxPNSize) {
     HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors =
         new HashMap<Integer, ArrayList<Integer>>();
     for (int neighborID : nextPathNeighbors) {
       for (int label : label_list.get(neighborID)) {
-        if (pathLabelNeighbors.containsKey(label))
-          pathLabelNeighbors.get(label).add(neighborID);
-        else {
-          ArrayList<Integer> arrayList = new ArrayList<Integer>();
+        if (pathLabelNeighbors.containsKey(label)) {
+          ArrayList<Integer> value = pathLabelNeighbors.get(label);
+          if (value.size() == 0) { // PN has already reached the maxPNSize
+            continue;
+          }
+
+          if (value.size() == maxPNSize) { // PN will reach the maxPNSize after this insertion
+            value = new ArrayList<>();
+            pathLabelNeighbors.put(label, value);
+            continue;
+          }
+
+          value.add(neighborID);
+        } else {
+          ArrayList<Integer> arrayList = new ArrayList<Integer>(maxPNSize);
           arrayList.add(neighborID);
           pathLabelNeighbors.put(label, arrayList);
         }
+
       }
     }
     return pathLabelNeighbors;

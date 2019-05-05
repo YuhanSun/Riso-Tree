@@ -221,13 +221,15 @@ public class Driver {
                 cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath),
                 cmd.getOptionValue(labelListPath), cmd.getOptionValue(labelStrMapPath),
                 Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
-                cmd.getOptionValue(PNPathAndPrefix));
+                cmd.getOptionValue(PNPathAndPrefix),
+                Integer.parseInt(cmd.getOptionValue(maxPNSize)));
             break;
           case wikiConstructPNTimeSingleHop:
             Construct_RisoTree.wikiConstructPNSingleHop(cmd.getOptionValue(containIDPath),
                 cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath),
                 cmd.getOptionValue(labelListPath), cmd.getOptionValue(labelStrMapPath),
-                Integer.parseInt(cmd.getOptionValue(hop)), cmd.getOptionValue(PNPathAndPrefix));
+                Integer.parseInt(cmd.getOptionValue(hop)), cmd.getOptionValue(PNPathAndPrefix),
+                Integer.parseInt(cmd.getOptionValue(maxPNSize)));
             break;
           case wikiLoadPN:
             Construct_RisoTree.wikiLoadPN(cmd.getOptionValue(PNPathAndPrefix),
