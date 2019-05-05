@@ -690,17 +690,18 @@ public class LoadDataNoOSM {
       long start = System.currentTimeMillis();
       layer.addAll(geomNodes);
 
-      Util.println("in memory time: " + (System.currentTimeMillis() - start));
-      Util.println("number of spatial objects: " + geomNodes.size());
+      String message = "in memory time: " + (System.currentTimeMillis() - start) + "\n";
+      message += "number of spatial objects: " + geomNodes.size() + "\n";
 
       start = System.currentTimeMillis();
       tx.success();
       tx.close();
-      Util.println("commit time: " + (System.currentTimeMillis() - start));
+      message += "commit time: " + (System.currentTimeMillis() - start) + "\n";
 
       start = System.currentTimeMillis();
       spatialDatabaseService.getDatabase().shutdown();
-      Util.println("shut down time: " + (System.currentTimeMillis() - start));
+      message += "shut down time: " + (System.currentTimeMillis() - start);
+      LOGGER.info(message);
 
     } catch (Exception e) {
       e.printStackTrace();
