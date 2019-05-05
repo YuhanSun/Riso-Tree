@@ -29,6 +29,9 @@ graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
 label_path="${data_dir}/graph_label.txt"
 entityStringLabelMapPath="${data_dir}/entity_string_label.txt"
+graphPropertyEdgePath="${data_dir}/graph_property_edge.txt"
+propertyMapPath="${data_dir}/property_map.txt"
+
 containID_path="${data_dir}/containID.txt"
 map_path="${data_dir}/node_map_RTree.txt"
 
@@ -37,6 +40,17 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 java -Xmx100g -jar ${jar_path} -h
 
 ###### Load ######
+# Load graph nodes, edges and spatial attributes.
+# java -Xmx100g -jar ${jar_path} -f wikidataLoadGraph \
+# 	-ep ${entity_path} \
+# 	-lp ${labelListPath} \
+# 	-entityStringLabelMapPath ${entityStringLabelMapPath} \
+# 	-dp ${db_path}
+# java -Xmx100g -jar ${jar_path} -f wikiLoadEdges \
+# 	-graphPropertyEdgePath ${graphPropertyEdgePath} \
+# 	-propertyMapPath ${propertyMapPath} \
+# 	-dp {db_path}
+
 # MAX_HOPNUM="2"
 # PNPathAndPreffix="${data_dir}/PathNeighbors_${tree_type}"
 # java -Xmx100g -jar ${jar_path} -f LoadAll -ep ${entity_path} -dp ${db_path} -c ${containID_path} -gp ${graph_path} -lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix} -mapPath ${map_path} -d ${dataset}

@@ -31,7 +31,8 @@ public class Driver {
     /**
      * for wikidata
      */
-    wikisetZeroOneHopPNForSpatialNodes,
+    wikidataLoadGraph, wikiLoadEdges, // load graph nodes and edges and spatial attributes
+    wikisetZeroOneHopPNForSpatialNodes, //
 
     wikiGenerateContainSpatialID, // one time prepare
     wikiConstructRTree, wikiConstructPNTime, //
@@ -66,6 +67,10 @@ public class Driver {
   // Load data
   private String mapPath = "mapPath";
   private String entityStringLabelMapPath = "entityStringLabelMapPath";
+  private String graphPropertyEdgePath = "graphPropertyEdgePath";
+  private String propertyMapPath = "propertyMapPath";
+
+
 
   private String MAX_HOPNUM = "MAX_HOPNUM";
   private String hop = "hop";
@@ -188,6 +193,15 @@ public class Driver {
           /**
            * for wikidata
            */
+          case wikidataLoadGraph:
+            Wikidata.loadAllEntities(cmd.getOptionValue(entityPath),
+                cmd.getOptionValue(labelListPath), cmd.getOptionValue(entityStringLabelMapPath),
+                cmd.getOptionValue(dbPath));
+            break;
+          case wikiLoadEdges:
+            Wikidata.loadEdges(cmd.getOptionValue(graphPropertyEdgePath),
+                cmd.getOptionValue(propertyMapPath), cmd.getOptionValue(dbPath));
+            break;
           case wikisetZeroOneHopPNForSpatialNodes:
             Wikidata.setZeroOneHopPNForSpatialNodes(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),

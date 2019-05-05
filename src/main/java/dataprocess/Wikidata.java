@@ -534,19 +534,23 @@ public class Wikidata {
   }
 
   public void loadEdges() throws Exception {
+    loadEdges(graphPropertyEdgePath, propertyMapPath, dbPath);
+  }
+
+  public static void loadEdges(String graphPropertyEdgePath, String propertyMapPath, String dbPath)
+      throws Exception {
     // read the relationshipsTypes
     Map<String, RelationshipType> map = createStringToRelationshipTypeMap(propertyMapPath);
 
     LOGGER.info("read edges from " + graphPropertyEdgePath);
-    BufferedReader reader = new BufferedReader(new FileReader(graphPropertyEdgePath));
-    LOGGER.info("Batch insert edges into: " + dbPath);
-    Map<String, String> config = new HashMap<String, String>();
-    config.put("dbms.pagecache.memory", "80g");
+    BufferedReader reader = Util.getBufferedReader(graphPropertyEdgePath);
+
     BatchInserter inserter = null;
     String line = null;
     int lineId = 0;
     try {
-      inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
+      inserter = Util.getBatchInserter(dbPath);
+      LOGGER.info("Batch insert edges into: " + dbPath);
       while ((line = reader.readLine()) != null) {
         lineId++;
         if (lineId % logInterval == 0) {
@@ -703,6 +707,14 @@ public class Wikidata {
     loadAllEntity(entities, labelStringMap, labels, dbPath);
   }
 
+  public static void loadAllEntities(String entityPath, String graphLabelPath,
+      String entityStringLabelMapPath, String dbPath) throws Exception {
+    ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
+    ArrayList<ArrayList<Integer>> labels = GraphUtil.ReadGraph(graphLabelPath);
+    String[] labelStringMap = readLabelMap(entityStringLabelMapPath);
+    loadAllEntity(entities, labelStringMap, labels, dbPath);
+  }
+
   /**
    * Load all entities without generating id because the node whose graphId = 0 will be in the
    * neo4jId = 0.
@@ -715,12 +727,11 @@ public class Wikidata {
    */
   public static void loadAllEntity(List<Entity> entities, String[] labelStringMap,
       ArrayList<ArrayList<Integer>> labelList, String dbPath) throws Exception {
-    LOGGER.info("Batch insert nodes into: " + dbPath);
-    Map<String, String> config = new HashMap<String, String>();
-    config.put("dbms.pagecache.memory", "80g");
+
     BatchInserter inserter = null;
     try {
-      inserter = BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
+      inserter = Util.getBatchInserter(dbPath);
+      LOGGER.info("Batch insert nodes into: " + dbPath);
       for (int i = 0; i < entities.size(); i++) {
         Entity entity = entities.get(i);
         Map<String, Object> properties = new HashMap<String, Object>();

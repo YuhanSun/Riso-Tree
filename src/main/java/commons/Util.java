@@ -60,6 +60,11 @@ public class Util {
 
   private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
 
+  public static BufferedReader getBufferedReader(String path) throws Exception {
+    LOGGER.info("Get reader from " + path);
+    return new BufferedReader(new FileReader(path));
+  }
+
   public static HashMap<Integer, Integer> histogram(List<Integer> list) {
     HashMap<Integer, Integer> res = new HashMap<>();
     for (int element : list) {
@@ -72,6 +77,13 @@ public class Util {
     return res;
   }
 
+  /**
+   * The config by default has 100g memory. Used for the server.
+   *
+   * @param dbPath
+   * @return
+   * @throws Exception
+   */
   public static BatchInserter getBatchInserter(String dbPath) throws Exception {
     Map<String, String> config = new HashMap<String, String>();
     config.put("dbms.pagecache.memory", "100g");
@@ -80,7 +92,7 @@ public class Util {
 
   public static BatchInserter getBatchInserter(String dbPath, Map<String, String> config)
       throws Exception {
-    LOGGER.info(String.format("Get batchinserter from %s, with config\n%s", dbPath, config));
+    LOGGER.info(String.format("Get batchinserter from %s, with config %s", dbPath, config));
     return BatchInserters.inserter(new File(dbPath).getAbsoluteFile(), config);
   }
 
