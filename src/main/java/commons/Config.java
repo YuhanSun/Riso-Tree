@@ -42,6 +42,7 @@ public class Config {
   public final static String PNPrefix = "PN";
   public final static String PNSizePrefix = "PNSize";
   public final static int graphNodeCount = 47116657;
+  public final static int logInterval = 5000000;
 
   public void setDatasetName(String pName) {
     this.dataset = pName;

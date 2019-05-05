@@ -687,6 +687,7 @@ public class LoadDataNoOSM {
         }
       }
 
+      LOGGER.info("layer.addAll(geomNodes)...");
       long start = System.currentTimeMillis();
       layer.addAll(geomNodes);
 
