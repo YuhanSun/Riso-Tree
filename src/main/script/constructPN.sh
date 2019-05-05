@@ -6,7 +6,7 @@
 # server
 dir="/hdd/code/yuhansun"
 dataset="wikidata"
-data_dir="${dir}/data/${dataset}"
+data_dir="${dir}/data/wikidata_risotree"
 code_dir="${dir}/code"
 
 # local test setup
