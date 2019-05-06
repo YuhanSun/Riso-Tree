@@ -13,6 +13,7 @@ public class Query_Graph {
 
   public int[] label_list;
   public String[] label_list_string;
+  public String[] nodeVariables; // variable name of each node id
 
   public ArrayList<ArrayList<Integer>> graph;
   public MyRectangle[] spa_predicate;
@@ -29,6 +30,7 @@ public class Query_Graph {
   public Query_Graph(int node_count, LabelType labelType) {
     this.labelType = labelType;
     label_list = new int[node_count];
+    nodeVariables = new String[node_count];
     graph = new ArrayList<ArrayList<Integer>>(node_count);
     for (int i = 0; i < node_count; i++)
       graph.add(new ArrayList<Integer>());

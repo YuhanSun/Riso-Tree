@@ -6,9 +6,11 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
+import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.Query_Graph;
 import commons.Util;
+import cypher.middleware.CypherDecoder;
 
 public class CypherDecoderTest {
 
@@ -47,7 +49,8 @@ public class CypherDecoderTest {
     Util.println(query);
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseServiceNotExistCreate(dbPath);
     Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, "spatialnode",
-        "(22.187478257613602, 113.50180238485339, 22.225842149771214, 113.56607615947725)",
+        new MyRectangle(
+            "(22.187478257613602, 113.50180238485339, 22.225842149771214, 113.56607615947725)"),
         service);
     Util.println(query_Graph);
     Util.println(Arrays.toString(query_Graph.label_list_string));
