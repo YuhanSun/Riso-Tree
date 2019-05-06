@@ -32,8 +32,8 @@ PNPathAndPrefix="${data_dir}/PathNeighbors"
 # convert single graph to bidirectional
 # java -Xmx100g -jar ${jar_path} -f convertSingleToBidirectinalGraph -dataDir ${data_dir}
 
-java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
-	-dp ${db_path} -d ${dataset} -c ${containID_path}
+# java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
+# 	-dp ${db_path} -d ${dataset} -c ${containID_path}
 
 ###### Wikidata Construct Path Neighbors for leaf nodes ###### (not used)
 # java -Xmx100g -jar ${jar_path} -f wikiConstructPNTime \
@@ -41,20 +41,20 @@ java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
 # 	-lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPrefix ${PNPathAndPrefix}
 
 # 0-hop
-# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
-# 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-# 	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix}
-# java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
-# 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-# 	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix}
+java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix}
+java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix}
 
 # 1-hop
-# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
-# 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-# 	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix}
-# java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
-# 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-# 	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix}
+java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix}
+java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix}
 
 # 2-hop
 # java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
