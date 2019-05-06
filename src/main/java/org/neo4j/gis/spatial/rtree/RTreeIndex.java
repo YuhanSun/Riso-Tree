@@ -43,6 +43,7 @@ import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
+import commons.Config;
 import commons.RisoTreeUtil;
 import commons.Util;
 
@@ -139,6 +140,9 @@ public class RTreeIndex implements SpatialIndexWriter {
 
     countSaved = false;
     totalGeometryCount++;
+    if (totalGeometryCount % Config.logInterval == 0) {
+      LOGGER.info("totalGeometryCount: " + totalGeometryCount);
+    }
   }
 
   /**
