@@ -21,7 +21,6 @@ public class ExecutionPlanDescriptionUtil {
       ExecutionPlanDescription planDescription) {
     Util.println(planDescription);
     Object value = planDescription.getArguments().get(ArgKey.ExpandExpression.name());
-    Util.println(value);
     String[] nodeVariables = StringUtils.substringsBetween(value.toString(), "(", ")");
     String nodeVariable1 = nodeVariables[0];
     if (nodeVariable1.contains(":")) {

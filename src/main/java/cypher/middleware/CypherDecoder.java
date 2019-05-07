@@ -37,12 +37,12 @@ public class CypherDecoder {
    * @param rectangle
    * @param service
    * @return
+   * @throws Exception
    */
-  public static Query_Graph getQueryGraph(String query, GraphDatabaseService service) {
-    String spatialNode = "";
-    MyRectangle rectangle = new MyRectangle();
-
-    return getQueryGraph(query, spatialNode, rectangle, service);
+  public static Query_Graph getQueryGraph(String query, GraphDatabaseService service)
+      throws Exception {
+    Map<String, MyRectangle> spatialPredicates = getSpatialPredicates(query);
+    return getQueryGraph(query, spatialPredicates, service);
   }
 
   public static Map<String, MyRectangle> getSpatialPredicates(String query) throws Exception {
@@ -52,9 +52,11 @@ public class CypherDecoder {
     String ast = statement.toString();
     List<String> strings = getStringScala(ast, lessThanOrEqualKeyword);
     Set<String> spatialNodeVariables = getSpatialNodeVariables(strings);
-    Util.println(spatialNodeVariables);
 
-
+    for (String variable : spatialNodeVariables) {
+      MyRectangle rectangle = getSpatialPredicateRange(variable, strings);
+      spatialPredicates.put(variable, rectangle);
+    }
 
     return spatialPredicates;
   }
@@ -64,7 +66,7 @@ public class CypherDecoder {
     ArrayList<Double> longitudes = new ArrayList<>();
     ArrayList<Double> latitudes = new ArrayList<>();
     for (String string : strings) {
-      if (split(string, variableKeyword).get(0).equals(variable)) {
+      if (getSingleAttributeInScalaString(string, variableKeyword).equals(variable)) {
         String propertyKeyName = getSingleAttributeInScalaString(string, propertyKeyNameKeyword);
         if (propertyKeyName.equals(Config.longitude_property_name)) {
           double lon = Double
@@ -75,12 +77,19 @@ public class CypherDecoder {
               .parseDouble(getSingleAttributeInScalaString(string, decimalDoubleLiteralKeyword));
           latitudes.add(lat);
         }
-        double[] lons = longitudes.toArray(new Double[2]);
       }
     }
     if (longitudes.size() != 2 || latitudes.size() != 2) {
+      Util.println(longitudes);
+      Util.println(latitudes);
       throw new Exception(strings + " does not contain all the range values!");
     }
+    Double[] lons = longitudes.toArray(new Double[2]);
+    Double[] lats = latitudes.toArray(new Double[2]);
+
+    Arrays.sort(lons);
+    Arrays.sort(lats);
+    return new MyRectangle(lons[0], lats[0], lons[1], lats[1]);
   }
 
   public static String getSingleAttributeInScalaString(String string, String keyword)
@@ -106,11 +115,10 @@ public class CypherDecoder {
 
     strings.remove(0);
     for (String piece : strings) {
-      Util.println(piece);
-      Util.println(getContentWithinParentheses(piece));
       res.add(getContentWithinParentheses(piece));
     }
     return res;
+
   }
 
   /**
@@ -132,9 +140,10 @@ public class CypherDecoder {
 
       if (index == 0) {
         res.add("");
+      } else {
+        res.add(curString.substring(0, index));
       }
 
-      res.add(curString.substring(0, index));
       curString = curString.substring(index + length, curString.length());
     }
 
@@ -203,6 +212,55 @@ public class CypherDecoder {
     return query_Graph;
   }
 
+  public static Query_Graph getQueryGraph(String query, Map<String, MyRectangle> spatialPredicates,
+      GraphDatabaseService service) throws Exception {
+    Query_Graph query_Graph = getQueryGraphWithoutSpatialPredicate(query, service);
+    for (String spatialNode : spatialPredicates.keySet()) {
+      setSpatialPredicate(query_Graph, spatialNode, spatialPredicates.get(spatialNode));
+    }
+    return query_Graph;
+  }
+
+  public static Query_Graph getQueryGraphWithoutSpatialPredicate(String query,
+      GraphDatabaseService service) {
+    String[] nodeStrings = getNodeStrings(query);
+    HashMap<String, Integer> nodeVariableIdMap = getNodeVariableIdMap(nodeStrings);
+    String[] labelList = getQueryLabelList(nodeVariableIdMap, nodeStrings);
+    Result result = service.execute("explain " + query);
+    ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+    Util.println(planDescription);
+    List<ExecutionPlanDescription> plans =
+        ExecutionPlanDescriptionUtil.getRequired(planDescription);
+    ArrayList<ArrayList<Integer>> graphStructure = getGraphStructure(plans, nodeVariableIdMap);
+
+    Query_Graph query_Graph = new Query_Graph(nodeVariableIdMap.size(), LabelType.STRING);
+    query_Graph.graph = graphStructure;
+    query_Graph.label_list_string = labelList;
+    String[] nodeVariables = new String[nodeVariableIdMap.size()];
+    for (String variable : nodeVariableIdMap.keySet()) {
+      nodeVariables[nodeVariableIdMap.get(variable)] = variable;
+    }
+    query_Graph.nodeVariables = nodeVariables;
+    return query_Graph;
+  }
+
+  public static void setSpatialPredicate(Query_Graph query_Graph, String spatialNode,
+      MyRectangle rectangle) throws Exception {
+    int spatialId = 0;
+    String[] nodeVariables = query_Graph.nodeVariables;
+    for (String variable : nodeVariables) {
+      if (variable.equals(spatialNode)) {
+        break;
+      }
+      spatialId++;
+    }
+    if (spatialId == nodeVariables.length) {
+      throw new Exception(spatialNode + " does not exist in the query graph");
+    }
+    query_Graph.Has_Spa_Predicate[spatialId] = true;
+    query_Graph.spa_predicate[spatialId] = rectangle;
+  }
+
   private static ArrayList<ArrayList<Integer>> getGraphStructure(
       List<ExecutionPlanDescription> plans, HashMap<String, Integer> nodeVariableIdMap) {
     ArrayList<TreeSet<Integer>> treeGraph = new ArrayList<>();
@@ -212,7 +270,6 @@ public class CypherDecoder {
     for (ExecutionPlanDescription planDescription : plans) {
       String[] edge =
           ExecutionPlanDescriptionUtil.getEdgeInExpandExpressionPlanNode(planDescription);
-      Util.println(Arrays.toString(edge));
       int id1 = nodeVariableIdMap.get(edge[0]);
       int id2 = nodeVariableIdMap.get(edge[1]);
       treeGraph.get(id1).add(id2);
@@ -229,7 +286,6 @@ public class CypherDecoder {
       String[] nodeStrings) {
     String[] labelList = new String[nodeVariableIdMap.size()];
     for (String string : nodeStrings) {
-      Util.println(string);
       if (string.contains(":")) {
         String[] strings = StringUtils.split(string, ":");
         String nodeVariable = strings[0];
