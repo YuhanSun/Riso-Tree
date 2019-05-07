@@ -48,7 +48,7 @@ java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
 	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize 100
 
-1-hop
+# 1-hop
 java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
 	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
 	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize 100
