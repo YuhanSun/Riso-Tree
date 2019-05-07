@@ -716,8 +716,8 @@ public class Construct_RisoTree {
 
     long constructTime = 0;
     if (hop == 0) {
-      constructTime =
-          wikiConstructPNTimeZeroHop(containIDMap, labelStringMap, label_list, PNPathAndPreffix);
+      constructTime = wikiConstructPNTimeZeroHop(containIDMap, labelStringMap, label_list,
+          PNPathAndPreffix, maxPNSize);
     } else if (hop > 0) {
       GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
       constructTime = wikiConstructPNTimeMultiHop(containIDMap, labelStringMap, dbservice, graph,
@@ -731,8 +731,8 @@ public class Construct_RisoTree {
   }
 
   public static long wikiConstructPNTimeZeroHop(HashMap<Long, ArrayList<Integer>> containIDMap,
-      String[] labelStringMap, ArrayList<ArrayList<Integer>> label_list, String PNPathAndPreffix)
-      throws Exception {
+      String[] labelStringMap, ArrayList<ArrayList<Integer>> label_list, String PNPathAndPreffix,
+      int maxPNSize) throws Exception {
     // 1-hop
     LOGGER.info("construct 0-hop");
     long start = System.currentTimeMillis();
@@ -747,7 +747,7 @@ public class Construct_RisoTree {
       // 0-hop path neighbors are spatial objects themselves.
       TreeSet<Integer> pathNeighbors = new TreeSet<>(containIDMap.get(nodeId));
       HashMap<Integer, ArrayList<Integer>> pathLabelNeighbor =
-          dividedByLabels(pathNeighbors, label_list, Integer.MAX_VALUE);
+          dividedByLabels(pathNeighbors, label_list, maxPNSize);
       outPathLabelNeighbors(pathLabelNeighbor, PNPrefix, writer1, labelStringMap);
     }
     Util.close(writer1);
