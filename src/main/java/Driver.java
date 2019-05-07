@@ -216,14 +216,14 @@ public class Driver {
             Construct_RisoTree.wikiGenerateContainSpatialID(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), cmd.getOptionValue(containIDPath));
             break;
-          case wikiConstructPNTime:
-            Construct_RisoTree.wikiConstructPNTime(cmd.getOptionValue(containIDPath),
-                cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath),
-                cmd.getOptionValue(labelListPath), cmd.getOptionValue(labelStrMapPath),
-                Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
-                cmd.getOptionValue(PNPathAndPrefix),
-                Integer.parseInt(cmd.getOptionValue(maxPNSize)));
-            break;
+          // case wikiConstructPNTime:
+          // Construct_RisoTree.wikiConstructPNTime(cmd.getOptionValue(containIDPath),
+          // cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath),
+          // cmd.getOptionValue(labelListPath), cmd.getOptionValue(labelStrMapPath),
+          // Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
+          // cmd.getOptionValue(PNPathAndPrefix),
+          // Integer.parseInt(cmd.getOptionValue(maxPNSize)));
+          // break;
           case wikiConstructPNTimeSingleHop:
             Construct_RisoTree.wikiConstructPNSingleHop(cmd.getOptionValue(containIDPath),
                 cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath),

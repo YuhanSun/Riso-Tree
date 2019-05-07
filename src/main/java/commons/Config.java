@@ -21,8 +21,8 @@ public class Config {
 
   private String SERVER_ROOT_URI = "http://localhost:7474/db/data";
 
-  private String longitude_property_name = "lon";
-  private String latitude_property_name = "lat";
+  public static String longitude_property_name = "lon";
+  public static String latitude_property_name = "lat";
   private String password = "syh19910205";
 
   // attention here, these settings change a lot

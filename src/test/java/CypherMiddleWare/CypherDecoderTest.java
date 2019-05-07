@@ -3,6 +3,7 @@ package CypherMiddleWare;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -29,7 +30,7 @@ public class CypherDecoderTest {
         + "113.50180238485339 <= spatialnode.lon <= 113.56607615947725 " + "RETURN * LIMIT 10";
     query =
         "MATCH (a:`heritage designation`)-[b]-(spatialnode:museum) WHERE 22.187478257613602 <= spatialnode.lat <= 22.225842149771214 AND 113.50180238485339 <= spatialnode.lon <= 113.56607615947725 RETURN spatialnode LIMIT 5";
-    Util.println(query);
+    // Util.println(query);
   }
 
 
@@ -40,6 +41,34 @@ public class CypherDecoderTest {
     assertTrue(strings[0].equals("a:A"));
     assertTrue(strings[1].equals("b:B"));
     assertTrue(strings[2].equals("c:TEST"));
+  }
+
+  @Test
+  public void getSpatialPredicteTest() throws Exception {
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseServiceNotExistCreate(dbPath);
+    CypherDecoder.getSpatialPredicates(query, service);
+    Util.close(service);
+  }
+
+  @Test
+  public void getStringScalaTest() throws Exception {
+    String string =
+        "Query(None,SingleQuery(List(Match(false,Pattern(List(EveryPath(RelationshipChain(NodePattern(Some(Variable(a)),List(LabelName(heritage designation)),None),RelationshipPattern(Some(Variable(b)),List(),None,None,BOTH,false),NodePattern(Some(Variable(spatialnode)),List(LabelName(museum)),None))))),List(),Some(Where(And(Ands(Set(LessThanOrEqual(DecimalDoubleLiteral(22.187478257613602),Property(Variable(spatialnode),PropertyKeyName(lat))), LessThanOrEqual(Property(Variable(spatialnode),PropertyKeyName(lat)),DecimalDoubleLiteral(22.225842149771214)))),Ands(Set(LessThanOrEqual(DecimalDoubleLiteral(113.50180238485339),Property(Variable(spatialnode),PropertyKeyName(lon))), LessThanOrEqual(Property(Variable(spatialnode),PropertyKeyName(lon)),DecimalDoubleLiteral(113.56607615947725)))))))), Return(false,ReturnItems(false,List(UnaliasedReturnItem(Variable(spatialnode),spatialnode))),None,None,None,Some(Limit(SignedDecimalIntegerLiteral(5))),Set()))))";
+    List<String> strings = CypherDecoder.getStringScala(string, "LessThanOrEqual");
+    Util.println(strings);
+  }
+
+  @Test
+  public void splitTest() {
+    Util.println(CypherDecoder.split("xxxherexxxtherexxxtobe", "xxx"));;
+  }
+
+  @Test
+  public void getContentWithinParenthesesTest() throws Exception {
+    assertTrue(CypherDecoder.getContentWithinParentheses("(xxx)").equals("xxx"));
+    assertTrue(CypherDecoder.getContentWithinParentheses("(x(y))").equals("x(y)"));
+    assertTrue(CypherDecoder.getContentWithinParentheses("(x(y(z)))").equals("x(y(z))"));
+
   }
 
   @Test

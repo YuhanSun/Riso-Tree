@@ -4,17 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import org.neo4j.cypher.internal.frontend.v3_4.ast.Match;
+import org.apache.commons.lang.StringUtils;
 import org.neo4j.cypher.internal.frontend.v3_4.ast.Query;
 import org.neo4j.cypher.internal.frontend.v3_4.ast.SingleQuery;
 import org.neo4j.cypher.internal.frontend.v3_4.ast.Statement;
 import org.neo4j.cypher.internal.frontend.v3_4.parser.CypherParser;
-import org.neo4j.cypher.internal.v3_4.expressions.EveryPath;
-import org.neo4j.cypher.internal.v3_4.expressions.Pattern;
 import org.neo4j.gis.spatial.Layer;
 import org.neo4j.gis.spatial.SpatialDatabaseRecord;
 import org.neo4j.gis.spatial.SpatialDatabaseService;
@@ -135,40 +131,41 @@ public class App {
     String query2 =
         "start a = node(*) match (a)--(b)--(c:TEST) where a.type = 0 return a, b, c limit 10";
     String query3 = "match (a:A)--(b:B)--(c:TEST) where a.type = 0 return a, b, c limit 10";
+    String query4 =
+        "MATCH (a:`heritage designation`)-[b]-(spatialnode:museum) WHERE 22.187478257613602 <= spatialnode.lat <= 22.225842149771214 AND 113.50180238485339 <= spatialnode.lon <= 113.56607615947725 RETURN spatialnode LIMIT 5";
 
-    Statement statement = parser.parse(query3, null);
+    Statement statement = parser.parse(query4, null);
     Query query = (Query) statement;
     Util.println(query);
-    // query.
 
     SingleQuery singleQuery = (SingleQuery) query.part();
-    Util.println(singleQuery);
+    Util.println("single query: " + singleQuery);
     Object object = singleQuery.productElement(0);
     Util.println(object.getClass());
 
     Collection collection = JavaConversions.asJavaCollection((scala.collection.Iterable) object);
-    Util.println(collection);
+    Util.println("collection: " + collection);
     Util.println(collection.getClass());
 
-    Iterator iterator = collection.iterator();
-    while (iterator.hasNext()) {
-      Object object2 = iterator.next();
-      if (object2.getClass().equals(Match.class)) {
-        Match match = (Match) object2;
-        Pattern pattern = match.pattern();
-        Util.println(pattern);
-        List list = JavaConversions.seqAsJavaList(pattern.patternParts());
-        for (Object object3 : list) {
-          if (object3.getClass().equals(EveryPath.class)) {
-            EveryPath everyPath = (EveryPath) object3;
-          }
-          Util.println(object3.getClass());
-        }
-
-        break;
-      }
-
-    }
+    // Iterator iterator = collection.iterator();
+    // while (iterator.hasNext()) {
+    // Object object2 = iterator.next();
+    // if (object2.getClass().equals(Match.class)) {
+    // Match match = (Match) object2;
+    // Pattern pattern = match.pattern();
+    // Util.println(pattern);
+    // List list = JavaConversions.seqAsJavaList(pattern.patternParts());
+    // for (Object object3 : list) {
+    // if (object3.getClass().equals(EveryPath.class)) {
+    // EveryPath everyPath = (EveryPath) object3;
+    // }
+    // Util.println(object3.getClass());
+    // }
+    //
+    // break;
+    // }
+    //
+    // }
 
     // Util.println(collection);
     // QueryPart queryPart = query.part().productElement(0);
@@ -205,16 +202,9 @@ public class App {
   }
 
   public static void test() {
-    HashMap<Integer, ArrayList<Integer>> map = new HashMap<>();
-    map.put(0, new ArrayList<>());
-    ArrayList<Integer> arrayList = map.get(0);
-    arrayList.add(1);
-    arrayList.add(2);
-    Util.println(arrayList);
-    Util.println(map.get(0));
-    arrayList = new ArrayList<>();
-    Util.println(arrayList);
-    Util.println(map.get(0));
+    String string =
+        "Query(None,SingleQuery(List(Match(false,Pattern(List(EveryPath(RelationshipChain(NodePattern(Some(Variable(a)),List(LabelName(heritage designation)),None),RelationshipPattern(Some(Variable(b)),List(),None,None,BOTH,false),NodePattern(Some(Variable(spatialnode)),List(LabelName(museum)),None))))),List(),Some(Where(And(Ands(Set(LessThanOrEqual(DecimalDoubleLiteral(22.187478257613602),Property(Variable(spatialnode),PropertyKeyName(lat))), LessThanOrEqual(Property(Variable(spatialnode),PropertyKeyName(lat)),DecimalDoubleLiteral(22.225842149771214)))),Ands(Set(LessThanOrEqual(DecimalDoubleLiteral(113.50180238485339),Property(Variable(spatialnode),PropertyKeyName(lon))), LessThanOrEqual(Property(Variable(spatialnode),PropertyKeyName(lon)),DecimalDoubleLiteral(113.56607615947725)))))))), Return(false,ReturnItems(false,List(UnaliasedReturnItem(Variable(spatialnode),spatialnode))),None,None,None,Some(Limit(SignedDecimalIntegerLiteral(5))),Set()))))";;
+    Util.println(Arrays.toString(StringUtils.split(string, "LessThanOrEqual")));
   }
 
   public static void restartNeo4jJava() {
