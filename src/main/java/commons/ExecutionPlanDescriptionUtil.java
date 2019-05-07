@@ -48,6 +48,11 @@ public class ExecutionPlanDescriptionUtil {
   }
 
   public static List<ExecutionPlanDescription> getRequired(ExecutionPlanDescription root) {
+    return getRequired(root, PlanExecutionType.Expand);
+  }
+
+  public static List<ExecutionPlanDescription> getRequired(ExecutionPlanDescription root,
+      PlanExecutionType typeWanted) {
     List<ExecutionPlanDescription> res = new LinkedList<>();
     Queue<ExecutionPlanDescription> queue = new LinkedList<ExecutionPlanDescription>();
     queue.add(root);
@@ -58,7 +63,7 @@ public class ExecutionPlanDescriptionUtil {
       ExecutionPlanDescription planDescription = queue.poll();
       for (ExecutionPlanDescription childPlan : planDescription.getChildren()) {
         queue.add(childPlan);
-        if (isUseful(childPlan)) {
+        if (isUseful(childPlan, typeWanted)) {
           res.add(childPlan);
         }
       }
@@ -67,8 +72,13 @@ public class ExecutionPlanDescriptionUtil {
   }
 
   public static boolean isUseful(ExecutionPlanDescription planDescription) {
+    return isUseful(planDescription, PlanExecutionType.Expand);
+  }
+
+  public static boolean isUseful(ExecutionPlanDescription planDescription,
+      PlanExecutionType typeWanted) {
     PlanExecutionType type = getPlanExecutionType(planDescription.getName());
-    if (type.equals(PlanExecutionType.Expand)) {
+    if (type.equals(typeWanted)) {
       return true;
     }
     return false;
