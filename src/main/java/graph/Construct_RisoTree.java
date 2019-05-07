@@ -367,11 +367,17 @@ public class Construct_RisoTree {
           String key = lineList[0];
 
           String content = lineList[1];
+          if (content.equals("[]")) {
+            properties.put(key, new int[0]);
+            properties.put(RisoTreeUtil.getPNSizeName(key), 0);
+            continue;
+          }
           String[] contentList = content.substring(1, content.length() - 1).split(", ");
 
           int[] value = new int[contentList.length];
-          for (int i = 0; i < contentList.length; i++)
+          for (int i = 0; i < contentList.length; i++) {
             value[i] = Integer.parseInt(contentList[i]);
+          }
           properties.put(key, value);
           properties.put(RisoTreeUtil.getPNSizeName(key), value.length);
         } else {
