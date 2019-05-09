@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Logger;
 import org.neo4j.graphdb.Direction;
@@ -202,7 +203,8 @@ public class RisoTreeQueryPN {
   }
 
   /**
-   * Generate the paths like _%s_%s if MAX_HOPNUM = 2.
+   * Generate the paths like _%s_%s if MAX_HOPNUM = 2. The paths are different for different
+   * labelType of the query graph.
    *
    * @param visited
    * @param paths contain the paths for return
@@ -330,6 +332,13 @@ public class RisoTreeQueryPN {
     }
   }
 
+  /**
+   * Recognize paths in the query Graph. The paths are different for INT or STRING labe in the query
+   * graph.
+   *
+   * @param queryGraph
+   * @return
+   */
   public HashMap<Integer, HashMap<Integer, HashSet<String>>> recognizePaths(
       Query_Graph queryGraph) {
     HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap =
@@ -570,7 +579,7 @@ public class RisoTreeQueryPN {
 
   /**
    * For a given query to get the most selective query node and its candidate set. Consider the
-   * ignored PN with [] and PNSize is 0.
+   * ignored PN with [] and PNSize is 0. Assume on 1 spatial predicate exists.
    *
    * @param query_Graph use the String[] label_list
    * @return null means something wrong
@@ -620,60 +629,34 @@ public class RisoTreeQueryPN {
       }
 
       Transaction tx = dbservice.beginTx();
-      LinkedList<Node> cur_list = new LinkedList<Node>();
       Node root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
+
+      MyRectangle queryRectangle = null;
+      Set<String> paths = new HashSet<>();
+      for (int key : spa_predicates.keySet()) {
+        queryRectangle = spa_predicates.get(key);
+        for (int endId : spaPathsMap.get(key).keySet()) {
+          for (String path : spaPathsMap.get(key).get(endId)) {
+            paths.add(path);
+          }
+        }
+      }
+
+      List<Node> overlapLeafNodes = getOverlapLeafNodes(queryRectangle, root_node, paths);
+      if (overlapLeafNodes.isEmpty() == true) {
+        Util.println("No result satisfy the query.");
+        tx.success();
+        tx.close();
+        return candidateSet;
+      }
+
+
+
+      LinkedList<Node> cur_list = new LinkedList<Node>();
       cur_list.add(root_node);
       LinkedList<Node> next_list = new LinkedList<Node>();
 
-      int level_index = 0;
       while (cur_list.isEmpty() == false) {
-        long startLevel = System.currentTimeMillis();// for the level time
-
-        // <spa_id, overlap_nodes_list>
-        // HashMap<Integer, LinkedList<Node>> overlap_MBR_list = new HashMap<>();
-        LinkedList<Node> overlap_MBR_list = new LinkedList<Node>(); // just support one spatial
-                                                                    // predicate
-
-        Iterator<Node> iterator = cur_list.iterator();
-        while (iterator.hasNext()) {
-          Node node = iterator.next();
-          if (node.hasProperty(Config.BBoxName)) {
-            double[] bbox = (double[]) node.getProperty(Config.BBoxName);
-            MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
-
-            for (int key : spa_predicates.keySet()) {
-              MyRectangle queryRectangle = spa_predicates.get(key);
-
-              MyRectangle intersect = MBR.intersect(queryRectangle);
-              if (intersect != null) {
-                // all overlapped nodes
-                // overlap_MBR_list.get(key).add(node);
-                overlap_MBR_list.add(node);
-
-                // record the next level tree nodes
-                Iterable<Relationship> rels =
-                    node.getRelationships(RTreeRel.RTREE_CHILD, Direction.OUTGOING);
-                for (Relationship relationship : rels)
-                  next_list.add(relationship.getEndNode());
-              }
-            }
-          } else
-            throw new Exception(String.format("node %d does not has \"bbox\" property", node));
-        }
-
-        if (outputLevelInfo) {
-          logWriteLine = String.format("level %d time: %d", level_index,
-              System.currentTimeMillis() - startLevel);
-          Util.println(logWriteLine);
-        }
-
-        if (overlap_MBR_list.isEmpty() == true) {
-          Util.println("No result satisfy the query.");
-          tx.success();
-          tx.close();
-          return candidateSet;
-        }
-
         // traverse to the leaf node level and start to form the cypher query
         if (overlap_MBR_list.isEmpty() == false && next_list.isEmpty()) {
           overlap_leaf_node_count = overlap_MBR_list.size();
@@ -703,7 +686,6 @@ public class RisoTreeQueryPN {
             int spa_count = 100;
 
             for (int key : spa_predicates.keySet()) {
-              MyRectangle queryRectangle = spa_predicates.get(key);
 
               MyRectangle intersect = MBR.intersect(queryRectangle);
               // calculate overlapped ratio compared to the MBR area
@@ -874,42 +856,49 @@ public class RisoTreeQueryPN {
     return null;
   }
 
-  public List<Node> getOverlapLeafNodes(MyRectangle queryRectangle, Node root) throws Exception {
+  public List<Node> getOverlapLeafNodes(MyRectangle queryRectangle, Node root, Set<String> paths)
+      throws Exception {
     String logWriteLine;
     LinkedList<Node> cur_list = new LinkedList<Node>();
     cur_list.add(root);
     LinkedList<Node> next_list = new LinkedList<Node>();
 
     int level_index = 0;
+    boolean isLeafLevel = false;
     while (cur_list.isEmpty() == false) {
       long startLevel = System.currentTimeMillis();// for the level time
       // <spa_id, overlap_nodes_list>
       // HashMap<Integer, LinkedList<Node>> overlap_MBR_list = new HashMap<>();
       LinkedList<Node> overlap_MBR_list = new LinkedList<Node>(); // just support one spatial
                                                                   // predicate
+
+      if (!isLeafLevel) {
+        Node firstNodeThisLevel = cur_list.get(0);
+        isLeafLevel = RTreeUtility.isLeaf(firstNodeThisLevel);
+      }
+
       for (Node node : cur_list) {
-        if (node.hasProperty(Config.BBoxName)) {
-          double[] bbox = (double[]) node.getProperty(Config.BBoxName);
-          MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
-          MyRectangle intersect = MBR.intersect(queryRectangle);
-          if (intersect != null) {
-            overlap_MBR_list.add(node);
-            // record the next level tree nodes
-            Iterable<Relationship> rels =
-                node.getRelationships(RTreeRel.RTREE_CHILD, Direction.OUTGOING);
-            for (Relationship relationship : rels) {
-              next_list.add(relationship.getEndNode());
-            }
+        if (isNodeOverlapRectangle(node, queryRectangle)) {
+          // if does not contain all the paths
+          if (isLeafLevel && !isNodeContainAllPaths(node, paths)) {
+            continue;
           }
-        } else {
-          throw new Exception(String.format("node %d does not has \"bbox\" property", node));
+          overlap_MBR_list.add(node);
+          // record the next level tree nodes
+          Iterable<Relationship> rels =
+              node.getRelationships(RTreeRel.RTREE_CHILD, Direction.OUTGOING);
+          for (Relationship relationship : rels) {
+            next_list.add(relationship.getEndNode());
+          }
         }
       }
 
       if (outputLevelInfo) {
+        logWriteLine = String.format("level %d\n", level_index);
+        logWriteLine += String.format("Located in nodes: %d\n", located_in_count);
         logWriteLine = String.format("level %d time: %d", level_index,
             System.currentTimeMillis() - startLevel);
-        Util.println(logWriteLine);
+        LOGGER.info(logWriteLine);
       }
 
       if (overlap_MBR_list.isEmpty() == true) {
@@ -928,6 +917,35 @@ public class RisoTreeQueryPN {
     }
 
     return null;
+  }
+
+  private boolean isNodeOverlapRectangle(Node node, MyRectangle queryRectangle) throws Exception {
+    if (node.hasProperty(Config.BBoxName)) {
+      double[] bbox = (double[]) node.getProperty(Config.BBoxName);
+      MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
+      MyRectangle intersect = MBR.intersect(queryRectangle);
+      return intersect != null;
+    } else {
+      throw new Exception(
+          String.format("node %s does not has \"%s\" property", node, Config.BBoxName));
+    }
+  }
+
+  /**
+   * Decide whether a node contains all the paths required.
+   *
+   * @param node
+   * @param paths
+   * @return
+   */
+  public boolean isNodeContainAllPaths(Node node, Set<String> paths) {
+    Iterable<String> keys = node.getPropertyKeys();
+    for (String key : keys) {
+      if (!paths.contains(key)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**

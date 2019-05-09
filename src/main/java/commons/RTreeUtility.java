@@ -3,6 +3,7 @@ package commons;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -15,6 +16,19 @@ import commons.Labels.OSMRelation;
 import commons.Labels.RTreeRel;
 
 public class RTreeUtility {
+
+  /**
+   * Decide whether a node is a leaf node in the RTree.
+   *
+   * @param node
+   * @return
+   */
+  public static boolean isLeaf(Node node) {
+    Iterable<Relationship> relationships =
+        node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_REFERENCE);
+    Iterator<Relationship> iterator = relationships.iterator();
+    return iterator.hasNext();
+  }
 
   /**
    * Get the height of current node in RTree. Leaf level will be of height 1. Leaf node is the level
