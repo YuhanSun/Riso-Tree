@@ -264,7 +264,13 @@ public class RTreeIndex implements SpatialIndexWriter {
         decodeGeometryNodeEnvelopes(geomNodes), 0.7);
     countSaved = false;
     totalGeometryCount = totalGeometryCount + (geomNodes.size() - outliers.size());
+    int index = 0;
     for (NodeWithEnvelope n : outliers) {
+      index++;
+      LOGGER.info("" + index);
+      // if (index % 10000 == 0) {
+      // LOGGER.info("" + index);
+      // }
       add(n.node);
     }
 
