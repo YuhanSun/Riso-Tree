@@ -1094,7 +1094,8 @@ public class RTreeIndex implements SpatialIndexWriter {
       // yuhan
       if (!spatialOnly) {
         int GD = getGD(indexNode, locInGraph);
-        enlargementNeeded = alpha * enlargementNeeded + (1 - alpha) * (double) GD;
+        enlargementNeeded = alpha * enlargementNeeded / (360 * 180)
+            + (1 - alpha) * (double) GD / Config.graphNodeCount;
       }
 
       if (enlargementNeeded < minimumEnlargement) {
@@ -1732,7 +1733,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    * The value for spatial coefficient. Set to 1.0 if do not want to consider graph distance in the
    * noContain case.
    */
-  private double alpha = 1.0;
+  private double alpha = 0.5;
 
   private int MaxPNSize = 100;
 
@@ -1740,7 +1741,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    * Control whether the PN comes into effect. It is set along with alpha. If alpha = 1.0, this
    * value should be true. Otherwise, false.
    */
-  private boolean spatialOnly = true;
+  private boolean spatialOnly = false;
 
   private int chooseSmallestGDCount = 0;
   private int getGDCount = 0;
