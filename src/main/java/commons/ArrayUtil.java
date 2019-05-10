@@ -88,6 +88,14 @@ public class ArrayUtil {
     return res;
   }
 
+  public static List<Integer> intArrayToList(int[] array) {
+    List<Integer> list = new ArrayList<>(array.length);
+    for (int val : array) {
+      list.add(val);
+    }
+    return list;
+  }
+
   public static long Average(List<Long> arraylist) {
     if (arraylist.size() == 0)
       return -1;

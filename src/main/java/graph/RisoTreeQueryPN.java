@@ -20,6 +20,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import commons.ArrayUtil;
 import commons.Config;
 import commons.Config.Explain_Or_Profile;
 import commons.Labels;
@@ -577,274 +578,187 @@ public class RisoTreeQueryPN {
     return query;
   }
 
-  // /**
-  // * For a given query to get the most selective query node and its candidate set. Consider the
-  // * ignored PN with [] and PNSize is 0. Assume on 1 spatial predicate exists.
-  // *
-  // * @param query_Graph use the String[] label_list
-  // * @return null means something wrong
-  // */
-  // public Map<Integer, Collection<Long>> getCandidateSetWithIgnore(Query_Graph query_Graph) {
-  // try {
-  // iniLogParams();
-  // Map<Integer, Collection<Long>> candidateSet = new HashMap<>();
-  // String logWriteLine = "";
-  //
-  // // <spa_id, rectangle> all query rectangles
-  // Map<Integer, MyRectangle> spa_predicates = new HashMap<Integer, MyRectangle>();
-  //
-  // // <spa_id, <neighbor_id, size_property_name>>
-  // Map<Integer, Map<Integer, Set<String>>> PN_size_propertyname = new HashMap<>();
-  // // <spa_id, <neighbor_id, list_property_name>>
-  // Map<Integer, Map<Integer, Set<String>>> PN_list_propertyname = new HashMap<>();
-  //
-  // // <spa_id, <end_id, path_name>> (path_name: PN_a_endid)
-  // Map<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
-  //
-  // // Construct min_hop (compact structure for min_hop_array
-  // // and NL_size_propertyname and NL_list_propertyname
-  // for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
-  // if (query_Graph.Has_Spa_Predicate[i]) {
-  // spa_predicates.put(i, query_Graph.spa_predicate[i]);
-  // }
-  //
-  // for (int spaID : spaPathsMap.keySet()) {
-  // PN_size_propertyname.put(spaID, new HashMap<Integer, Set<String>>());
-  // PN_list_propertyname.put(spaID, new HashMap<Integer, Set<String>>());
-  // for (int neighborID : spaPathsMap.get(spaID).keySet()) {
-  // PN_size_propertyname.get(spaID).put(neighborID, new HashSet<String>());
-  // PN_list_propertyname.get(spaID).put(neighborID, new HashSet<String>());
-  // for (String PNName : spaPathsMap.get(spaID).get(neighborID)) {
-  // PN_size_propertyname.get(spaID).get(neighborID).add(RisoTreeUtil.getPNSizeName(PNName));
-  // PN_list_propertyname.get(spaID).get(neighborID).add(PNName);
-  // }
-  // }
-  // }
-  //
-  // if (outputLevelInfo) {
-  // logWriteLine = String.format("NL_property: %s", PN_size_propertyname);
-  // Util.println(logWriteLine);
-  // }
-  //
-  // Transaction tx = dbservice.beginTx();
-  // Node root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
-  //
-  // Map<Integer, List<Node>> overlapLeafNodes =
-  // getOverlapLeafNodes(root_node, spa_predicates, PN_size_propertyname);
-  // if (overlapLeafNodes == null) {
-  // Util.println("No result satisfy the query.");
-  // tx.success();
-  // tx.close();
-  // return candidateSet;
-  // }
-  //
-  // candidateSet =
-  // getCandidateSetWithIgnore(overlapLeafNodes, PN_list_propertyname, PN_size_propertyname);
-  // return candidateSet;
-  //
-  // LinkedList<Node> cur_list = new LinkedList<Node>();
-  // cur_list.add(root_node);
-  // LinkedList<Node> next_list = new LinkedList<Node>();
-  //
-  // while (cur_list.isEmpty() == false) {
-  // // traverse to the leaf node level and start to form the cypher query
-  // if (overlap_MBR_list.isEmpty() == false && next_list.isEmpty()) {
-  // overlap_leaf_node_count = overlap_MBR_list.size();
-  // // <spa_id, card>
-  // HashMap<Integer, Double> spa_cards = new HashMap<Integer, Double>();
-  // for (int key : spa_predicates.keySet())
-  // spa_cards.put(key, 0.0);
-  //
-  // // <spa_id, <neighbor_id, card>>
-  // HashMap<Integer, HashMap<Integer, HashMap<String, Double>>> NL_cards =
-  // new HashMap<Integer, HashMap<Integer, HashMap<String, Double>>>();
-  // for (int spa_id : PN_size_propertyname.keySet()) {
-  // NL_cards.put(spa_id, new HashMap<Integer, HashMap<String, Double>>());
-  // for (int neighborID : PN_size_propertyname.get(spa_id).keySet()) {
-  // NL_cards.get(spa_id).put(neighborID, new HashMap<String, Double>());
-  // for (String propertyName : PN_size_propertyname.get(spa_id).get(neighborID))
-  // NL_cards.get(spa_id).get(neighborID).put(propertyName, 0.0);
-  // }
-  // }
-  //
-  // for (Node node : overlap_MBR_list) {
-  // double[] bbox = (double[]) node.getProperty(Config.BBoxName);
-  // MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
-  // // OwnMethods.Print(MBR);
-  // double MBR_area = MBR.area();
-  // // int spa_count = (Integer) node.getProperty("count");
-  // int spa_count = 100;
-  //
-  // for (int key : spa_predicates.keySet()) {
-  //
-  // MyRectangle intersect = MBR.intersect(queryRectangle);
-  // // calculate overlapped ratio compared to the MBR area
-  // double ratio;
-  // if (MBR_area == 0)
-  // ratio = 1;
-  // else
-  // ratio = intersect.area() / MBR_area;
-  // // estimate spatial predicate cardinality
-  // spa_cards.put(key, (spa_cards.get(key) + ratio * spa_count));
-  //
-  // // estimate NL cardinality
-  // for (int neighborID : NL_cards.get(key).keySet())
-  // for (String propertyName : NL_cards.get(key).get(neighborID).keySet()) {
-  // if (node.hasProperty(propertyName)) {
-  // int PNSize = (Integer) node.getProperty(propertyName);
-  // NL_cards.get(key).get(neighborID).put(propertyName,
-  // NL_cards.get(key).get(neighborID).get(propertyName) + ratio * PNSize);
-  // }
-  // }
-  // }
-  // }
-  //
-  // // find the query node with the minimum cardinality
-  // double min_spa_card = Double.MAX_VALUE, min_NL_card = Double.MAX_VALUE;
-  // int minSpaID = 0;// the spatial predicate with minimum cardinality
-  // int min_NL_spa_id = 0, min_NL_neighbor_id = 0;// min NL spatial id and neighbor id
-  // String minPNListPropertyname = null, minPNSizePropertyname = "";
-  //
-  // // now spa_cards has only one key
-  // for (int key : spa_cards.keySet()) {
-  // double spa_card = spa_cards.get(key);
-  // if (spa_card < min_spa_card) {
-  // minSpaID = key;
-  // min_spa_card = spa_card;
-  // }
-  //
-  // if (outputLevelInfo) {
-  // logWriteLine = String.format("spa_card %d %f", key, spa_card);
-  // Util.println(logWriteLine);
-  // }
-  //
-  // for (int neighbor_id : PN_list_propertyname.get(key).keySet())
-  // for (String properName : PN_list_propertyname.get(key).get(neighbor_id)) {
-  // double card =
-  // NL_cards.get(key).get(neighbor_id).get(RisoTreeUtil.getPNSizeName(properName));
-  // if (card < min_NL_card) {
-  // min_NL_spa_id = key;
-  // min_NL_neighbor_id = neighbor_id;
-  // min_NL_card = card;
-  // minPNListPropertyname = properName;
-  // minPNSizePropertyname = RisoTreeUtil.getPNSizeName(properName);
-  // }
-  // if (outputLevelInfo) {
-  // logWriteLine = String.format("%d %d %s estimate size: %f", key, neighbor_id,
-  // properName, card);
-  // Util.println(logWriteLine);
-  // }
-  // }
-  // }
-  //
-  // if (outputLevelInfo) {
-  // logWriteLine = String.format("level %d min card : %f", level_index,
-  // Math.min(min_spa_card, min_NL_card));
-  // Util.println(logWriteLine);
-  // }
-  //
-  // // construct the NL_list with the highest selectivity
-  // long start1 = System.currentTimeMillis();
-  //
-  // HashSet<Long> min_NL_list = null;
-  // int realMinPNSize = Integer.MAX_VALUE;
-  // if (minPNListPropertyname != null) {
-  // min_NL_list = new HashSet<>();
-  // for (Node node : overlap_MBR_list) {
-  // if (node.hasProperty(minPNListPropertyname)) {
-  // // here id is graph id rather than neo4j id
-  // int[] NL_list_label = (int[]) node.getProperty(minPNListPropertyname);
-  // for (int node_id : NL_list_label)
-  // min_NL_list.add((long) node_id);
-  // }
-  // }
-  // realMinPNSize = min_NL_list.size();
-  // }
-  //
-  // range_query_time += System.currentTimeMillis() - startLevel;
-  //
-  // if (outputLevelInfo) {
-  // logWriteLine = String.format("min_NL_list size is %d\n", realMinPNSize);
-  // if (realMinPNSize < min_spa_card)
-  // logWriteLine += "NL_list is more selective\n";
-  // else
-  // logWriteLine += "spa predicate is more selective\n";
-  // logWriteLine +=
-  // String.format("NL_serialize time: %d\n", System.currentTimeMillis() - start1);
-  // logWriteLine += String.format("level %d time: %d\n", level_index,
-  // System.currentTimeMillis() - startLevel);
-  // Util.println(logWriteLine);
-  // }
-  //
-  // // set realMinPNSize to 0 to force start the neighbor
-  // if (forceGraphFirst) {
-  // Util.println("force graph first even min PN size is " + realMinPNSize);
-  // realMinPNSize = 0;
-  // }
-  //
-  // // if PN is more selective than spatial predicate
-  // if (realMinPNSize < min_spa_card) {
-  // Util.println("PN is more selective");
-  // candidateSet.put(min_NL_neighbor_id, min_NL_list);
-  // } else { // if spatial predicate is more selective
-  // MyRectangle queryRect = spa_predicates.get(minSpaID);
-  // // get located in nodes
-  // located_in_count = 0;
-  // int levelTime = 0;
-  // level_index++;
-  // double nodeIndex = 0;
-  // // construct a cypher query for each tree leaf node
-  // // which consists of several spatial objects
-  // Collection<Long> candidateIds = new LinkedList<>();
-  // for (Node node : overlap_MBR_list) {
-  // nodeIndex++;
-  // long start = System.currentTimeMillis();
-  // Iterable<Relationship> rels =
-  // node.getRelationships(Direction.OUTGOING, Labels.RTreeRel.RTREE_REFERENCE);
-  //
-  // // default fan-out of neo4j spatial is 100
-  // for (Relationship relationship : rels) {
-  // Node geom = relationship.getEndNode();
-  // double[] bbox = (double[]) geom.getProperty(Config.BBoxName);
-  // MyRectangle rectangle = new MyRectangle(bbox);
-  // if (rectangle.intersect(queryRect) != null) {
-  // candidateIds.add(geom.getId());
-  // located_in_count++;
-  // }
-  // }
-  // long time = System.currentTimeMillis() - start;
-  // range_query_time += time;
-  // levelTime += time;
-  //
-  // Util.println("Execute percentage: " + nodeIndex / overlap_MBR_list.size());
-  // start = System.currentTimeMillis();
-  // }
-  // if (outputLevelInfo) {
-  // logWriteLine = String.format("level %d\n", level_index);
-  // logWriteLine += String.format("Located in nodes: %d\n", located_in_count);
-  // logWriteLine += String.format("level %d time: %d", level_index, levelTime);
-  // Util.println(logWriteLine);
-  // }
-  // tx.success();
-  // tx.close();
-  // candidateSet.put(minSpaID, candidateIds);
-  // }
-  // return candidateSet;
-  // }
-  //
-  // cur_list = next_list;
-  // next_list = new LinkedList<Node>();
-  // level_index++;
-  // }
-  // tx.success();
-  // tx.close();
-  //
-  // } catch (Exception e) {
-  // e.printStackTrace();
-  // System.exit(-1);
-  // }
-  // return null;
-  // }
+  /**
+   * For a given query to get the most selective query node and its candidate set. Consider the
+   * ignored PN with [] and PNSize is 0. Assume on 1 spatial predicate exists.
+   *
+   * @param query_Graph use the String[] label_list
+   * @return null means something wrong
+   */
+  public Map<Integer, Collection<Long>> getCandidateSetWithIgnore(Query_Graph query_Graph) {
+    try {
+      iniLogParams();
+      Map<Integer, Collection<Long>> candidateSet = new HashMap<>();
+      String logWriteLine = "";
+
+      // <spa_id, rectangle> all query rectangles
+      Map<Integer, MyRectangle> spa_predicates = new HashMap<Integer, MyRectangle>();
+
+      // <spa_id, <neighbor_id, size_property_name>>
+      Map<Integer, Map<Integer, Set<String>>> PN_size_propertyname = new HashMap<>();
+      // <spa_id, <neighbor_id, list_property_name>>
+      Map<Integer, Map<Integer, Set<String>>> PN_list_propertyname = new HashMap<>();
+
+      // <spa_id, <end_id, path_name>> (path_name: PN_a_endid)
+      Map<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
+
+      // Construct min_hop (compact structure for min_hop_array
+      // and NL_size_propertyname and NL_list_propertyname
+      for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
+        if (query_Graph.Has_Spa_Predicate[i]) {
+          spa_predicates.put(i, query_Graph.spa_predicate[i]);
+        }
+
+      for (int spaID : spaPathsMap.keySet()) {
+        PN_size_propertyname.put(spaID, new HashMap<Integer, Set<String>>());
+        PN_list_propertyname.put(spaID, new HashMap<Integer, Set<String>>());
+        for (int neighborID : spaPathsMap.get(spaID).keySet()) {
+          PN_size_propertyname.get(spaID).put(neighborID, new HashSet<String>());
+          PN_list_propertyname.get(spaID).put(neighborID, new HashSet<String>());
+          for (String PNName : spaPathsMap.get(spaID).get(neighborID)) {
+            PN_size_propertyname.get(spaID).get(neighborID).add(RisoTreeUtil.getPNSizeName(PNName));
+            PN_list_propertyname.get(spaID).get(neighborID).add(PNName);
+          }
+        }
+      }
+
+      if (outputLevelInfo) {
+        logWriteLine = String.format("NL_property: %s", PN_size_propertyname);
+        Util.println(logWriteLine);
+      }
+
+      Transaction tx = dbservice.beginTx();
+      Node root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
+
+      Map<Integer, List<Node>> overlapLeafNodes =
+          getOverlapLeafNodes(root_node, spa_predicates, PN_size_propertyname);
+      if (overlapLeafNodes == null) {
+        LOGGER.info("No result satisfy the query.");
+        tx.success();
+        tx.close();
+        return candidateSet;
+      }
+
+      candidateSet =
+          getCandidateSetWithIgnore(overlapLeafNodes, PN_list_propertyname, PN_size_propertyname);
+      tx.success();
+      tx.close();
+      return candidateSet;
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+    return null;
+  }
+
+  private Map<Integer, Collection<Long>> getCandidateSetWithIgnore(
+      Map<Integer, List<Node>> overlapLeafNodes,
+      Map<Integer, Map<Integer, Set<String>>> pN_list_propertyname,
+      Map<Integer, Map<Integer, Set<String>>> pN_size_propertyname) throws Exception {
+    Map<Integer, Map<Integer, Collection<Long>>> pathNeighborMultiPredicates = new HashMap<>();
+    for (int spatialId : overlapLeafNodes.keySet()) {
+      Map<Integer, Collection<Long>> pathNeighbors =
+          getPathNeighbors(overlapLeafNodes.get(spatialId), pN_list_propertyname.get(spatialId),
+              pN_size_propertyname.get(spatialId));
+      pathNeighborMultiPredicates.put(spatialId, pathNeighbors);
+    }
+
+    Map<Integer, Collection<Long>> candidateSets =
+        refineMultiPredicatesCandidateSets(pathNeighborMultiPredicates);
+
+    return candidateSets;
+  }
+
+  private Map<Integer, Collection<Long>> refineMultiPredicatesCandidateSets(
+      Map<Integer, Map<Integer, Collection<Long>>> pathNeighborMultiPredicates) {
+    int minPredicate = -1, minCard = Integer.MAX_VALUE;
+    for (int spatialId : pathNeighborMultiPredicates.keySet()) {
+      int card = 0;
+      Map<Integer, Collection<Long>> candidateSetsPredicate =
+          pathNeighborMultiPredicates.get(spatialId);
+      for (int endId : candidateSetsPredicate.keySet()) {
+        card += candidateSetsPredicate.get(endId).size();
+      }
+      if (card < minCard) {
+        minPredicate = spatialId;
+      }
+    }
+    return pathNeighborMultiPredicates.get(minPredicate);
+  }
+
+  /**
+   * Get the candidateSet for one spatial predicate.
+   *
+   * @param list
+   * @param pN_list_propertyname
+   * @param pN_size_propertyname
+   * @return
+   * @throws Exception
+   */
+  private Map<Integer, Collection<Long>> getPathNeighbors(List<Node> list,
+      Map<Integer, Set<String>> pN_list_propertyname,
+      Map<Integer, Set<String>> pN_size_propertyname) throws Exception {
+    Map<Integer, Collection<Long>> candidateSets = new HashMap<>();
+
+    for (Node node : list) {
+      int minEndId = getEndIdWithMinCard(node, pN_size_propertyname);
+      addPathNeighbors(node, minEndId, pN_list_propertyname, candidateSets);
+    }
+    return candidateSets;
+  }
+
+  /**
+   * Add the path neighbor of the minEndId into the corresponding node id of candidateSets.
+   *
+   * @param node
+   * @param minEndId
+   * @param pN_list_propertyname
+   * @param candidateSets
+   */
+  private void addPathNeighbors(Node node, int minEndId,
+      Map<Integer, Set<String>> pN_list_propertyname,
+      Map<Integer, Collection<Long>> candidateSets) {
+    // Construct the candidateSet for a endId using different path neighbors ending at it.
+    List<Integer> candidates = null;
+    for (String path : pN_list_propertyname.get(minEndId)) {
+      int[] pathNeighbors = (int[]) node.getProperty(path);
+      if (pathNeighbors.length == 0) {
+        continue; // the dropped path neighbor cannot refine the candidates.
+      }
+      if (candidates == null) {
+        candidates = ArrayUtil.intArrayToList(pathNeighbors);
+      } else {
+        candidates = ArrayUtil.sortedListIntersect(candidates, pathNeighbors);
+      }
+    }
+
+    Collection<Long> candidateSet = candidateSets.getOrDefault(minEndId, new HashSet<>());
+    for (int candidateId : candidates) {
+      candidateSet.add((long) candidateId);
+    }
+    candidateSets.put(minEndId, candidateSet);
+  }
+
+  private int getEndIdWithMinCard(Node node, Map<Integer, Set<String>> pN_size_propertyname)
+      throws Exception {
+    int minCard = Integer.MAX_VALUE;
+    int minEndId = -1;
+    for (int endId : pN_size_propertyname.keySet()) {
+      for (String pathSizeName : pN_size_propertyname.get(endId)) {
+        int curSize = (int) node.getProperty(pathSizeName);
+        if (curSize != 0 && curSize < minCard) {
+          minEndId = endId;
+        }
+      }
+    }
+
+    if (minEndId == -1) {
+      throw new Exception(String.format("Node %s's path neighbor has all been dropped!", node));
+    }
+
+    return minEndId;
+  }
 
   public Map<Integer, List<Node>> getOverlapLeafNodes(Node root_node,
       Map<Integer, MyRectangle> spa_predicates,
@@ -853,6 +767,9 @@ public class RisoTreeQueryPN {
     for (int spatialId : spa_predicates.keySet()) {
       List<Node> overlapLeafNodes = getOverlapLeafNodesSinglePredicate(root_node,
           spa_predicates.get(spatialId), pN_list_propertyname.get(spatialId));
+      if (overlapLeafNodes.isEmpty()) {
+        return null;
+      }
       overlapLeafNodesMultiPredicate.put(spatialId, overlapLeafNodes);
     }
     return overlapLeafNodesMultiPredicate;
