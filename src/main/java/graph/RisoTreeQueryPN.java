@@ -34,6 +34,7 @@ import commons.Query_Graph.LabelType;
 import commons.RTreeUtility;
 import commons.RisoTreeUtil;
 import commons.Util;
+import cypher.middleware.CypherDecoder;
 import knn.Element;
 import knn.KNNComparator;
 import knn.NodeAndRec;
@@ -578,43 +579,86 @@ public class RisoTreeQueryPN {
     return query;
   }
 
-  public void queryWithIgnore(String query, Query_Graph query_Graph, int limit,
-      Explain_Or_Profile explain_Or_Profile) {
-    Map<Integer, Collection<Long>> candidateSets = getCandidateSetWithIgnore(query_Graph);
-    String queryAfterRewrite =
-        formQueryWithIgnore(query, candidateSets, query_Graph, limit, explain_Or_Profile);
+  public void queryWithIgnore(String query) throws Exception {
+    Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
+    queryWithIgnore(query, query_Graph);
   }
 
-  private String formQueryWithIgnore(String query, Map<Integer, Collection<Long>> candidateSets,
-      Query_Graph query_Graph, int limit, Explain_Or_Profile explain_Or_Profile) {
-    String queryAfterRewrite = "";
-    switch (explain_Or_Profile) {
-      case Profile:
-        queryAfterRewrite += "profile ";
-        break;
-      case Explain:
-        queryAfterRewrite += "explain ";
-        break;
-      default:
-        break;
+  public void queryWithIgnore(String query, Query_Graph query_Graph) throws Exception {
+    iniLogParams();
+    Map<Integer, Collection<Long>> candidateSets = getCandidateSetWithIgnore(query_Graph);
+    String queryAfterRewrite = formQueryWithIgnore(query, candidateSets, query_Graph.nodeVariables);
+    long start = System.currentTimeMillis();
+    Result result = dbservice.execute(queryAfterRewrite);
+    get_iterator_time += System.currentTimeMillis() - start;
+
+    start = System.currentTimeMillis();
+    int cur_count = 0;
+    while (result.hasNext()) {
+      cur_count++;
+      Map<String, Object> row = result.next();
+      if (outputResult) {
+        Util.println(row);
+      }
     }
+    iterate_time += System.currentTimeMillis() - start;
 
-    // id
-    queryAfterRewrite += String.format("\n(id(a%d) = %d ", pos, ids.get(0));
-    if (ids.size() > 1)
-      for (int i = 1; i < ids.size(); i++)
-        queryAfterRewrite += String.format("or id(a%d) = %d ", pos, ids.get(i));
-    queryAfterRewrite += ")";
+    result_count += cur_count;
+    ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+    page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+    if (outputExecutionPlan) {
+      Util.println(planDescription);
+      Util.println("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
+      if (planDescription.hasProfilerStatistics()) {
+        Util.println("cypher statistics: " + planDescription.getProfilerStatistics().getDbHits());
+      } else {
+        throw new Exception("planDescription has no statistics!!");
+      }
 
-    // return
-    queryAfterRewrite += "\nreturn id(a0)";
-    for (int i = 1; i < query_Graph.graph.size(); i++)
-      queryAfterRewrite += String.format(",id(a%d)", i);
+      OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
+    }
+  }
 
-    if (limit != -1)
-      queryAfterRewrite += String.format(" limit %d", limit);
+  public static String formQueryWithIgnore(String query,
+      Map<Integer, Collection<Long>> candidateSets, String[] nodeVariables) {
+    String queryAfterRewrite = query.toString();
+
+    String idConstraint = formIdConstraint(candidateSets, nodeVariables);
+    queryAfterRewrite = insertIdConstraint(queryAfterRewrite, idConstraint);
 
     return queryAfterRewrite;
+  }
+
+  /**
+   * Split the query into two parts. One is before where. Another is the rest.
+   *
+   * @param query
+   * @return
+   */
+  public static String[] generateQueryCombineParts(String query) {
+    String queryLowercase = query.toLowerCase();
+    int splitPos = queryLowercase.indexOf("where") + 5;
+    return new String[] {query.substring(0, splitPos), query.substring(splitPos, query.length())};
+  }
+
+  private static String insertIdConstraint(String query, String idConstraint) {
+    String[] queryParts = generateQueryCombineParts(query);
+    return queryParts[0] + " " + idConstraint + " and" + queryParts[1];
+  }
+
+  public static String formIdConstraint(Map<Integer, Collection<Long>> candidateSets,
+      String[] nodeVariables) {
+    String string = "";
+    for (int endId : candidateSets.keySet()) {
+      Collection<Long> ids = candidateSets.get(endId);
+      String variable = nodeVariables[endId];
+      if (string.isEmpty()) {
+        string += String.format("(id(%s) in %s", variable, ids);
+      } else {
+        string += String.format(" or id(%s) in %s)", variable, ids);
+      }
+    }
+    return string;
   }
 
   /**
@@ -626,7 +670,6 @@ public class RisoTreeQueryPN {
    */
   public Map<Integer, Collection<Long>> getCandidateSetWithIgnore(Query_Graph query_Graph) {
     try {
-      iniLogParams();
       Map<Integer, Collection<Long>> candidateSet = new HashMap<>();
 
       // <spa_id, rectangle> all query rectangles
@@ -925,7 +968,6 @@ public class RisoTreeQueryPN {
    */
   public HashMap<Integer, Collection<Long>> getCandidateSet(Query_Graph query_Graph) {
     try {
-      iniLogParams();
       HashMap<Integer, Collection<Long>> candidateSet = new HashMap<>();
       String logWriteLine = "";
 
