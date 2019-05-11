@@ -578,9 +578,48 @@ public class RisoTreeQueryPN {
     return query;
   }
 
+  public void queryWithIgnore(String query, Query_Graph query_Graph, int limit,
+      Explain_Or_Profile explain_Or_Profile) {
+    Map<Integer, Collection<Long>> candidateSets = getCandidateSetWithIgnore(query_Graph);
+    String queryAfterRewrite =
+        formQueryWithIgnore(query, candidateSets, query_Graph, limit, explain_Or_Profile);
+  }
+
+  private String formQueryWithIgnore(String query, Map<Integer, Collection<Long>> candidateSets,
+      Query_Graph query_Graph, int limit, Explain_Or_Profile explain_Or_Profile) {
+    String queryAfterRewrite = "";
+    switch (explain_Or_Profile) {
+      case Profile:
+        queryAfterRewrite += "profile ";
+        break;
+      case Explain:
+        queryAfterRewrite += "explain ";
+        break;
+      default:
+        break;
+    }
+
+    // id
+    queryAfterRewrite += String.format("\n(id(a%d) = %d ", pos, ids.get(0));
+    if (ids.size() > 1)
+      for (int i = 1; i < ids.size(); i++)
+        queryAfterRewrite += String.format("or id(a%d) = %d ", pos, ids.get(i));
+    queryAfterRewrite += ")";
+
+    // return
+    queryAfterRewrite += "\nreturn id(a0)";
+    for (int i = 1; i < query_Graph.graph.size(); i++)
+      queryAfterRewrite += String.format(",id(a%d)", i);
+
+    if (limit != -1)
+      queryAfterRewrite += String.format(" limit %d", limit);
+
+    return queryAfterRewrite;
+  }
+
   /**
    * For a given query to get the most selective query node and its candidate set. Consider the
-   * ignored PN with [] and PNSize is 0. Assume on 1 spatial predicate exists.
+   * ignored PN with [] and PNSize is 0. Assume that only 1 spatial predicate exists.
    *
    * @param query_Graph use the String[] label_list
    * @return null means something wrong
@@ -589,7 +628,6 @@ public class RisoTreeQueryPN {
     try {
       iniLogParams();
       Map<Integer, Collection<Long>> candidateSet = new HashMap<>();
-      String logWriteLine = "";
 
       // <spa_id, rectangle> all query rectangles
       Map<Integer, MyRectangle> spa_predicates = new HashMap<Integer, MyRectangle>();
@@ -623,20 +661,26 @@ public class RisoTreeQueryPN {
       }
 
       if (outputLevelInfo) {
-        logWriteLine = String.format("NL_property: %s", PN_size_propertyname);
-        Util.println(logWriteLine);
+        Util.println(String.format("NL_property: %s", PN_size_propertyname));
       }
 
       Transaction tx = dbservice.beginTx();
       Node root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
 
+      long start = System.currentTimeMillis();
       Map<Integer, List<Node>> overlapLeafNodes =
           getOverlapLeafNodes(root_node, spa_predicates, PN_size_propertyname);
+
+      range_query_time += System.currentTimeMillis() - start;
       if (overlapLeafNodes == null) {
         LOGGER.info("No result satisfy the query.");
         tx.success();
         tx.close();
         return candidateSet;
+      }
+
+      for (List<Node> nodes : overlapLeafNodes.values()) {
+        overlap_leaf_node_count += nodes.size();
       }
 
       candidateSet =
