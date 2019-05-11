@@ -13,6 +13,10 @@ public class Neo4j_API {
     graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbpath));
   }
 
+  public Neo4j_API(GraphDatabaseService service) {
+    this.graphDb = service;
+  }
+
   public void ShutDown() {
     if (graphDb != null)
       graphDb.shutdown();

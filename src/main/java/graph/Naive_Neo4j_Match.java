@@ -5,10 +5,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.neo4j.graphdb.ExecutionPlanDescription;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import commons.*;
+import commons.Config;
 import commons.Config.Explain_Or_Profile;
+import commons.MyRectangle;
+import commons.OwnMethods;
+import commons.Query_Graph;
+import commons.Util;
 
 /**
  * this class is graphfirst approach, spatial predicate is checked during graph search. (spatial
@@ -35,6 +40,19 @@ public class Naive_Neo4j_Match {
   public long get_iterator_time, iterate_time;
   public long result_count = 0;
   public long page_access;
+
+  public Naive_Neo4j_Match(GraphDatabaseService dbservice) {
+    neo4j_API = new Neo4j_API(dbservice);
+    Config config = new Config();
+    lon_name = config.GetLongitudePropertyName();
+    lat_name = config.GetLatitudePropertyName();
+
+    String[] rect_corner_name = config.GetRectCornerName();
+    minx_name = rect_corner_name[0];
+    miny_name = rect_corner_name[1];
+    maxx_name = rect_corner_name[2];
+    maxy_name = rect_corner_name[3];
+  }
 
   public Naive_Neo4j_Match(String db_path) {
     neo4j_API = new Neo4j_API(db_path);
@@ -64,6 +82,26 @@ public class Naive_Neo4j_Match {
 
     Result result = neo4j_API.graphDb.execute(query);
     return result;
+  }
+
+  /**
+   * Solve a cypher query.
+   *
+   * @param query
+   */
+  public void queryWithIgnore(String query) {
+    iniLogVariables();
+    long start = System.currentTimeMillis();
+    Result result = neo4j_API.graphDb.execute(query);
+    get_iterator_time += System.currentTimeMillis() - start;
+
+    start = System.currentTimeMillis();
+    while (result.hasNext()) {
+      result_count++;
+      result.next();
+    }
+    iterate_time += System.currentTimeMillis() - start;
+    page_access = OwnMethods.GetTotalDBHits(result.getExecutionPlanDescription());
   }
 
   // public Result Explain_SubgraphMatch_Spa_API(Query_Graph query_Graph, int limit)//use neo4j
@@ -178,10 +216,7 @@ public class Naive_Neo4j_Match {
   }
 
   public List<Long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) {
-    get_iterator_time = 0;
-    iterate_time = 0;
-    result_count = 0;
-    page_access = 0;
+    iniLogVariables();
     List<Long[]> res = new LinkedList<>();
     ArrayList<Integer> pos = new ArrayList<>();
     for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
@@ -211,5 +246,12 @@ public class Naive_Neo4j_Match {
     tx.success();
     tx.close();
     return res;
+  }
+
+  private void iniLogVariables() {
+    get_iterator_time = 0;
+    iterate_time = 0;
+    result_count = 0;
+    page_access = 0;
   }
 }
