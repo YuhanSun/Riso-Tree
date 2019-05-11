@@ -24,10 +24,19 @@ public class WikiRisoTreeQueryPNTest {
   }
 
   @Test
-  public void queryWithIgnoreTest() {
+  public void queryWithIgnoreTest() throws Exception {
     RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, Datasets.wikidata.name(), 1);
-    String query =
-        "MATCH (a:`big city`)-[b]-(spatialnode:university) WHERE 22.279519480377537 <= spatialnode.lat <= 30.210054844294437 AND 76.62143523404609 <= spatialnode.lon <= 91.42557592735976 RETURN * LIMIT 10";
+    String query = "MATCH (a:`big city`)-[b]-(spatialnode:university) "
+        + "WHERE 22.279519480377537 <= spatialnode.lat <= 30.210054844294437 AND 76.62143523404609 <= spatialnode.lon <= 91.42557592735976 "
+        + "RETURN * LIMIT 10";
+    risoTreeQueryPN.queryWithIgnore(query);
+    Util.println("result count: " + risoTreeQueryPN.result_count);
+    Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
+
+    Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
+    naive_Neo4j_Match.queryWithIgnore(query);
+    Util.println("result count: " + naive_Neo4j_Match.result_count);
+    Util.println("page hit: " + naive_Neo4j_Match.page_access);
   }
 
 }
