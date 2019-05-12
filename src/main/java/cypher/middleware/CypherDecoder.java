@@ -30,7 +30,7 @@ public class CypherDecoder {
   private static final String decimalDoubleLiteralKeyword = "DecimalDoubleLiteral";
 
   /**
-   * Convert a Cypher query to Query_Graph format.
+   * Convert a Cypher query to Query_Graph format, including graph structure and spatial predicates.
    *
    * @param query
    * @param spatialNode
@@ -45,9 +45,17 @@ public class CypherDecoder {
     return getQueryGraph(query, spatialPredicates, service);
   }
 
+  /**
+   * Get the spatial predicates in a cypher query by using the CypherParser.
+   *
+   * @param query
+   * @return
+   * @throws Exception
+   */
   public static Map<String, MyRectangle> getSpatialPredicates(String query) throws Exception {
     Map<String, MyRectangle> spatialPredicates = new HashMap<>();
     CypherParser parser = new CypherParser();
+
     Statement statement = parser.parse(query, null);
     String ast = statement.toString();
     List<String> strings = getStringScala(ast, lessThanOrEqualKeyword);
@@ -193,7 +201,6 @@ public class CypherDecoder {
     String[] labelList = getQueryLabelList(nodeVariableIdMap, nodeStrings);
     Result result = service.execute("explain " + query);
     ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-    Util.println(planDescription);
     List<ExecutionPlanDescription> plans =
         ExecutionPlanDescriptionUtil.getRequired(planDescription);
     ArrayList<ArrayList<Integer>> graphStructure = getGraphStructure(plans, nodeVariableIdMap);
@@ -221,6 +228,14 @@ public class CypherDecoder {
     return query_Graph;
   }
 
+  /**
+   * Extract Query_Graph components except for the spatial predicates by using service running
+   * explain xxx. Assume labelType is String.
+   *
+   * @param query
+   * @param service
+   * @return
+   */
   public static Query_Graph getQueryGraphWithoutSpatialPredicate(String query,
       GraphDatabaseService service) {
     String[] nodeStrings = getNodeStrings(query);
@@ -228,7 +243,6 @@ public class CypherDecoder {
     String[] labelList = getQueryLabelList(nodeVariableIdMap, nodeStrings);
     Result result = service.execute("explain " + query);
     ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-    Util.println(planDescription);
     List<ExecutionPlanDescription> plans =
         ExecutionPlanDescriptionUtil.getRequired(planDescription);
     ArrayList<ArrayList<Integer>> graphStructure = getGraphStructure(plans, nodeVariableIdMap);
@@ -244,6 +258,14 @@ public class CypherDecoder {
     return query_Graph;
   }
 
+  /**
+   * Set the query graph with the given spatial predicate.
+   *
+   * @param query_Graph
+   * @param spatialNode
+   * @param rectangle
+   * @throws Exception
+   */
   public static void setSpatialPredicate(Query_Graph query_Graph, String spatialNode,
       MyRectangle rectangle) throws Exception {
     int spatialId = 0;

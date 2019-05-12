@@ -10,7 +10,8 @@ import commons.Util;
 
 public class WikiRisoTreeQueryPNTest {
 
-  String dbPath = "";
+  String dbPath =
+      "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt\\neo4j-community-3.4.12_risotree_test\\data\\databases\\graph.db";
   GraphDatabaseService service = null;
 
   @Before
@@ -25,18 +26,25 @@ public class WikiRisoTreeQueryPNTest {
 
   @Test
   public void queryWithIgnoreTest() throws Exception {
-    RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, Datasets.wikidata.name(), 1);
     String query = "MATCH (a:`big city`)-[b]-(spatialnode:university) "
-        + "WHERE 22.279519480377537 <= spatialnode.lat <= 30.210054844294437 AND 76.62143523404609 <= spatialnode.lon <= 91.42557592735976 "
-        + "RETURN * LIMIT 10";
-    risoTreeQueryPN.queryWithIgnore(query);
-    Util.println("result count: " + risoTreeQueryPN.result_count);
-    Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
+        + "WHERE 17.684805514724214 <= spatialnode.lat <= 33.97125439168383 AND 75.2649384026851 <= spatialnode.lon <= 98.33687275901212  "
+        + "RETURN *";
+
+
 
     Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
+    long start = System.currentTimeMillis();
     naive_Neo4j_Match.queryWithIgnore(query);
+    Util.println("time: " + (System.currentTimeMillis() - start));
     Util.println("result count: " + naive_Neo4j_Match.result_count);
     Util.println("page hit: " + naive_Neo4j_Match.page_access);
+
+    RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, Datasets.wikidata.name(), 1);
+    start = System.currentTimeMillis();
+    risoTreeQueryPN.queryWithIgnore(query);
+    Util.println("time: " + (System.currentTimeMillis() - start));
+    Util.println("result count: " + risoTreeQueryPN.result_count);
+    Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
   }
 
 }

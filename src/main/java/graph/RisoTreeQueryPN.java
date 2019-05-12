@@ -584,10 +584,24 @@ public class RisoTreeQueryPN {
     queryWithIgnore(query, query_Graph);
   }
 
+  /**
+   * Execute the query. Attach 'explain' to get profile statistics.
+   *
+   * @param query
+   * @param query_Graph
+   * @throws Exception
+   */
   public void queryWithIgnore(String query, Query_Graph query_Graph) throws Exception {
     iniLogParams();
     Map<Integer, Collection<Long>> candidateSets = getCandidateSetWithIgnore(query_Graph);
+
+    if (candidateSets.isEmpty()) {
+      return;
+    }
+
     String queryAfterRewrite = formQueryWithIgnore(query, candidateSets, query_Graph.nodeVariables);
+    queryAfterRewrite = "profile " + queryAfterRewrite;
+    LOGGER.info("query after rewrite: \n" + queryAfterRewrite);
     long start = System.currentTimeMillis();
     Result result = dbservice.execute(queryAfterRewrite);
     get_iterator_time += System.currentTimeMillis() - start;
@@ -641,9 +655,15 @@ public class RisoTreeQueryPN {
     return new String[] {query.substring(0, splitPos), query.substring(splitPos, query.length())};
   }
 
+  /**
+   * 
+   * @param query
+   * @param idConstraint
+   * @return
+   */
   private static String insertIdConstraint(String query, String idConstraint) {
     String[] queryParts = generateQueryCombineParts(query);
-    return queryParts[0] + " " + idConstraint + " and" + queryParts[1];
+    return queryParts[0] + " (" + idConstraint + ") and" + queryParts[1];
   }
 
   public static String formIdConstraint(Map<Integer, Collection<Long>> candidateSets,
@@ -653,9 +673,9 @@ public class RisoTreeQueryPN {
       Collection<Long> ids = candidateSets.get(endId);
       String variable = nodeVariables[endId];
       if (string.isEmpty()) {
-        string += String.format("(id(%s) in %s", variable, ids);
+        string += String.format("id(%s) in %s", variable, ids);
       } else {
-        string += String.format(" or id(%s) in %s)", variable, ids);
+        string += String.format(" or id(%s) in %s", variable, ids);
       }
     }
     return string;
@@ -683,6 +703,8 @@ public class RisoTreeQueryPN {
       // <spa_id, <end_id, path_name>> (path_name: PN_a_endid)
       Map<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
 
+      LOGGER.info(spaPathsMap.toString());
+
       // Construct min_hop (compact structure for min_hop_array
       // and NL_size_propertyname and NL_list_propertyname
       for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
@@ -704,7 +726,7 @@ public class RisoTreeQueryPN {
       }
 
       if (outputLevelInfo) {
-        Util.println(String.format("NL_property: %s", PN_size_propertyname));
+        Util.println(String.format("PNSize_property: %s", PN_size_propertyname));
       }
 
       Transaction tx = dbservice.beginTx();
@@ -864,7 +886,6 @@ public class RisoTreeQueryPN {
 
   private List<Node> getOverlapLeafNodesSinglePredicate(Node root_node, MyRectangle myRectangle,
       Map<Integer, Set<String>> pN_propertyname_single_predicate) throws Exception {
-    String logWriteLine;
     List<Node> cur_list = new LinkedList<>();
     cur_list.add(root_node);
     List<Node> next_list = new LinkedList<>();
@@ -904,11 +925,12 @@ public class RisoTreeQueryPN {
           }
         }
       }
+      located_in_count = overlap_MBR_list.size();
 
       if (outputLevelInfo) {
-        logWriteLine = String.format("level %d\n", level_index);
+        String logWriteLine = String.format("level %d\n", level_index);
         logWriteLine += String.format("Located in nodes: %d\n", located_in_count);
-        logWriteLine = String.format("level %d time: %d", level_index,
+        logWriteLine += String.format("level %d time: %d", level_index,
             System.currentTimeMillis() - startLevel);
         LOGGER.info(logWriteLine);
       }
@@ -951,9 +973,8 @@ public class RisoTreeQueryPN {
    * @return
    */
   public boolean isNodeContainAllPaths(Node node, Set<String> paths) {
-    Iterable<String> keys = node.getPropertyKeys();
-    for (String key : keys) {
-      if (!paths.contains(key)) {
+    for (String path : paths) {
+      if (!node.hasProperty(path)) {
         return false;
       }
     }
