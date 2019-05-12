@@ -41,6 +41,8 @@ public class Naive_Neo4j_Match {
   public long result_count = 0;
   public long page_access;
 
+  public static boolean outputResult = false;
+
   public Naive_Neo4j_Match(GraphDatabaseService dbservice) {
     neo4j_API = new Neo4j_API(dbservice);
     Config config = new Config();
@@ -91,6 +93,7 @@ public class Naive_Neo4j_Match {
    */
   public void queryWithIgnore(String query) {
     iniLogVariables();
+    query = "profile " + query;
     long start = System.currentTimeMillis();
     Result result = neo4j_API.graphDb.execute(query);
     get_iterator_time += System.currentTimeMillis() - start;
@@ -98,7 +101,10 @@ public class Naive_Neo4j_Match {
     start = System.currentTimeMillis();
     while (result.hasNext()) {
       result_count++;
-      result.next();
+      Map<String, Object> row = result.next();
+      if (outputResult) {
+        Util.println(row);
+      }
     }
     iterate_time += System.currentTimeMillis() - start;
     page_access = OwnMethods.GetTotalDBHits(result.getExecutionPlanDescription());
