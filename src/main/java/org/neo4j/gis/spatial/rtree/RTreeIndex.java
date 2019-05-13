@@ -155,7 +155,6 @@ public class RTreeIndex implements SpatialIndexWriter {
       parent = chooseSubTree(parent, geomNode);
     }
     chooseSubTreeTime += System.currentTimeMillis() - start;
-    Util.println("chooseSubTree time: " + chooseSubTreeTime);
     if (countChildren(parent, RTreeRelationshipTypes.RTREE_REFERENCE) >= maxNodeReferences) {
       insertInLeaf(parent, geomNode);
       splitAndAdjustPathBoundingBox(parent);
@@ -276,7 +275,9 @@ public class RTreeIndex implements SpatialIndexWriter {
       // if (index % 10000 == 0) {
       // LOGGER.info("" + index);
       // }
+      long start = System.currentTimeMillis();
       add(n.node);
+      totalTime += System.currentTimeMillis() - start;
       Util.println("chooseSubTree time: " + chooseSubTreeTime);
       Util.println("getLocInGraph time: " + getLocInGraphTime);
       Util.println("getGDTime time: " + getGDTime);
@@ -1785,6 +1786,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   public long getLocInGraphTime = 0;
   public long getGDTime = 0;
   public long adjustGraphLocTime = 0;
+  public long totalTime = 0;
 
   // Private classes
   private class WarmUpVisitor implements SpatialIndexVisitor {
