@@ -150,9 +150,12 @@ public class RTreeIndex implements SpatialIndexWriter {
    */
   private void addBelow(Node parent, Node geomNode) {
     // choose a path down to a leaf
+    long start = System.currentTimeMillis();
     while (!nodeIsLeaf(parent)) {
       parent = chooseSubTree(parent, geomNode);
     }
+    chooseSubTreeTime += System.currentTimeMillis() - start;
+    Util.println("chooseSubTree time: " + chooseSubTreeTime);
     if (countChildren(parent, RTreeRelationshipTypes.RTREE_REFERENCE) >= maxNodeReferences) {
       insertInLeaf(parent, geomNode);
       splitAndAdjustPathBoundingBox(parent);
@@ -176,6 +179,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    * @param geomNode
    */
   private void adjustGraphLoc(Node parent, Node geomNode) {
+    long start = System.currentTimeMillis();
     HashMap<String, int[]> parentLoc = getLocInGraph(parent);
     HashMap<String, int[]> childLoc = getLocInGraph(geomNode);
     for (String key : childLoc.keySet()) {
@@ -206,6 +210,7 @@ public class RTreeIndex implements SpatialIndexWriter {
         parent.setProperty(key, expandPN);
       }
     }
+    adjustGraphLocTime += System.currentTimeMillis() - start;
   }
 
 
@@ -272,6 +277,11 @@ public class RTreeIndex implements SpatialIndexWriter {
       // LOGGER.info("" + index);
       // }
       add(n.node);
+      Util.println("chooseSubTree time: " + chooseSubTreeTime);
+      Util.println("getLocInGraph time: " + getLocInGraphTime);
+      Util.println("getGDTime time: " + getGDTime);
+      Util.println("adjustGraphLocTime time: " + adjustGraphLocTime);
+
     }
 
     LOGGER.info("chooseIndexnodeWithSmallestGD is called " + chooseSmallestGDCount + " times");
@@ -1170,12 +1180,14 @@ public class RTreeIndex implements SpatialIndexWriter {
    * @return
    */
   private HashMap<String, int[]> getLocInGraph(Node node) {
+    long start = System.currentTimeMillis();
     HashMap<String, int[]> pathNeighbors = new HashMap<>();
     for (String key : node.getPropertyKeys()) {
       if (RisoTreeUtil.isPNProperty(key)) {
         pathNeighbors.put(key, (int[]) node.getProperty(key));
       }
     }
+    getLocInGraphTime += System.currentTimeMillis() - start;
     return pathNeighbors;
   }
 
@@ -1187,6 +1199,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    * @return
    */
   private int getGD(Node indexNode, HashMap<String, int[]> pathNeighbors) {
+    long start = System.currentTimeMillis();
     getGDCount++;
     int GD = 0;
     for (String key : pathNeighbors.keySet()) {
@@ -1213,6 +1226,7 @@ public class RTreeIndex implements SpatialIndexWriter {
         GD += Util.arraysDifferenceCount(pathNeighbors.get(key), indexNodePathNeighbor);
       }
     }
+    getGDTime += System.currentTimeMillis() - start;
     return GD;
   }
 
@@ -1765,6 +1779,12 @@ public class RTreeIndex implements SpatialIndexWriter {
   private int noContainDifferent = 0; // Spatial only and SGD takes different subtrees.
 
   public final static String PN_PROP_PREFFIX = "PN_";
+
+  // ******** tracking time *********/
+  public long chooseSubTreeTime = 0;
+  public long getLocInGraphTime = 0;
+  public long getGDTime = 0;
+  public long adjustGraphLocTime = 0;
 
   // Private classes
   private class WarmUpVisitor implements SpatialIndexVisitor {
