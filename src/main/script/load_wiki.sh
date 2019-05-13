@@ -68,7 +68,7 @@ java -Xmx100g -jar ${jar_path} \
 	-gp ${graph_path} \
 	-lp ${label_path} \
 	-ep ${entity_path} \
-	-entityStringLabelMapPath ${entityStringLabelMapPath}
+	-entityStringLabelMapPath ${entityStringLabelMapPath} \
 	-maxPNSize 100 \
 	-outputPath ${data_dir}/spatialNodesZeroOneHopPN.txt
 
