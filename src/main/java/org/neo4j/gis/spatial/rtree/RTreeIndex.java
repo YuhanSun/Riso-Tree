@@ -281,7 +281,8 @@ public class RTreeIndex implements SpatialIndexWriter {
       Util.println("chooseSubTree time: " + chooseSubTreeTime);
       Util.println("getLocInGraph time: " + getLocInGraphTime);
       Util.println("getGDTime time: " + getGDTime);
-      Util.println("adjustGraphLocTime time: " + adjustGraphLocTime);
+      Util.println("adjustGraphLoc time: " + adjustGraphLocTime);
+      Util.println("Total time: " + totalTime);
 
     }
 
