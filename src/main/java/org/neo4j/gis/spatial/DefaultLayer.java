@@ -17,16 +17,20 @@
  */
 package org.neo4j.gis.spatial;
 
-import java.util.*;
-import com.vividsolutions.jts.geom.PrecisionModel;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import org.geotools.factory.FactoryRegistryException;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
+import org.neo4j.gis.spatial.attributes.PropertyMappingManager;
+import org.neo4j.gis.spatial.encoders.Configurable;
 import org.neo4j.gis.spatial.rtree.Envelope;
 import org.neo4j.gis.spatial.rtree.Listener;
 import org.neo4j.gis.spatial.rtree.filter.SearchFilter;
-import org.neo4j.gis.spatial.attributes.PropertyMappingManager;
-import org.neo4j.gis.spatial.encoders.Configurable;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -35,6 +39,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 /**
  * Instances of Layer provide the ability for developers to add/remove and edit geometries
@@ -78,6 +83,18 @@ public class DefaultLayer implements Constants, Layer, SpatialDataset {
 
     index.add(geomNode);
     return new SpatialDatabaseRecord(this, geomNode, geometry);
+  }
+
+  public int addAll(List<Node> geomNodes, HashMap<String, int[]>[] spatialNodesPathNeighbors) {
+    GeometryEncoder geometryEncoder = getGeometryEncoder();
+
+    for (Node geomNode : geomNodes) {
+      Geometry geometry = geometryEncoder.decodeGeometry(geomNode);
+      // add BBOX to Node if it's missing
+      geometryEncoder.encodeGeometry(geometry, geomNode);
+    }
+    index.add(geomNodes);
+    return geomNodes.size();
   }
 
   @Override

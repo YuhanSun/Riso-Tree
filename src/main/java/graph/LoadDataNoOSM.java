@@ -665,6 +665,60 @@ public class LoadDataNoOSM {
    * @param dataset
    * @param entityPath
    */
+  public void wikiConstructRTree(String dbPath, String dataset, String entityPath, String graphPath,
+      String labelPath) {
+    try {
+      Util.checkPathExist(dbPath);
+      Util.checkPathExist(entityPath);
+
+      ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
+      String layerName = dataset;
+      GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
+      SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
+
+      Transaction tx = databaseService.beginTx();
+      LOGGER.info("create layer: " + layerName);
+      SimplePointLayer layer = (SimplePointLayer) createLayer(layerName, spatialDatabaseService);
+
+      ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
+      for (Entity entity : entities) {
+        if (entity.IsSpatial) {
+          Node node = databaseService.getNodeById(entity.id);
+          geomNodes.add(node);
+        }
+      }
+
+      LOGGER.info("layer.addAll(geomNodes)...");
+      long start = System.currentTimeMillis();
+      layer.addAll(geomNodes, null);
+
+      String message = "in memory time: " + (System.currentTimeMillis() - start) + "\n";
+      message += "number of spatial objects: " + geomNodes.size() + "\n";
+
+      start = System.currentTimeMillis();
+      tx.success();
+      tx.close();
+      message += "commit time: " + (System.currentTimeMillis() - start) + "\n";
+
+      start = System.currentTimeMillis();
+      spatialDatabaseService.getDatabase().shutdown();
+      message += "shut down time: " + (System.currentTimeMillis() - start);
+      LOGGER.info(message);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+
+  /**
+   * Construct RTree for the Wikidata. Nodes have been created already. Nodes can possess multiple
+   * labels.
+   *
+   * @param dbPath
+   * @param dataset
+   * @param entityPath
+   */
   public void wikiConstructRTree(String dbPath, String dataset, String entityPath) {
     try {
       Util.checkPathExist(dbPath);
@@ -677,7 +731,7 @@ public class LoadDataNoOSM {
 
       Transaction tx = databaseService.beginTx();
       LOGGER.info("create layer: " + layerName);
-      EditableLayer layer = createLayer(layerName, spatialDatabaseService);
+      SimplePointLayer layer = (SimplePointLayer) createLayer(layerName, spatialDatabaseService);
 
       ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
       for (Entity entity : entities) {
