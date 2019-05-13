@@ -66,7 +66,7 @@ java -Xmx100g -jar ${jar_path} -h
 java -Xmx100g -jar ${jar_path} \
 	-f wikigenerateZeroOneHopPNForSpatialNodes \
 	-gp ${graph_path} \
-	-labelListPath ${label_path} \
+	-lp ${label_path} \
 	-ep ${entity_path} \
 	-entityStringLabelMapPath ${entityStringLabelMapPath}
 	-maxPNSize 100 \
