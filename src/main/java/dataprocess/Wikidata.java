@@ -578,6 +578,59 @@ public class Wikidata {
     Util.close(inserter);
   }
 
+  public static void generateZeroOneHopPNForSpatialNodes(String graphPath, String labelPath,
+      String entityPath, String entityStringLabelMapPath, int maxPNSize, String outputPath)
+      throws Exception {
+    Util.checkPathExist(graphPath);
+    Util.checkPathExist(labelPath);
+    Util.checkPathExist(entityPath);
+    Util.checkPathExist(entityStringLabelMapPath);
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
+    ArrayList<ArrayList<Integer>> graphLabels = GraphUtil.ReadGraph(labelPath);
+    ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
+    String[] labelStringMap = readLabelMap(entityStringLabelMapPath);
+
+    FileWriter writer = Util.getFileWriter(outputPath);
+    generateZeroOneHopPNForSpatialNodes(graph, graphLabels, entities, labelStringMap, maxPNSize,
+        writer);
+    Util.close(writer);
+  }
+
+  private static void generateZeroOneHopPNForSpatialNodes(ArrayList<ArrayList<Integer>> graph,
+      ArrayList<ArrayList<Integer>> graphLabels, ArrayList<Entity> entities,
+      String[] labelStringMap, int maxPNSize, FileWriter writer) throws Exception {
+    for (Entity entity : entities) {
+      if (!entity.IsSpatial) {
+        continue;
+      }
+      int id = entity.id;
+      generateOutputZeroOneHopPNForSingleSpatialNode(graph, graphLabels, labelStringMap, id, maxPNSize,
+          writer);
+    }
+  }
+
+  private static void generateOutputZeroOneHopPNForSingleSpatialNode(ArrayList<ArrayList<Integer>> graph,
+      ArrayList<ArrayList<Integer>> graphLabels, String[] labelStringMap, int id, int maxPNSize,
+      FileWriter writer) throws Exception {
+    Map<String, ArrayList<Integer>> zeroHopPathNeighbors =
+        generateZeroHopPNForSingleSpatialNode(id, graphLabels.get(id), labelStringMap);
+    Map<String, ArrayList<Integer>> oneHopPathNeighbors = generateOneHopPNForSingleSpatialNode(
+        zeroHopPathNeighbors, id, graph, graphLabels, labelStringMap, maxPNSize);
+    writer.write(id + "\n");
+    writePathNeighbors(writer, zeroHopPathNeighbors);
+    writePathNeighbors(writer, oneHopPathNeighbors);
+  }
+
+
+
+  private static void writePathNeighbors(FileWriter writer,
+      Map<String, ArrayList<Integer>> pathNeighbors) throws Exception {
+    // TODO Auto-generated method stub
+    for (String key : pathNeighbors.keySet()) {
+      writer.write(String.format("%s,%s\n", key, pathNeighbors.get(key)));
+    }
+  }
+
   public static void setZeroOneHopPNForSpatialNodes(String dbPath, String graphPath,
       String labelPath, String entityStringLabelMapPath, int maxPNSize) {
     BatchInserter inserter = null;
@@ -617,6 +670,26 @@ public class Wikidata {
       setOneHopPN(inserter, id, neighbors, nodeLabels, graphLabels, labelStringMap, maxPNSize);
       id++;
     }
+  }
+
+  private static Map<String, ArrayList<Integer>> generateOneHopPNForSingleSpatialNode(
+      Map<String, ArrayList<Integer>> zeroHopPathNeighbors, int id,
+      ArrayList<ArrayList<Integer>> graph, ArrayList<ArrayList<Integer>> graphLabels,
+      String[] labelStringMap, int maxPNSize) {
+    Map<String, ArrayList<Integer>> oneHopPathNeighbors = new HashMap<>();
+    HashMap<String, ArrayList<Integer>> pathLabelNeighbors =
+        dividedByLabels(graph.get(id), graphLabels, labelStringMap, maxPNSize);
+    for (String key : pathLabelNeighbors.keySet()) {
+      ArrayList<Integer> arrayList = pathLabelNeighbors.get(key);
+      if (arrayList.size() == 0) { // the removal case
+        continue;
+      }
+      for (String zeroHopPathName : zeroHopPathNeighbors.keySet()) {
+        String oneHopKey = RisoTreeUtil.getAttachName(zeroHopPathName, key);
+        oneHopPathNeighbors.put(oneHopKey, arrayList);
+      }
+    }
+    return oneHopPathNeighbors;
   }
 
   private static void setOneHopPN(BatchInserter inserter, int id, ArrayList<Integer> neighbors,
@@ -676,6 +749,19 @@ public class Wikidata {
       }
     }
     return pathLabelNeighbors;
+  }
+
+  private static Map<String, ArrayList<Integer>> generateZeroHopPNForSingleSpatialNode(int id,
+      Iterable<Integer> labels, String[] labelStringMap) {
+    Map<String, ArrayList<Integer>> pathNeighbors = new HashMap<>();
+    for (int labelId : labels) {
+      String labelStr = labelStringMap[labelId];
+      String propertyName = RisoTreeUtil.getAttachName(Config.PNPrefix, labelStr);
+      ArrayList<Integer> pathNeighbor = new ArrayList<>();
+      pathNeighbor.add(id);
+      pathNeighbors.put(propertyName, pathNeighbor);
+    }
+    return pathNeighbors;
   }
 
   private static void setZeroHopPN(BatchInserter inserter, int id, Iterable<Integer> labels,

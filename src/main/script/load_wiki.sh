@@ -64,8 +64,18 @@ java -Xmx100g -jar ${jar_path} -h
 #  -maxPNSize 100
 
 java -Xmx100g -jar ${jar_path} \
-	-f wikiConstructRTree \
-	-dp ${db_path} \
-	-d ${dataset} \
-	-ep ${entity_path}
+	-f wikigenerateZeroOneHopPNForSpatialNodes \
+	-gp ${graph_path} \
+	-labelListPath ${label_path} \
+	-ep ${entity_path} \
+	-entityStringLabelMapPath ${entityStringLabelMapPath}
+	-maxPNSize 100 \
+	-outputPath ${data_dir}/spatialNodesZeroOneHopPN.txt
+
+
+# java -Xmx100g -jar ${jar_path} \
+# 	-f wikiConstructRTree \
+# 	-dp ${db_path} \
+# 	-d ${dataset} \
+# 	-ep ${entity_path}
 

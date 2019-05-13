@@ -66,6 +66,15 @@ public class Util {
     }
   }
 
+  public static FileWriter getFileWriter(String path) throws Exception {
+    return new FileWriter(path, false);
+  }
+
+  public static FileWriter getFileWriter(String path, boolean app) throws Exception {
+    LOGGER.info("Get FileWriter from " + path);
+    return new FileWriter(path, app);
+  }
+
   public static BufferedReader getBufferedReader(String path) throws Exception {
     LOGGER.info("Get reader from " + path);
     return new BufferedReader(new FileReader(path));

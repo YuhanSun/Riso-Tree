@@ -32,7 +32,7 @@ public class Driver {
      * for wikidata
      */
     wikidataLoadGraph, wikiLoadEdges, // load graph nodes and edges and spatial attributes
-    wikisetZeroOneHopPNForSpatialNodes, //
+    wikisetZeroOneHopPNForSpatialNodes, wikigenerateZeroOneHopPNForSpatialNodes, //
 
     wikiGenerateContainSpatialID, // one time prepare
     wikiConstructRTree, wikiConstructPNTime, //
@@ -207,6 +207,12 @@ public class Driver {
                 cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),
                 cmd.getOptionValue(entityStringLabelMapPath),
                 Integer.parseInt(cmd.getOptionValue(maxPNSize)));
+            break;
+          case wikigenerateZeroOneHopPNForSpatialNodes:
+            Wikidata.generateZeroOneHopPNForSpatialNodes(cmd.getOptionValue(graphPath),
+                cmd.getOptionValue(labelListPath), cmd.getOptionValue(entityPath),
+                cmd.getOptionValue(entityStringLabelMapPath),
+                Integer.parseInt(cmd.getOptionValue(maxPNSize)), cmd.getOptionValue(outputPath));
             break;
           case wikiConstructRTree:
             new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
