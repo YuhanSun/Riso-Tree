@@ -164,11 +164,15 @@ public class RTreeIndex implements SpatialIndexWriter {
     while (!nodeIsLeaf(parent)) {
       parent = chooseSubTree(parent, geomNode, pathNeighbors);
     }
+
+    LOGGER.info("parent node: " + parent);
+
     chooseSubTreeTime += System.currentTimeMillis() - start;
     if (countChildren(parent, RTreeRelationshipTypes.RTREE_REFERENCE) >= maxNodeReferences) {
       insertInLeaf(parent, geomNode, pathNeighbors);
       splitAndAdjustPathBoundingBox(parent);
     } else { // no split case, done for RisoTree.
+      LOGGER.info(String.format("insertInLeaf(%s, %s, %s)", parent, geomNode, pathNeighbors));
       if (insertInLeaf(parent, geomNode, pathNeighbors)) {
         // bbox enlargement needed
         adjustPathBoundingBox(parent);
@@ -213,6 +217,7 @@ public class RTreeIndex implements SpatialIndexWriter {
 
       if (childPN.length == 0) {
         // childPN is the ignored PN, so directly make parent PN ignored.
+        LOGGER.info(String.format("parent.setProperty(%s, %s)", key, String.valueOf(childPN)));
         parent.setProperty(key, childPN);
         continue;
       }
@@ -233,6 +238,7 @@ public class RTreeIndex implements SpatialIndexWriter {
         if (expandPN.length > MaxPNSize) {
           expandPN = new int[] {};
         }
+        LOGGER.info(String.format("parent.setProperty(%s, %s)", key, String.valueOf(childPN)));
         parent.setProperty(key, expandPN);
       }
     }
