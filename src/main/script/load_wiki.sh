@@ -31,6 +31,7 @@ label_path="${data_dir}/graph_label.txt"
 entityStringLabelMapPath="${data_dir}/entity_string_label.txt"
 graphPropertyEdgePath="${data_dir}/graph_property_edge.txt"
 propertyMapPath="${data_dir}/property_map.txt"
+spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
 
 containID_path="${data_dir}/containID.txt"
 map_path="${data_dir}/node_map_RTree.txt"
@@ -63,19 +64,20 @@ java -Xmx100g -jar ${jar_path} -h
 #  -entityStringLabelMapPath ${entityStringLabelMapPath} \
 #  -maxPNSize 100
 
-java -Xmx100g -jar ${jar_path} \
-	-f wikigenerateZeroOneHopPNForSpatialNodes \
-	-gp ${graph_path} \
-	-lp ${label_path} \
-	-ep ${entity_path} \
-	-entityStringLabelMapPath ${entityStringLabelMapPath} \
-	-maxPNSize 100 \
-	-outputPath ${data_dir}/spatialNodesZeroOneHopPN.txt
-
-
 # java -Xmx100g -jar ${jar_path} \
-# 	-f wikiConstructRTree \
-# 	-dp ${db_path} \
-# 	-d ${dataset} \
-# 	-ep ${entity_path}
+# 	-f wikigenerateZeroOneHopPNForSpatialNodes \
+# 	-gp ${graph_path} \
+# 	-lp ${label_path} \
+# 	-ep ${entity_path} \
+# 	-entityStringLabelMapPath ${entityStringLabelMapPath} \
+# 	-maxPNSize 100 \
+# 	-outputPath ${data_dir}/spatialNodesZeroOneHopPN.txt
+
+
+java -Xmx100g -jar ${jar_path} \
+	-f wikiConstructRTree \
+	-dp ${db_path} \
+	-d ${dataset} \
+	-ep ${entity_path} \
+	-spatialNodePNPath ${spatialNodePNPath}
 

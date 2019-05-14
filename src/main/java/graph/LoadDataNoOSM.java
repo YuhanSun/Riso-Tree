@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -659,38 +660,54 @@ public class LoadDataNoOSM {
 
   /**
    * Construct RTree for the Wikidata. Nodes have been created already. Nodes can possess multiple
-   * labels.
+   * labels. ZeroOneHopPN read from disk and stored in memory.
+   *
+   * @param dbPath
+   * @param dataset
+   * @param entityPath
+   * @throws Exception
+   */
+  public void wikiConstructRTree(String dbPath, String dataset, String entityPath,
+      String spatialNodePNPath) throws Exception {
+    Util.checkPathExist(dbPath);
+    Util.checkPathExist(entityPath);
+    Util.checkPathExist(spatialNodePNPath);
+
+    ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
+    List<Map<String, int[]>> spatialNodesPathNeighbors = readSpatialNodesPN(spatialNodePNPath);
+    wikiConstructRTree(dbPath, dataset, entities, spatialNodesPathNeighbors);
+  }
+
+  /**
+   * Construct RTree for the Wikidata. Nodes have been created already. Nodes can possess multiple
+   * labels. ZeroOneHopPN read from disk and stored in memory.
    *
    * @param dbPath
    * @param dataset
    * @param entityPath
    */
-  public void wikiConstructRTree(String dbPath, String dataset, String entityPath, String graphPath,
-      String labelPath) {
+  public void wikiConstructRTree(String dbPath, String dataset, ArrayList<Entity> entities,
+      List<Map<String, int[]>> spatialNodesPathNeighbors) {
     try {
-      Util.checkPathExist(dbPath);
-      Util.checkPathExist(entityPath);
-
-      ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
       String layerName = dataset;
-      GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
-      SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(databaseService);
+      GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+      SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(service);
 
-      Transaction tx = databaseService.beginTx();
+      Transaction tx = service.beginTx();
       LOGGER.info("create layer: " + layerName);
       SimplePointLayer layer = (SimplePointLayer) createLayer(layerName, spatialDatabaseService);
 
       ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
       for (Entity entity : entities) {
         if (entity.IsSpatial) {
-          Node node = databaseService.getNodeById(entity.id);
+          Node node = service.getNodeById(entity.id);
           geomNodes.add(node);
         }
       }
 
       LOGGER.info("layer.addAll(geomNodes)...");
       long start = System.currentTimeMillis();
-      layer.addAll(geomNodes, null);
+      layer.addAll(geomNodes, spatialNodesPathNeighbors);
 
       String message = "in memory time: " + (System.currentTimeMillis() - start) + "\n";
       message += "number of spatial objects: " + geomNodes.size() + "\n";
@@ -709,6 +726,51 @@ public class LoadDataNoOSM {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  public static List<Map<String, int[]>> readSpatialNodesPN(String spatialNodePNPath)
+      throws Exception {
+    List<Map<String, int[]>> spatialNodesPN =
+        new ArrayList<>(Collections.nCopies(Config.graphNodeCount, null));
+
+    BufferedReader reader = Util.getBufferedReader(spatialNodePNPath);
+    LOGGER.info("Read spatial nodes path neighbors from " + spatialNodePNPath);
+    String line = null;
+    line = reader.readLine();
+    long nodeID = Long.parseLong(line);
+
+    while (true) {
+      Map<String, int[]> pn = new HashMap<>();
+      while ((line = reader.readLine()) != null) {
+        if (line.matches("\\d+$") == false) { // path neighbor lines
+          String[] lineList = line.split(",", 2);
+          String key = lineList[0];
+
+          String content = lineList[1];
+          if (content.equals("[]")) {
+            pn.put(key, new int[] {0});
+            continue;
+          }
+          String[] contentList = content.substring(1, content.length() - 1).split(", ");
+
+          int[] value = new int[contentList.length];
+          for (int i = 0; i < contentList.length; i++) {
+            value[i] = Integer.parseInt(contentList[i]);
+          }
+          pn.put(key, value);
+        } else {
+          break;
+        }
+      }
+      spatialNodesPN.set((int) nodeID, pn);
+
+      if (line == null) {
+        break;
+      }
+      nodeID = Long.parseLong(line);
+    }
+
+    return spatialNodesPN;
   }
 
   /**

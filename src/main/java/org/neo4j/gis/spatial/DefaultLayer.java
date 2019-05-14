@@ -18,10 +18,10 @@
 package org.neo4j.gis.spatial;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.geotools.factory.FactoryRegistryException;
 import org.geotools.referencing.CRS;
@@ -85,7 +85,7 @@ public class DefaultLayer implements Constants, Layer, SpatialDataset {
     return new SpatialDatabaseRecord(this, geomNode, geometry);
   }
 
-  public int addAll(List<Node> geomNodes, HashMap<String, int[]>[] spatialNodesPathNeighbors) {
+  public int addAll(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors) {
     GeometryEncoder geometryEncoder = getGeometryEncoder();
 
     for (Node geomNode : geomNodes) {
@@ -93,7 +93,7 @@ public class DefaultLayer implements Constants, Layer, SpatialDataset {
       // add BBOX to Node if it's missing
       geometryEncoder.encodeGeometry(geometry, geomNode);
     }
-    index.add(geomNodes);
+    index.add(geomNodes, spatialNodesPathNeighbors);
     return geomNodes.size();
   }
 

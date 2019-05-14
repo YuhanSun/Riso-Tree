@@ -131,6 +131,19 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
   }
 
+  public void add(Node geomNode, Map<String, int[]> pathNeighbors) {
+    // initialize the search with root
+    Node parent = getIndexRoot();
+
+    addBelow(parent, geomNode, pathNeighbors);
+
+    countSaved = false;
+    totalGeometryCount++;
+    if (totalGeometryCount % Config.logInterval == 0) {
+      LOGGER.info("totalGeometryCount: " + totalGeometryCount);
+    }
+  }
+
   @Override
   public void add(Node geomNode) {
     // initialize the search with root
@@ -142,6 +155,27 @@ public class RTreeIndex implements SpatialIndexWriter {
     totalGeometryCount++;
     if (totalGeometryCount % Config.logInterval == 0) {
       LOGGER.info("totalGeometryCount: " + totalGeometryCount);
+    }
+  }
+
+  private void addBelow(Node parent, Node geomNode, Map<String, int[]> pathNeighbors) {
+    // choose a path down to a leaf
+    long start = System.currentTimeMillis();
+    while (!nodeIsLeaf(parent)) {
+      parent = chooseSubTree(parent, geomNode, pathNeighbors);
+    }
+    chooseSubTreeTime += System.currentTimeMillis() - start;
+    if (countChildren(parent, RTreeRelationshipTypes.RTREE_REFERENCE) >= maxNodeReferences) {
+      insertInLeaf(parent, geomNode, pathNeighbors);
+      splitAndAdjustPathBoundingBox(parent);
+    } else { // no split case, done for RisoTree.
+      if (insertInLeaf(parent, geomNode, pathNeighbors)) {
+        // bbox enlargement needed
+        adjustPathBoundingBox(parent);
+      }
+      if (!spatialOnly) {
+        adjustGraphLoc(parent, pathNeighbors);// yuhan
+      }
     }
   }
 
@@ -167,6 +201,43 @@ public class RTreeIndex implements SpatialIndexWriter {
         adjustGraphLoc(parent, geomNode);// yuhan
       }
     }
+  }
+
+  private void adjustGraphLoc(Node parent, Map<String, int[]> pathNeighbors) {
+    long start = System.currentTimeMillis();
+    HashMap<String, int[]> parentLoc = getLocInGraph(parent);
+    Map<String, int[]> childLoc = pathNeighbors;
+    long startWrite = System.currentTimeMillis();
+    for (String key : childLoc.keySet()) {
+      int[] childPN = childLoc.get(key);
+
+      if (childPN.length == 0) {
+        // childPN is the ignored PN, so directly make parent PN ignored.
+        parent.setProperty(key, childPN);
+        continue;
+      }
+
+      int[] parentPN = parentLoc.get(key);
+      if (parentPN == null) {
+        parent.setProperty(key, childPN);
+        continue;
+      }
+
+      if (parentPN.length == 0) {
+        continue;
+      }
+
+      // both PNs are not ignored
+      int[] expandPN = Util.sortedArrayMerge(childPN, parentPN);
+      if (expandPN.length > parentPN.length) { // if PN is really expanded
+        if (expandPN.length > MaxPNSize) {
+          expandPN = new int[] {};
+        }
+        parent.setProperty(key, expandPN);
+      }
+    }
+    adjustWriteTime += System.currentTimeMillis() - startWrite;
+    adjustGraphLocTime += System.currentTimeMillis() - start;
   }
 
   /**
@@ -229,6 +300,40 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
   }
 
+
+  public void add(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors) {
+    List<NodeWithEnvelope> outliers = bulkInsertion(getIndexRoot(), getHeight(getIndexRoot(), 0),
+        decodeGeometryNodeEnvelopes(geomNodes), 0.7);
+    countSaved = false;
+    totalGeometryCount = totalGeometryCount + (geomNodes.size() - outliers.size());
+    int index = 0;
+    for (NodeWithEnvelope n : outliers) {
+      index++;
+      LOGGER.info("" + index);
+      // if (index % 10000 == 0) {
+      // LOGGER.info("" + index);
+      // }
+      long start = System.currentTimeMillis();
+      Map<String, int[]> pathNeighbors = spatialNodesPathNeighbors.get((int) n.node.getId());
+      add(n.node, pathNeighbors);
+      totalTime += System.currentTimeMillis() - start;
+      Util.println("chooseSubTree time: " + chooseSubTreeTime);
+      Util.println("getLocInGraph time: " + getLocInGraphTime);
+      Util.println("getGDTime time: " + getGDTime);
+      Util.println("adjustWrite time: " + adjustWriteTime);
+      Util.println("adjustGraphLoc time: " + adjustGraphLocTime);
+      Util.println("Total time: " + totalTime);
+    }
+
+    LOGGER.info("chooseIndexnodeWithSmallestGD is called " + chooseSmallestGDCount + " times");
+    LOGGER.info(differentTimes + " are different");
+
+    LOGGER.info(String.format("getGD() is called %d times", getGDCount));
+
+    LOGGER.info("noContainCount happens " + noContainCount + " times");
+    LOGGER.info(String.format("%d are the same while %d are different.", noContainSame,
+        noContainDifferent));
+  }
 
   /**
    * Depending on the size of the incumbent tree, this will either attempt to rebuild the entire
@@ -1047,6 +1152,103 @@ public class RTreeIndex implements SpatialIndexWriter {
     return !node.hasRelationship(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
   }
 
+  private Node chooseSubTree(Node parentIndexNode, Node geomRootNode,
+      Map<String, int[]> pathNeighbors) {
+    // children that can contain the new geometry
+    List<Node> indexNodes = new ArrayList<>();
+
+    // pick the child that contains the new geometry bounding box
+    Iterable<Relationship> relationships =
+        parentIndexNode.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
+    for (Relationship relation : relationships) {
+      Node indexNode = relation.getEndNode();
+      if (getIndexNodeEnvelope(indexNode).contains(getLeafNodeEnvelope(geomRootNode))) {
+        indexNodes.add(indexNode);
+      }
+    }
+
+    // more than one leaf nodes contains geomRootNode
+    if (indexNodes.size() > 1) {
+      // return chooseIndexNodeWithSmallestArea(indexNodes);
+      // yuhan
+      Node node = chooseIndexNodeWithSmallestArea(indexNodes);
+      if (!spatialOnly) {
+        chooseSmallestGDCount++;
+        Node nodeWithSmallestGD = chooseIndexnodeWithSmallestGD(indexNodes, pathNeighbors);
+        if (node.equals(nodeWithSmallestGD) == false) {
+          differentTimes++;
+        }
+        node = nodeWithSmallestGD;
+      }
+      // Utility.print(node);
+      // Utility.print(res);
+      return node;
+    } else if (indexNodes.size() == 1) {
+      return indexNodes.get(0);
+    }
+
+    // No leaf node contains geomRootNode
+    Map<String, int[]> locInGraph = null;
+    if (!spatialOnly) {
+      locInGraph = pathNeighbors;
+    }
+    // pick the child that needs the minimum enlargement to include the new geometry
+    double minimumEnlargement = Double.POSITIVE_INFINITY;
+
+    // for evaluation comparison purpose, yuhan
+    noContainCount++;
+    double minimumEnlargementSpatial = Double.POSITIVE_INFINITY;
+    List<Node> minimumNodesSpatial = new LinkedList<>();
+
+    relationships =
+        parentIndexNode.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
+    for (Relationship relation : relationships) {
+      Node indexNode = relation.getEndNode();
+      double enlargementNeeded = getAreaEnlargement(indexNode, geomRootNode);
+
+      // for comparison, yuhan
+      if (enlargementNeeded < minimumEnlargementSpatial) {
+        minimumNodesSpatial.clear();
+        minimumNodesSpatial.add(indexNode);
+        minimumEnlargementSpatial = enlargementNeeded;
+      } else if (enlargementNeeded == minimumEnlargementSpatial) {
+        minimumNodesSpatial.add(indexNode);
+      }
+
+      // yuhan
+      if (!spatialOnly) {
+        int GD = getGD(indexNode, locInGraph);
+        enlargementNeeded = alpha * enlargementNeeded / (360 * 180)
+            + (1 - alpha) * (double) GD / Config.graphNodeCount;
+      }
+
+      if (enlargementNeeded < minimumEnlargement) {
+        indexNodes.clear();
+        indexNodes.add(indexNode);
+        minimumEnlargement = enlargementNeeded;
+      } else if (enlargementNeeded == minimumEnlargement) {
+        indexNodes.add(indexNode);
+      }
+    }
+
+    if (indexNodes.size() > 1) {
+      // This happens very rarely because it requires two enlargement to be exactly the same.
+      return chooseIndexNodeWithSmallestArea(indexNodes);
+    } else if (indexNodes.size() == 1) {
+      // for comparison, yuhan
+      if (indexNodes.get(0).equals(minimumNodesSpatial.get(0))) {
+        noContainSame++;
+      } else {
+        noContainDifferent++;
+      }
+
+      return indexNodes.get(0);
+    } else {
+      // this shouldn't happen
+      throw new RuntimeException("No IndexNode found for new geometry");
+    }
+  }
+
   private Node chooseSubTree(Node parentIndexNode, Node geomRootNode) {
     // children that can contain the new geometry
     List<Node> indexNodes = new ArrayList<>();
@@ -1143,6 +1345,24 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
   }
 
+  private Node chooseIndexnodeWithSmallestGD(List<Node> indexNodes,
+      Map<String, int[]> pathNeighbors) {
+    Node result = null;
+    double smallestSGD = Double.MAX_VALUE;
+    Util.println("count: " + indexNodes.size());
+    for (Node indexNode : indexNodes) {
+      int GD = getGD(indexNode, pathNeighbors);
+      double area = getArea(getIndexNodeEnvelope(indexNode));
+      double SGD = 0.000000001 * area + GD;
+      Util.println(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
+      if (result == null || SGD < smallestSGD) {
+        result = indexNode;
+        smallestSGD = SGD;
+      }
+    }
+    return result;
+  }
+
   /**
    * Compute the GD by considering area of the indexNode. The reason is that GDs are often the same
    * for all indexNodes. To handle the equality problem, we consider the area of indexNode.
@@ -1200,7 +1420,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    * @param pathNeighbors
    * @return
    */
-  private int getGD(Node indexNode, HashMap<String, int[]> pathNeighbors) {
+  private int getGD(Node indexNode, Map<String, int[]> pathNeighbors) {
     long start = System.currentTimeMillis();
     getGDCount++;
     int GD = 0;
@@ -1229,6 +1449,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       }
     }
     getGDTime += System.currentTimeMillis() - start;
+    LOGGER.info("GD: " + GD);
     return GD;
   }
 
@@ -1262,6 +1483,11 @@ public class RTreeIndex implements SpatialIndexWriter {
       counter++;
     }
     return counter;
+  }
+
+  private boolean insertInLeaf(Node indexNode, Node geomRootNode,
+      Map<String, int[]> pathNeighbors) {
+    return addChild(indexNode, RTreeRelationshipTypes.RTREE_REFERENCE, geomRootNode, pathNeighbors);
   }
 
   /**
@@ -1534,6 +1760,21 @@ public class RTreeIndex implements SpatialIndexWriter {
     layerNode.createRelationshipTo(newRoot, RTreeRelationshipTypes.RTREE_ROOT);
   }
 
+  private boolean addChild(Node parent, RelationshipType type, Node newChild,
+      Map<String, int[]> pathNeighbors) {
+    // yuhan
+    // only adustGraphLoc when the parent is a leaf node.
+    if (spatialOnly == false && type.name().equals(RTreeRelationshipTypes.RTREE_REFERENCE.name())) {
+      adjustGraphLoc(parent, pathNeighbors);
+    }
+
+    Envelope childEnvelope = getChildNodeEnvelope(newChild, type);
+    double[] childBBox = new double[] {childEnvelope.getMinX(), childEnvelope.getMinY(),
+        childEnvelope.getMaxX(), childEnvelope.getMaxY()};
+    parent.createRelationshipTo(newChild, type);
+    return expandParentBoundingBoxAfterNewChild(parent, childBBox);
+  }
+
   /**
    * Add the child to a parent node by creating a relationship. Update the mbr accordingly. For
    * RisoTree (spatialOnly == false) update PNs. Only the leaf node will be adjusted for now. No
@@ -1788,6 +2029,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   public long getGDTime = 0;
   public long adjustGraphLocTime = 0;
   public long totalTime = 0;
+  public long adjustWriteTime = 0;
 
   // Private classes
   private class WarmUpVisitor implements SpatialIndexVisitor {

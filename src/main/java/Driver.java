@@ -63,6 +63,7 @@ public class Driver {
   // Construct_RisoTree
   private String containIDPath = "c";
   private String labelStrMapPath = "labelStrMapPath";
+  private String spatialNodePNPath = "spatialNodePNPath";
 
   // Load data
   private String mapPath = "mapPath";
@@ -95,6 +96,7 @@ public class Driver {
     options.addOption(mapPath, "map path", true, "path for the map from entity id to neo4j id");
     options.addOption(labelStrMapPath, "labelStrMapPath", true,
         "the map from graph id to String label (name)");
+    options.addOption(spatialNodePNPath, "spatialNodePNPath", true, "spatialNodePNPath");
     options.addOption(entityStringLabelMapPath, "entityStringLabelMapPath", true,
         "the map from entity id to String label (name)");
 
@@ -215,8 +217,11 @@ public class Driver {
                 Integer.parseInt(cmd.getOptionValue(maxPNSize)), cmd.getOptionValue(outputPath));
             break;
           case wikiConstructRTree:
+            // new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
+            // cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath));
             new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
-                cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath));
+                cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath),
+                cmd.getOptionValue(spatialNodePNPath));
             break;
           case wikiGenerateContainSpatialID:
             Construct_RisoTree.wikiGenerateContainSpatialID(cmd.getOptionValue(dbPath),
@@ -260,12 +265,19 @@ public class Driver {
 
 
   public static void main(String[] args) {
-    // String dataDir = "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt";
+    String dataDir = "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt";
     //
     // // Analyze
     // args = new String[] {"-f", "getPNSizeDistribution", "-dp",
     // dataDir + "\\neo4j-community-3.4.12_risotree\\data\\databases\\graph.db", "-d", "wikidata",
     // "-outputPath", dataDir + "/PNdistribution.txt"};
+
+    // load 1-hop pathneighbors.
+    args = new String[] {"-f", FunctionName.wikiLoadPN.name(), "-dp",
+        dataDir + "\\neo4j-community-3.4.12_risotree\\data\\databases\\graph.db", "-c",
+        dataDir + "\\containID.txt", "-gp", dataDir + "\\graph.txt", "-labelStrMapPath",
+        dataDir + "\\entity_string_label.txt", "-lp", dataDir + "\\graph_label.txt", "-hop", "0",
+        "-PNPrefix", dataDir + "PathNeighbors", "-maxPNSize", "100"};
 
     // run only once.
     // DataProcess.convertSingleToBidirectinalGraph();
