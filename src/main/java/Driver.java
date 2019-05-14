@@ -265,7 +265,7 @@ public class Driver {
 
 
   public static void main(String[] args) {
-    String dataDir = "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt";
+    // String dataDir = "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt";
     //
     // // Analyze
     // args = new String[] {"-f", "getPNSizeDistribution", "-dp",
@@ -273,11 +273,11 @@ public class Driver {
     // "-outputPath", dataDir + "/PNdistribution.txt"};
 
     // load 1-hop pathneighbors.
-    args = new String[] {"-f", FunctionName.wikiLoadPN.name(), "-dp",
-        dataDir + "\\neo4j-community-3.4.12_risotree\\data\\databases\\graph.db", "-c",
-        dataDir + "\\containID.txt", "-gp", dataDir + "\\graph.txt", "-labelStrMapPath",
-        dataDir + "\\entity_string_label.txt", "-lp", dataDir + "\\graph_label.txt", "-hop", "0",
-        "-PNPrefix", dataDir + "PathNeighbors", "-maxPNSize", "100"};
+    // args = new String[] {"-f", FunctionName.wikiLoadPN.name(), "-dp",
+    // dataDir + "\\neo4j-community-3.4.12_risotree\\data\\databases\\graph.db", "-c",
+    // dataDir + "\\containID.txt", "-gp", dataDir + "\\graph.txt", "-labelStrMapPath",
+    // dataDir + "\\entity_string_label.txt", "-lp", dataDir + "\\graph_label.txt", "-hop", "0",
+    // "-PNPrefix", dataDir + "PathNeighbors", "-maxPNSize", "100"};
 
     // run only once.
     // DataProcess.convertSingleToBidirectinalGraph();
