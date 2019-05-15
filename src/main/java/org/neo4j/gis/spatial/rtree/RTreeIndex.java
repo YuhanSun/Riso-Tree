@@ -355,8 +355,10 @@ public class RTreeIndex implements SpatialIndexWriter {
     if (root == null) {
       throw new Exception("Root node is null");
     }
-    long rootId = root.getId();
-    leafNodesPathNeighbors.put(rootId, new HashMap<>());
+    Node rootMBRNode = root
+        .getSingleRelationship(RTreeRelationshipTypes.RTREE_ROOT, Direction.OUTGOING).getEndNode();
+    long id = rootMBRNode.getId();
+    leafNodesPathNeighbors.put(id, new HashMap<>());
   }
 
   /**
@@ -1741,6 +1743,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     // remove the PN property and reconstruct in addChild() function
     if (!spatialOnly) {
       leafNodesPathNeighbors.remove(indexNode.getId());
+      leafNodesPathNeighbors.put(indexNode.getId(), new HashMap<>());
     }
 
     // reset bounding box and add new children
@@ -1751,6 +1754,7 @@ public class RTreeIndex implements SpatialIndexWriter {
 
     // create new node from split
     Node newIndexNode = database.createNode();
+    leafNodesPathNeighbors.put(newIndexNode.getId(), new HashMap<>());
     for (NodeWithEnvelope entry : group2) {
       addChild(newIndexNode, relationshipType, entry.node);
     }
