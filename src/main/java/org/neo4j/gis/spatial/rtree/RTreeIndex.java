@@ -44,7 +44,6 @@ import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
 import commons.Config;
-import commons.RisoTreeUtil;
 import commons.Util;
 
 /**
@@ -215,16 +214,16 @@ public class RTreeIndex implements SpatialIndexWriter {
     for (String key : childLoc.keySet()) {
       int[] childPN = childLoc.get(key);
 
+      long parentId = parent.getId();
       if (childPN.length == 0) {
         // childPN is the ignored PN, so directly make parent PN ignored.
-        LOGGER.info(String.format("parent.setProperty(%s, %s)", key, String.valueOf(childPN)));
-        parent.setProperty(key, childPN);
+        leafNodesPathNeighbors.get(parentId).put(key, childPN);
         continue;
       }
 
       int[] parentPN = parentLoc.get(key);
       if (parentPN == null) {
-        parent.setProperty(key, childPN);
+        leafNodesPathNeighbors.get(parentId).put(key, childPN);
         continue;
       }
 
@@ -238,8 +237,7 @@ public class RTreeIndex implements SpatialIndexWriter {
         if (expandPN.length > MaxPNSize) {
           expandPN = new int[] {};
         }
-        LOGGER.info(String.format("parent.setProperty(%s, %s)", key, String.valueOf(childPN)));
-        parent.setProperty(key, expandPN);
+        leafNodesPathNeighbors.get(parentId).put(key, expandPN);
       }
     }
     adjustWriteTime += System.currentTimeMillis() - startWrite;
@@ -306,13 +304,26 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
   }
 
+  public void printTimeTrack() {
+    Util.println("chooseSubTree time: " + chooseSubTreeTime);
+    Util.println("getLocInGraph time: " + getLocInGraphTime);
+    Util.println("getGDTime time: " + getGDTime);
+    Util.println("adjustWrite time: " + adjustWriteTime);
+    Util.println("adjustGraphLoc time: " + adjustGraphLocTime);
+    Util.println("Total time: " + totalTime);
+  }
 
-  public void add(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors) {
+  public void add(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors)
+      throws Exception {
     List<NodeWithEnvelope> outliers = bulkInsertion(getIndexRoot(), getHeight(getIndexRoot(), 0),
         decodeGeometryNodeEnvelopes(geomNodes), 0.7);
     countSaved = false;
     totalGeometryCount = totalGeometryCount + (geomNodes.size() - outliers.size());
     int index = 0;
+
+    // initialize the map for leaf nodes path neighbors
+    initializeLeafNodesPathNeighbors();
+
     for (NodeWithEnvelope n : outliers) {
       index++;
       LOGGER.info("" + index);
@@ -323,12 +334,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       Map<String, int[]> pathNeighbors = spatialNodesPathNeighbors.get((int) n.node.getId());
       add(n.node, pathNeighbors);
       totalTime += System.currentTimeMillis() - start;
-      Util.println("chooseSubTree time: " + chooseSubTreeTime);
-      Util.println("getLocInGraph time: " + getLocInGraphTime);
-      Util.println("getGDTime time: " + getGDTime);
-      Util.println("adjustWrite time: " + adjustWriteTime);
-      Util.println("adjustGraphLoc time: " + adjustGraphLocTime);
-      Util.println("Total time: " + totalTime);
+      printTimeTrack();
     }
 
     LOGGER.info("chooseIndexnodeWithSmallestGD is called " + chooseSmallestGDCount + " times");
@@ -339,6 +345,16 @@ public class RTreeIndex implements SpatialIndexWriter {
     LOGGER.info("noContainCount happens " + noContainCount + " times");
     LOGGER.info(String.format("%d are the same while %d are different.", noContainSame,
         noContainDifferent));
+  }
+
+  private void initializeLeafNodesPathNeighbors() throws Exception {
+    leafNodesPathNeighbors = new HashMap<>();
+    Node root = getRootNode();
+    if (root == null) {
+      throw new Exception("Root node is null");
+    }
+    long rootId = root.getId();
+    leafNodesPathNeighbors.put(rootId, new HashMap<>());
   }
 
   /**
@@ -389,11 +405,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       long start = System.currentTimeMillis();
       add(n.node);
       totalTime += System.currentTimeMillis() - start;
-      Util.println("chooseSubTree time: " + chooseSubTreeTime);
-      Util.println("getLocInGraph time: " + getLocInGraphTime);
-      Util.println("getGDTime time: " + getGDTime);
-      Util.println("adjustGraphLoc time: " + adjustGraphLocTime);
-      Util.println("Total time: " + totalTime);
+      printTimeTrack();
 
     }
 
@@ -1186,8 +1198,6 @@ public class RTreeIndex implements SpatialIndexWriter {
         }
         node = nodeWithSmallestGD;
       }
-      // Utility.print(node);
-      // Utility.print(res);
       return node;
     } else if (indexNodes.size() == 1) {
       return indexNodes.get(0);
@@ -1409,12 +1419,8 @@ public class RTreeIndex implements SpatialIndexWriter {
    */
   private HashMap<String, int[]> getLocInGraph(Node node) {
     long start = System.currentTimeMillis();
-    HashMap<String, int[]> pathNeighbors = new HashMap<>();
-    for (String key : node.getPropertyKeys()) {
-      if (RisoTreeUtil.isPNProperty(key)) {
-        pathNeighbors.put(key, (int[]) node.getProperty(key));
-      }
-    }
+    HashMap<String, int[]> pathNeighbors =
+        (HashMap<String, int[]>) leafNodesPathNeighbors.get(node.getId());
     getLocInGraphTime += System.currentTimeMillis() - start;
     return pathNeighbors;
   }
@@ -1430,8 +1436,12 @@ public class RTreeIndex implements SpatialIndexWriter {
     long start = System.currentTimeMillis();
     getGDCount++;
     int GD = 0;
+
+    long indexNodeId = indexNode.getId();
+    Map<String, int[]> indexNodePathNeighbors = leafNodesPathNeighbors.get(indexNodeId);
+
     for (String key : pathNeighbors.keySet()) {
-      int[] indexNodePathNeighbor = (int[]) indexNode.getProperty(key, null);
+      int[] indexNodePathNeighbor = indexNodePathNeighbors.get(key);
       int[] pn = pathNeighbors.get(key);
       if (indexNodePathNeighbor == null) {
         if (pn.length == 0) { // pn is ignored
@@ -1450,7 +1460,8 @@ public class RTreeIndex implements SpatialIndexWriter {
       if (pn.length == 0) {
         GD += MaxPNSize - indexNodePathNeighbor.length;
       } else {
-        // mark here, current is fine, may be improved.
+        // mark here, current is fine, may be improved. If the |difference+indexNodePN| > maxPNSize,
+        // then this GD is too much.
         GD += Util.arraysDifferenceCount(pathNeighbors.get(key), indexNodePathNeighbor);
       }
     }
@@ -1713,7 +1724,8 @@ public class RTreeIndex implements SpatialIndexWriter {
   }
 
   /**
-   * Add group1 into indexNode and group2 into newIndexNode
+   * Add group1 into indexNode and group2 into newIndexNode, including remove PN if indexNode is a
+   * leaf node.
    *
    * @param indexNode
    * @param group1
@@ -1726,11 +1738,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     // yuhan
     // remove the PN property and reconstruct in addChild() function
     if (!spatialOnly) {
-      for (String key : indexNode.getAllProperties().keySet()) {
-        if (RisoTreeUtil.isPNProperty(key)) {
-          indexNode.removeProperty(key);
-        }
-      }
+      leafNodesPathNeighbors.remove(indexNode.getId());
     }
 
     // reset bounding box and add new children
@@ -1751,7 +1759,8 @@ public class RTreeIndex implements SpatialIndexWriter {
   /**
    * Create a new node as the new root. Add oldRoot and newIndexNode as children of such new node.
    * Keep the schema of LayerNode--RootNode correct. Remove the original relationship to oldRoot and
-   * add a new relationship to newRoot. Adjust PN and mbr is done in addChild().
+   * add a new relationship to newRoot. Here addChild() will not cause PN adjust because newRoot is
+   * not a leaf node.
    *
    * @param oldRoot
    * @param newIndexNode
@@ -1762,6 +1771,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     addChild(newRoot, RTreeRelationshipTypes.RTREE_CHILD, newIndexNode);
 
     Node layerNode = getRootNode();
+    // move the RTREE_ROOT relationship from the oldRoot to new Root.
     layerNode.getSingleRelationship(RTreeRelationshipTypes.RTREE_ROOT, Direction.OUTGOING).delete();
     layerNode.createRelationshipTo(newRoot, RTreeRelationshipTypes.RTREE_ROOT);
   }
@@ -2028,6 +2038,8 @@ public class RTreeIndex implements SpatialIndexWriter {
   private int noContainDifferent = 0; // Spatial only and SGD takes different subtrees.
 
   public final static String PN_PROP_PREFFIX = "PN_";
+
+  public HashMap<Long, Map<String, int[]>> leafNodesPathNeighbors = null;
 
   // ******** tracking time *********/
   public long chooseSubTreeTime = 0;

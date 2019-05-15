@@ -85,7 +85,8 @@ public class DefaultLayer implements Constants, Layer, SpatialDataset {
     return new SpatialDatabaseRecord(this, geomNode, geometry);
   }
 
-  public int addAll(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors) {
+  public int addAll(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors)
+      throws Exception {
     GeometryEncoder geometryEncoder = getGeometryEncoder();
 
     for (Node geomNode : geomNodes) {
