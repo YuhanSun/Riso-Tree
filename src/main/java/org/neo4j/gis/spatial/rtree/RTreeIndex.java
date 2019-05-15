@@ -1571,8 +1571,10 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   private Node greenesSplit(Node indexNode) {
     if (nodeIsLeaf(indexNode)) {
+      LOGGER.info("nodeIsLeaf case");
       return greenesSplit(indexNode, RTreeRelationshipTypes.RTREE_REFERENCE);
     } else {
+      LOGGER.info("node Is not leaf case");
       return greenesSplit(indexNode, RTreeRelationshipTypes.RTREE_CHILD);
     }
   }
@@ -1647,6 +1649,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     List<NodeWithEnvelope> left = entries.subList(0, splitAt);
     List<NodeWithEnvelope> right = entries.subList(splitAt, entries.size());
 
+    LOGGER.info("reconnectTwoChildGroups");
     return reconnectTwoChildGroups(indexNode, left, right, relationshipType);
   }
 
@@ -1757,16 +1760,21 @@ public class RTreeIndex implements SpatialIndexWriter {
       leafNodesPathNeighbors.put(indexNode.getId(), new HashMap<>());
     }
 
+    LOGGER.info("add group1 into indexNode");
     // reset bounding box and add new children
     indexNode.removeProperty(INDEX_PROP_BBOX);
     for (NodeWithEnvelope entry : group1) {
+      LOGGER.info(String.format("addChild(%s, %s, %s)", indexNode, relationshipType, entry.node));
       addChild(indexNode, relationshipType, entry.node);
     }
 
     // create new node from split
     Node newIndexNode = database.createNode();
     leafNodesPathNeighbors.put(newIndexNode.getId(), new HashMap<>());
+    LOGGER.info("add group2 into newIndexNode");
     for (NodeWithEnvelope entry : group2) {
+      LOGGER
+          .info(String.format("addChild(%s, %s, %s)", newIndexNode, relationshipType, entry.node));
       addChild(newIndexNode, relationshipType, entry.node);
     }
 
