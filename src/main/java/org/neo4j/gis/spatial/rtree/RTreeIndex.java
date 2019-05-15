@@ -324,6 +324,7 @@ public class RTreeIndex implements SpatialIndexWriter {
 
     // initialize the map for leaf nodes path neighbors
     initializeLeafNodesPathNeighbors();
+    Util.println(database.getNodeById(47116659).getAllProperties());
 
     for (NodeWithEnvelope n : outliers) {
       index++;
