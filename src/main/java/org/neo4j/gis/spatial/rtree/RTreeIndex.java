@@ -1830,7 +1830,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     // yuhan
     // only adustGraphLoc when the parent is a leaf node.
     if (spatialOnly == false && type.name().equals(RTreeRelationshipTypes.RTREE_REFERENCE.name())) {
-      adjustGraphLoc(parent, newChild);
+      adjustGraphLoc(parent, spatialNodesPathNeighbors.get((int) newChild.getId()));
     }
 
     Envelope childEnvelope = getChildNodeEnvelope(newChild, type);
