@@ -255,7 +255,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   private void adjustGraphLoc(Node parent, Node geomNode) {
     long start = System.currentTimeMillis();
     HashMap<String, int[]> parentLoc = getLocInGraph(parent);
-    HashMap<String, int[]> childLoc = getLocInGraph(geomNode);
+    Map<String, int[]> childLoc = spatialNodesPathNeighbors.get((int) geomNode.getId());
     for (String key : childLoc.keySet()) {
       int[] childPN = childLoc.get(key);
 
@@ -323,6 +323,7 @@ public class RTreeIndex implements SpatialIndexWriter {
 
     // initialize the map for leaf nodes path neighbors
     initializeLeafNodesPathNeighbors();
+    this.spatialNodesPathNeighbors = spatialNodesPathNeighbors;
 
     for (NodeWithEnvelope n : outliers) {
       index++;
@@ -2044,6 +2045,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   public final static String PN_PROP_PREFFIX = "PN_";
 
   public HashMap<Long, Map<String, int[]>> leafNodesPathNeighbors = null;
+  public List<Map<String, int[]>> spatialNodesPathNeighbors = null;
 
   // ******** tracking time *********/
   public long chooseSubTreeTime = 0;
