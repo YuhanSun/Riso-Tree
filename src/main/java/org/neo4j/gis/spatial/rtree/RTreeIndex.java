@@ -168,7 +168,9 @@ public class RTreeIndex implements SpatialIndexWriter {
 
     chooseSubTreeTime += System.currentTimeMillis() - start;
     if (countChildren(parent, RTreeRelationshipTypes.RTREE_REFERENCE) >= maxNodeReferences) {
+      LOGGER.info(String.format("insertInLeaf(%s,%s,%s)", parent, geomNode, pathNeighbors));
       insertInLeaf(parent, geomNode, pathNeighbors);
+      LOGGER.info(String.format("splitAndAdjustPathBoundingBox(%s)", parent));
       splitAndAdjustPathBoundingBox(parent);
     } else { // no split case, done for RisoTree.
       LOGGER.info(String.format("insertInLeaf(%s, %s, %s)", parent, geomNode, pathNeighbors));
@@ -1505,6 +1507,14 @@ public class RTreeIndex implements SpatialIndexWriter {
     return counter;
   }
 
+  /**
+   * Insert a object into a leaf node.
+   * 
+   * @param indexNode the leaf node
+   * @param geomRootNode the spatial object
+   * @param pathNeighbors path neighbor of the <code>geomRootNode</code>
+   * @return
+   */
   private boolean insertInLeaf(Node indexNode, Node geomRootNode,
       Map<String, int[]> pathNeighbors) {
     return addChild(indexNode, RTreeRelationshipTypes.RTREE_REFERENCE, geomRootNode, pathNeighbors);
@@ -1525,6 +1535,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   private void splitAndAdjustPathBoundingBox(Node indexNode) {
     // create a new node and distribute the entries.
     // entries are distributed evenly into indexNode and newIndexNode respectively.
+    LOGGER.info("greenesSplit");
     Node newIndexNode =
         splitMode.equals(GREENES_SPLIT) ? greenesSplit(indexNode) : quadraticSplit(indexNode);
     Node parent = getIndexNodeParent(indexNode);
@@ -1533,6 +1544,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     if (parent == null) {
       // if indexNode is the root, create a new root, maintain the RTree schema and adjust PN and
       // mbr.
+      LOGGER.info("createNewRoot");
       createNewRoot(indexNode, newIndexNode);
     } else {
       expandParentBoundingBoxAfterNewChild(parent,
