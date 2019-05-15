@@ -208,6 +208,7 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   private void adjustGraphLoc(Node parent, Map<String, int[]> pathNeighbors) {
     long start = System.currentTimeMillis();
+    LOGGER.info("leaf nodes path neighbors:" + leafNodesPathNeighbors.toString());
     HashMap<String, int[]> parentLoc = getLocInGraph(parent);
     Map<String, int[]> childLoc = pathNeighbors;
     long startWrite = System.currentTimeMillis();
