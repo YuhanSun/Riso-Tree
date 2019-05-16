@@ -309,6 +309,18 @@ public class RTreeIndex implements SpatialIndexWriter {
     Util.println("Total time: " + totalTime);
   }
 
+  public void printFunctionCallTrack() {
+    Util.println("In the chooseSubtree(), chooseIndexnodeWithSmallestGD is called "
+        + chooseSmallestGDCount + " times");
+    Util.println(differentTimes + " are different");
+
+    Util.println(String.format("getGD() is called %d times", getGDCount));
+
+    Util.println("noContainCount happens " + noContainCount + " times");
+    Util.println(String.format("%d are the same while %d are different.", noContainSame,
+        noContainDifferent));
+  }
+
   public void add(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors,
       double alpha, int maxPNSize) throws Exception {
     List<NodeWithEnvelope> outliers = bulkInsertion(getIndexRoot(), getHeight(getIndexRoot(), 0),
@@ -333,17 +345,10 @@ public class RTreeIndex implements SpatialIndexWriter {
       Map<String, int[]> pathNeighbors = spatialNodesPathNeighbors.get((int) n.node.getId());
       add(n.node, pathNeighbors);
       totalTime += System.currentTimeMillis() - start;
-      printTimeTrack();
     }
 
-    LOGGER.info("chooseIndexnodeWithSmallestGD is called " + chooseSmallestGDCount + " times");
-    LOGGER.info(differentTimes + " are different");
-
-    LOGGER.info(String.format("getGD() is called %d times", getGDCount));
-
-    LOGGER.info("noContainCount happens " + noContainCount + " times");
-    LOGGER.info(String.format("%d are the same while %d are different.", noContainSame,
-        noContainDifferent));
+    printTimeTrack();
+    printFunctionCallTrack();
   }
 
   private void initializeLeafNodesPathNeighbors() throws Exception {
@@ -406,19 +411,10 @@ public class RTreeIndex implements SpatialIndexWriter {
       long start = System.currentTimeMillis();
       add(n.node);
       totalTime += System.currentTimeMillis() - start;
-      printTimeTrack();
-
     }
 
-    LOGGER.info("chooseIndexnodeWithSmallestGD is called " + chooseSmallestGDCount + " times");
-    LOGGER.info(differentTimes + " are different");
-
-    LOGGER.info(String.format("getGD() is called %d times", getGDCount));
-
-    LOGGER.info("noContainCount happens " + noContainCount + " times");
-    LOGGER.info(String.format("%d are the same while %d are different.", noContainSame,
-        noContainDifferent));
-
+    printTimeTrack();
+    printFunctionCallTrack();
     // }
 
   }
@@ -1285,7 +1281,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       // return chooseIndexNodeWithSmallestArea(indexNodes);
       // yuhan
       Node node = chooseIndexNodeWithSmallestArea(indexNodes);
-      if (!spatialOnly) {
+      if (!spatialOnly && nodeIsLeaf(node)) {
         chooseSmallestGDCount++;
         Node nodeWithSmallestGD = chooseIndexnodeWithSmallestGD(indexNodes, geomRootNode);
         if (node.equals(nodeWithSmallestGD) == false) {
@@ -1293,8 +1289,6 @@ public class RTreeIndex implements SpatialIndexWriter {
         }
         node = nodeWithSmallestGD;
       }
-      // Utility.print(node);
-      // Utility.print(res);
       return node;
     } else if (indexNodes.size() == 1) {
       return indexNodes.get(0);
@@ -1315,6 +1309,17 @@ public class RTreeIndex implements SpatialIndexWriter {
 
     relationships =
         parentIndexNode.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
+
+    // check whether current level is leaf to decide whether to consider the graph distance.
+    boolean isLeaf = false;
+    for (Relationship relationship : relationships) {
+      Node firstNode = relationship.getEndNode();
+      if (nodeIsLeaf(firstNode)) {
+        isLeaf = true;
+      }
+      break;
+    }
+
     for (Relationship relation : relationships) {
       Node indexNode = relation.getEndNode();
       double enlargementNeeded = getAreaEnlargement(indexNode, geomRootNode);
@@ -1329,7 +1334,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       }
 
       // yuhan
-      if (!spatialOnly) {
+      if (!spatialOnly && isLeaf) {
         int GD = getGD(indexNode, locInGraph);
         enlargementNeeded = alpha * enlargementNeeded / (360 * 180)
             + (1 - alpha) * (double) GD / Config.graphNodeCount;
