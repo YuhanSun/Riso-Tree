@@ -77,6 +77,7 @@ public class RisoTreeQueryPN {
   public long overlap_leaf_node_count;
   public long located_in_count;
   public String logPath;
+  public ExecutionPlanDescription planDescription;
 
   // for both knn and join
   public long check_paths_time;
@@ -618,7 +619,7 @@ public class RisoTreeQueryPN {
     iterate_time += System.currentTimeMillis() - start;
 
     result_count += cur_count;
-    ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+    planDescription = result.getExecutionPlanDescription();
     page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
     if (outputExecutionPlan) {
       Util.println(planDescription);
@@ -824,16 +825,17 @@ public class RisoTreeQueryPN {
    * @param minEndId
    * @param pN_list_propertyname
    * @param candidateSets
+   * @throws Exception
    */
   private void addPathNeighbors(Node node, int minEndId,
-      Map<Integer, Set<String>> pN_list_propertyname,
-      Map<Integer, Collection<Long>> candidateSets) {
+      Map<Integer, Set<String>> pN_list_propertyname, Map<Integer, Collection<Long>> candidateSets)
+      throws Exception {
     // Construct the candidateSet for a endId using different path neighbors ending at it.
     List<Integer> candidates = null;
     for (String path : pN_list_propertyname.get(minEndId)) {
       int[] pathNeighbors = (int[]) node.getProperty(path);
       if (pathNeighbors.length == 0) {
-        continue; // the dropped path neighbor cannot refine the candidates.
+        throw new Exception(String.format("%s has %s as minCard while it is dropped!", node, path));
       }
       if (candidates == null) {
         candidates = ArrayUtil.intArrayToList(pathNeighbors);
@@ -858,6 +860,7 @@ public class RisoTreeQueryPN {
         int curSize = (int) node.getProperty(pathSizeName);
         if (curSize != 0 && curSize < minCard) {
           minEndId = endId;
+          minCard = curSize;
         }
       }
     }
