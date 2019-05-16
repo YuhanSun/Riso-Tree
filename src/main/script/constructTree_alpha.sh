@@ -25,6 +25,7 @@ graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
 label_path="${data_dir}/graph_label.txt"
 labelStrMapPath="${data_dir}/entity_string_label.txt"
+spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
