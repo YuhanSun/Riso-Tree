@@ -1142,6 +1142,7 @@ public class Construct_RisoTree {
   public static void wikiGenerateContainSpatialID(String db_path, String dataset,
       String containIDPath) {
     try {
+      Util.checkPathExist(db_path);
       GraphDatabaseService dbservice = Neo4jGraphUtility.getDatabaseService(db_path);
       HashMap<Long, TreeSet<Long>> containIDMap = new HashMap<>();
       Transaction tx = dbservice.beginTx();
