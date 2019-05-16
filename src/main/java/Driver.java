@@ -78,6 +78,7 @@ public class Driver {
   private String PNPathAndPrefix = "PNPrefix";
 
   private String maxPNSize = "maxPNSize";
+  private String alpha = "alpha";
 
   // Analyze
   private String outputPath = "outputPath";
@@ -105,7 +106,9 @@ public class Driver {
     options.addOption(hop, "hop", true, "hop");
     options.addOption(PNPathAndPrefix, "PNPathAndPrefix", true, "Path Neighbor file path preffix");
 
+
     options.addOption(maxPNSize, "maxPNSize", true, "Path Neighbor maximum size");
+    options.addOption(alpha, "alpha", true, "alpha");
 
     // Analyze
     options.addOption(outputPath, "outputPath", true, "The output path for analyze");
@@ -221,7 +224,9 @@ public class Driver {
             // cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath));
             new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), cmd.getOptionValue(entityPath),
-                cmd.getOptionValue(spatialNodePNPath));
+                cmd.getOptionValue(spatialNodePNPath),
+                Double.parseDouble(cmd.getOptionValue(alpha)),
+                Integer.parseInt(cmd.getOptionValue(maxPNSize)));
             break;
           case wikiGenerateContainSpatialID:
             Construct_RisoTree.wikiGenerateContainSpatialID(cmd.getOptionValue(dbPath),

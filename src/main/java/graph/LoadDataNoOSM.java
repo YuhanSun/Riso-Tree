@@ -668,14 +668,14 @@ public class LoadDataNoOSM {
    * @throws Exception
    */
   public void wikiConstructRTree(String dbPath, String dataset, String entityPath,
-      String spatialNodePNPath) throws Exception {
+      String spatialNodePNPath, double alpha, int maxPNSize) throws Exception {
     Util.checkPathExist(dbPath);
     Util.checkPathExist(entityPath);
     Util.checkPathExist(spatialNodePNPath);
 
     ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
     List<Map<String, int[]>> spatialNodesPathNeighbors = readSpatialNodesPN(spatialNodePNPath);
-    wikiConstructRTree(dbPath, dataset, entities, spatialNodesPathNeighbors);
+    wikiConstructRTree(dbPath, dataset, entities, spatialNodesPathNeighbors, alpha, maxPNSize);
   }
 
   /**
@@ -687,7 +687,7 @@ public class LoadDataNoOSM {
    * @param entityPath
    */
   public void wikiConstructRTree(String dbPath, String dataset, ArrayList<Entity> entities,
-      List<Map<String, int[]>> spatialNodesPathNeighbors) {
+      List<Map<String, int[]>> spatialNodesPathNeighbors, double alpha, int maxPNSize) {
     try {
       String layerName = dataset;
       GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
@@ -707,7 +707,7 @@ public class LoadDataNoOSM {
 
       LOGGER.info("layer.addAll(geomNodes)...");
       long start = System.currentTimeMillis();
-      layer.addAll(geomNodes, spatialNodesPathNeighbors);
+      layer.addAll(geomNodes, spatialNodesPathNeighbors, alpha, maxPNSize);
 
       String message = "in memory time: " + (System.currentTimeMillis() - start) + "\n";
       message += "number of spatial objects: " + geomNodes.size() + "\n";

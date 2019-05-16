@@ -138,9 +138,6 @@ public class RTreeIndex implements SpatialIndexWriter {
 
     countSaved = false;
     totalGeometryCount++;
-    if (totalGeometryCount % Config.logInterval == 0) {
-      LOGGER.info("totalGeometryCount: " + totalGeometryCount);
-    }
   }
 
   @Override
@@ -152,9 +149,6 @@ public class RTreeIndex implements SpatialIndexWriter {
 
     countSaved = false;
     totalGeometryCount++;
-    if (totalGeometryCount % Config.logInterval == 0) {
-      LOGGER.info("totalGeometryCount: " + totalGeometryCount);
-    }
   }
 
   private void addBelow(Node parent, Node geomNode, Map<String, int[]> pathNeighbors) {
@@ -164,16 +158,16 @@ public class RTreeIndex implements SpatialIndexWriter {
       parent = chooseSubTree(parent, geomNode, pathNeighbors);
     }
 
-    LOGGER.info("parent node: " + parent);
+    // LOGGER.info("parent node: " + parent);
 
     chooseSubTreeTime += System.currentTimeMillis() - start;
     if (countChildren(parent, RTreeRelationshipTypes.RTREE_REFERENCE) >= maxNodeReferences) {
-      LOGGER.info(String.format("insertInLeaf(%s,%s,%s)", parent, geomNode, pathNeighbors));
+      // LOGGER.info(String.format("insertInLeaf(%s,%s,%s)", parent, geomNode, pathNeighbors));
       insertInLeaf(parent, geomNode, pathNeighbors);
-      LOGGER.info(String.format("splitAndAdjustPathBoundingBox(%s)", parent));
+      // LOGGER.info(String.format("splitAndAdjustPathBoundingBox(%s)", parent));
       splitAndAdjustPathBoundingBox(parent);
     } else { // no split case, done for RisoTree.
-      LOGGER.info(String.format("insertInLeaf(%s, %s, %s)", parent, geomNode, pathNeighbors));
+      // LOGGER.info(String.format("insertInLeaf(%s, %s, %s)", parent, geomNode, pathNeighbors));
       if (insertInLeaf(parent, geomNode, pathNeighbors)) {
         // bbox enlargement needed
         adjustPathBoundingBox(parent);
@@ -315,8 +309,8 @@ public class RTreeIndex implements SpatialIndexWriter {
     Util.println("Total time: " + totalTime);
   }
 
-  public void add(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors)
-      throws Exception {
+  public void add(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors,
+      double alpha, int maxPNSize) throws Exception {
     List<NodeWithEnvelope> outliers = bulkInsertion(getIndexRoot(), getHeight(getIndexRoot(), 0),
         decodeGeometryNodeEnvelopes(geomNodes), 0.7);
     countSaved = false;
@@ -326,13 +320,15 @@ public class RTreeIndex implements SpatialIndexWriter {
     // initialize the map for leaf nodes path neighbors
     initializeLeafNodesPathNeighbors();
     this.spatialNodesPathNeighbors = spatialNodesPathNeighbors;
+    this.alpha = alpha;
+    this.MaxPNSize = maxPNSize;
 
     for (NodeWithEnvelope n : outliers) {
       index++;
-      LOGGER.info("" + index);
-      // if (index % 10000 == 0) {
       // LOGGER.info("" + index);
-      // }
+      if (index % 10000 == 0) {
+        LOGGER.info("" + index);
+      }
       long start = System.currentTimeMillis();
       Map<String, int[]> pathNeighbors = spatialNodesPathNeighbors.get((int) n.node.getId());
       add(n.node, pathNeighbors);
@@ -1370,12 +1366,12 @@ public class RTreeIndex implements SpatialIndexWriter {
       Map<String, int[]> pathNeighbors) {
     Node result = null;
     double smallestSGD = Double.MAX_VALUE;
-    Util.println("count: " + indexNodes.size());
+    // Util.println("count: " + indexNodes.size());
     for (Node indexNode : indexNodes) {
       int GD = getGD(indexNode, pathNeighbors);
       double area = getArea(getIndexNodeEnvelope(indexNode));
       double SGD = 0.000000001 * area + GD;
-      Util.println(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
+      // Util.println(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
       if (result == null || SGD < smallestSGD) {
         result = indexNode;
         smallestSGD = SGD;
@@ -1400,13 +1396,13 @@ public class RTreeIndex implements SpatialIndexWriter {
   private Node chooseIndexnodeWithSmallestGD(List<Node> indexNodes, Node geomRootNode) {
     Node result = null;
     double smallestSGD = Double.MAX_VALUE;
-    Util.println("count: " + indexNodes.size());
+    // Util.println("count: " + indexNodes.size());
     HashMap<String, int[]> pathNeighbors = getLocInGraph(geomRootNode);
     for (Node indexNode : indexNodes) {
       int GD = getGD(indexNode, pathNeighbors);
       double area = getArea(getIndexNodeEnvelope(indexNode));
       double SGD = 0.000000001 * area + GD;
-      Util.println(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
+      // Util.println(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
       if (result == null || SGD < smallestSGD) {
         result = indexNode;
         smallestSGD = SGD;
@@ -1471,7 +1467,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       }
     }
     getGDTime += System.currentTimeMillis() - start;
-    LOGGER.info("GD: " + GD);
+    // LOGGER.info("GD: " + GD);
     return GD;
   }
 
@@ -1535,7 +1531,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   private void splitAndAdjustPathBoundingBox(Node indexNode) {
     // create a new node and distribute the entries.
     // entries are distributed evenly into indexNode and newIndexNode respectively.
-    LOGGER.info("greenesSplit");
+    // LOGGER.info("greenesSplit");
     Node newIndexNode =
         splitMode.equals(GREENES_SPLIT) ? greenesSplit(indexNode) : quadraticSplit(indexNode);
     Node parent = getIndexNodeParent(indexNode);
@@ -1544,7 +1540,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     if (parent == null) {
       // if indexNode is the root, create a new root, maintain the RTree schema and adjust PN and
       // mbr.
-      LOGGER.info("createNewRoot");
+      // LOGGER.info("createNewRoot");
       createNewRoot(indexNode, newIndexNode);
     } else {
       expandParentBoundingBoxAfterNewChild(parent,
@@ -1571,10 +1567,10 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   private Node greenesSplit(Node indexNode) {
     if (nodeIsLeaf(indexNode)) {
-      LOGGER.info("nodeIsLeaf case");
+      // LOGGER.info("nodeIsLeaf case");
       return greenesSplit(indexNode, RTreeRelationshipTypes.RTREE_REFERENCE);
     } else {
-      LOGGER.info("node Is not leaf case");
+      // LOGGER.info("node Is not leaf case");
       return greenesSplit(indexNode, RTreeRelationshipTypes.RTREE_CHILD);
     }
   }
@@ -1649,7 +1645,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     List<NodeWithEnvelope> left = entries.subList(0, splitAt);
     List<NodeWithEnvelope> right = entries.subList(splitAt, entries.size());
 
-    LOGGER.info("reconnectTwoChildGroups");
+    // LOGGER.info("reconnectTwoChildGroups");
     return reconnectTwoChildGroups(indexNode, left, right, relationshipType);
   }
 
@@ -1760,21 +1756,22 @@ public class RTreeIndex implements SpatialIndexWriter {
       leafNodesPathNeighbors.put(indexNode.getId(), new HashMap<>());
     }
 
-    LOGGER.info("add group1 into indexNode");
+    // LOGGER.info("add group1 into indexNode");
     // reset bounding box and add new children
     indexNode.removeProperty(INDEX_PROP_BBOX);
     for (NodeWithEnvelope entry : group1) {
-      LOGGER.info(String.format("addChild(%s, %s, %s)", indexNode, relationshipType, entry.node));
+      // LOGGER.info(String.format("addChild(%s, %s, %s)", indexNode, relationshipType,
+      // entry.node));
       addChild(indexNode, relationshipType, entry.node);
     }
 
     // create new node from split
     Node newIndexNode = database.createNode();
     leafNodesPathNeighbors.put(newIndexNode.getId(), new HashMap<>());
-    LOGGER.info("add group2 into newIndexNode");
+    // LOGGER.info("add group2 into newIndexNode");
     for (NodeWithEnvelope entry : group2) {
-      LOGGER
-          .info(String.format("addChild(%s, %s, %s)", newIndexNode, relationshipType, entry.node));
+      // LOGGER
+      // .info(String.format("addChild(%s, %s, %s)", newIndexNode, relationshipType, entry.node));
       addChild(newIndexNode, relationshipType, entry.node);
     }
 
@@ -2022,8 +2019,8 @@ public class RTreeIndex implements SpatialIndexWriter {
   private Node rootNode;
   private EnvelopeDecoder envelopeDecoder;
   private int maxNodeReferences;
-  private String splitMode = GREENES_SPLIT;
-  // private String splitMode = QUADRATIC_SPLIT;
+  // private String splitMode = GREENES_SPLIT;
+  private String splitMode = QUADRATIC_SPLIT;
   private boolean shouldMergeTrees = false;
 
   private Node metadataNode;
@@ -2037,9 +2034,9 @@ public class RTreeIndex implements SpatialIndexWriter {
    * The value for spatial coefficient. Set to 1.0 if do not want to consider graph distance in the
    * noContain case.
    */
-  private double alpha = 0.5;
+  private Double alpha = null;
 
-  private int MaxPNSize = 100;
+  private Integer MaxPNSize = null;
 
   /*
    * Control whether the PN comes into effect. It is set along with alpha. If alpha = 1.0, this
