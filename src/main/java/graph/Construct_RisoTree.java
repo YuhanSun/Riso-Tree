@@ -761,7 +761,7 @@ public class Construct_RisoTree {
   }
 
   /**
-   * Construct PN (hop > 0), without considering ignored PN.
+   * Construct PN (hop > 0), PN whose size exceeds {@code maxPNSize} will be set as [].
    *
    * @param containIDMap
    * @param labelStringMap
@@ -770,6 +770,7 @@ public class Construct_RisoTree {
    * @param label_list
    * @param hop
    * @param PNPathAndPreffix
+   * @param maxPNSize
    * @return
    * @throws Exception
    */
@@ -778,9 +779,9 @@ public class Construct_RisoTree {
       ArrayList<ArrayList<Integer>> label_list, int hop, String PNPathAndPreffix, int maxPNSize)
       throws Exception {
     // more than one hop
-    Transaction tx2 = dbservice.beginTx();
+    Transaction tx = dbservice.beginTx();
     LOGGER.info(String.format("construct %d hop", hop));
-    FileWriter writer2 = new FileWriter(new File(getPNFilePath(PNPathAndPreffix, hop)));
+    FileWriter writer = new FileWriter(new File(getPNFilePath(PNPathAndPreffix, hop)));
 
     int index = 0;
     long start = System.currentTimeMillis();
@@ -790,23 +791,35 @@ public class Construct_RisoTree {
         LOGGER.info("" + index);
       }
 
-      writer2.write(nodeID + "\n");
+      writer.write(nodeID + "\n");
       Node node = dbservice.getNodeById(nodeID);
-      constructPNOutputForNode(node, labelStringMap, graph, label_list, hop, writer2, maxPNSize);
+      constructPNOutputForNode(node, labelStringMap, graph, label_list, hop, writer, maxPNSize);
 
     }
-    Util.close(writer2);
-    tx2.success();
-    tx2.close();
+    Util.close(writer);
+    tx.success();
+    tx.close();
     return System.currentTimeMillis() - start;
   }
 
+  /**
+   * Construct the PN for a given hop.
+   * 
+   * @param node
+   * @param labelStringMap
+   * @param graph
+   * @param label_list
+   * @param hop
+   * @param writer
+   * @param maxPNSize
+   * @throws Exception
+   */
   private static void constructPNOutputForNode(Node node, String[] labelStringMap,
       ArrayList<ArrayList<Integer>> graph, ArrayList<ArrayList<Integer>> label_list, int hop,
-      FileWriter writer2, int maxPNSize) throws Exception {
+      FileWriter writer, int maxPNSize) throws Exception {
     Map<String, Object> properties = node.getAllProperties();
     for (String key : properties.keySet()) {
-      if (RisoTreeUtil.isPNProperty(key) && StringUtils.countMatches(key, '_') == (hop)) {
+      if (RisoTreeUtil.isPNProperty(key) && RisoTreeUtil.getHopNumber(key) == (hop - 1)) {
         int[] curPathNeighbors = (int[]) properties.get(key);
         if (curPathNeighbors.length == 0) {
           continue; // this PN is ignored.
@@ -814,7 +827,7 @@ public class Construct_RisoTree {
         TreeSet<Integer> nextPathNeighbors = getNextPathNeighborsInSet(curPathNeighbors, graph);
         HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors =
             dividedByLabels(nextPathNeighbors, label_list, maxPNSize);
-        outPathLabelNeighbors(pathLabelNeighbors, key, writer2, labelStringMap);
+        outPathLabelNeighbors(pathLabelNeighbors, key, writer, labelStringMap);
       }
     }
   }
@@ -897,6 +910,19 @@ public class Construct_RisoTree {
     }
   }
 
+  /**
+   * Only called by a deprecated function. Ignored.
+   * 
+   * @param containIDMap
+   * @param labelStringMap
+   * @param dbservice
+   * @param graph
+   * @param label_list
+   * @param MAX_HOPNUM
+   * @param PNPathAndPreffix
+   * @return
+   * @throws Exception
+   */
   public static HashMap<Integer, Long> wikiConstructPNTime(
       HashMap<Long, ArrayList<Integer>> containIDMap, String[] labelStringMap,
       GraphDatabaseService dbservice, ArrayList<ArrayList<Integer>> graph,

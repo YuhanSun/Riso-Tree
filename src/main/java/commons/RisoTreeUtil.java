@@ -15,4 +15,14 @@ public class RisoTreeUtil {
   public static String getAttachName(String prefix, String attachment) {
     return prefix + "_" + attachment;
   }
+
+  /**
+   * Get the hop number of a PN property name. Assume 0-hop is stored with property name PN_label.
+   * 
+   * @param PNPropertyName
+   * @return
+   */
+  public static int getHopNumber(String PNPropertyName) {
+    return StringUtils.countMatches(PNPropertyName, "_") - 1;
+  }
 }
