@@ -32,12 +32,12 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 split_mode="Gleenes"
 maxPNSize="100"
 
-# suffix="_${split_mode}_${alpha}_${maxPNSize}_test"
-suffix="_${split_mode}_${alpha}_${maxPNSize}"
-
 for alpha in 0 0.25 0.5 0.75 1.0
 # for alpha in 0
 do
+	# suffix="_${split_mode}_${alpha}_${maxPNSize}_test"
+	suffix="${split_mode}_${alpha}_${maxPNSize}"
+
 	# db_path="${data_dir}/neo4j-community-3.4.12_${split_mode}_${alpha}_${maxPNSize}${suffix}/data/databases/graph.db"
 	# containID_path="${data_dir}/containID_${split_mode}_${alpha}_${maxPNSize}${suffix}.txt"
 	# PNPathAndPrefix="${data_dir}/PathNeighbors_${split_mode}_${alpha}_${maxPNSize}${suffix}"
@@ -50,9 +50,7 @@ done
 
 for alpha in 0 0.25 0.5 0.75 1.0
 do
-	# db_path="${data_dir}/neo4j-community-3.4.12_${split_mode}_${alpha}_${maxPNSize}${suffix}/data/databases/graph.db"
-	# containID_path="${data_dir}/containID_${split_mode}_${alpha}_${maxPNSize}${suffix}.txt"
-	# PNPathAndPrefix="${data_dir}/PathNeighbors_${split_mode}_${alpha}_${maxPNSize}${suffix}"
+	suffix="${split_mode}_${alpha}_${maxPNSize}"
 	inputPath="PathNeighbors_${suffix}_1.txt"
 
 	java -Xmx100g -jar ${jar_path} \
