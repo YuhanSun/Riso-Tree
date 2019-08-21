@@ -97,6 +97,12 @@ public class Analyze {
 
   }
 
+  /**
+   * Get the PathNeighbor count for a PN file.
+   *
+   * @param filepath
+   * @throws Exception
+   */
   public static void getPNNonEmptyCount(String filepath) throws Exception {
     Map<Long, Map<String, int[]>> pns = ReadWriteUtil.readLeafNodesPathNeighbors(filepath);
     int countNeighbors = 0; // the count of neighbors in the PN

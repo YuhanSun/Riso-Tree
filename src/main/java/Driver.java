@@ -26,7 +26,7 @@ public class Driver {
     /**
      * analyze
      */
-    getPNSizeDistribution,
+    getPNSizeDistribution, getPNNonEmptyCount,
 
     /**
      * for wikidata
@@ -81,6 +81,7 @@ public class Driver {
   private String alpha = "alpha";
 
   // Analyze
+  private String inputPath = "inputPath";
   private String outputPath = "outputPath";
 
   public Driver(String[] args) {
@@ -112,6 +113,7 @@ public class Driver {
 
     // Analyze
     options.addOption(outputPath, "outputPath", true, "The output path for analyze");
+    options.addOption(inputPath, "inputPath", true, "The input path for analyze");
   }
 
   public void parser() {
@@ -194,6 +196,9 @@ public class Driver {
           case getPNSizeDistribution:
             Analyze.getPNSizeDistribution(cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
                 cmd.getOptionValue(outputPath));
+            break;
+          case getPNNonEmptyCount:
+            Analyze.getPNNonEmptyCount(cmd.getOptionValue(inputPath));
             break;
           /**
            * for wikidata
