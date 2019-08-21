@@ -1245,7 +1245,8 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
 
     if (indexNodes.size() > 1) {
-      // This happens very rarely because it requires two enlargement to be exactly the same.
+      // This happens very rarely because it requires two enlargement to be exactly the same. But it
+      // often happen when alpha = 0. Because only graphDist is considered in that case.
       return chooseIndexNodeWithSmallestArea(indexNodes);
     } else if (indexNodes.size() == 1) {
       // for comparison, yuhan
