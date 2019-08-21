@@ -91,10 +91,24 @@ public class Analyze {
     Util.println(config.getDatasetName());
     config.setDatasetName(Datasets.Yelp_100.toString());
     initParameters();
-    getAverageDegree();
+    // getAverageDegree();
     // getSpatialEntityCount();
     // get2HopNeighborCount();
 
+  }
+
+  public static void getPNNonEmptyCount(String filepath) throws Exception {
+    Map<Long, Map<String, int[]>> pns = ReadWriteUtil.readLeafNodesPathNeighbors(filepath);
+    int countNeighbors = 0; // the count of neighbors in the PN
+    int PNPropertyCount = 0; // the count of PN itself
+    for (long leafNodeId : pns.keySet()) {
+      Map<String, int[]> pn = pns.get(leafNodeId);
+      PNPropertyCount += pn.size();
+      for (String pnKey : pn.keySet()) {
+        countNeighbors += pn.get(pnKey).length;
+      }
+    }
+    Util.println(String.format("%s,%d,%d", filepath, PNPropertyCount, countNeighbors));
   }
 
   public static void getPNSizeDistribution(String dbPath, String dataset, String outputPath)

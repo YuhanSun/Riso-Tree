@@ -219,4 +219,55 @@ public class ReadWriteUtil {
     return queryrectangles;
   }
 
+  /**
+   * Read the path neighbors map for leaf nodes. Use Map rather than List because leaf nodes count
+   * is normally less than 100K. But for spatial nodes PN List is used because it can exceed 1M.
+   * 
+   * @param path
+   * @return
+   * @throws Exception
+   */
+  public static Map<Long, Map<String, int[]>> readLeafNodesPathNeighbors(String path)
+      throws Exception {
+    Map<Long, Map<String, int[]>> nodesPN = new HashMap<>();
+
+    BufferedReader reader = Util.getBufferedReader(path);
+    LOGGER.info("Read leaf nodes path neighbors from " + path);
+    String line = null;
+    line = reader.readLine();
+    long nodeID = Long.parseLong(line);
+
+    while (true) {
+      Map<String, int[]> pn = new HashMap<>();
+      while ((line = reader.readLine()) != null) {
+        if (line.matches("\\d+$") == false) { // path neighbor lines
+          String[] lineList = line.split(",", 2);
+          String key = lineList[0];
+
+          String content = lineList[1];
+          if (content.equals("[]")) {
+            pn.put(key, new int[] {0});
+            continue;
+          }
+          String[] contentList = content.substring(1, content.length() - 1).split(", ");
+
+          int[] value = new int[contentList.length];
+          for (int i = 0; i < contentList.length; i++) {
+            value[i] = Integer.parseInt(contentList[i]);
+          }
+          pn.put(key, value);
+        } else {
+          break;
+        }
+      }
+      nodesPN.put(nodeID, pn);
+
+      if (line == null) {
+        break;
+      }
+      nodeID = Long.parseLong(line);
+    }
+
+    return nodesPN;
+  }
 }
