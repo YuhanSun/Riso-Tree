@@ -58,18 +58,18 @@ do
 	-c ${containID_path}
 
 	# # 0-hop
-	# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
-	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	# -lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 
 	# # java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
-	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	# -lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 
 	# # # 1-hop
-	# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
-	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	# -lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 
 	# java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
 	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
