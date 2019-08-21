@@ -36,7 +36,7 @@ maxPNSize="100"
 for alpha in 0 0.25 0.5 0.75 1.0
 # for alpha in 0
 do
-	# suffix="_${split_mode}_${alpha}_${maxPNSize}_test"
+	# suffix="${split_mode}_${alpha}_${maxPNSize}_test"
 	suffix="${split_mode}_${alpha}_${maxPNSize}"
 
 	# db_path="${data_dir}/neo4j-community-3.4.12_${split_mode}_${alpha}_${maxPNSize}${suffix}/data/databases/graph.db"
