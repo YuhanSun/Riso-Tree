@@ -51,7 +51,7 @@ done
 for alpha in 0 0.25 0.5 0.75 1.0
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}"
-	inputPath="PathNeighbors_${suffix}_1.txt"
+	inputPath="${data_dir}/PathNeighbors_${suffix}_1.txt"
 
 	java -Xmx100g -jar ${jar_path} \
 	-f getPNNonEmptyCount \
