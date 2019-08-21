@@ -58,6 +58,6 @@ do
 
 	java -Xmx100g -jar ${jar_path} \
 	-f getPNNonEmptyCount \
-	-inputPath ${inputPath}
+	-inputPath ${inputPath} \
 	-outputPath ${outputPath}
 done
