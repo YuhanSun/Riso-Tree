@@ -103,7 +103,7 @@ public class Analyze {
    * @param filepath
    * @throws Exception
    */
-  public static void getPNNonEmptyCount(String filepath) throws Exception {
+  public static void getPNNonEmptyCount(String filepath, String logPath) throws Exception {
     Map<Long, Map<String, int[]>> pns = ReadWriteUtil.readLeafNodesPathNeighbors(filepath);
     int countNeighbors = 0; // the count of neighbors in the PN
     int PNPropertyCount = 0; // the count of PN itself
@@ -114,7 +114,8 @@ public class Analyze {
         countNeighbors += pn.get(pnKey).length;
       }
     }
-    Util.println(String.format("%s,%d,%d", filepath, PNPropertyCount, countNeighbors));
+    ReadWriteUtil.WriteFile(logPath, true,
+        String.format("%s,%d,%d\n", filepath, PNPropertyCount, countNeighbors));
   }
 
   public static void getPNSizeDistribution(String dbPath, String dataset, String outputPath)

@@ -198,7 +198,8 @@ public class Driver {
                 cmd.getOptionValue(outputPath));
             break;
           case getPNNonEmptyCount:
-            Analyze.getPNNonEmptyCount(cmd.getOptionValue(inputPath));
+            Analyze.getPNNonEmptyCount(cmd.getOptionValue(inputPath),
+                cmd.getOptionValue(outputPath));
             break;
           /**
            * for wikidata
