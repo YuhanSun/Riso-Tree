@@ -41,7 +41,7 @@ do
 	# db_path="${data_dir}/neo4j-community-3.4.12_${split_mode}_${alpha}_${maxPNSize}${suffix}/data/databases/graph.db"
 	# containID_path="${data_dir}/containID_${split_mode}_${alpha}_${maxPNSize}${suffix}.txt"
 	# PNPathAndPrefix="${data_dir}/PathNeighbors_${split_mode}_${alpha}_${maxPNSize}${suffix}"
-	inputPath="PathNeighbors_${suffix}_0.txt"
+	inputPath="${data_dir}/PathNeighbors_${suffix}_0.txt"
 
 	java -Xmx100g -jar ${jar_path} \
 	-f getPNNonEmptyCount \
