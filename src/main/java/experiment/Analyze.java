@@ -14,6 +14,7 @@ import commons.Config;
 import commons.Config.Datasets;
 import commons.Config.system;
 import commons.GraphUtil;
+import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.RTreeUtility;
@@ -95,6 +96,29 @@ public class Analyze {
     // getSpatialEntityCount();
     // get2HopNeighborCount();
 
+  }
+
+  public static void leafNodesOverlapAnalysis(String dbPath, String dataset, String logPath)
+      throws Exception {
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    Transaction tx = service.beginTx();
+    List<Node> leafNodes = RTreeUtility.getRTreeLeafLevelNodes(service, dataset);
+    double total = 0.0;
+    for (Node node : leafNodes) {
+      MyRectangle sourceRect = RTreeUtility.getNodeMBR(node);
+      List<Node> overlapNodes = RTreeUtility.getOverlapLeafNodes(service, dataset, sourceRect);
+      long id = node.getId();
+      for (Node overlapNode : overlapNodes) {
+        if (id == overlapNode.getId()) {
+          continue;
+        }
+        total += sourceRect.intersect(RTreeUtility.getNodeMBR(overlapNode)).area();
+      }
+    }
+    tx.success();
+    tx.close();
+    Util.close(service);
+    ReadWriteUtil.WriteFile(logPath, true, String.format("%s,%f", dbPath, total));
   }
 
   /**

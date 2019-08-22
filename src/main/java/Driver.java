@@ -26,7 +26,7 @@ public class Driver {
     /**
      * analyze
      */
-    getPNSizeDistribution, getPNNonEmptyCount,
+    getPNSizeDistribution, getPNNonEmptyCount, overlapAnalysis,
 
     /**
      * for wikidata
@@ -200,6 +200,10 @@ public class Driver {
           case getPNNonEmptyCount:
             Analyze.getPNNonEmptyCount(cmd.getOptionValue(inputPath),
                 cmd.getOptionValue(outputPath));
+            break;
+          case overlapAnalysis:
+            Analyze.leafNodesOverlapAnalysis(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(dataset), cmd.getOptionValue(outputPath));
             break;
           /**
            * for wikidata

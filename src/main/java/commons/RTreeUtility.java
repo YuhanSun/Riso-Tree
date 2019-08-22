@@ -69,7 +69,7 @@ public class RTreeUtility {
    * @return
    */
   public static MyRectangle getNodeMBR(Node node) {
-    double[] bbox = (double[]) node.getProperty("bbox");
+    double[] bbox = (double[]) node.getProperty(Config.BBoxName);
     MyRectangle myRectangle = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
     return myRectangle;
   }
@@ -152,6 +152,42 @@ public class RTreeUtility {
         for (Relationship relationship : rels) {
           queue.add(relationship.getEndNode());
         }
+      }
+    }
+    throw new Exception(
+        "RTree structure is inccorect! It does not have RTREE_CHILD or RTREE_REFERENCE relationship!");
+  }
+
+  public static List<Node> getOverlapLeafNodes(GraphDatabaseService service, String layerName,
+      MyRectangle rectangle) throws Exception {
+    LinkedList<Node> queue = new LinkedList<>();
+    Node rtree_root_node = getRTreeRoot(service, layerName);
+    if (rtree_root_node == null) {
+      return queue;
+    }
+    if (getNodeMBR(rtree_root_node).intersect(rectangle) != null) {
+      queue.add(rtree_root_node);
+    } else {
+      return queue;
+    }
+    while (!queue.isEmpty()) {
+      if (queue.peek().hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)) {
+        return queue;
+      }
+      int size = queue.size();
+      for (int i = 0; i < size; i++) {
+        Node node = queue.poll();
+        Iterable<Relationship> rels =
+            node.getRelationships(Direction.OUTGOING, RTreeRel.RTREE_CHILD);
+        for (Relationship relationship : rels) {
+          Node endNode = relationship.getEndNode();
+          if (getNodeMBR(endNode).intersect(rectangle) != null) {
+            queue.add(endNode);
+          }
+        }
+      }
+      if (queue.size() == 0) {
+        return queue;
       }
     }
     throw new Exception(
