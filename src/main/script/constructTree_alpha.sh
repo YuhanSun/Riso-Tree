@@ -32,8 +32,8 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 split_mode="Gleenes"
 maxPNSize="100"
 
-# for alpha in 0 0.25 0.5 0.75 1.0
-for alpha in 0.25
+for alpha in 0 0.25 0.5 0.75 1.0
+# for alpha in 0.25
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_test"
 
@@ -41,37 +41,37 @@ do
 	containID_path="${data_dir}/containID_${suffix}.txt"
 	PNPathAndPrefix="${data_dir}/PathNeighbors_${suffix}"
 
-	# Construct the tree structure
-	java -Xmx100g -jar ${jar_path} \
-	-f wikiConstructRTree \
-	-dp ${db_path} \
-	-d ${dataset} \
-	-ep ${entity_path} \
-	-spatialNodePNPath ${spatialNodePNPath} \
-	-alpha ${alpha} \
-	-maxPNSize ${maxPNSize}
+	# # Construct the tree structure
+	# java -Xmx100g -jar ${jar_path} \
+	# -f wikiConstructRTree \
+	# -dp ${db_path} \
+	# -d ${dataset} \
+	# -ep ${entity_path} \
+	# -spatialNodePNPath ${spatialNodePNPath} \
+	# -alpha ${alpha} \
+	# -maxPNSize ${maxPNSize}
 
-	# Generate the leaf contain spatial node file
-	java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
-	-dp ${db_path} \
-	-d ${dataset} \
-	-c ${containID_path}
+	# # Generate the leaf contain spatial node file
+	# java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
+	# -dp ${db_path} \
+	# -d ${dataset} \
+	# -c ${containID_path}
 
-	# 0-hop
-	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
-	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
-
-	java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
-	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
-
-	# 1-hop
-	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
-	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+	# # 0-hop
+	# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
+	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	# -lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 
 	# java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
 	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	# -lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+
+	# # 1-hop
+	# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
+	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
 	# -lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+
+	java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 done
