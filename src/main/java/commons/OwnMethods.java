@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -31,8 +32,10 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.roaringbitmap.RoaringBitmap;
 import org.roaringbitmap.buffer.ImmutableRoaringBitmap;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 
@@ -238,7 +241,7 @@ public class OwnMethods {
         center_ids_list.add(center_id);
       } while (center_ids_set.size() != experimentCount);
       OwnMethods.WriteFile((String) center_id_path, (boolean) false, (String) "");
-      Iterator iterator = center_ids_list.iterator();
+      Iterator<Integer> iterator = center_ids_list.iterator();
       while (iterator.hasNext()) {
         int id = (Integer) iterator.next();
         OwnMethods.WriteFile((String) center_id_path, (boolean) true,
@@ -465,7 +468,7 @@ public class OwnMethods {
   }
 
   /**
-   * Generate random query graph from a data graph
+   * Generate random query graph from a data graph.
    * 
    * @param graph the data graph
    * @param labels labels for the data graph
@@ -576,6 +579,115 @@ public class OwnMethods {
     return null;
   }
 
+  /**
+   * Generate random query graph with string label from a spatial node. Only one spatial predicate.
+   * 
+   * @param graph the data graph
+   * @param labels labels for the data graph
+   * @param entities
+   * @param node_count size of the generated graph
+   * @param spa_pred_count number of spatial predicates
+   * @return
+   * @throws Exception
+   */
+  public static Query_Graph GenerateRandomGraphStringLabel(ArrayList<ArrayList<Integer>> graph,
+      ArrayList<ArrayList<Integer>> labels, String[] labelStringMap, ArrayList<Entity> entities,
+      int node_count, int startSpatialId) throws Exception {
+    ArrayList<ArrayList<Integer>> subgraph = new ArrayList<ArrayList<Integer>>(node_count);
+    for (int i = 0; i < node_count; i++)
+      subgraph.add(new ArrayList<Integer>());
+    ArrayList<Integer> subgraph_ids = new ArrayList<Integer>(node_count);
+
+    subgraph_ids.add(startSpatialId);
+    Random random = new Random();
+    // int graph_size = graph.size();
+    // while (true) {
+    // int first_node = (int) (random.nextDouble() * graph_size);
+    // if (graph.get(first_node).size() != 0) {
+    // subgraph_ids.add(first_node);
+    // break;
+    // }
+    // }
+
+    while (subgraph_ids.size() < node_count) {
+      long start = System.currentTimeMillis();
+      int start_index = random.nextInt(subgraph_ids.size()); // pos in the subgraph_ids
+      int start_id = subgraph_ids.get(start_index);
+      ArrayList<Integer> neighbors = graph.get(start_id);
+      if (neighbors.size() == 0)
+        continue;
+      int end_index_neighbor = random.nextInt(neighbors.size()); // pos in the neighbors array
+      int end_id = neighbors.get(end_index_neighbor);
+      int end_index = subgraph_ids.indexOf(end_id); // pos in the subgraph_ids array
+      if (end_index == -1) {
+        subgraph_ids.add(end_id);
+        end_index = subgraph_ids.size() - 1;
+      }
+      if (subgraph.get(start_index).contains(end_id) == false) {
+        subgraph.get(start_index).add(end_id);
+        subgraph.get(end_index).add(start_id);
+      }
+      if (System.currentTimeMillis() - start > 6000) {
+        return GenerateRandomGraphStringLabel(graph, labels, labelStringMap, entities, node_count,
+            startSpatialId);
+      }
+    }
+    Query_Graph query_Graph = new Query_Graph(node_count);
+
+    // int spa_node_count = 0;
+    // ArrayList<Integer> spa_indices = new ArrayList<Integer>();
+    // for (int i = 0; i < subgraph_ids.size(); i++) {
+    // int id = subgraph_ids.get(i);
+    // if (entities.get(id).IsSpatial) {
+    // spa_indices.add(i);
+    // spa_node_count++;
+    // }
+    // }
+    //
+    // if (spa_node_count < spa_pred_count)
+    // return GenerateRandomGraph(graph, labels, entities, node_count, spa_pred_count);
+    // else {
+    // spa_indices = GetRandom_NoDuplicate(spa_indices, spa_pred_count);
+    // for (int index : spa_indices)
+    // query_Graph.Has_Spa_Predicate[index] = true;
+
+    for (int i = 0; i < node_count; i++) {
+      int id = subgraph_ids.get(i);
+      ArrayList<Integer> singleNodeLabels = labels.get(id);
+      int label = singleNodeLabels.get(random.nextInt(singleNodeLabels.size()));
+      query_Graph.label_list_string[i] = labelStringMap[label];
+      ArrayList<Integer> neighbors = subgraph.get(i);
+      for (int neighbor : neighbors) {
+        int neighbor_index = subgraph_ids.indexOf(neighbor);
+        if (neighbor_index == -1) {
+          Util.println(neighbor + " in " + id + "'s neighbors " + neighbors + " does not exist");
+          Util.println("All the ids in the subgraph are" + subgraph_ids);
+          throw new Exception("neighbors does not exist in subgraph_ids");
+        } else {
+          if (i < neighbor_index) {
+            query_Graph.graph.get(i).add(neighbor_index);
+            query_Graph.graph.get(neighbor_index).add(i);
+          }
+        }
+      }
+    }
+
+    for (ArrayList<Integer> neighbors : query_Graph.graph) {
+      Collections.sort(neighbors);
+    }
+
+    return query_Graph;
+  }
+
+  /**
+   * Get random element from a list of integers. The list can have duplicate elements. The returned
+   * ints will reflect the value distribution. But the returned result will not have duplicate
+   * elements regarding pos in wholeset. So {@code count} cannot exceed {@code wholeset}.
+   * 
+   * @param wholeset
+   * @param count count <= wholeset.size()
+   * @return
+   */
   public static ArrayList<Integer> GetRandom_NoDuplicate(ArrayList<Integer> wholeset, int count) {
     ArrayList<Integer> result = new ArrayList<Integer>(count);
     HashSet<Integer> hashSet = new HashSet<Integer>();
@@ -1082,7 +1194,6 @@ public class OwnMethods {
     try {
       reader = new BufferedReader(new FileReader(new File(entityPath)));
       str = reader.readLine();
-      int node_count = Integer.parseInt(str);
       while ((str = reader.readLine()) != null) {
         String[] str_l = str.split(",");
         int flag = Integer.parseInt(str_l[1]);
@@ -1246,7 +1357,7 @@ public class OwnMethods {
   }
 
   public static void PrintNode(Node node) {
-    Iterator iter = node.getPropertyKeys().iterator();
+    Iterator<String> iter = node.getPropertyKeys().iterator();
     HashMap<String, String> properties = new HashMap<String, String>();
     while (iter.hasNext()) {
       String key = (String) iter.next();
@@ -1284,6 +1395,13 @@ public class OwnMethods {
     return dbhits;
   }
 
+  /**
+   * Use Point as the object in STRtree because knearest search must rely on the Point type. Entity
+   * type will cause error.
+   *
+   * @param entities
+   * @return
+   */
   public static STRtree ConstructSTRee(ArrayList<Entity> entities) {
     STRtree strtree = new STRtree();
 
@@ -1295,5 +1413,74 @@ public class OwnMethods {
 
       }
     return strtree;
+  }
+
+  /**
+   * Not used currently.
+   *
+   * @param entities
+   * @return
+   */
+  public static STRtree constructSTreeWithEntities(List<Entity> entities) {
+    STRtree strtree = new STRtree();
+
+    GeometryFactory fact = new GeometryFactory();
+    for (Entity entity : entities)
+      if (entity.IsSpatial) {
+        Point datapoint = fact.createPoint(new Coordinate(entity.lon, entity.lat));
+        strtree.insert(datapoint.getEnvelopeInternal(), entity);
+      }
+    return strtree;
+  }
+
+  public static Object[] kNearestSearch(STRtree stRtree, double lon, double lat, int K) {
+    GeometryFactory factory = new GeometryFactory();
+    Point center = factory.createPoint(new Coordinate(lon, lat));
+    Object[] result = stRtree.kNearestNeighbour(center.getEnvelopeInternal(),
+        new GeometryFactory().toGeometry(center.getEnvelopeInternal()), new GeometryItemDistance(),
+        K);
+    return result;
+  }
+
+  public static double kNearestDistance(STRtree stRtree, double lon, double lat, int K) {
+    Object[] result = kNearestSearch(stRtree, lon, lat, K);
+    double radius = 0.0;
+    for (Object object : result) {
+      Point point = (Point) object;
+      double dist = Util.distance(lon, lat, point.getX(), point.getY());
+      if (dist > radius)
+        radius = dist;
+    }
+    return radius;
+  }
+
+  public static MyRectangle getRectKWithin(STRtree stRtree, double lon, double lat, int K) {
+    double radius = kNearestDistance(stRtree, lon, lat, K);
+    double a = equalAreaCircleToSquare(radius);
+
+    double minx = lon - a / 2;
+    double miny = lat - a / 2;
+    double maxx = lon + a / 2;
+    double maxy = lat + a / 2;
+
+    return new MyRectangle(minx, miny, maxx, maxy);
+  }
+
+  public static double equalAreaCircleToSquare(double radius) {
+    return Math.sqrt(Math.PI) * radius;
+  }
+
+  public static ArrayList<Integer> samplingWithinRange(STRtree stRtree, MyRectangle rectangle,
+      int K) {
+    ArrayList<Integer> ids = new ArrayList<>(K);
+    List<?> objects = stRtree
+        .query(new Envelope(rectangle.min_x, rectangle.max_x, rectangle.min_y, rectangle.max_y));
+
+    for (Object object : objects) {
+      Entity entity = (Entity) object;
+      ids.add(entity.id);
+    }
+
+    return GetRandom_NoDuplicate(ids, K);
   }
 }

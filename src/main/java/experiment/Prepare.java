@@ -1,18 +1,12 @@
 package experiment;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Random;
+import java.util.List;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.DynamicLabel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -25,15 +19,17 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config;
+import commons.Config.system;
 import commons.Entity;
 import commons.GraphUtil;
+import commons.Labels.GraphLabel;
 import commons.Labels.OSMRelation;
+import commons.MyRectangle;
+import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
 import commons.Util;
-import commons.Config.system;
-import commons.Labels.GraphLabel;
-import commons.OwnMethods;
+import dataprocess.Wikidata;
 
 /**
  * convert {0,1} two labels graph to more selective graph with 10 or 100 labels for Gowalla dataset,
@@ -488,6 +484,50 @@ public class Prepare {
     }
   }
 
+  public static void generateExperimentCypherQuery(String graphPath, String entityPath,
+      String labelsPath, String entityStringLabelMapPath, double startSelectivity,
+      double endSelectivity, int count, int selectivityTimes, String outputPath) throws Exception {
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
+    ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
+    ArrayList<ArrayList<Integer>> graphLabels = GraphUtil.ReadGraph(labelsPath);
+    String[] labelStringMap = Wikidata.readLabelMap(entityStringLabelMapPath);
+
+    STRtree stRtreeEntities = OwnMethods.constructSTreeWithEntities(entities);
+    STRtree stRtreePoints = OwnMethods.ConstructSTRee(entities);
+
+    ArrayList<Integer> spatialIds = getSpatialIds(entities);
+    int spatialCount = spatialIds.size();
+    double selectivity = startSelectivity;
+    while (selectivity < endSelectivity) {
+      int K = (int) (selectivity * spatialCount) + 1;
+      ArrayList<Integer> centerIds = OwnMethods.GetRandom_NoDuplicate(spatialIds, count);
+
+      for (int centerId : centerIds) {
+        Entity centerEntity = entities.get(centerId);
+        if (centerEntity.id != centerId) {
+          throw new Exception(String.format("%d th entity has id %d", centerId, centerEntity.id));
+        }
+        MyRectangle rectangle =
+            OwnMethods.getRectKWithin(stRtreePoints, centerEntity.lon, centerEntity.lat, K);
+        ArrayList<Integer> sampleIds =
+            OwnMethods.samplingWithinRange(stRtreeEntities, rectangle, 1);
+        int startSpatialId = sampleIds.get(0);
+      }
+
+      selectivity *= 10;
+    }
+  }
+
+  public static ArrayList<Integer> getSpatialIds(List<Entity> entities) {
+    ArrayList<Integer> ids = new ArrayList<>(entities.size());
+    for (Entity entity : entities) {
+      if (entity.IsSpatial) {
+        ids.add(entity.id);
+      }
+    }
+    return ids;
+  }
+
   public static void newLabelTest() {
     try {
       GraphDatabaseService dbService =
@@ -496,7 +536,7 @@ public class Prepare {
 
       for (int i = 0; i < 10; i++) {
         int labelIndex = i + 2;
-        Label label = DynamicLabel.label(String.format("GRAPH_%d", labelIndex));
+        Label label = Label.label(String.format("GRAPH_%d", labelIndex));
         ResourceIterator<Node> nodes = dbService.findNodes(label);
         int count = 0;
         while (nodes.hasNext()) {
@@ -538,7 +578,7 @@ public class Prepare {
         int id = (Integer) node.getProperty("id");
         int labelIndex = label_list.get(id);
         String label_name = String.format("GRAPH_%d", labelIndex);
-        Label label = DynamicLabel.label(label_name);
+        Label label = Label.label(label_name);
         node.addLabel(label);
       }
 
