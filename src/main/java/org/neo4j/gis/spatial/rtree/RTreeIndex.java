@@ -319,6 +319,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     Util.println("noContainCount happens " + noContainCount + " times");
     Util.println(String.format("%d are the same while %d are different.", noContainSame,
         noContainDifferent));
+    Util.println(String.format("tieBreakFailCount: %d", tieBreakFailCount));
   }
 
   public void add(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors,
@@ -1229,10 +1230,17 @@ public class RTreeIndex implements SpatialIndexWriter {
       }
 
       // yuhan
+      // if graph influence is not zero
       if (!spatialOnly) {
         int GD = getGD(indexNode, locInGraph);
-        enlargementNeeded = alpha * enlargementNeeded / (360 * 180)
-            + (1 - alpha) * (double) GD / Config.graphNodeCount;
+        // if graph influence is 1 (alpha = 0), in order to handle the tie breaks for GD
+        if (Math.abs(alpha - 0.0) < 0.00000001) {
+          enlargementNeeded = 0.00000000001 * enlargementNeeded / (360 * 180)
+              + (1 - alpha) * (double) GD / Config.graphNodeCount;
+        } else {
+          enlargementNeeded = alpha * enlargementNeeded / (360 * 180)
+              + (1 - alpha) * (double) GD / Config.graphNodeCount;
+        }
       }
 
       if (enlargementNeeded < minimumEnlargement) {
@@ -1247,6 +1255,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     if (indexNodes.size() > 1) {
       // This happens very rarely because it requires two enlargement to be exactly the same. But it
       // often happen when alpha = 0. Because only graphDist is considered in that case.
+      tieBreakFailCount++;
       return chooseIndexNodeWithSmallestArea(indexNodes);
     } else if (indexNodes.size() == 1) {
       // for comparison, yuhan
@@ -2064,6 +2073,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   private int noContainCount = 0;
   private int noContainSame = 0; // Spatial only and SGD takes the same subtree.
   private int noContainDifferent = 0; // Spatial only and SGD takes different subtrees.
+  private int tieBreakFailCount = 0;
 
   public final static String PN_PROP_PREFFIX = "PN_";
 
