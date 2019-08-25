@@ -118,7 +118,7 @@ public class Analyze {
     tx.success();
     tx.close();
     Util.close(service);
-    ReadWriteUtil.WriteFile(logPath, true, String.format("%s,%f\n", dbPath, total));
+    ReadWriteUtil.WriteFile(logPath, true, String.format("%s\t%f\n", dbPath, total));
   }
 
   /**
@@ -139,7 +139,7 @@ public class Analyze {
       }
     }
     ReadWriteUtil.WriteFile(logPath, true,
-        String.format("%s,%d,%d\n", filepath, PNPropertyCount, countNeighbors));
+        String.format("%s\t%d\t%d\n", filepath, PNPropertyCount, countNeighbors));
   }
 
   public static void getPNSizeDistribution(String dbPath, String dataset, String outputPath)

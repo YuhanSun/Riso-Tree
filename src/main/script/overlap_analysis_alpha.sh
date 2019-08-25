@@ -26,3 +26,5 @@ do
 	-d ${dataset} \
 	-outputPath ${outputPath}
 done
+
+echo "" >> ${outputPath}

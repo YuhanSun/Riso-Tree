@@ -51,6 +51,8 @@ do
 	-outputPath ${outputPath}
 done
 
+echo "" >> ${outputPath}
+
 for alpha in 0 0.25 0.5 0.75 1.0
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_test"
@@ -61,3 +63,5 @@ do
 	-inputPath ${inputPath} \
 	-outputPath ${outputPath}
 done
+
+echo "" >> ${outputPath}
