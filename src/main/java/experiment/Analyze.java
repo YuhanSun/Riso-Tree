@@ -118,7 +118,7 @@ public class Analyze {
     tx.success();
     tx.close();
     Util.close(service);
-    ReadWriteUtil.WriteFile(logPath, true, String.format("%s,%f", dbPath, total));
+    ReadWriteUtil.WriteFile(logPath, true, String.format("%s,%f\n", dbPath, total));
   }
 
   /**
