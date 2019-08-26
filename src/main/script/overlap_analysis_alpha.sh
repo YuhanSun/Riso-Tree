@@ -11,8 +11,8 @@ code_dir="${dir}/code"
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 outputPath="${data_dir}/overlap_analysis.csv"
 
-header="db_path	total_overlap	average_overlap"
-echo ${header} >> ${outputPath}
+header="db_path\ttotal_overlap\taverage_overlap\n"
+printf ${header} >> ${outputPath}
 
 split_mode="Gleenes"
 maxPNSize="100"
@@ -30,4 +30,4 @@ do
 	-outputPath ${outputPath}
 done
 
-echo "" >> ${outputPath}
+printf "\n" >> ${outputPath}

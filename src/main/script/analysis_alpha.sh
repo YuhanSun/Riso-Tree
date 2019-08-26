@@ -30,8 +30,8 @@ code_dir="${dir}/code"
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 outputPath="${data_dir}/PNNonEmptyCount.csv"
 
-header="filepath	PNPropertyCount	PNNeighborCount	PNPropertySize	PNNeighborSize	total_size"
-echo ${header} >> ${outputPath}
+header="filepath\tPNPropertyCount\tPNNeighborCount\tPNPropertySize\tPNNeighborSize\ttotal_size\n"
+printf ${header} >> ${outputPath}
 
 split_mode="Gleenes"
 maxPNSize="100"
@@ -54,8 +54,8 @@ do
 	-outputPath ${outputPath}
 done
 
-echo "" >> ${outputPath}
-echo ${header} >> ${outputPath}
+printf "\n" >> ${outputPath}
+printf ${header} >> ${outputPath}
 
 for alpha in 0 0.25 0.5 0.75 1.0
 do
@@ -68,4 +68,4 @@ do
 	-outputPath ${outputPath}
 done
 
-echo "" >> ${outputPath}
+printf "\n" >> ${outputPath}
