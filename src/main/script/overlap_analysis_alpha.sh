@@ -11,6 +11,9 @@ code_dir="${dir}/code"
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 outputPath="${data_dir}/overlap_analysis.csv"
 
+header="db_path	total_overlap	average_overlap"
+echo ${header} >> ${outputPath}
+
 split_mode="Gleenes"
 maxPNSize="100"
 

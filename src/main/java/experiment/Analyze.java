@@ -118,7 +118,8 @@ public class Analyze {
     tx.success();
     tx.close();
     Util.close(service);
-    ReadWriteUtil.WriteFile(logPath, true, String.format("%s\t%f\n", dbPath, total));
+    ReadWriteUtil.WriteFile(logPath, true,
+        String.format("%s\t%f\t%f\n", dbPath, total, total / leafNodes.size()));
   }
 
   /**
@@ -138,8 +139,13 @@ public class Analyze {
         countNeighbors += pn.get(pnKey).length;
       }
     }
-    ReadWriteUtil.WriteFile(logPath, true,
-        String.format("%s\t%d\t%d\n", filepath, PNPropertyCount, countNeighbors));
+    // assume each neighbor id is 32 bits.
+    double PNNeighborSizeInMB = ((double) countNeighbors) * 32 / 4 / 1024 / 1024;
+    // assume a key requires 32 bits.
+    double PNKeySizeInMB = ((double) PNPropertyCount) * 32 / 4 / 1024 / 1024;
+    double totalSize = PNNeighborSizeInMB + PNKeySizeInMB;
+    ReadWriteUtil.WriteFile(logPath, true, String.format("%s\t%d\t%d\t%f\t%f\t%f\n", filepath,
+        PNPropertyCount, countNeighbors, PNKeySizeInMB, PNNeighborSizeInMB, totalSize));
   }
 
   public static void getPNSizeDistribution(String dbPath, String dataset, String outputPath)
