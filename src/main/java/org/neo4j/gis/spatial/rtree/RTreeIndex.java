@@ -165,7 +165,6 @@ public class RTreeIndex implements SpatialIndexWriter {
       // LOGGER.info(String.format("insertInLeaf(%s,%s,%s)", parent, geomNode, pathNeighbors));
       insertInLeaf(parent, geomNode, pathNeighbors);
       // LOGGER.info(String.format("splitAndAdjustPathBoundingBox(%s)", parent));
-      // This needs to be replaced by GD version. Currently split do not considered GD.
       splitAndAdjustPathBoundingBox(parent);
     } else { // no split case, done for RisoTree.
       // LOGGER.info(String.format("insertInLeaf(%s, %s, %s)", parent, geomNode, pathNeighbors));
@@ -1021,6 +1020,11 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
   }
 
+  /**
+   * Get the root node of RTree. It is the highest node with bbox.
+   *
+   * @return
+   */
   public Node getIndexRoot() {
     try (Transaction tx = database.beginTx()) {
       Node indexRoot =
@@ -1543,8 +1547,9 @@ public class RTreeIndex implements SpatialIndexWriter {
   }
 
   /**
-   * Insert a object into a leaf node.
-   * 
+   * Insert a object into a leaf node. Will adjust MBR and graphloc if necessary in addChild()
+   * function.
+   *
    * @param indexNode the leaf node
    * @param geomRootNode the spatial object
    * @param pathNeighbors path neighbor of the <code>geomRootNode</code>
@@ -1568,7 +1573,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   }
 
   /**
-   * 
+   * Currently split using the original algorithm, but adjust PN accordingly.
    *
    * @param indexNode
    */
@@ -1847,6 +1852,16 @@ public class RTreeIndex implements SpatialIndexWriter {
     layerNode.createRelationshipTo(newRoot, RTreeRelationshipTypes.RTREE_ROOT);
   }
 
+  /**
+   * Refer to the same-name function. The return only considers the MBR, not the PN because PN is
+   * not recursely adjusted.
+   *
+   * @param parent
+   * @param type
+   * @param newChild
+   * @param pathNeighbors
+   * @return {@code parent} MBR changed or not
+   */
   private boolean addChild(Node parent, RelationshipType type, Node newChild,
       Map<String, int[]> pathNeighbors) {
     // yuhan
@@ -1886,6 +1901,11 @@ public class RTreeIndex implements SpatialIndexWriter {
     return expandParentBoundingBoxAfterNewChild(parent, childBBox);
   }
 
+  /**
+   * Adjust the parent of {@code node}.
+   *
+   * @param node
+   */
   private void adjustPathBoundingBox(Node node) {
     Node parent = getIndexNodeParent(node);
     if (parent != null) {
@@ -1943,7 +1963,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    *
    * @param parent IndexNode
    * @param childBBox geomNode inserted
-   * @return is bbox changed?
+   * @return is bbox changed or not
    */
   protected boolean expandParentBoundingBoxAfterNewChild(Node parent, double[] childBBox) {
     if (!parent.hasProperty(INDEX_PROP_BBOX)) {
