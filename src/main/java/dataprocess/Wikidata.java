@@ -604,14 +604,14 @@ public class Wikidata {
         continue;
       }
       int id = entity.id;
-      generateOutputZeroOneHopPNForSingleSpatialNode(graph, graphLabels, labelStringMap, id, maxPNSize,
-          writer);
+      generateOutputZeroOneHopPNForSingleSpatialNode(graph, graphLabels, labelStringMap, id,
+          maxPNSize, writer);
     }
   }
 
-  private static void generateOutputZeroOneHopPNForSingleSpatialNode(ArrayList<ArrayList<Integer>> graph,
-      ArrayList<ArrayList<Integer>> graphLabels, String[] labelStringMap, int id, int maxPNSize,
-      FileWriter writer) throws Exception {
+  private static void generateOutputZeroOneHopPNForSingleSpatialNode(
+      ArrayList<ArrayList<Integer>> graph, ArrayList<ArrayList<Integer>> graphLabels,
+      String[] labelStringMap, int id, int maxPNSize, FileWriter writer) throws Exception {
     Map<String, ArrayList<Integer>> zeroHopPathNeighbors =
         generateZeroHopPNForSingleSpatialNode(id, graphLabels.get(id), labelStringMap);
     Map<String, ArrayList<Integer>> oneHopPathNeighbors = generateOneHopPNForSingleSpatialNode(
@@ -681,9 +681,9 @@ public class Wikidata {
         dividedByLabels(graph.get(id), graphLabels, labelStringMap, maxPNSize);
     for (String key : pathLabelNeighbors.keySet()) {
       ArrayList<Integer> arrayList = pathLabelNeighbors.get(key);
-      if (arrayList.size() == 0) { // the removal case
-        continue;
-      }
+      // if (arrayList.size() == 0) { // the removal case
+      // continue;
+      // }
       for (String zeroHopPathName : zeroHopPathNeighbors.keySet()) {
         String oneHopKey = RisoTreeUtil.getAttachName(zeroHopPathName, key);
         oneHopPathNeighbors.put(oneHopKey, arrayList);
@@ -692,6 +692,17 @@ public class Wikidata {
     return oneHopPathNeighbors;
   }
 
+  /**
+   * Not used because it is too slow.
+   *
+   * @param inserter
+   * @param id
+   * @param neighbors
+   * @param labels
+   * @param graphLabels
+   * @param labelStringMap
+   * @param maxPNSize
+   */
   private static void setOneHopPN(BatchInserter inserter, int id, ArrayList<Integer> neighbors,
       Iterable<Integer> labels, ArrayList<ArrayList<Integer>> graphLabels, String[] labelStringMap,
       int maxPNSize) {
@@ -720,6 +731,15 @@ public class Wikidata {
     }
   }
 
+  /**
+   * Divide 1-hop neighbors by labels. Each neighbor can have >1 labels.
+   *
+   * @param nextPathNeighbors
+   * @param graphLabels
+   * @param labelStringMap
+   * @param maxPNSize if > {@code maxPNSize}, neighbors = []
+   * @return the format: (labelStr, neighbors)
+   */
   private static HashMap<String, ArrayList<Integer>> dividedByLabels(
       ArrayList<Integer> nextPathNeighbors, ArrayList<ArrayList<Integer>> graphLabels,
       String[] labelStringMap, int maxPNSize) {
