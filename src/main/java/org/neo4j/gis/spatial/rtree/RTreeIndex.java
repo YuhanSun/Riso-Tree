@@ -165,6 +165,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       // LOGGER.info(String.format("insertInLeaf(%s,%s,%s)", parent, geomNode, pathNeighbors));
       insertInLeaf(parent, geomNode, pathNeighbors);
       // LOGGER.info(String.format("splitAndAdjustPathBoundingBox(%s)", parent));
+      // This needs to be replaced by GD version. Currently split do not considered GD.
       splitAndAdjustPathBoundingBox(parent);
     } else { // no split case, done for RisoTree.
       // LOGGER.info(String.format("insertInLeaf(%s, %s, %s)", parent, geomNode, pathNeighbors));
@@ -202,6 +203,13 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
   }
 
+  /**
+   * Adjust the parent PN by expanding based on {@code pathNeighbors}. Only called when
+   * {@code parent} is leaf node.
+   *
+   * @param parent
+   * @param pathNeighbors
+   */
   private void adjustGraphLoc(Node parent, Map<String, int[]> pathNeighbors) {
     long start = System.currentTimeMillis();
     HashMap<String, int[]> parentLoc = getLocInGraph(parent);
@@ -1168,6 +1176,14 @@ public class RTreeIndex implements SpatialIndexWriter {
     return !node.hasRelationship(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
   }
 
+  private Node chooseIndexNodeWithSmallestSGD(List<Node> indexNodes, Node geomRootNode,
+      Map<String, int[]> pathNeighbors) {
+    if (indexNodes.size() == 0) {
+      throw new RuntimeException("indexNodes has 0 nodes!");
+    }
+    return null;
+  }
+
   private Node chooseSubTree(Node parentIndexNode, Node geomRootNode,
       Map<String, int[]> pathNeighbors) {
     // children that can contain the new geometry
@@ -1377,6 +1393,14 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
   }
 
+  /**
+   * Choose the node with the smallest GD. Since GD has many same values, use the area as a tie
+   * breaker.
+   *
+   * @param indexNodes
+   * @param pathNeighbors
+   * @return
+   */
   private Node chooseIndexnodeWithSmallestGD(List<Node> indexNodes,
       Map<String, int[]> pathNeighbors) {
     Node result = null;
@@ -1385,7 +1409,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     for (Node indexNode : indexNodes) {
       int GD = getGD(indexNode, pathNeighbors);
       double area = getArea(getIndexNodeEnvelope(indexNode));
-      double SGD = 0.000000001 * area + GD;
+      double SGD = 0.000000001 * area + GD; // Solve tie breaker using the smallest area.
       // Util.println(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
       if (result == null || SGD < smallestSGD) {
         result = indexNode;
@@ -1543,19 +1567,25 @@ public class RTreeIndex implements SpatialIndexWriter {
     return addChild(indexNode, RTreeRelationshipTypes.RTREE_REFERENCE, geomRootNode);
   }
 
+  /**
+   * 
+   *
+   * @param indexNode
+   */
   private void splitAndAdjustPathBoundingBox(Node indexNode) {
     // create a new node and distribute the entries.
     // entries are distributed evenly into indexNode and newIndexNode respectively.
     // LOGGER.info("greenesSplit");
+    // PN is adjusted if indexNode is leaf nodes.
     Node newIndexNode =
         splitMode.equals(GREENES_SPLIT) ? greenesSplit(indexNode) : quadraticSplit(indexNode);
     Node parent = getIndexNodeParent(indexNode);
     // System.out.println("spitIndex " + newIndexNode.getId());
     // System.out.println("parent " + parent.getId());
     if (parent == null) {
-      // if indexNode is the root, create a new root, maintain the RTree schema and adjust PN and
-      // mbr.
+      // if indexNode is the root, create a new root, maintain the RTree structure and MBR.
       // LOGGER.info("createNewRoot");
+      // MBR is adjusted here and no PN adjustment is needed.
       createNewRoot(indexNode, newIndexNode);
     } else {
       expandParentBoundingBoxAfterNewChild(parent,
@@ -1642,8 +1672,8 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   /**
    *
-   * @param indexNode
-   * @param relationshipType
+   * @param indexNode can be leaf or non-leaf node
+   * @param relationshipType can be {@code RTREE_CHILD} or {@code RTREE_REFERENCE}
    * @return a new IndexNode that contains the second part of children
    */
   private Node greenesSplit(Node indexNode, RelationshipType relationshipType) {
@@ -1766,7 +1796,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       List<NodeWithEnvelope> group2, RelationshipType relationshipType) {
     // yuhan
     // remove the PN property and reconstruct in addChild() function
-    if (!spatialOnly) {
+    if (!spatialOnly && relationshipType.equals(RTreeRelationshipTypes.RTREE_REFERENCE)) {
       leafNodesPathNeighbors.remove(indexNode.getId());
       leafNodesPathNeighbors.put(indexNode.getId(), new HashMap<>());
     }
@@ -1795,14 +1825,18 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   /**
    * Create a new node as the new root. Add oldRoot and newIndexNode as children of such new node.
-   * Keep the schema of LayerNode--RootNode correct. Remove the original relationship to oldRoot and
-   * add a new relationship to newRoot. Here addChild() will not cause PN adjust because newRoot is
-   * not a leaf node.
+   * Keep the schema of LayerNode-[:RTREE_ROOT]-RootNode correct. Remove the original relationship
+   * to oldRoot and add a new relationship to newRoot. MBR is maintained and adjusted in addChild
+   * function. Here we use addChild() no adjust version without considering PN because newRoot is
+   * not a leaf node. This function does not need to adjust PN. It can be used for both versions. PN
+   * exists on oldRoot and newIndexNode and should have been adjusted before going into this
+   * function.
    *
    * @param oldRoot
    * @param newIndexNode
    */
   private void createNewRoot(Node oldRoot, Node newIndexNode) {
+    // Create a new root and add oldRoot and newIndexNode as children.
     Node newRoot = database.createNode();
     addChild(newRoot, RTreeRelationshipTypes.RTREE_CHILD, oldRoot);
     addChild(newRoot, RTreeRelationshipTypes.RTREE_CHILD, newIndexNode);
@@ -1817,7 +1851,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       Map<String, int[]> pathNeighbors) {
     // yuhan
     // only adustGraphLoc when the parent is a leaf node.
-    if (spatialOnly == false && type.name().equals(RTreeRelationshipTypes.RTREE_REFERENCE.name())) {
+    if (spatialOnly == false && type.equals(RTreeRelationshipTypes.RTREE_REFERENCE)) {
       adjustGraphLoc(parent, pathNeighbors);
     }
 
@@ -1841,7 +1875,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   private boolean addChild(Node parent, RelationshipType type, Node newChild) {
     // yuhan
     // only adustGraphLoc when the parent is a leaf node.
-    if (spatialOnly == false && type.name().equals(RTreeRelationshipTypes.RTREE_REFERENCE.name())) {
+    if (spatialOnly == false && type.equals(RTreeRelationshipTypes.RTREE_REFERENCE)) {
       adjustGraphLoc(parent, spatialNodesPathNeighbors.get((int) newChild.getId()));
     }
 
@@ -2011,6 +2045,11 @@ public class RTreeIndex implements SpatialIndexWriter {
     node.delete();
   }
 
+  /**
+   * Get the layer node (one above the rootNode).
+   *
+   * @return
+   */
   private Node getRootNode() {
     return rootNode;
   }
@@ -2031,7 +2070,7 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   private GraphDatabaseService database;
 
-  private Node rootNode;
+  private Node rootNode; // actually it is the layerNode.
   private EnvelopeDecoder envelopeDecoder;
   private int maxNodeReferences;
   private String splitMode = GREENES_SPLIT;
