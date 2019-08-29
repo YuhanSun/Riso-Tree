@@ -22,7 +22,7 @@ code_dir="${dir}/code"
 
 
 # server setup
-db_path="${data_dir}/neo4j-community-3.4.12_0.5/data/databases/graph.db"
+# db_path="${data_dir}/neo4j-community-3.4.12_0.5/data/databases/graph.db"
 
 
 graph_path="${data_dir}/graph.txt"
@@ -64,20 +64,20 @@ java -Xmx100g -jar ${jar_path} -h
 #  -entityStringLabelMapPath ${entityStringLabelMapPath} \
 #  -maxPNSize 100
 
-# java -Xmx100g -jar ${jar_path} \
-# 	-f wikigenerateZeroOneHopPNForSpatialNodes \
-# 	-gp ${graph_path} \
-# 	-lp ${label_path} \
-# 	-ep ${entity_path} \
-# 	-entityStringLabelMapPath ${entityStringLabelMapPath} \
-# 	-maxPNSize 100 \
-# 	-outputPath ${data_dir}/spatialNodesZeroOneHopPN.txt
-
-
 java -Xmx100g -jar ${jar_path} \
-	-f wikiConstructRTree \
-	-dp ${db_path} \
-	-d ${dataset} \
+	-f wikigenerateZeroOneHopPNForSpatialNodes \
+	-gp ${graph_path} \
+	-lp ${label_path} \
 	-ep ${entity_path} \
-	-spatialNodePNPath ${spatialNodePNPath}
+	-entityStringLabelMapPath ${entityStringLabelMapPath} \
+	-maxPNSize 100 \
+	-outputPath ${data_dir}/spatialNodesZeroOneHopPN.txt
+
+
+# java -Xmx100g -jar ${jar_path} \
+# 	-f wikiConstructRTree \
+# 	-dp ${db_path} \
+# 	-d ${dataset} \
+# 	-ep ${entity_path} \
+# 	-spatialNodePNPath ${spatialNodePNPath}
 
