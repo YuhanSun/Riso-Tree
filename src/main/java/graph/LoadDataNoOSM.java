@@ -728,6 +728,13 @@ public class LoadDataNoOSM {
     }
   }
 
+  /**
+   * id in [0, Config.graphNodeCount]. Non-spatial filled with null.
+   * 
+   * @param spatialNodePNPath
+   * @return
+   * @throws Exception
+   */
   public static List<Map<String, int[]>> readSpatialNodesPN(String spatialNodePNPath)
       throws Exception {
     List<Map<String, int[]>> spatialNodesPN =
@@ -748,7 +755,7 @@ public class LoadDataNoOSM {
 
           String content = lineList[1];
           if (content.equals("[]")) {
-            pn.put(key, new int[] {0});
+            pn.put(key, new int[0]);
             continue;
           }
           String[] contentList = content.substring(1, content.length() - 1).split(", ");
