@@ -203,7 +203,7 @@ public class Driver {
                 cmd.getOptionValue(outputPath));
             break;
           case overlapAnalysis:
-            Analyze.leafNodesOverlapAnalysis(cmd.getOptionValue(dbPath),
+            Analyze.leafNodesOverlapAnalysisInMemory(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), cmd.getOptionValue(outputPath));
             break;
           case areaAnalysis:

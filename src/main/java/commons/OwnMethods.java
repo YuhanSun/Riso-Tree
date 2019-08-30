@@ -1422,6 +1422,24 @@ public class OwnMethods {
    * @param entities
    * @return
    */
+  public static STRtree constructSTRTreeWithMyRectangles(List<MyRectangle> rectangles) {
+    STRtree strtree = new STRtree();
+
+    for (MyRectangle rectangle : rectangles) {
+      Envelope envelope =
+          new Envelope(rectangle.min_x, rectangle.max_x, rectangle.min_y, rectangle.max_y);
+      strtree.insert(envelope, rectangle);
+    }
+    return strtree;
+  }
+
+  /**
+   * The STRTree constructed using entity as object can only be used for range search. It cannot be
+   * used for any Nearest Neighbor query.
+   *
+   * @param entities
+   * @return
+   */
   public static STRtree constructSTRTreeWithEntities(List<Entity> entities) {
     STRtree strtree = new STRtree();
 

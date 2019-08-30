@@ -3,6 +3,7 @@ package experiment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -10,6 +11,8 @@ import java.util.logging.Logger;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config;
 import commons.Config.Datasets;
 import commons.Config.system;
@@ -98,10 +101,51 @@ public class Analyze {
 
   }
 
+  /**
+   * Analyze the average overlap for each tree leaf node. Read all rectangles of leaf nodes and
+   * store them in memory. Build an in-memory RTree to perform the self-join.
+   *
+   * @param dbPath
+   * @param dataset
+   * @param logPath
+   * @throws Exception
+   */
+  public static void leafNodesOverlapAnalysisInMemory(String dbPath, String dataset, String logPath)
+      throws Exception {
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    List<MyRectangle> rectangles = new LinkedList<>();
+    Transaction tx = service.beginTx();
+    List<Node> leafNodes = RTreeUtility.getRTreeLeafLevelNodes(service, dataset);
+    for (Node node : leafNodes) {
+      rectangles.add(RTreeUtility.getNodeMBR(node));
+    }
+    tx.success();
+    tx.close();
+    Util.close(service);
+
+    double total = 0.0;
+    STRtree stRtree = OwnMethods.constructSTRTreeWithMyRectangles(rectangles);
+    for (MyRectangle rectangle : rectangles) {
+      Envelope searchRect =
+          new Envelope(rectangle.min_x, rectangle.max_x, rectangle.min_y, rectangle.max_y);
+      List<?> overlaps = stRtree.query(searchRect);
+      for (Object object : overlaps) {
+        MyRectangle overlapRect = (MyRectangle) object;
+        if (overlapRect.equals(rectangle)) {
+          continue;
+        }
+        total += rectangle.intersect(overlapRect).area();
+      }
+    }
+
+    ReadWriteUtil.WriteFile(logPath, true,
+        String.format("%s\t%f\t%f\n", dbPath, total, total / leafNodes.size()));
+  }
+
 
   /**
    * Analyze the average overlap for each tree leaf node. For each leaf node, compute the overlapped
-   * area with all other leaf nodes.
+   * area with all other leaf nodes. In-disk is too slow. Replaced by a in memory version.
    *
    * @param dbPath
    * @param dataset
