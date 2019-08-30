@@ -1,10 +1,9 @@
 package commons;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import commons.MyRectangle;
 
 public class MyRectangleTest {
 
@@ -26,8 +25,18 @@ public class MyRectangleTest {
   }
 
   @Test
-  public void test() {
+  public void isSameTest() {
+    MyRectangle r1 = new MyRectangle(0.00001, 0.00002, 1, 2);
+    MyRectangle r2 = new MyRectangle(0.00001, 0.00002, 1.0, 2);
+    assertTrue(r1.isSame(r2));
 
+    r1 = new MyRectangle(0.00001, 0.00002, 1, 2);
+    r2 = new MyRectangle(0.00001, 0.00002, 1.00, 2);
+    assertTrue(r1.isSame(r2));
+
+    r1 = new MyRectangle(0.00001001, 0.00002, 1, 2);
+    r2 = new MyRectangle(0.00001, 0.00002, 1.00, 2);
+    assertTrue(!r1.isSame(r2));
   }
 
 }

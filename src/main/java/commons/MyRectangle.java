@@ -68,4 +68,10 @@ public class MyRectangle {
     else
       return null;
   }
+
+  public boolean isSame(MyRectangle other) {
+    double epsilon = Math.pow(0.1, 12);
+    return Math.abs(min_x - other.min_x) < epsilon && Math.abs(min_y - other.min_y) < epsilon
+        && Math.abs(max_x - other.max_x) < epsilon && Math.abs(max_y - other.max_y) < epsilon;
+  }
 }
