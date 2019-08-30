@@ -342,6 +342,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     initializeLeafNodesPathNeighbors();
     this.spatialNodesPathNeighbors = spatialNodesPathNeighbors;
     this.alpha = alpha;
+    this.spatialOnly = Math.abs(alpha - 1) < 0.0000001 ? true : false;
     this.MaxPNSize = maxPNSize;
 
     for (NodeWithEnvelope n : outliers) {
@@ -2204,7 +2205,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    * Control whether the PN comes into effect. It is set along with alpha. If alpha = 1.0, this
    * value should be true. Otherwise, false.
    */
-  private boolean spatialOnly = false;
+  private Boolean spatialOnly = null;
 
   private int chooseSmallestGDCount = 0;
   private int getGDCount = 0;
