@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
 import org.neo4j.cypher.internal.frontend.v3_4.ast.Query;
 import org.neo4j.cypher.internal.frontend.v3_4.ast.SingleQuery;
 import org.neo4j.cypher.internal.frontend.v3_4.ast.Statement;
@@ -202,9 +201,17 @@ public class App {
   }
 
   public static void test() {
-    String string =
-        "Query(None,SingleQuery(List(Match(false,Pattern(List(EveryPath(RelationshipChain(NodePattern(Some(Variable(a)),List(LabelName(heritage designation)),None),RelationshipPattern(Some(Variable(b)),List(),None,None,BOTH,false),NodePattern(Some(Variable(spatialnode)),List(LabelName(museum)),None))))),List(),Some(Where(And(Ands(Set(LessThanOrEqual(DecimalDoubleLiteral(22.187478257613602),Property(Variable(spatialnode),PropertyKeyName(lat))), LessThanOrEqual(Property(Variable(spatialnode),PropertyKeyName(lat)),DecimalDoubleLiteral(22.225842149771214)))),Ands(Set(LessThanOrEqual(DecimalDoubleLiteral(113.50180238485339),Property(Variable(spatialnode),PropertyKeyName(lon))), LessThanOrEqual(Property(Variable(spatialnode),PropertyKeyName(lon)),DecimalDoubleLiteral(113.56607615947725)))))))), Return(false,ReturnItems(false,List(UnaliasedReturnItem(Variable(spatialnode),spatialnode))),None,None,None,Some(Limit(SignedDecimalIntegerLiteral(5))),Set()))))";;
-    Util.println(Arrays.toString(StringUtils.split(string, "LessThanOrEqual")));
+    // String string =
+    // "Query(None,SingleQuery(List(Match(false,Pattern(List(EveryPath(RelationshipChain(NodePattern(Some(Variable(a)),List(LabelName(heritage
+    // designation)),None),RelationshipPattern(Some(Variable(b)),List(),None,None,BOTH,false),NodePattern(Some(Variable(spatialnode)),List(LabelName(museum)),None))))),List(),Some(Where(And(Ands(Set(LessThanOrEqual(DecimalDoubleLiteral(22.187478257613602),Property(Variable(spatialnode),PropertyKeyName(lat))),
+    // LessThanOrEqual(Property(Variable(spatialnode),PropertyKeyName(lat)),DecimalDoubleLiteral(22.225842149771214)))),Ands(Set(LessThanOrEqual(DecimalDoubleLiteral(113.50180238485339),Property(Variable(spatialnode),PropertyKeyName(lon))),
+    // LessThanOrEqual(Property(Variable(spatialnode),PropertyKeyName(lon)),DecimalDoubleLiteral(113.56607615947725)))))))),
+    // Return(false,ReturnItems(false,List(UnaliasedReturnItem(Variable(spatialnode),spatialnode))),None,None,None,Some(Limit(SignedDecimalIntegerLiteral(5))),Set()))))";;
+    // Util.println(Arrays.toString(StringUtils.split(string, "LessThanOrEqual")));
+    // RelationshipType type = RTreeRelationshipTypes.RTREE_CHILD;
+    // Util.println(type.equals(RTreeRelationshipTypes.RTREE_CHILD));
+    int[] array = new int[0];
+    Util.println(Arrays.toString(array));
   }
 
   public static void restartNeo4jJava() {
@@ -298,7 +305,7 @@ public class App {
     String entityPath =
         String.format("/mnt/hgfs/Ubuntu_shared/GeoMinHop/data/%s/entity.txt", dataset);
     ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
-    STRtree stRtree = OwnMethods.ConstructSTRee(entities);
+    STRtree stRtree = OwnMethods.constructSTRTree(entities);
 
     String queryRectPath = String.format(
         "/mnt/hgfs/Ubuntu_shared/GeoMinHop/query/spa_predicate/%s/queryrect_%d.txt", dataset, 114);
