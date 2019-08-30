@@ -356,7 +356,7 @@ public class Prepare {
       if (entities == null)
         entities = OwnMethods.ReadEntity(entityPath);
       int spa_count = OwnMethods.GetSpatialEntityCount(entities);
-      STRtree stRtree = OwnMethods.ConstructSTRee(entities);
+      STRtree stRtree = OwnMethods.constructSTRTree(entities);
 
       Util.println("Read center id from " + center_id_path);
       ArrayList<Integer> center_ids = OwnMethods.ReadCenterID(center_id_path);
@@ -493,7 +493,7 @@ public class Prepare {
     String[] labelStringMap = Wikidata.readLabelMap(entityStringLabelMapPath);
 
     STRtree stRtreeEntities = OwnMethods.constructSTRTreeWithEntities(entities);
-    STRtree stRtreePoints = OwnMethods.ConstructSTRee(entities);
+    STRtree stRtreePoints = OwnMethods.constructSTRTree(entities);
 
     ArrayList<Integer> spatialIds = getSpatialIds(entities);
     int spatialCount = spatialIds.size();

@@ -92,7 +92,7 @@ public class UtilityTest {
     ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
     double distance = 10;
 
-    STRtree stRtree = OwnMethods.ConstructSTRee(entities);
+    STRtree stRtree = OwnMethods.constructSTRTree(entities);
     long start = System.currentTimeMillis();
     MyPoint point = new MyPoint(500, 500);
     LinkedList<Entity> result = Util.distanceQuery(stRtree, point, distance);

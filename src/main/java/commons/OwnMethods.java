@@ -1402,7 +1402,7 @@ public class OwnMethods {
    * @param entities
    * @return
    */
-  public static STRtree ConstructSTRee(ArrayList<Entity> entities) {
+  public static STRtree constructSTRTree(ArrayList<Entity> entities) {
     STRtree strtree = new STRtree();
 
     GeometryFactory fact = new GeometryFactory();
