@@ -1222,6 +1222,8 @@ public class RTreeIndex implements SpatialIndexWriter {
         enlargementNeeded = getAreaEnlargement(indexNode, geomRootNode);
       }
 
+      Util.println("before: " + enlargementNeeded);
+
       // for comparison, yuhan
       if (enlargementNeeded < minimumEnlargementSpatial) {
         minimumNodesSpatial.clear();
@@ -1249,11 +1251,13 @@ public class RTreeIndex implements SpatialIndexWriter {
         }
       }
 
+      Util.println("after: " + enlargementNeeded);
       if (enlargementNeeded < minimumEnlargement) {
         nodesWithSmallestGSD.clear();
         nodesWithSmallestGSD.add(indexNode);
         minimumEnlargement = enlargementNeeded;
       } else if (enlargementNeeded == minimumEnlargement) {
+        Util.println("equal here");
         nodesWithSmallestGSD.add(indexNode);
       }
     }
