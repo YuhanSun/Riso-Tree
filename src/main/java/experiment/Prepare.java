@@ -492,7 +492,7 @@ public class Prepare {
     ArrayList<ArrayList<Integer>> graphLabels = GraphUtil.ReadGraph(labelsPath);
     String[] labelStringMap = Wikidata.readLabelMap(entityStringLabelMapPath);
 
-    STRtree stRtreeEntities = OwnMethods.constructSTreeWithEntities(entities);
+    STRtree stRtreeEntities = OwnMethods.constructSTRTreeWithEntities(entities);
     STRtree stRtreePoints = OwnMethods.ConstructSTRee(entities);
 
     ArrayList<Integer> spatialIds = getSpatialIds(entities);

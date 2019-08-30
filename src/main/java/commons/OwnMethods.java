@@ -1416,12 +1416,13 @@ public class OwnMethods {
   }
 
   /**
-   * Not used currently.
+   * The STRTree constructed using entity as object can only be used for range search. It cannot be
+   * used for any Nearest Neighbor query.
    *
    * @param entities
    * @return
    */
-  public static STRtree constructSTreeWithEntities(List<Entity> entities) {
+  public static STRtree constructSTRTreeWithEntities(List<Entity> entities) {
     STRtree strtree = new STRtree();
 
     GeometryFactory fact = new GeometryFactory();
