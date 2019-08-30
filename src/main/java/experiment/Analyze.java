@@ -98,6 +98,16 @@ public class Analyze {
 
   }
 
+
+  /**
+   * Analyze the average overlap for each tree leaf node. For each leaf node, compute the overlapped
+   * area with all other leaf nodes.
+   *
+   * @param dbPath
+   * @param dataset
+   * @param logPath
+   * @throws Exception
+   */
   public static void leafNodesOverlapAnalysis(String dbPath, String dataset, String logPath)
       throws Exception {
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
@@ -114,6 +124,31 @@ public class Analyze {
         }
         total += sourceRect.intersect(RTreeUtility.getNodeMBR(overlapNode)).area();
       }
+    }
+    tx.success();
+    tx.close();
+    Util.close(service);
+    ReadWriteUtil.WriteFile(logPath, true,
+        String.format("%s\t%f\t%f\n", dbPath, total, total / leafNodes.size()));
+  }
+
+  /**
+   * Compute the average area of leaf nodes.
+   *
+   * @param dbPath
+   * @param dataset
+   * @param logPath
+   * @throws Exception
+   */
+  public static void leafNodesAvgArea(String dbPath, String dataset, String logPath)
+      throws Exception {
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    Transaction tx = service.beginTx();
+    List<Node> leafNodes = RTreeUtility.getRTreeLeafLevelNodes(service, dataset);
+    double total = 0.0;
+    for (Node node : leafNodes) {
+      MyRectangle rectangle = RTreeUtility.getNodeMBR(node);
+      total += rectangle.area();
     }
     tx.success();
     tx.close();

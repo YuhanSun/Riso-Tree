@@ -26,7 +26,8 @@ public class Driver {
     /**
      * analyze
      */
-    getPNSizeDistribution, getPNNonEmptyCount, overlapAnalysis,
+    getPNSizeDistribution, getPNNonEmptyCount, // PN
+    overlapAnalysis, areaAnalysis, // area
 
     /**
      * for wikidata
@@ -204,6 +205,10 @@ public class Driver {
           case overlapAnalysis:
             Analyze.leafNodesOverlapAnalysis(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), cmd.getOptionValue(outputPath));
+            break;
+          case areaAnalysis:
+            Analyze.leafNodesAvgArea(cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
+                cmd.getOptionValue(outputPath));
             break;
           /**
            * for wikidata
