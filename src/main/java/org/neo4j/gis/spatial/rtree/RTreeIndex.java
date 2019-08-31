@@ -1223,7 +1223,7 @@ public class RTreeIndex implements SpatialIndexWriter {
         enlargementNeeded = getAreaEnlargement(indexNode, geomRootNode);
       }
 
-      Util.println("before: " + enlargementNeeded);
+      // Util.println("before: " + enlargementNeeded);
 
       // for comparison, yuhan
       if (enlargementNeeded < minimumEnlargementSpatial) {
@@ -1355,7 +1355,7 @@ public class RTreeIndex implements SpatialIndexWriter {
 
       // yuhan
       // if graph influence is not zero
-      if (!spatialOnly) {
+      if (!spatialOnly && nodeIsLeaf(indexNode)) {
         int GD = getGD(indexNode, locInGraph);
         // if graph influence is 1 (alpha = 0), in order to handle the tie breaks for GD
         if (Math.abs(alpha - 0.0) < 0.00000001) {
