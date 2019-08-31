@@ -155,8 +155,9 @@ public class RTreeIndex implements SpatialIndexWriter {
     // choose a path down to a leaf
     long start = System.currentTimeMillis();
     while (!nodeIsLeaf(parent)) {
+      parent = chooseSubTree(parent, geomNode);
       // parent = chooseSubTree(parent, geomNode, pathNeighbors);
-      parent = chooseSubTreeSmallestGSD(parent, geomNode, pathNeighbors);
+      // parent = chooseSubTreeSmallestGSD(parent, geomNode, pathNeighbors);
     }
 
     // LOGGER.info("parent node: " + parent);
