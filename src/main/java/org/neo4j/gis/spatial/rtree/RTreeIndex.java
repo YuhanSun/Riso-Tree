@@ -155,8 +155,8 @@ public class RTreeIndex implements SpatialIndexWriter {
     // choose a path down to a leaf
     long start = System.currentTimeMillis();
     while (!nodeIsLeaf(parent)) {
-      parent = chooseSubTree(parent, geomNode);
-      // parent = chooseSubTree(parent, geomNode, pathNeighbors);
+      // parent = chooseSubTree(parent, geomNode);
+      parent = chooseSubTree(parent, geomNode, pathNeighbors);
       // parent = chooseSubTreeSmallestGSD(parent, geomNode, pathNeighbors);
     }
 
@@ -1281,6 +1281,15 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
   }
 
+  /**
+   * First compute the node that contain the {@code geomRootNode}. If |overlap| > 1,
+   * {@code chooseIndexnodeWithSmallestGD}.
+   * 
+   * @param parentIndexNode
+   * @param geomRootNode
+   * @param pathNeighbors
+   * @return
+   */
   private Node chooseSubTree(Node parentIndexNode, Node geomRootNode,
       Map<String, int[]> pathNeighbors) {
     // children that can contain the new geometry
@@ -1302,7 +1311,8 @@ public class RTreeIndex implements SpatialIndexWriter {
       // return chooseIndexNodeWithSmallestArea(indexNodes);
       // yuhan
       Node node = chooseIndexNodeWithSmallestArea(indexNodes);
-      if (!spatialOnly) {
+      // if (!spatialOnly)
+      {
         chooseSmallestGDCount++;
         Node nodeWithSmallestGD = chooseIndexnodeWithSmallestGD(indexNodes, pathNeighbors);
         if (node.equals(nodeWithSmallestGD) == false) {
