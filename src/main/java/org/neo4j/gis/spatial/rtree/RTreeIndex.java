@@ -1252,13 +1252,13 @@ public class RTreeIndex implements SpatialIndexWriter {
         }
       }
 
-      Util.println("after: " + enlargementNeeded);
+      // Util.println("after: " + enlargementNeeded);
       if (enlargementNeeded < minimumEnlargement) {
         nodesWithSmallestGSD.clear();
         nodesWithSmallestGSD.add(indexNode);
         minimumEnlargement = enlargementNeeded;
       } else if (enlargementNeeded == minimumEnlargement) {
-        Util.println("equal here");
+        // Util.println("equal here");
         nodesWithSmallestGSD.add(indexNode);
       }
     }
@@ -1266,7 +1266,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       // This happens very rarely because it requires two enlargement to be exactly the same. But it
       // often happen when alpha = 0. Because only graphDist is considered in that case.
       tieBreakFailCount++;
-      return chooseIndexNodeWithSmallestArea(indexNodes);
+      return chooseIndexNodeWithSmallestArea(nodesWithSmallestGSD);
     } else if (nodesWithSmallestGSD.size() == 1) {
       // for comparison, yuhan
       if (nodesWithSmallestGSD.get(0).equals(minimumNodesSpatial.get(0))) {
