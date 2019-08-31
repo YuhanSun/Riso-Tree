@@ -1312,7 +1312,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       // yuhan
       Node node = chooseIndexNodeWithSmallestArea(indexNodes);
       // if (!spatialOnly)
-      {
+      if (nodeIsLeaf(indexNodes.get(0))) {
         chooseSmallestGDCount++;
         Node nodeWithSmallestGD = chooseIndexnodeWithSmallestGD(indexNodes, pathNeighbors);
         if (node.equals(nodeWithSmallestGD) == false) {
