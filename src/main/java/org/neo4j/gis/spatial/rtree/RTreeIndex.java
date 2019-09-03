@@ -1242,13 +1242,16 @@ public class RTreeIndex implements SpatialIndexWriter {
       // if graph influence is not zero
       if (!spatialOnly && isLeaf) {
         int GD = getGD(indexNode, locInGraph);
+        double normSD = enlargementNeeded / (360.0 * 180.0);
+        double normGD = (double) GD / Config.graphNodeCount;
+
+        Util.println("normSD: " + normSD);
+        Util.println("normGD: " + normGD);
         // if graph influence is 1 (alpha = 0), in order to handle the tie breaks for GD
-        if (Math.abs(alpha - 0.0) < 0.00000001) {
-          enlargementNeeded = 0.00000000001 * enlargementNeeded / (360 * 180)
-              + (1 - alpha) * (double) GD / Config.graphNodeCount;
+        if (Math.abs(alpha - 0.0) < 0.0000000001) {
+          enlargementNeeded = 0.00000001 * normSD + (1 - alpha) * normGD;
         } else {
-          enlargementNeeded = alpha * enlargementNeeded / (360 * 180)
-              + (1 - alpha) * (double) GD / Config.graphNodeCount;
+          enlargementNeeded = alpha * normSD + (1 - alpha) * normGD;
         }
       }
 
