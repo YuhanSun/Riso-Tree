@@ -1245,8 +1245,9 @@ public class RTreeIndex implements SpatialIndexWriter {
         double normSD = enlargementNeeded / (360.0 * 180.0);
         double normGD = (double) GD / Config.graphNodeCount;
 
-        Util.println("normSD: " + normSD);
-        Util.println("normGD: " + normGD);
+        String logLine = String.format("normSD: %s, normGD: %s", Double.toString(normSD),
+            Double.toString(normGD));
+        Util.println(logLine);
         // if graph influence is 1 (alpha = 0), in order to handle the tie breaks for GD
         if (Math.abs(alpha - 0.0) < 0.0000000001) {
           enlargementNeeded = 0.00000001 * normSD + (1 - alpha) * normGD;
