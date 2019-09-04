@@ -41,19 +41,19 @@ do
 	containID_path="${data_dir}/containID_${suffix}.txt"
 	PNPathAndPrefix="${data_dir}/PathNeighbors_${suffix}"
 
-	# # 0-hop
-	# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
-	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	# -lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+	# 0-hop
+	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 
-	# java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
-	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	# -lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+	java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 
-	# # # 1-hop
-	# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
-	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	# -lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+	# 1-hop
+	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
+	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 
 	# java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
 	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
