@@ -32,7 +32,7 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 split_mode="Gleenes"
 alpha="1.0"
 containID_suffix="${split_mode}_${alpha}_new_version"
-containID_path="${data_dir}/containID_${suffix}.txt"
+containID_path="${data_dir}/containID_${containID_suffix}.txt"
 
 for maxPNSize in 10 20 40 80 160
 do
