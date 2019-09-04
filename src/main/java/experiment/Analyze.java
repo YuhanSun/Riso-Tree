@@ -215,8 +215,8 @@ public class Analyze {
         MyRectangle rectangle = RTreeUtility.getNodeMBR(node);
         total += rectangle.area();
       }
-      ReadWriteUtil.WriteFile(logPath, true,
-          String.format("%d\t%f\t%d\t%f\n", level, total, nodes.size(), total / nodes.size()));
+      ReadWriteUtil.WriteFile(logPath, true, String.format("%d\t%f\t%d\t%f\n", level, total,
+          nodeThisLevel.size(), total / nodeThisLevel.size()));
       level++;
     }
 

@@ -179,18 +179,16 @@ public class RTreeUtility {
       if (queue.peek().hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)) {
         return nodes;
       }
+      nodes.add(new LinkedList<>(queue));
       int size = queue.size();
-      List<Node> nodesThisLevel = new LinkedList<>();
       for (int i = 0; i < size; i++) {
         Node node = queue.poll();
         Iterable<Relationship> rels =
             node.getRelationships(Direction.OUTGOING, RTreeRel.RTREE_CHILD);
         for (Relationship relationship : rels) {
           queue.add(relationship.getEndNode());
-          nodesThisLevel.add(relationship.getEndNode());
         }
       }
-      nodes.add(nodesThisLevel);
     }
     throw new Exception(
         "RTree structure is inccorect! It does not have RTREE_CHILD or RTREE_REFERENCE relationship!");
