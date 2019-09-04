@@ -15,7 +15,7 @@ split_mode="Gleenes"
 maxPNSize="100"
 
 # for alpha in 0 0.25 0.5 0.75 1.0
-for alpha in 0.99
+for alpha in 0.9999 1.0
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 	db_path="${data_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
