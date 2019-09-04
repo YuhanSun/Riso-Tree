@@ -37,7 +37,8 @@ public class Driver {
 
     wikiGenerateContainSpatialID, // one time prepare
     wikiConstructRTree, wikiConstructPNTime, //
-    wikiConstructPNTimeSingleHop, wikiLoadPN,//
+    wikiConstructPNTimeSingleHop, wikiLoadPN, //
+    wikiConstructPNTimeSingleHopNoGraphDb,
   }
 
   private static FunctionName getFunctionEnum(String function) {
@@ -264,6 +265,13 @@ public class Driver {
                 cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath),
                 cmd.getOptionValue(labelListPath), cmd.getOptionValue(labelStrMapPath),
                 Integer.parseInt(cmd.getOptionValue(hop)), cmd.getOptionValue(PNPathAndPrefix),
+                Integer.parseInt(cmd.getOptionValue(maxPNSize)));
+            break;
+          case wikiConstructPNTimeSingleHopNoGraphDb:
+            Construct_RisoTree.wikiConstructPNSingleHopNoGraphDb(cmd.getOptionValue(containIDPath),
+                cmd.getOptionValue(graphPath), cmd.getOptionValue(labelListPath),
+                cmd.getOptionValue(labelStrMapPath), Integer.parseInt(cmd.getOptionValue(hop)),
+                cmd.getOptionValue(PNPathAndPrefix),
                 Integer.parseInt(cmd.getOptionValue(maxPNSize)));
             break;
           case wikiLoadPN:
