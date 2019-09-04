@@ -176,10 +176,10 @@ public class RTreeUtility {
     LinkedList<Node> queue = new LinkedList<>();
     queue.add(rtree_root_node);
     while (!queue.isEmpty()) {
+      nodes.add(new LinkedList<>(queue));
       if (queue.peek().hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)) {
         return nodes;
       }
-      nodes.add(new LinkedList<>(queue));
       int size = queue.size();
       for (int i = 0; i < size; i++) {
         Node node = queue.poll();
