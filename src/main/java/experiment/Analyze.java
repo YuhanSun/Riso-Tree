@@ -201,6 +201,30 @@ public class Analyze {
         String.format("%s\t%f\t%f\n", dbPath, total, total / leafNodes.size()));
   }
 
+  public static void treeNodesAvgArea(String dbPath, String dataset, String logPath)
+      throws Exception {
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    Transaction tx = service.beginTx();
+    List<List<Node>> nodes = RTreeUtility.getRTreeNodesInLevels(service, dataset);
+    int level = 0;
+    ReadWriteUtil.WriteFile(logPath, true, dbPath + "\n");
+    ReadWriteUtil.WriteFile(logPath, true, "level\ttotal\tcount\tavg\n");
+    for (List<Node> nodeThisLevel : nodes) {
+      double total = 0.0;
+      for (Node node : nodeThisLevel) {
+        MyRectangle rectangle = RTreeUtility.getNodeMBR(node);
+        total += rectangle.area();
+      }
+      ReadWriteUtil.WriteFile(logPath, true,
+          String.format("%d\t%f\t%d\t%f\n", level, total, nodes.size(), total / nodes.size()));
+      level++;
+    }
+
+    tx.success();
+    tx.close();
+    Util.close(service);
+  }
+
   /**
    * Get the PathNeighbor count for a PN file.
    *

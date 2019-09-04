@@ -158,6 +158,44 @@ public class RTreeUtility {
         "RTree structure is inccorect! It does not have RTREE_CHILD or RTREE_REFERENCE relationship!");
   }
 
+  /**
+   * Get the nodes of an r-tree for each level.
+   *
+   * @param service
+   * @param layerName
+   * @return
+   * @throws Exception
+   */
+  public static List<List<Node>> getRTreeNodesInLevels(GraphDatabaseService service,
+      String layerName) throws Exception {
+    Node rtree_root_node = getRTreeRoot(service, layerName);
+    if (rtree_root_node == null) {
+      return new LinkedList<>();
+    }
+    List<List<Node>> nodes = new LinkedList<>();
+    LinkedList<Node> queue = new LinkedList<>();
+    queue.add(rtree_root_node);
+    while (!queue.isEmpty()) {
+      if (queue.peek().hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)) {
+        return nodes;
+      }
+      int size = queue.size();
+      List<Node> nodesThisLevel = new LinkedList<>();
+      for (int i = 0; i < size; i++) {
+        Node node = queue.poll();
+        Iterable<Relationship> rels =
+            node.getRelationships(Direction.OUTGOING, RTreeRel.RTREE_CHILD);
+        for (Relationship relationship : rels) {
+          queue.add(relationship.getEndNode());
+          nodesThisLevel.add(relationship.getEndNode());
+        }
+      }
+      nodes.add(nodesThisLevel);
+    }
+    throw new Exception(
+        "RTree structure is inccorect! It does not have RTREE_CHILD or RTREE_REFERENCE relationship!");
+  }
+
   public static List<Node> getOverlapLeafNodes(GraphDatabaseService service, String layerName,
       MyRectangle rectangle) throws Exception {
     LinkedList<Node> queue = new LinkedList<>();
