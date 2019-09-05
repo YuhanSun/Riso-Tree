@@ -246,7 +246,7 @@ public class ReadWriteUtil {
 
           String content = lineList[1];
           if (content.equals("[]")) {
-            pn.put(key, new int[] {0});
+            pn.put(key, new int[0]);
             continue;
           }
           String[] contentList = content.substring(1, content.length() - 1).split(", ");
