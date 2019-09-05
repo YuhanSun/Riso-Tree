@@ -34,7 +34,7 @@ printf ${header} >> ${outputPath}
 
 for maxPNSize in 10 20 40 80 160
 do
-	suffix="${split_mode}_${alpha}_${maxPNSize}_test"
+	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 	inputPath="${data_dir}/PathNeighbors_${suffix}_1.txt"
 
 	java -Xmx100g -jar ${jar_path} \
