@@ -17,7 +17,7 @@ printf ${header} >> ${outputPath}
 split_mode="Gleenes"
 alpha="1.0"
 
-for maxPNSize in 10 20 40 80 160
+for maxPNSize in 10 20 40 80 160 320 640 1280 2560
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 
@@ -32,7 +32,7 @@ done
 printf "\n" >> ${outputPath}
 printf ${header} >> ${outputPath}
 
-for maxPNSize in 10 20 40 80 160
+for maxPNSize in 10 20 40 80 160 320 640 1280 2560
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 	inputPath="${data_dir}/PathNeighbors_${suffix}_1.txt"
