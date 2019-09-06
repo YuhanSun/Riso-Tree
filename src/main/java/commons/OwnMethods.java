@@ -37,6 +37,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import commons.Query_Graph.LabelType;
 
 
 public class OwnMethods {
@@ -609,8 +610,8 @@ public class OwnMethods {
     // }
     // }
 
+    long start = System.currentTimeMillis();
     while (subgraph_ids.size() < node_count) {
-      long start = System.currentTimeMillis();
       int start_index = random.nextInt(subgraph_ids.size()); // pos in the subgraph_ids
       int start_id = subgraph_ids.get(start_index);
       ArrayList<Integer> neighbors = graph.get(start_id);
@@ -632,7 +633,7 @@ public class OwnMethods {
             startSpatialId);
       }
     }
-    Query_Graph query_Graph = new Query_Graph(node_count);
+    Query_Graph query_Graph = new Query_Graph(node_count, LabelType.STRING);
 
     // int spa_node_count = 0;
     // ArrayList<Integer> spa_indices = new ArrayList<Integer>();
@@ -651,6 +652,7 @@ public class OwnMethods {
     // for (int index : spa_indices)
     // query_Graph.Has_Spa_Predicate[index] = true;
 
+    query_Graph.Has_Spa_Predicate[0] = true;
     for (int i = 0; i < node_count; i++) {
       int id = subgraph_ids.get(i);
       ArrayList<Integer> singleNodeLabels = labels.get(id);

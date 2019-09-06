@@ -29,11 +29,21 @@ public class Query_Graph {
 
   public Query_Graph(int node_count, LabelType labelType) {
     this.labelType = labelType;
-    label_list = new int[node_count];
+    switch (this.labelType) {
+      case INT:
+        label_list = new int[node_count];
+        break;
+      case STRING:
+        label_list_string = new String[node_count];
+        break;
+      default:
+        break;
+    }
     nodeVariables = new String[node_count];
     graph = new ArrayList<ArrayList<Integer>>(node_count);
-    for (int i = 0; i < node_count; i++)
+    for (int i = 0; i < node_count; i++) {
       graph.add(new ArrayList<Integer>());
+    }
     spa_predicate = new MyRectangle[node_count];
     Has_Spa_Predicate = new boolean[node_count];
   }
@@ -66,13 +76,15 @@ public class Query_Graph {
   @Override
   public String toString() {
     String string = "";
-    for (int i = 0; i < label_list.length; i++) {
+    for (int i = 0; i < graph.size(); i++) {
       ArrayList<Integer> neighbors = graph.get(i);
       string += String.format("%d,%d", i, neighbors.size());
-      for (int neighbor : neighbors)
+      for (int neighbor : neighbors) {
         string += String.format(",%d", neighbor);
+      }
       string += "," + String.valueOf(Has_Spa_Predicate[i]);
-      string += String.format(",%d\n", label_list[i]);
+      string += String.format(",%s\n",
+          labelType.equals(LabelType.INT) ? String.valueOf(label_list[i]) : label_list_string[i]);
     }
 
     return string;
