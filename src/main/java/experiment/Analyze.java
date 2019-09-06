@@ -235,11 +235,16 @@ public class Analyze {
     Map<Long, Map<String, int[]>> pns = ReadWriteUtil.readLeafNodesPathNeighbors(filepath);
     int countNeighbors = 0; // the count of neighbors in the PN
     int PNPropertyCount = 0; // the count of PN itself
+    int nonEmptyPNCount = 0;
     for (long leafNodeId : pns.keySet()) {
       Map<String, int[]> pn = pns.get(leafNodeId);
       PNPropertyCount += pn.size();
       for (String pnKey : pn.keySet()) {
-        countNeighbors += pn.get(pnKey).length;
+        int len = pn.get(pnKey).length;
+        if (len != 0) {
+          countNeighbors += pn.get(pnKey).length;
+          nonEmptyPNCount++;
+        }
       }
     }
     // assume each neighbor id is 32 bits.
@@ -247,8 +252,9 @@ public class Analyze {
     // assume a key requires 32 bits.
     double PNKeySizeInMB = ((double) PNPropertyCount) * 32 / 4 / 1024 / 1024;
     double totalSize = PNNeighborSizeInMB + PNKeySizeInMB;
-    ReadWriteUtil.WriteFile(logPath, true, String.format("%s\t%d\t%d\t%f\t%f\t%f\n", filepath,
-        PNPropertyCount, countNeighbors, PNKeySizeInMB, PNNeighborSizeInMB, totalSize));
+    ReadWriteUtil.WriteFile(logPath, true,
+        String.format("%s\t%d\t%d\t%d\t%f\t%f\t%f\n", filepath, PNPropertyCount, nonEmptyPNCount,
+            countNeighbors, PNKeySizeInMB, PNNeighborSizeInMB, totalSize));
   }
 
   public static void getPNSizeDistribution(String dbPath, String dataset, String outputPath)
