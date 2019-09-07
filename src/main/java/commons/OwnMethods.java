@@ -593,7 +593,7 @@ public class OwnMethods {
    */
   public static Query_Graph GenerateRandomGraphStringLabel(ArrayList<ArrayList<Integer>> graph,
       ArrayList<ArrayList<Integer>> labels, String[] labelStringMap, ArrayList<Entity> entities,
-      int node_count, int startSpatialId) throws Exception {
+      int node_count, int startSpatialId, MyRectangle queryRect) throws Exception {
     ArrayList<ArrayList<Integer>> subgraph = new ArrayList<ArrayList<Integer>>(node_count);
     for (int i = 0; i < node_count; i++)
       subgraph.add(new ArrayList<Integer>());
@@ -611,6 +611,7 @@ public class OwnMethods {
     // }
 
     long start = System.currentTimeMillis();
+    // expand the subgraph until its size is node_count. id in subgraph is the original graph_id.
     while (subgraph_ids.size() < node_count) {
       int start_index = random.nextInt(subgraph_ids.size()); // pos in the subgraph_ids
       int start_id = subgraph_ids.get(start_index);
@@ -630,35 +631,21 @@ public class OwnMethods {
       }
       if (System.currentTimeMillis() - start > 6000) {
         return GenerateRandomGraphStringLabel(graph, labels, labelStringMap, entities, node_count,
-            startSpatialId);
+            startSpatialId, queryRect);
       }
     }
     Query_Graph query_Graph = new Query_Graph(node_count, LabelType.STRING);
 
-    // int spa_node_count = 0;
-    // ArrayList<Integer> spa_indices = new ArrayList<Integer>();
-    // for (int i = 0; i < subgraph_ids.size(); i++) {
-    // int id = subgraph_ids.get(i);
-    // if (entities.get(id).IsSpatial) {
-    // spa_indices.add(i);
-    // spa_node_count++;
-    // }
-    // }
-    //
-    // if (spa_node_count < spa_pred_count)
-    // return GenerateRandomGraph(graph, labels, entities, node_count, spa_pred_count);
-    // else {
-    // spa_indices = GetRandom_NoDuplicate(spa_indices, spa_pred_count);
-    // for (int index : spa_indices)
-    // query_Graph.Has_Spa_Predicate[index] = true;
-
     query_Graph.Has_Spa_Predicate[0] = true;
+    query_Graph.spa_predicate[0] = queryRect;
     for (int i = 0; i < node_count; i++) {
       int id = subgraph_ids.get(i);
+      // set random label for each query node
       ArrayList<Integer> singleNodeLabels = labels.get(id);
       int label = singleNodeLabels.get(random.nextInt(singleNodeLabels.size()));
       query_Graph.label_list_string[i] = labelStringMap[label];
       ArrayList<Integer> neighbors = subgraph.get(i);
+      // convert the graph_id in the subgraph to the query graph
       for (int neighbor : neighbors) {
         int neighbor_index = subgraph_ids.indexOf(neighbor);
         if (neighbor_index == -1) {
@@ -1454,6 +1441,15 @@ public class OwnMethods {
     return strtree;
   }
 
+  /**
+   * Get the top-K closet object.
+   *
+   * @param stRtree
+   * @param lon
+   * @param lat
+   * @param K
+   * @return
+   */
   public static Object[] kNearestSearch(STRtree stRtree, double lon, double lat, int K) {
     GeometryFactory factory = new GeometryFactory();
     Point center = factory.createPoint(new Coordinate(lon, lat));
@@ -1463,6 +1459,15 @@ public class OwnMethods {
     return result;
   }
 
+  /**
+   * Get the radius for the KNearest Neighbors.
+   *
+   * @param stRtree
+   * @param lon
+   * @param lat
+   * @param K
+   * @return
+   */
   public static double kNearestDistance(STRtree stRtree, double lon, double lat, int K) {
     Object[] result = kNearestSearch(stRtree, lon, lat, K);
     double radius = 0.0;
@@ -1475,6 +1480,15 @@ public class OwnMethods {
     return radius;
   }
 
+  /**
+   * Convert the circle radius to a rectangle region with the same center.
+   *
+   * @param stRtree
+   * @param lon
+   * @param lat
+   * @param K
+   * @return
+   */
   public static MyRectangle getRectKWithin(STRtree stRtree, double lon, double lat, int K) {
     double radius = kNearestDistance(stRtree, lon, lat, K);
     double a = equalAreaCircleToSquare(radius);
@@ -1487,6 +1501,12 @@ public class OwnMethods {
     return new MyRectangle(minx, miny, maxx, maxy);
   }
 
+  /**
+   * Get the square with the same area.
+   *
+   * @param radius
+   * @return
+   */
   public static double equalAreaCircleToSquare(double radius) {
     return Math.sqrt(Math.PI) * radius;
   }

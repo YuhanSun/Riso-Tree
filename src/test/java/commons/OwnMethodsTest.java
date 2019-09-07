@@ -10,19 +10,26 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.neo4j.graphdb.GraphDatabaseService;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import commons.Config.Explain_Or_Profile;
+import cypher.middleware.CypherDecoder;
+import cypher.middleware.CypherEncoder;
 import dataprocess.Wikidata;
 
 public class OwnMethodsTest {
 
-  String dataDir;
+  String dataDir, homeDir;
+  String dbPath;
 
   @Before
   public void setUp() throws Exception {
     ClassLoader classLoader = getClass().getClassLoader();
     File file = new File(classLoader.getResource("").getFile());
+    homeDir = file.getAbsolutePath();
     dataDir = file.getAbsolutePath() + "/data";
+    dbPath = homeDir + "/data/graph.db";
   }
 
   @After
@@ -74,16 +81,23 @@ public class OwnMethodsTest {
         GraphUtil.ReadGraph(dataDir + "/smallGraph/label_graph.txt");
     String[] labelStringMap = Wikidata.readLabelMap(smallGraphDir + "/label_string.txt");
     ArrayList<Entity> entities = GraphUtil.ReadEntity(smallGraphDir + "/entity.txt");
-    int node_count = 3;
+    int node_count = 4;
     int startSpatialId = 4;
     Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, labels,
-        labelStringMap, entities, node_count, startSpatialId);
+        labelStringMap, entities, node_count, startSpatialId, new MyRectangle());
     // Util.println(dataDir);
     // String[] files = new File(dataDir).list();
     // for (String file : files) {
     // Util.println(file);
     // }
     Util.println(query_Graph.toString());
+    String cypherQueryString =
+        CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing);
+    Util.println(cypherQueryString);
+
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    Query_Graph decodeQueryGraph = CypherDecoder.getQueryGraph(cypherQueryString, service);
+    Util.println(decodeQueryGraph.toString());
   }
 
 }

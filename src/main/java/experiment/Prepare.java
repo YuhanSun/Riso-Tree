@@ -486,7 +486,8 @@ public class Prepare {
 
   public static void generateExperimentCypherQuery(String graphPath, String entityPath,
       String labelsPath, String entityStringLabelMapPath, double startSelectivity,
-      double endSelectivity, int count, int selectivityTimes, String outputPath) throws Exception {
+      double endSelectivity, int queryCount, int selectivityTimes, int node_count,
+      String outputPath) throws Exception {
     ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
     ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
     ArrayList<ArrayList<Integer>> graphLabels = GraphUtil.ReadGraph(labelsPath);
@@ -500,21 +501,27 @@ public class Prepare {
     double selectivity = startSelectivity;
     while (selectivity < endSelectivity) {
       int K = (int) (selectivity * spatialCount) + 1;
-      ArrayList<Integer> centerIds = OwnMethods.GetRandom_NoDuplicate(spatialIds, count);
+      // Get the center for each query graph. It may not appear in the query graph.
+      ArrayList<Integer> centerIds = OwnMethods.GetRandom_NoDuplicate(spatialIds, queryCount);
 
       for (int centerId : centerIds) {
         Entity centerEntity = entities.get(centerId);
         if (centerEntity.id != centerId) {
-          throw new Exception(String.format("%d th entity has id %d", centerId, centerEntity.id));
+          throw new RuntimeException(
+              String.format("%d th entity has id %d", centerId, centerEntity.id));
         }
+        // the rectangle is used as the query region
         MyRectangle rectangle =
             OwnMethods.getRectKWithin(stRtreePoints, centerEntity.lon, centerEntity.lat, K);
+        // sample ids will be used to generate the query pattern
         ArrayList<Integer> sampleIds =
             OwnMethods.samplingWithinRange(stRtreeEntities, rectangle, 1);
         int startSpatialId = sampleIds.get(0);
+        Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, graphLabels,
+            labelStringMap, entities, node_count, startSpatialId, rectangle);
       }
 
-      selectivity *= 10;
+      selectivity *= selectivityTimes;
     }
   }
 

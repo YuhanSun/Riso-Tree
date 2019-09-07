@@ -87,6 +87,10 @@ public class Query_Graph {
           labelType.equals(LabelType.INT) ? String.valueOf(label_list[i]) : label_list_string[i]);
     }
 
+    for (MyRectangle rectangle : spa_predicate) {
+      string += String.format("%s\n", rectangle);
+    }
+
     return string;
   }
 
