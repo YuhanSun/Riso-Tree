@@ -133,7 +133,7 @@ public class Driver {
     // options.addOption(endSelectivity, "endSelectivity", true, "end selectivity");
     options.addOption(selectivitiesStr, "selectivities string", true,
         "separated by comma without []");
-
+    options.addOption(queryCount, "queryCount", true, "the number of queries to be generated");
 
   }
 
