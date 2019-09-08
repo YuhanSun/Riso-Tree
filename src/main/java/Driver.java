@@ -10,6 +10,7 @@ import commons.Util;
 import dataprocess.Wikidata;
 import experiment.Analyze;
 import experiment.DataProcess;
+import experiment.Prepare;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
 
@@ -39,6 +40,8 @@ public class Driver {
     wikiConstructRTree, wikiConstructPNTime, //
     wikiConstructPNTimeSingleHop, wikiLoadPN, //
     wikiConstructPNTimeSingleHopNoGraphDb,
+
+    generateQuery,
   }
 
   private static FunctionName getFunctionEnum(String function) {
@@ -86,6 +89,13 @@ public class Driver {
   private String inputPath = "inputPath";
   private String outputPath = "outputPath";
 
+  // Experiment
+  private String nodeCount = "nodeCount";
+  // private String startSelectivity = "startSelectivity";
+  // private String endSelectivity = "endSelectivity";
+  private String selectivitiesStr = "selectivityStr";
+  private String queryCount = "queryCount";
+
   public Driver(String[] args) {
     this.args = args;
     options.addOption(help, "help", false, "show help.");
@@ -116,6 +126,15 @@ public class Driver {
     // Analyze
     options.addOption(outputPath, "outputPath", true, "The output path for analyze");
     options.addOption(inputPath, "inputPath", true, "The input path for analyze");
+
+    // Experiment
+    options.addOption(nodeCount, "nodeCount", true, "The node count in the query graph");
+    // options.addOption(startSelectivity, "startSelectivity", true, "start selectivity");
+    // options.addOption(endSelectivity, "endSelectivity", true, "end selectivity");
+    options.addOption(selectivitiesStr, "selectivities string", true,
+        "separated by comma without []");
+
+
   }
 
   public void parser() {
@@ -277,6 +296,15 @@ public class Driver {
           case wikiLoadPN:
             Construct_RisoTree.wikiLoadPN(cmd.getOptionValue(PNPathAndPrefix),
                 Integer.parseInt(cmd.getOptionValue(hop)), cmd.getOptionValue(dbPath));
+            break;
+
+          // experiment
+          case generateQuery:
+            Prepare.generateExperimentCypherQuery(cmd.getOptionValue(graphPath),
+                cmd.getOptionValue(entityPath), cmd.getOptionValue(labelListPath),
+                cmd.getOptionValue(labelStrMapPath), cmd.getOptionValue(selectivitiesStr),
+                Integer.parseInt(cmd.getOptionValue(queryCount)),
+                Integer.parseInt(cmd.getOptionValue(nodeCount)), cmd.getOptionValue(outputPath));
             break;
           default:
             Util.println(String.format("Function %s does not exist!", functionNameString));

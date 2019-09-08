@@ -19,6 +19,7 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config;
+import commons.Config.Explain_Or_Profile;
 import commons.Config.system;
 import commons.Entity;
 import commons.GraphUtil;
@@ -28,7 +29,9 @@ import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
+import commons.ReadWriteUtil;
 import commons.Util;
+import cypher.middleware.CypherEncoder;
 import dataprocess.Wikidata;
 
 /**
@@ -485,44 +488,87 @@ public class Prepare {
   }
 
   public static void generateExperimentCypherQuery(String graphPath, String entityPath,
-      String labelsPath, String entityStringLabelMapPath, double startSelectivity,
-      double endSelectivity, int queryCount, int selectivityTimes, int node_count,
-      String outputPath) throws Exception {
-    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
+      String labelsPath, String entityStringLabelMapPath, String selectivitiesStr, int queryCount,
+      int nodeCount, String outputDir) throws Exception {
+    Util.checkPathExist(graphPath);
+    Util.checkPathExist(entityPath);
+    Util.checkPathExist(labelsPath);
+    Util.checkPathExist(entityStringLabelMapPath);
+    Util.checkPathExist(outputDir);
+
     ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
+    ArrayList<Integer> spatialIds = getSpatialIds(entities);
+
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
     ArrayList<ArrayList<Integer>> graphLabels = GraphUtil.ReadGraph(labelsPath);
     String[] labelStringMap = Wikidata.readLabelMap(entityStringLabelMapPath);
 
     STRtree stRtreeEntities = OwnMethods.constructSTRTreeWithEntities(entities);
     STRtree stRtreePoints = OwnMethods.constructSTRTree(entities);
 
-    ArrayList<Integer> spatialIds = getSpatialIds(entities);
-    int spatialCount = spatialIds.size();
-    double selectivity = startSelectivity;
-    while (selectivity < endSelectivity) {
-      int K = (int) (selectivity * spatialCount) + 1;
-      // Get the center for each query graph. It may not appear in the query graph.
-      ArrayList<Integer> centerIds = OwnMethods.GetRandom_NoDuplicate(spatialIds, queryCount);
+    generateExperimentCypherQuery(graph, entities, spatialIds, graphLabels, labelStringMap,
+        selectivitiesStr, queryCount, nodeCount, stRtreeEntities, stRtreePoints, outputDir);
+  }
 
-      for (int centerId : centerIds) {
-        Entity centerEntity = entities.get(centerId);
-        if (centerEntity.id != centerId) {
-          throw new RuntimeException(
-              String.format("%d th entity has id %d", centerId, centerEntity.id));
-        }
-        // the rectangle is used as the query region
-        MyRectangle rectangle =
-            OwnMethods.getRectKWithin(stRtreePoints, centerEntity.lon, centerEntity.lat, K);
-        // sample ids will be used to generate the query pattern
-        ArrayList<Integer> sampleIds =
-            OwnMethods.samplingWithinRange(stRtreeEntities, rectangle, 1);
-        int startSpatialId = sampleIds.get(0);
-        Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, graphLabels,
-            labelStringMap, entities, node_count, startSpatialId, rectangle);
-      }
-
-      selectivity *= selectivityTimes;
+  public static void generateExperimentCypherQuery(ArrayList<ArrayList<Integer>> graph,
+      ArrayList<Entity> entities, ArrayList<Integer> spatialIds,
+      ArrayList<ArrayList<Integer>> graphLabels, String[] labelStringMap, String selectivitiesStr,
+      int queryCount, int nodeCount, STRtree stRtreeEntities, STRtree stRtreePoints,
+      String outputDir) throws Exception {
+    String[] selectivities = selectivitiesStr.split(",");
+    for (String selectivity : selectivities) {
+      List<String> queries = generateExperimentCypherQuerySelectivity(graph, entities, spatialIds,
+          graphLabels, labelStringMap, Double.parseDouble(selectivity), queryCount, nodeCount,
+          stRtreeEntities, stRtreePoints);
+      String outputPath = String.format("%s/%d_%s", outputDir, nodeCount);
+      ReadWriteUtil.WriteFile(outputPath, true, queries);
     }
+  }
+
+  /**
+   * For a given selectivity, generate several cypher queries ({@code queryCount}).
+   *
+   * @param graph
+   * @param entities
+   * @param spatialIds
+   * @param graphLabels
+   * @param labelStringMap
+   * @param selectivity
+   * @param queryCount
+   * @param node_count
+   * @param stRtreeEntities
+   * @param stRtreePoints
+   * @return
+   * @throws Exception
+   */
+  public static List<String> generateExperimentCypherQuerySelectivity(
+      ArrayList<ArrayList<Integer>> graph, ArrayList<Entity> entities,
+      ArrayList<Integer> spatialIds, ArrayList<ArrayList<Integer>> graphLabels,
+      String[] labelStringMap, double selectivity, int queryCount, int node_count,
+      STRtree stRtreeEntities, STRtree stRtreePoints) throws Exception {
+    List<String> queries = new ArrayList<>(queryCount);
+    int spatialCount = spatialIds.size();
+    int K = (int) (selectivity * spatialCount);
+    // Get the center for each query graph. It may not appear in the query graph.
+    ArrayList<Integer> centerIds = OwnMethods.GetRandom_NoDuplicate(spatialIds, queryCount);
+
+    for (int centerId : centerIds) {
+      Entity centerEntity = entities.get(centerId);
+      if (centerEntity.id != centerId) {
+        throw new RuntimeException(
+            String.format("%d th entity has id %d", centerId, centerEntity.id));
+      }
+      // the rectangle is used as the query region
+      MyRectangle rectangle =
+          OwnMethods.getRectKWithin(stRtreePoints, centerEntity.lon, centerEntity.lat, K);
+      // sample ids will be used to generate the query pattern
+      ArrayList<Integer> sampleIds = OwnMethods.samplingWithinRange(stRtreeEntities, rectangle, 1);
+      int startSpatialId = sampleIds.get(0);
+      Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, graphLabels,
+          labelStringMap, entities, node_count, startSpatialId, rectangle);
+      queries.add(CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing));
+    }
+    return queries;
   }
 
   public static ArrayList<Integer> getSpatialIds(List<Entity> entities) {
