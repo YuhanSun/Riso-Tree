@@ -571,7 +571,9 @@ public class Prepare {
       Util.println("start spatial id: " + startSpatialId);
       Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, graphLabels,
           labelStringMap, entities, node_count, startSpatialId, rectangle);
-      queries.add(CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing));
+      String query = CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing);
+      Util.println(query);
+      queries.add(query);
     }
     return queries;
   }

@@ -635,6 +635,7 @@ public class OwnMethods {
         subgraph.get(end_index).add(start_id);
       }
       if (System.currentTimeMillis() - start > 6000) {
+        Util.println("recursive");
         return GenerateRandomGraphStringLabel(graph, labels, labelStringMap, entities, node_count,
             startSpatialId, queryRect);
       }
