@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -42,6 +43,8 @@ import dataprocess.Wikidata;
  *
  */
 public class Prepare {
+
+  private static final Logger LOGGER = Logger.getLogger(Prepare.class.getName());
 
   static Config config = new Config();
   static String dataset = config.getDatasetName();
@@ -517,6 +520,7 @@ public class Prepare {
       String outputDir) throws Exception {
     String[] selectivities = selectivitiesStr.split(",");
     for (String selectivity : selectivities) {
+      LOGGER.info(selectivity);
       List<String> queries = generateExperimentCypherQuerySelectivity(graph, entities, spatialIds,
           graphLabels, labelStringMap, Double.parseDouble(selectivity), queryCount, nodeCount,
           stRtreeEntities, stRtreePoints);
@@ -551,8 +555,8 @@ public class Prepare {
     int K = (int) (selectivity * spatialCount);
     // Get the center for each query graph. It may not appear in the query graph.
     ArrayList<Integer> centerIds = OwnMethods.GetRandom_NoDuplicate(spatialIds, queryCount);
-
     for (int centerId : centerIds) {
+      Util.println("centerId: " + centerId);
       Entity centerEntity = entities.get(centerId);
       if (centerEntity.id != centerId) {
         throw new RuntimeException(
@@ -564,6 +568,7 @@ public class Prepare {
       // sample ids will be used to generate the query pattern
       ArrayList<Integer> sampleIds = OwnMethods.samplingWithinRange(stRtreeEntities, rectangle, 1);
       int startSpatialId = sampleIds.get(0);
+      Util.println("start spatial id: " + startSpatialId);
       Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, graphLabels,
           labelStringMap, entities, node_count, startSpatialId, rectangle);
       queries.add(CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing));
