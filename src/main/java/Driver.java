@@ -93,7 +93,7 @@ public class Driver {
   private String nodeCount = "nodeCount";
   // private String startSelectivity = "startSelectivity";
   // private String endSelectivity = "endSelectivity";
-  private String selectivitiesStr = "selectivityStr";
+  private String selectivitiesStr = "selectivitiesStr";
   private String queryCount = "queryCount";
 
   public Driver(String[] args) {
