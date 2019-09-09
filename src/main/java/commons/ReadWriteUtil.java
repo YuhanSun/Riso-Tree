@@ -267,7 +267,7 @@ public class ReadWriteUtil {
       }
       nodeID = Long.parseLong(line);
     }
-
+    Util.close(reader);
     return nodesPN;
   }
 }
