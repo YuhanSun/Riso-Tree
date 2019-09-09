@@ -38,7 +38,7 @@ public class Driver {
 
     wikiGenerateContainSpatialID, // one time prepare
     wikiConstructRTree, wikiConstructPNTime, //
-    wikiConstructPNTimeSingleHop, wikiLoadPN, //
+    wikiConstructPNTimeSingleHop, wikiLoadPN, wikiLoadAllHopPN, //
     wikiConstructPNTimeSingleHopNoGraphDb,
 
     generateQuery,
@@ -80,6 +80,7 @@ public class Driver {
 
   private String MAX_HOPNUM = "MAX_HOPNUM";
   private String hop = "hop";
+  private String hopListStr = "hopListStr";
   private String PNPathAndPrefix = "PNPrefix";
 
   private String maxPNSize = "maxPNSize";
@@ -118,6 +119,7 @@ public class Driver {
     options.addOption(MAX_HOPNUM, "MAX_HOPNUM", true, "MAX_HOPNUM of RisoTree");
     options.addOption(hop, "hop", true, "hop");
     options.addOption(PNPathAndPrefix, "PNPathAndPrefix", true, "Path Neighbor file path preffix");
+    options.addOption(hopListStr, "hopListStr", true, "hop list sep comma");
 
 
     options.addOption(maxPNSize, "maxPNSize", true, "Path Neighbor maximum size");
@@ -297,7 +299,11 @@ public class Driver {
             Construct_RisoTree.wikiLoadPN(cmd.getOptionValue(PNPathAndPrefix),
                 Integer.parseInt(cmd.getOptionValue(hop)), cmd.getOptionValue(dbPath));
             break;
-
+          case wikiLoadAllHopPN:
+            Construct_RisoTree.wikiLoadAllHopPN(cmd.getOptionValue(PNPathAndPrefix),
+                cmd.getOptionValue(hopListStr), cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(containIDPath));
+            break;
           // experiment
           case generateQuery:
             Prepare.generateExperimentCypherQuery(cmd.getOptionValue(graphPath),

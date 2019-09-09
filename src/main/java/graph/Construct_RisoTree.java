@@ -334,6 +334,65 @@ public class Construct_RisoTree {
   }
 
   /**
+   * Load all hop path neighbors at one time. Reduce the load time.
+   *
+   * @param PNPathAndPreffix
+   * @param hopListStr
+   * @param dbPath
+   * @param containIDPath
+   * @throws Exception
+   */
+  public static void wikiLoadAllHopPN(String PNPathAndPreffix, String hopListStr, String dbPath,
+      String containIDPath) throws Exception {
+    Util.checkPathExist(dbPath);
+    Util.checkPathExist(containIDPath);
+    List<Map<Long, Map<String, int[]>>> allHopPns = new ArrayList<>();
+    List<String> paths = new ArrayList<>();
+    for (String hopStr : hopListStr.split(",")) {
+      int hop = Integer.parseInt(hopStr);
+      String filePath = getPNFileName(PNPathAndPreffix, hop);
+      Util.checkPathExist(filePath);
+      paths.add(filePath);
+    }
+
+    HashMap<Long, ArrayList<Integer>> containIDMap = readContainIDMap(containIDPath);
+    for (String filePath : paths) {
+      Map<Long, Map<String, int[]>> pn = ReadWriteUtil.readLeafNodesPathNeighbors(filePath);
+      allHopPns.add(pn);
+    }
+
+    int index = 0;
+    BatchInserter inserter = Util.getBatchInserter(dbPath);
+    for (long nodeID : containIDMap.keySet()) {
+      Map<String, Object> properties = inserter.getNodeProperties(nodeID);
+      int i = 0;
+      for (Map<Long, Map<String, int[]>> singleHopPn : allHopPns) {
+        Map<String, int[]> nodePn = singleHopPn.get(nodeID);
+        if (nodePn == null) {
+          throw new RuntimeException(
+              String.format("nodeId %d does not exist in hop %d!", nodeID, i));
+        }
+        for (String key : nodePn.keySet()) {
+          int[] value = nodePn.get(key);
+          properties.put(key, value);
+          properties.put(RisoTreeUtil.getPNSizeName(key), value.length);
+        }
+        i++;
+      }
+      inserter.setNodeProperties(nodeID, properties);
+      index++;
+      if (index % PNLogCount == 0) {
+        LOGGER.info("" + index);
+      }
+    }
+    Util.close(inserter);
+  }
+
+  public static String getPNFileName(String prefix, int hop) {
+    return prefix + "_" + hop + ".txt";
+  }
+
+  /**
    * Load specific hop of path neighbor from a given file. The path file will be
    * PNPathAndPreffix_hop.txt.
    *
