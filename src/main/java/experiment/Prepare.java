@@ -571,7 +571,7 @@ public class Prepare {
             OwnMethods.samplingWithinRange(stRtreeEntities, rectangle, 1);
         int startSpatialId = sampleIds.get(0);
         Util.println("start spatial id: " + startSpatialId);
-        if (graphLabels.get(startSpatialId).size() > 0) {
+        if (graphLabels.get(startSpatialId).size() > 0 && graph.get(startSpatialId).size() > 0) {
           Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, graphLabels,
               labelStringMap, entities, node_count, startSpatialId, rectangle);
           String query = CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing);

@@ -595,8 +595,9 @@ public class OwnMethods {
       ArrayList<ArrayList<Integer>> labels, String[] labelStringMap, ArrayList<Entity> entities,
       int node_count, int startSpatialId, MyRectangle queryRect) throws Exception {
     ArrayList<ArrayList<Integer>> subgraph = new ArrayList<ArrayList<Integer>>(node_count);
-    for (int i = 0; i < node_count; i++)
+    for (int i = 0; i < node_count; i++) {
       subgraph.add(new ArrayList<Integer>());
+    }
     ArrayList<Integer> subgraph_ids = new ArrayList<Integer>(node_count);
 
     subgraph_ids.add(startSpatialId);
@@ -613,6 +614,7 @@ public class OwnMethods {
     // expand the subgraph until its size is node_count. id in subgraph is the original graph_id.
     long start = System.currentTimeMillis();
     while (subgraph_ids.size() < node_count) {
+      Util.println(subgraph_ids.size());
       int start_index = random.nextInt(subgraph_ids.size()); // pos in the subgraph_ids
       int start_id = subgraph_ids.get(start_index);
       ArrayList<Integer> neighbors = graph.get(start_id);
