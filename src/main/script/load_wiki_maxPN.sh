@@ -23,7 +23,7 @@ do
 	PNPathAndPrefix="${data_dir}/PathNeighbors_${suffix}"
 	java -Xmx100g -jar ${jar_path} \
 		-f wikiLoadAllHopPN \
-		-PNPrefix ${PNPrefix} \
+		-PNPrefix ${PNPathAndPrefix} \
 		-hopListStr 0,1 \
 		-dp ${db_path} \
 		-c ${containID_path}
