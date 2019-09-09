@@ -4,7 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
@@ -554,9 +557,14 @@ public class Prepare {
     int spatialCount = spatialIds.size();
     int K = (int) (selectivity * spatialCount);
     // Get the center for each query graph. It may not appear in the query graph.
-    ArrayList<Integer> centerIds = OwnMethods.GetRandom_NoDuplicate(spatialIds, queryCount);
-    for (int centerId : centerIds) {
+    Set<Integer> centerIds = new HashSet<>();
+    Random random = new Random();
+    while (centerIds.size() < queryCount) {
+      int centerId = spatialIds.get(random.nextInt(spatialCount));
       Util.println("centerId: " + centerId);
+      if (!centerIds.add(centerId)) { // id is already in the set
+        continue;
+      }
       Entity centerEntity = entities.get(centerId);
       if (centerEntity.id != centerId) {
         throw new RuntimeException(
@@ -566,7 +574,12 @@ public class Prepare {
       MyRectangle rectangle =
           OwnMethods.getRectKWithin(stRtreePoints, centerEntity.lon, centerEntity.lat, K);
       // sample ids will be used to generate the query pattern
+      long start = System.currentTimeMillis();
       while (true) {
+        if (System.currentTimeMillis() - start > 5000) {
+          centerIds.remove(centerId);
+          break;
+        }
         ArrayList<Integer> sampleIds =
             OwnMethods.samplingWithinRange(stRtreeEntities, rectangle, 1);
         int startSpatialId = sampleIds.get(0);
