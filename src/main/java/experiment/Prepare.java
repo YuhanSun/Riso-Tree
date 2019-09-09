@@ -524,7 +524,7 @@ public class Prepare {
       List<String> queries = generateExperimentCypherQuerySelectivity(graph, entities, spatialIds,
           graphLabels, labelStringMap, Double.parseDouble(selectivity), queryCount, nodeCount,
           stRtreeEntities, stRtreePoints);
-      String outputPath = String.format("%s/%d_%s", outputDir, nodeCount);
+      String outputPath = String.format("%s/%d_%s", outputDir, nodeCount, selectivity);
       ReadWriteUtil.WriteFile(outputPath, true, queries);
     }
   }
@@ -566,14 +566,20 @@ public class Prepare {
       MyRectangle rectangle =
           OwnMethods.getRectKWithin(stRtreePoints, centerEntity.lon, centerEntity.lat, K);
       // sample ids will be used to generate the query pattern
-      ArrayList<Integer> sampleIds = OwnMethods.samplingWithinRange(stRtreeEntities, rectangle, 1);
-      int startSpatialId = sampleIds.get(0);
-      Util.println("start spatial id: " + startSpatialId);
-      Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, graphLabels,
-          labelStringMap, entities, node_count, startSpatialId, rectangle);
-      String query = CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing);
-      Util.println(query);
-      queries.add(query);
+      while (true) {
+        ArrayList<Integer> sampleIds =
+            OwnMethods.samplingWithinRange(stRtreeEntities, rectangle, 1);
+        int startSpatialId = sampleIds.get(0);
+        Util.println("start spatial id: " + startSpatialId);
+        if (graphLabels.get(startSpatialId).size() > 0) {
+          Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, graphLabels,
+              labelStringMap, entities, node_count, startSpatialId, rectangle);
+          String query = CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing);
+          Util.println(query);
+          queries.add(query);
+          break;
+        }
+      }
     }
     return queries;
   }
