@@ -611,8 +611,8 @@ public class OwnMethods {
     // }
 
     // expand the subgraph until its size is node_count. id in subgraph is the original graph_id.
+    long start = System.currentTimeMillis();
     while (subgraph_ids.size() < node_count) {
-      long start = System.currentTimeMillis();
       int start_index = random.nextInt(subgraph_ids.size()); // pos in the subgraph_ids
       int start_id = subgraph_ids.get(start_index);
       ArrayList<Integer> neighbors = graph.get(start_id);
