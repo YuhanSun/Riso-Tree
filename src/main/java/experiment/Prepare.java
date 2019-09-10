@@ -6,8 +6,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
@@ -491,6 +493,33 @@ public class Prepare {
       Util.println("output query graph to " + querygraph_path);
       Util.WriteQueryGraph(querygraph_path, query_Graphs);
     }
+  }
+
+  /**
+   * Convert the single label label.txt file to label graph and generate the label to string map at
+   * the same time.
+   *
+   * @param labelListPath
+   * @param labelGraphPath
+   * @param labelStringMapPath
+   * @throws Exception
+   */
+  public static void singleLabelListToLabelGraph(String labelListPath, String labelGraphPath,
+      String labelStringMapPath) throws Exception {
+    Util.checkPathExist(labelListPath);
+    List<Integer> labelList = ReadWriteUtil.readIntegerArray(labelListPath);
+    ArrayList<ArrayList<Integer>> labelGraph = new ArrayList<>(labelList.size());
+    Map<Integer, String> labelMap = new TreeMap<>();
+    for (int label : labelList) {
+      if (!labelMap.containsKey(label)) {
+        labelMap.put(label, String.valueOf(label));
+      }
+      ArrayList<Integer> nodeLabels = new ArrayList<>();
+      nodeLabels.add(label);
+      labelGraph.add(nodeLabels);
+    }
+    GraphUtil.writeGraphArrayList(labelGraph, labelGraphPath);
+    ReadWriteUtil.WriteMap(labelStringMapPath, false, labelMap);
   }
 
   public static void generateExperimentCypherQuery(String graphPath, String entityPath,

@@ -41,6 +41,10 @@ public class Driver {
     wikiConstructPNTimeSingleHop, wikiLoadPN, wikiLoadAllHopPN, //
     wikiConstructPNTimeSingleHopNoGraphDb,
 
+    /**
+     * experiment
+     */
+    singleLabelListToLabelGraph, // convert single label dataset to multi-label format.
     generateQuery,
   }
 
@@ -305,6 +309,10 @@ public class Driver {
                 cmd.getOptionValue(containIDPath));
             break;
           // experiment
+          case singleLabelListToLabelGraph:
+            Prepare.singleLabelListToLabelGraph(cmd.getOptionValue(labelListPath),
+                cmd.getOptionValue(outputPath), cmd.getOptionValue(labelStrMapPath));
+            break;
           case generateQuery:
             Prepare.generateExperimentCypherQuery(cmd.getOptionValue(graphPath),
                 cmd.getOptionValue(entityPath), cmd.getOptionValue(labelListPath),
