@@ -138,13 +138,12 @@ public class ReadWriteUtil {
    * @param map
    * @throws Exception
    */
-  public static void WriteMap(String filename, boolean app, Map<Object, Object> map)
-      throws Exception {
+  public static <K, V> void WriteMap(String filename, boolean app, Map<K, V> map) throws Exception {
     FileWriter fWriter = new FileWriter(filename, app);
-    Set<Entry<Object, Object>> set = map.entrySet();
-    Iterator<Entry<Object, Object>> iterator = set.iterator();
+    Set<Entry<K, V>> set = map.entrySet();
+    Iterator<Entry<K, V>> iterator = set.iterator();
     while (iterator.hasNext()) {
-      Entry<Object, Object> element = iterator.next();
+      Entry<K, V> element = iterator.next();
       fWriter.write(
           String.format("%s,%s\n", element.getKey().toString(), element.getValue().toString()));
     }
