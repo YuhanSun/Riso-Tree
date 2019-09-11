@@ -13,6 +13,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -586,7 +587,7 @@ public class RisoTreeQueryPN {
   }
 
   /**
-   * Execute the query. Attach 'explain' to get profile statistics.
+   * Execute the query. Attach 'profile' to get profile statistics.
    *
    * @param query
    * @param query_Graph
@@ -634,6 +635,14 @@ public class RisoTreeQueryPN {
     }
   }
 
+  /**
+   * Rewrite the query to include the candidateSets constraint.
+   *
+   * @param query
+   * @param candidateSets
+   * @param nodeVariables
+   * @return
+   */
   public static String formQueryWithIgnore(String query,
       Map<Integer, Collection<Long>> candidateSets, String[] nodeVariables) {
     String queryAfterRewrite = query.toString();
@@ -657,7 +666,8 @@ public class RisoTreeQueryPN {
   }
 
   /**
-   * 
+   * Insert the id constraint string into the original query string.
+   *
    * @param query
    * @param idConstraint
    * @return
@@ -667,6 +677,13 @@ public class RisoTreeQueryPN {
     return queryParts[0] + " (" + idConstraint + ") and" + queryParts[1];
   }
 
+  /**
+   * Form the string of like "id(a0) in [...] or id(a1) in [...]".
+   *
+   * @param candidateSets
+   * @param nodeVariables
+   * @return
+   */
   public static String formIdConstraint(Map<Integer, Collection<Long>> candidateSets,
       String[] nodeVariables) {
     String string = "";
@@ -872,10 +889,20 @@ public class RisoTreeQueryPN {
     return minEndId;
   }
 
+  /**
+   * Get the overlapped leaf nodes for all spatial predicates.
+   *
+   * @param root_node
+   * @param spa_predicates
+   * @param pN_list_propertyname
+   * @return a map of <spa_predicate_id, overlapped_nodes>
+   * @throws Exception
+   */
   public Map<Integer, List<Node>> getOverlapLeafNodes(Node root_node,
       Map<Integer, MyRectangle> spa_predicates,
       Map<Integer, Map<Integer, Set<String>>> pN_list_propertyname) throws Exception {
     Map<Integer, List<Node>> overlapLeafNodesMultiPredicate = new HashMap<>();
+    // for each spatial predicate, get the overlapped leaf nodes.
     for (int spatialId : spa_predicates.keySet()) {
       List<Node> overlapLeafNodes = getOverlapLeafNodesSinglePredicate(root_node,
           spa_predicates.get(spatialId), pN_list_propertyname.get(spatialId));
@@ -887,6 +914,16 @@ public class RisoTreeQueryPN {
     return overlapLeafNodesMultiPredicate;
   }
 
+  /**
+   * Get the overlapped leaf nodes for a spatial predicate considering all the label path
+   * constraint.
+   *
+   * @param root_node
+   * @param myRectangle
+   * @param pN_propertyname_single_predicate the label path prop related to this spatial predicate
+   * @return
+   * @throws Exception
+   */
   private List<Node> getOverlapLeafNodesSinglePredicate(Node root_node, MyRectangle myRectangle,
       Map<Integer, Set<String>> pN_propertyname_single_predicate) throws Exception {
     List<Node> cur_list = new LinkedList<>();
@@ -915,8 +952,8 @@ public class RisoTreeQueryPN {
 
       for (Node node : cur_list) {
         if (isNodeOverlapRectangle(node, myRectangle)) {
-          // if does not contain all the paths
-          if (isLeafLevel && !isNodeContainAllPaths(node, paths)) {
+          // if does not contain all the paths (currently only leaf nodes contain path info)
+          if (isLeafLevel && !isNodeContainAllPathsIgnore(node, paths)) {
             continue;
           }
           overlap_MBR_list.add(node);
@@ -966,6 +1003,56 @@ public class RisoTreeQueryPN {
       throw new Exception(
           String.format("node %s does not has \"%s\" property", node, Config.BBoxName));
     }
+  }
+
+  /**
+   * Decide whether a node contains all the paths required. PN can be ignored (stored with []).
+   *
+   * @param node
+   * @param paths
+   * @return
+   */
+  public boolean isNodeContainAllPathsIgnore(Node node, Set<String> paths) {
+    for (String path : paths) {
+      if (!isNodeContainSinglePathIgnore(node, path)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public boolean isNodeContainSinglePathIgnore(Node node, String path) {
+    Set<String> shorterPaths = formIgnoreSearchSet(path);
+    for (String key : node.getPropertyKeys()) {
+      if (key.equals(path)) {
+        return true;
+      }
+      if (shorterPaths.contains(key)) {
+        int[] pn = (int[]) node.getProperty(key);
+        if (pn.length == 0) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Form the label paths set for the ignore case. Because longer path can be ignored. So check the
+   * shorter path that has value [].
+   * 
+   * @param path
+   * @return
+   */
+  public Set<String> formIgnoreSearchSet(String path) {
+    Set<String> searchPaths = new HashSet<>();
+    String[] strings = StringUtils.split(path, '_');
+    String curString = strings[0];
+    for (int i = 1; i < strings.length; i++) {
+      curString += "_" + strings[i];
+      searchPaths.add(curString);
+    }
+    return searchPaths;
   }
 
   /**
