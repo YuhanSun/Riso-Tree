@@ -130,6 +130,16 @@ public class ReadWriteUtil {
     return graph_pos_map_list;
   }
 
+  public static List<String> readFileAllLines(String filepath) throws Exception {
+    List<String> lines = new ArrayList<>();
+    BufferedReader reader = Util.getBufferedReader(filepath);
+    String line = null;
+    while ((line = reader.readLine()) != null) {
+      lines.add(line);
+    }
+    return lines;
+  }
+
   /**
    * write map to file
    * 
