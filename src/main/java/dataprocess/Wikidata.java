@@ -816,6 +816,13 @@ public class Wikidata {
 
   public static void loadAllEntities(String entityPath, String graphLabelPath,
       String entityStringLabelMapPath, String dbPath) throws Exception {
+    Util.checkPathExist(entityPath);
+    Util.checkPathExist(graphLabelPath);
+    Util.checkPathExist(entityStringLabelMapPath);
+    if (Util.pathExist(dbPath)) {
+      throw new RuntimeException(dbPath + " should not exist and it should be an empty db!");
+    }
+
     ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
     ArrayList<ArrayList<Integer>> labels = GraphUtil.ReadGraph(graphLabelPath);
     String[] labelStringMap = readLabelMap(entityStringLabelMapPath);
