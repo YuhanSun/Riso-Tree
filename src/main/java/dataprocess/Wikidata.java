@@ -590,6 +590,7 @@ public class Wikidata {
     ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
     String[] labelStringMap = readLabelMap(entityStringLabelMapPath);
 
+    maxPNSize = maxPNSize == -1 ? Integer.MAX_VALUE : maxPNSize;
     FileWriter writer = Util.getFileWriter(outputPath);
     generateZeroOneHopPNForSpatialNodes(graph, graphLabels, entities, labelStringMap, maxPNSize,
         writer);
