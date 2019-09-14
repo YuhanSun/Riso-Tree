@@ -39,6 +39,13 @@ do
 	# -maxPNSize -1 \
 	# -outputPath ${spatialNodePNPath}
 
+	# Load graph nodes.
+	java -Xmx100g -jar ${jar_path} -f wikidataLoadGraph \
+		-ep ${entity_path} \
+		-lp ${label_path} \
+		-entityStringLabelMapPath ${entityStringLabelMapPath} \
+		-dp ${db_path}
+
 	# Construct the tree structure
 	java -Xmx100g -jar ${jar_path} \
 	-f wikiConstructRTree \
