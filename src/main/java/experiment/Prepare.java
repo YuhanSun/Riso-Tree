@@ -522,6 +522,31 @@ public class Prepare {
     ReadWriteUtil.WriteMap(labelStringMapPath, false, labelMap);
   }
 
+  /**
+   * Generate the labels.txt file based on entity.txt. If entity is spatial, its label is 1.
+   * Otherwise, use random integer from [2, labelCount + 1].
+   * 
+   * @param labelCount
+   * @param entityPath
+   * @param outputLabelPath
+   */
+  public static void generateRandomLabel(int labelCount, String entityPath,
+      String outputLabelPath) {
+    ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
+    Random random = new Random();
+    List<Integer> labels = new ArrayList<>(entities.size());
+
+    for (Entity entity : entities) {
+      if (entity.IsSpatial) {
+        labels.add(1);
+      } else {
+        int label = random.nextInt(labelCount) + 2;
+        labels.add(label);
+      }
+    }
+    ReadWriteUtil.WriteArray(outputLabelPath, labels);
+  }
+
   public static void generateExperimentCypherQuery(String graphPath, String entityPath,
       String labelsPath, String entityStringLabelMapPath, String selectivitiesStr, int queryCount,
       int nodeCount, String outputDir) throws Exception {

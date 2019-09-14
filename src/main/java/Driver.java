@@ -44,7 +44,7 @@ public class Driver {
     /**
      * experiment
      */
-    singleLabelListToLabelGraph, // convert single label dataset to multi-label format.
+    generateRandomLabel, singleLabelListToLabelGraph, // for single label graph prepare
     generateQuery,
   }
 
@@ -60,46 +60,47 @@ public class Driver {
   private String[] args = null;
   private Options options = new Options();
 
-  private String help = "h";
-  private String function = "f";
-  private String graphPath = "gp";
-  private String entityPath = "ep";
-  private String labelListPath = "lp";
-  private String dbPath = "dp";
-  private String dataset = "d";
-  private String dataDir = "dataDir";
+  private static final String help = "h";
+  private static final String function = "f";
+  private static final String graphPath = "gp";
+  private static final String entityPath = "ep";
+  private static final String labelListPath = "lp";
+  private static final String dbPath = "dp";
+  private static final String dataset = "d";
+  private static final String dataDir = "dataDir";
 
   // Construct_RisoTree
-  private String containIDPath = "c";
-  private String labelStrMapPath = "labelStrMapPath";
-  private String spatialNodePNPath = "spatialNodePNPath";
+  private static final String containIDPath = "c";
+  private static final String labelStrMapPath = "labelStrMapPath";
+  private static final String spatialNodePNPath = "spatialNodePNPath";
 
   // Load data
-  private String mapPath = "mapPath";
-  private String entityStringLabelMapPath = "entityStringLabelMapPath";
-  private String graphPropertyEdgePath = "graphPropertyEdgePath";
-  private String propertyMapPath = "propertyMapPath";
+  private static final String mapPath = "mapPath";
+  private static final String entityStringLabelMapPath = "entityStringLabelMapPath";
+  private static final String graphPropertyEdgePath = "graphPropertyEdgePath";
+  private static final String propertyMapPath = "propertyMapPath";
 
 
 
-  private String MAX_HOPNUM = "MAX_HOPNUM";
-  private String hop = "hop";
-  private String hopListStr = "hopListStr";
-  private String PNPathAndPrefix = "PNPrefix";
+  private static final String MAX_HOPNUM = "MAX_HOPNUM";
+  private static final String hop = "hop";
+  private static final String hopListStr = "hopListStr";
+  private static final String PNPathAndPrefix = "PNPrefix";
 
-  private String maxPNSize = "maxPNSize";
-  private String alpha = "alpha";
+  private static final String maxPNSize = "maxPNSize";
+  private static final String alpha = "alpha";
 
   // Analyze
-  private String inputPath = "inputPath";
-  private String outputPath = "outputPath";
+  private static final String inputPath = "inputPath";
+  private static final String outputPath = "outputPath";
 
   // Experiment
-  private String nodeCount = "nodeCount";
+  private static final String labelCount = "labelCount"; // for single-label graph
+  private static final String nodeCount = "nodeCount";
   // private String startSelectivity = "startSelectivity";
   // private String endSelectivity = "endSelectivity";
-  private String selectivitiesStr = "selectivitiesStr";
-  private String queryCount = "queryCount";
+  private static final String selectivitiesStr = "selectivitiesStr";
+  private static final String queryCount = "queryCount";
 
   public Driver(String[] args) {
     this.args = args;
@@ -134,6 +135,8 @@ public class Driver {
     options.addOption(inputPath, "inputPath", true, "The input path for analyze");
 
     // Experiment
+    options.addOption(labelCount, "labelCount", true,
+        "the number of labels in graphs with random-generated label");
     options.addOption(nodeCount, "nodeCount", true, "The node count in the query graph");
     // options.addOption(startSelectivity, "startSelectivity", true, "start selectivity");
     // options.addOption(endSelectivity, "endSelectivity", true, "end selectivity");
@@ -312,6 +315,10 @@ public class Driver {
           case singleLabelListToLabelGraph:
             Prepare.singleLabelListToLabelGraph(cmd.getOptionValue(labelListPath),
                 cmd.getOptionValue(outputPath), cmd.getOptionValue(labelStrMapPath));
+            break;
+          case generateRandomLabel:
+            Prepare.generateRandomLabel(Integer.parseInt(cmd.getOptionValue(labelCount)),
+                cmd.getOptionValue(entityPath), cmd.getOptionValue(labelListPath));
             break;
           case generateQuery:
             Prepare.generateExperimentCypherQuery(cmd.getOptionValue(graphPath),
