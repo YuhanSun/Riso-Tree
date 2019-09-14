@@ -19,7 +19,7 @@ entityStringLabelMapPath="${data_dir}/entity_string_label.txt"
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
 split_mode="Gleenes"
-maxPNSize="100"
+maxPNSize="-1"
 
 for alpha in 1.0
 do
@@ -30,30 +30,31 @@ do
 	PNPathAndPrefix="${data_dir}/PathNeighbors_${suffix}"
 
 	# Generate the 0-1 hop pn for spatial nodes
-	java -Xmx100g -jar ${jar_path} \
-	-f wikigenerateZeroOneHopPNForSpatialNodes \
-	-gp ${graph_path} \
-	-lp ${label_path} \
-	-ep ${entity_path} \
-	-entityStringLabelMapPath ${entityStringLabelMapPath} \
-	-maxPNSize -1 \
-	-outputPath ${spatialNodePNPath}
-
-	# # Construct the tree structure
 	# java -Xmx100g -jar ${jar_path} \
-	# -f wikiConstructRTree \
-	# -dp ${db_path} \
-	# -d ${dataset} \
+	# -f wikigenerateZeroOneHopPNForSpatialNodes \
+	# -gp ${graph_path} \
+	# -lp ${label_path} \
 	# -ep ${entity_path} \
-	# -spatialNodePNPath ${spatialNodePNPath} \
-	# -alpha ${alpha} \
-	# -maxPNSize ${maxPNSize}
+	# -entityStringLabelMapPath ${entityStringLabelMapPath} \
+	# -maxPNSize -1 \
+	# -outputPath ${spatialNodePNPath}
 
-	# # Generate the leaf contain spatial node file
-	# java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
-	# -dp ${db_path} \
-	# -d ${dataset} \
-	# -c ${containID_path}
+	# Construct the tree structure
+	java -Xmx100g -jar ${jar_path} \
+	-f wikiConstructRTree \
+	-dp ${db_path} \
+	-d ${dataset} \
+	-ep ${entity_path} \
+	-spatialNodePNPath ${spatialNodePNPath} \
+	-alpha ${alpha} \
+	-maxPNSize ${maxPNSize}
+
+	# Generate the leaf contain spatial node file
+	java -Xmx100g -jar ${jar_path} \
+		-f wikiGenerateContainSpatialID \
+		-dp ${db_path} \
+		-d ${dataset} \
+		-c ${containID_path}
 
 	# # 0-hop
 	# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
