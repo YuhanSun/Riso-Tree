@@ -752,7 +752,7 @@ public class RisoTreeQueryPN {
 
       long start = System.currentTimeMillis();
       Map<Integer, List<Node>> overlapLeafNodes =
-          getOverlapLeafNodes(root_node, spa_predicates, PN_size_propertyname);
+          getOverlapLeafNodes(root_node, spa_predicates, PN_list_propertyname);
 
       range_query_time += System.currentTimeMillis() - start;
       if (overlapLeafNodes == null) {
@@ -930,13 +930,15 @@ public class RisoTreeQueryPN {
     cur_list.add(root_node);
     List<Node> next_list = new LinkedList<>();
 
-    Set<String> paths = new HashSet<>();
+    Map<String, Set<String>> pathsAndShorterPaths = new HashMap<>();
     for (int endId : pN_propertyname_single_predicate.keySet()) {
       Set<String> pathsToSameNode = pN_propertyname_single_predicate.get(endId);
       for (String path : pathsToSameNode) {
-        paths.add(path);
+        pathsAndShorterPaths.put(path, formIgnoreSearchSet(path));
       }
     }
+
+    LOGGER.info("paths and shorter paths: " + pathsAndShorterPaths.toString());
 
     int level_index = 0;
     boolean isLeafLevel = false;
@@ -953,7 +955,7 @@ public class RisoTreeQueryPN {
       for (Node node : cur_list) {
         if (isNodeOverlapRectangle(node, myRectangle)) {
           // if does not contain all the paths (currently only leaf nodes contain path info)
-          if (isLeafLevel && !isNodeContainAllPathsIgnore(node, paths)) {
+          if (isLeafLevel && !isNodeContainAllPathsIgnore(node, pathsAndShorterPaths)) {
             continue;
           }
           overlap_MBR_list.add(node);
@@ -1012,17 +1014,17 @@ public class RisoTreeQueryPN {
    * @param paths
    * @return
    */
-  public boolean isNodeContainAllPathsIgnore(Node node, Set<String> paths) {
-    for (String path : paths) {
-      if (!isNodeContainSinglePathIgnore(node, path)) {
+  public boolean isNodeContainAllPathsIgnore(Node node,
+      Map<String, Set<String>> pathsAndShortPaths) {
+    for (String path : pathsAndShortPaths.keySet()) {
+      if (!isNodeContainSinglePathIgnore(node, path, pathsAndShortPaths.get(path))) {
         return false;
       }
     }
     return true;
   }
 
-  public boolean isNodeContainSinglePathIgnore(Node node, String path) {
-    Set<String> shorterPaths = formIgnoreSearchSet(path);
+  public boolean isNodeContainSinglePathIgnore(Node node, String path, Set<String> shorterPaths) {
     for (String key : node.getPropertyKeys()) {
       if (key.equals(path)) {
         return true;
