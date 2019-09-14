@@ -344,7 +344,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     this.spatialNodesPathNeighbors = spatialNodesPathNeighbors;
     this.alpha = alpha;
     this.spatialOnly = Math.abs(alpha - 1) < 0.0000001 ? true : false;
-    this.MaxPNSize = maxPNSize;
+    this.MaxPNSize = maxPNSize == -1 ? Integer.MAX_VALUE : maxPNSize;
 
     for (NodeWithEnvelope n : outliers) {
       index++;
