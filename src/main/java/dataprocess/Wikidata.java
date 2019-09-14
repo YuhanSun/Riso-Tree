@@ -763,7 +763,7 @@ public class Wikidata {
 
           value.add(neighborID);
         } else {
-          ArrayList<Integer> arrayList = new ArrayList<Integer>(maxPNSize);
+          ArrayList<Integer> arrayList = new ArrayList<>();
           arrayList.add(neighborID);
           pathLabelNeighbors.put(labelStr, arrayList);
         }
