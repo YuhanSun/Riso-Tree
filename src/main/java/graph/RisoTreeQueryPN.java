@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
+import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -582,8 +583,11 @@ public class RisoTreeQueryPN {
     return query;
   }
 
+  private Query_Graph query_Graph = null;
+
   public void queryWithIgnore(String query) throws Exception {
     Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
+    this.query_Graph = query_Graph;
     // queryWithIgnore(query, query_Graph);
     queryWithIgnoreNewLabel(query, query_Graph);
   }
@@ -892,9 +896,11 @@ public class RisoTreeQueryPN {
       Map<Integer, Map<Integer, Set<String>>> pN_size_propertyname) throws Exception {
     Map<Integer, Map<Integer, Collection<Long>>> pathNeighborMultiPredicates = new HashMap<>();
     for (int spatialId : overlapLeafNodes.keySet()) {
+      // Map<Integer, Collection<Long>> pathNeighbors =
+      // getPathNeighbors(overlapLeafNodes.get(spatialId), pN_list_propertyname.get(spatialId),
+      // pN_size_propertyname.get(spatialId));
       Map<Integer, Collection<Long>> pathNeighbors =
-          getPathNeighbors(overlapLeafNodes.get(spatialId), pN_list_propertyname.get(spatialId),
-              pN_size_propertyname.get(spatialId));
+          getPathNeighbors(spatialId, overlapLeafNodes, pN_list_propertyname, pN_size_propertyname);
       pathNeighborMultiPredicates.put(spatialId, pathNeighbors);
     }
 
@@ -975,13 +981,56 @@ public class RisoTreeQueryPN {
     candidateSets.put(minEndId, candidateSet);
   }
 
+  private Map<Integer, Collection<Long>> getPathNeighbors(int spatialId,
+      Map<Integer, List<Node>> overlapLeafNodes,
+      Map<Integer, Map<Integer, Set<String>>> pN_list_propertyname,
+      Map<Integer, Map<Integer, Set<String>>> pN_size_propertyname) throws Exception {
+    Map<Integer, Collection<Long>> candidateSets = new HashMap<>();
+
+    for (Node node : overlapLeafNodes.get(spatialId)) {
+      int minEndId = getEndIdWithMinCard(node, pN_size_propertyname.get(spatialId));
+      if (minEndId == -1) {
+        addSpatialCandidate(node, spatialId, candidateSets);
+      } else {
+        addPathNeighbors(node, minEndId, pN_list_propertyname.get(spatialId), candidateSets);
+      }
+    }
+    return candidateSets;
+  }
+
+  private void addSpatialCandidate(Node node, int spatialId,
+      Map<Integer, Collection<Long>> candidateSets) {
+    MyRectangle queryRect = query_Graph.spa_predicate[spatialId];
+    Collection<Long> candidateSet = candidateSets.get(spatialId);
+    if (candidateSet == null) {
+      candidateSet = new HashSet<>();
+    }
+    Iterable<Relationship> rels =
+        node.getRelationships(RTreeRelationshipTypes.RTREE_REFERENCE, Direction.OUTGOING);
+    for (Relationship relationship : rels) {
+      Node geom = relationship.getEndNode();
+      MyRectangle mbr = RTreeUtility.getNodeMBR(geom);
+      if (queryRect.intersect(mbr) != null) {
+        candidateSet.add(geom.getId());
+      }
+    }
+
+    candidateSets.put(spatialId, candidateSet);
+  }
+
   private int getEndIdWithMinCard(Node node, Map<Integer, Set<String>> pN_size_propertyname)
       throws Exception {
     int minCard = Integer.MAX_VALUE;
     int minEndId = -1;
     for (int endId : pN_size_propertyname.keySet()) {
       for (String pathSizeName : pN_size_propertyname.get(endId)) {
-        int curSize = (int) node.getProperty(pathSizeName);
+        Object curSizeObject = node.getProperty(pathSizeName, Integer.MAX_VALUE);
+        // Object curSizeObject = node.getProperty(pathSizeName);
+        // this case handle the removed pn because of a shorter path
+        // if (curSizeObject == null) {
+        // continue;
+        // }
+        int curSize = (int) curSizeObject;
         if (curSize != 0 && curSize < minCard) {
           minEndId = endId;
           minCard = curSize;
@@ -990,7 +1039,7 @@ public class RisoTreeQueryPN {
     }
 
     if (minEndId == -1) {
-      throw new Exception(String.format("Node %s's path neighbor has all been dropped!", node));
+      LOGGER.info(String.format("Node %s's path neighbor has all been dropped!", node));
     }
 
     return minEndId;
