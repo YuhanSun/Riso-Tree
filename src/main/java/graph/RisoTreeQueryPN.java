@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
@@ -95,10 +96,10 @@ public class RisoTreeQueryPN {
   public long check_overlap_time;
 
   // test control variables
-  public static boolean outputLevelInfo = true;
-  public static boolean outputQuery = true;
-  public static boolean outputExecutionPlan = false;
-  public static boolean outputResult = false;
+  public static final boolean outputLevelInfo = true;
+  public static final boolean outputQuery = true;
+  public static final boolean outputExecutionPlan = false;
+  public static final boolean outputResult = false;
 
   public static boolean forceGraphFirst = true;
 
@@ -583,7 +584,113 @@ public class RisoTreeQueryPN {
 
   public void queryWithIgnore(String query) throws Exception {
     Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
-    queryWithIgnore(query, query_Graph);
+    // queryWithIgnore(query, query_Graph);
+    queryWithIgnoreNewLabel(query, query_Graph);
+  }
+
+  /**
+   * Execute the query. Attach 'profile' to get profile statistics.
+   *
+   * @param query
+   * @param query_Graph
+   * @throws Exception
+   */
+  public void queryWithIgnoreNewLabel(String query, Query_Graph query_Graph) throws Exception {
+    iniLogParams();
+    Map<Integer, Collection<Long>> candidateSets = getCandidateSetWithIgnore(query_Graph);
+
+    if (candidateSets.isEmpty()) {
+      return;
+    }
+
+    setNewLabel(candidateSets, query_Graph.nodeVariables);
+
+    String queryAfterRewrite = formQueryWithIgnoreNewLabel(query, candidateSets, query_Graph);
+    queryAfterRewrite = "profile " + queryAfterRewrite;
+    LOGGER.info("query after rewrite: \n" + queryAfterRewrite);
+    long start = System.currentTimeMillis();
+    Result result = dbservice.execute(queryAfterRewrite);
+    get_iterator_time += System.currentTimeMillis() - start;
+
+    start = System.currentTimeMillis();
+    int cur_count = 0;
+    while (result.hasNext()) {
+      cur_count++;
+      Map<String, Object> row = result.next();
+      if (outputResult) {
+        Util.println(row);
+      }
+    }
+    iterate_time += System.currentTimeMillis() - start;
+
+    result_count += cur_count;
+    planDescription = result.getExecutionPlanDescription();
+    page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+    if (outputExecutionPlan) {
+      Util.println(planDescription);
+      Util.println("OwnMethods.gethits: " + OwnMethods.GetTotalDBHits(planDescription));
+      if (planDescription.hasProfilerStatistics()) {
+        Util.println("cypher statistics: " + planDescription.getProfilerStatistics().getDbHits());
+      } else {
+        throw new Exception("planDescription has no statistics!!");
+      }
+
+      OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
+    }
+
+    recoverLabel(candidateSets, query_Graph.nodeVariables);
+  }
+
+  private String formQueryWithIgnoreNewLabel(String query,
+      Map<Integer, Collection<Long>> candidateSets, Query_Graph query_Graph) {
+    List<String> subQueries = new ArrayList<>();
+    for (int id : candidateSets.keySet()) {
+      String variable = query_Graph.nodeVariables[id];
+      String label = query_Graph.label_list_string[id];
+      String replaceToken = String.format("%s:%s", variable, label);
+      if (!query.contains(replaceToken)) {
+        throw new RuntimeException(query + " does not have " + replaceToken);
+      }
+      subQueries
+          .add(query.replace(replaceToken, replaceToken + ":" + query_Graph.nodeVariables[id]));
+    }
+
+    String newQuery = null;
+    for (String subQuery : subQueries) {
+      if (newQuery == null) {
+        newQuery = subQuery;
+        continue;
+      } else {
+        newQuery += " UNION " + subQuery;
+      }
+    }
+    return newQuery;
+  }
+
+  /**
+   * Set the new label for cypher query execution.
+   *
+   * @param candidateSets
+   * @param nodeVariables
+   */
+  private void setNewLabel(Map<Integer, Collection<Long>> candidateSets, String[] nodeVariables) {
+    for (int queryNodeId : candidateSets.keySet()) {
+      String nodeVariableName = nodeVariables[queryNodeId];
+      for (long neo4jId : candidateSets.get(queryNodeId)) {
+        Node node = dbservice.getNodeById(neo4jId);
+        node.addLabel(Label.label(nodeVariableName));
+      }
+    }
+  }
+
+  private void recoverLabel(Map<Integer, Collection<Long>> candidateSets, String[] nodeVariables) {
+    for (int queryNodeId : candidateSets.keySet()) {
+      String nodeVariableName = nodeVariables[queryNodeId];
+      for (long neo4jId : candidateSets.get(queryNodeId)) {
+        Node node = dbservice.getNodeById(neo4jId);
+        node.removeLabel(Label.label(nodeVariableName));
+      }
+    }
   }
 
   /**
@@ -1399,14 +1506,7 @@ public class RisoTreeQueryPN {
    */
   public void Query(Query_Graph query_Graph, int limit) {
     try {
-      Util.println("Initialize variables for query");
-      range_query_time = 0;
-      get_iterator_time = 0;
-      iterate_time = 0;
-      result_count = 0;
-      page_hit_count = 0;
-      overlap_leaf_node_count = 0;
-      located_in_count = 0;
+      iniLogParams();
       String logWriteLine = "";
 
       // <spa_id, rectangle> all query rectangles
