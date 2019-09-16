@@ -21,6 +21,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import commons.ArrayUtil;
@@ -587,8 +588,12 @@ public class RisoTreeQueryPN {
 
   public void queryWithIgnore(String query) throws Exception {
     Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
+    this.query_Graph = query_Graph;
+    Transaction tx = dbservice.beginTx();
     // queryWithIgnore(query, query_Graph);
     queryWithIgnoreNewLabel(query, query_Graph);
+    tx.success();
+    tx.close();
   }
 
   /**
@@ -651,12 +656,12 @@ public class RisoTreeQueryPN {
     for (int id : candidateSets.keySet()) {
       String variable = query_Graph.nodeVariables[id];
       String label = query_Graph.label_list_string[id];
-      String replaceToken = String.format("%s:%s", variable, label);
+      String replaceToken = String.format("%s:`%s`", variable, label);
       if (!query.contains(replaceToken)) {
         throw new RuntimeException(query + " does not have " + replaceToken);
       }
-      subQueries
-          .add(query.replace(replaceToken, replaceToken + ":" + query_Graph.nodeVariables[id]));
+      subQueries.add(
+          query.replace(replaceToken, replaceToken + ":`" + query_Graph.nodeVariables[id] + "`"));
     }
 
     String newQuery = null;
@@ -665,7 +670,7 @@ public class RisoTreeQueryPN {
         newQuery = subQuery;
         continue;
       } else {
-        newQuery += " UNION " + subQuery;
+        newQuery += " UNION ALL " + subQuery;
       }
     }
     return newQuery;
@@ -683,6 +688,12 @@ public class RisoTreeQueryPN {
       for (long neo4jId : candidateSets.get(queryNodeId)) {
         Node node = dbservice.getNodeById(neo4jId);
         node.addLabel(Label.label(nodeVariableName));
+      }
+      ResourceIterator<Node> nodes = dbservice.findNodes(Label.label(nodeVariableName));
+      while (nodes.hasNext()) {
+        Node node = nodes.next();
+        Util.println(nodeVariableName);
+        Util.println(node.getId());
       }
     }
   }
@@ -858,7 +869,6 @@ public class RisoTreeQueryPN {
         Util.println(String.format("PNSize_property: %s", PN_size_propertyname));
       }
 
-      Transaction tx = dbservice.beginTx();
       Node root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
 
       long start = System.currentTimeMillis();
@@ -868,8 +878,6 @@ public class RisoTreeQueryPN {
       range_query_time += System.currentTimeMillis() - start;
       if (overlapLeafNodes == null) {
         LOGGER.info("No result satisfy the query.");
-        tx.success();
-        tx.close();
         return candidateSet;
       }
 
@@ -879,8 +887,6 @@ public class RisoTreeQueryPN {
 
       candidateSet =
           getCandidateSetWithIgnore(overlapLeafNodes, PN_list_propertyname, PN_size_propertyname);
-      tx.success();
-      tx.close();
       return candidateSet;
 
     } catch (Exception e) {
