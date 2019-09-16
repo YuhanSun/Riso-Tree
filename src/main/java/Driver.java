@@ -10,6 +10,7 @@ import commons.Util;
 import dataprocess.Wikidata;
 import experiment.Analyze;
 import experiment.DataProcess;
+import experiment.MaxPNSize;
 import experiment.Prepare;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
@@ -46,7 +47,8 @@ public class Driver {
      * experiment
      */
     generateRandomLabel, singleLabelListToLabelGraph, // for single label graph prepare
-    generateQuery,
+    generateQuery, // prepare
+    maxPNSizeRisoTreeQuery, // query
   }
 
   private static FunctionName getFunctionEnum(String function) {
@@ -102,6 +104,9 @@ public class Driver {
   // private String endSelectivity = "endSelectivity";
   private static final String selectivitiesStr = "selectivitiesStr";
   private static final String queryCount = "queryCount";
+  private static final String queryPath = "queryPath";
+  private static final String queryId = "queryId";
+
 
   public Driver(String[] args) {
     this.args = args;
@@ -144,6 +149,8 @@ public class Driver {
     options.addOption(selectivitiesStr, "selectivities string", true,
         "separated by comma without []");
     options.addOption(queryCount, "queryCount", true, "the number of queries to be generated");
+    options.addOption(queryPath, "queryPath", true, "path of the query file");
+    options.addOption(queryId, "queryId", true, "id of the query in the query file");
 
   }
 
@@ -334,6 +341,12 @@ public class Driver {
                 cmd.getOptionValue(labelStrMapPath), cmd.getOptionValue(selectivitiesStr),
                 Integer.parseInt(cmd.getOptionValue(queryCount)),
                 Integer.parseInt(cmd.getOptionValue(nodeCount)), cmd.getOptionValue(outputPath));
+            break;
+          case maxPNSizeRisoTreeQuery:
+            MaxPNSize.maxPNSizeRisoTreeQuery(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(dataset), Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
+                cmd.getOptionValue(queryPath), Integer.parseInt(cmd.getOptionValue(queryId)),
+                cmd.getOptionValue(outputPath));
             break;
           default:
             Util.println(String.format("Function %s does not exist!", functionNameString));
