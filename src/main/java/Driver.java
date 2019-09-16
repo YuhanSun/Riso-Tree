@@ -29,6 +29,7 @@ public class Driver {
      */
     getPNSizeDistribution, getPNNonEmptyCount, // PN
     overlapAnalysis, areaAnalysis, treeNodesAvgArea, // area
+    degreeSD,
 
     /**
      * for wikidata
@@ -243,9 +244,11 @@ public class Driver {
             Analyze.treeNodesAvgArea(cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
                 cmd.getOptionValue(outputPath));
             break;
-          /**
-           * for wikidata
-           */
+          case degreeSD:
+            Analyze.degreeSD(cmd.getOptionValue(graphPath), cmd.getOptionValue(outputPath));
+            /**
+             * for wikidata
+             */
           case wikidataLoadGraph:
             Wikidata.loadAllEntities(cmd.getOptionValue(entityPath),
                 cmd.getOptionValue(labelListPath), cmd.getOptionValue(entityStringLabelMapPath),

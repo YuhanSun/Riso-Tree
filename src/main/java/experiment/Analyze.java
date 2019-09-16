@@ -101,6 +101,26 @@ public class Analyze {
 
   }
 
+  public static void degreeSD(String graphPath, String outputPath) {
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
+    double sd = degreeSD(graph);
+    ReadWriteUtil.WriteFile(outputPath, true,
+        String.format("%s\t%s", graphPath, String.valueOf(sd)));
+  }
+
+  public static double degreeSD(ArrayList<ArrayList<Integer>> graph) {
+    int sum = 0;
+    for (ArrayList<Integer> neighbors : graph) {
+      sum += neighbors.size();
+    }
+    double avg = ((double) sum) / graph.size();
+    double deviation = 0;
+    for (ArrayList<Integer> neighbors : graph) {
+      deviation += Math.pow(neighbors.size() - avg, 2);
+    }
+    return Math.sqrt(deviation / graph.size());
+  }
+
   /**
    * Analyze the average overlap for each tree leaf node. Read all rectangles of leaf nodes and
    * store them in memory. Build an in-memory RTree to perform the self-join.
