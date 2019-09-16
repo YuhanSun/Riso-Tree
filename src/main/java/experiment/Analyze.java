@@ -16,6 +16,7 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config;
 import commons.Config.Datasets;
 import commons.Config.system;
+import commons.Entity;
 import commons.GraphUtil;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
@@ -101,11 +102,46 @@ public class Analyze {
 
   }
 
+  public static void degreeAvg(String graphPath, String entityPath, String outputPath) {
+    Util.checkPathExist(graphPath);
+    Util.checkPathExist(entityPath);
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
+    ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
+    double[] res = degreeAvg(graph, entities);
+    ReadWriteUtil.WriteFile(outputPath, true,
+        String.format("%s\t%f\t%f\n", graphPath, res[0], res[1]));
+  }
+
+  /**
+   * Get average degree for all nodes and spatial nodes.
+   *
+   * @param graph
+   * @param entities
+   * @return
+   */
+  public static double[] degreeAvg(ArrayList<ArrayList<Integer>> graph,
+      ArrayList<Entity> entities) {
+    int sumDegree = 0, spatialCount = 0, spatialSumDegree = 0;
+    if (graph.size() != entities.size()) {
+      throw new RuntimeException("graph size entities size mismatch!");
+    }
+    for (int i = 0; i < graph.size(); i++) {
+      int degree = graph.get(i).size();
+      sumDegree += degree;
+      if (entities.get(i).IsSpatial) {
+        spatialCount++;
+        spatialSumDegree += degree;
+      }
+    }
+    return new double[] {(double) sumDegree / graph.size(),
+        (double) spatialSumDegree / spatialCount};
+  }
+
   public static void degreeSD(String graphPath, String outputPath) {
     ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
     double sd = degreeSD(graph);
     ReadWriteUtil.WriteFile(outputPath, true,
-        String.format("%s\t%s", graphPath, String.valueOf(sd)));
+        String.format("%s\t%s\n", graphPath, String.valueOf(sd)));
   }
 
   public static double degreeSD(ArrayList<ArrayList<Integer>> graph) {
