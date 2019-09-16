@@ -22,7 +22,7 @@ do
 	# containID_suffix="${split_mode}_${alpha}_new_version"
 	containID_path="${data_dir}/containID.txt"
 
-	java -Xmx100g -jar ${jar_path}
+	java -Xmx100g -jar ${jar_path} \
 		-f degreeSD \
 		-gp ${graph_path} \
 		-outputPath ${outputPath}
