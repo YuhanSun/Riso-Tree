@@ -135,7 +135,7 @@ public class Util {
     LOGGER.info("shut down is done.");
   }
 
-  public static void close(GraphDatabaseService service) throws Exception {
+  public static void close(GraphDatabaseService service) {
     LOGGER.info("shut down graph database service...");
     if (service != null) {
       service.shutdown();
