@@ -33,7 +33,7 @@ public class MaxPNSize {
     for (int i = 0; i < dbPaths.length; i++) {
       ResultRecord resultRecord = resultRecords.get(i);
       ReadWriteUtil.WriteFile(outputPath, true,
-          String.format("%s\t%d\n", dbPaths[i], resultRecord.runTime));
+          String.format("%s\t%d\t%d\n", dbPaths[i], resultRecord.runTime, resultRecord.pageHit));
     }
   }
 
@@ -58,7 +58,7 @@ public class MaxPNSize {
     long start = System.currentTimeMillis();
     risoTreeQueryPN.queryWithIgnoreNewLabel(query, query_Graph);
     long runTime = System.currentTimeMillis() - start;
-    return new ResultRecord(runTime);
+    return new ResultRecord(runTime, risoTreeQueryPN.page_hit_count);
   }
 
 }
