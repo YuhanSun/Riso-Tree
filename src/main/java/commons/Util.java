@@ -60,9 +60,9 @@ public class Util {
 
   private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
 
-  public static void checkPathExist(String filepath) throws Exception {
+  public static void checkPathExist(String filepath) {
     if (!Util.pathExist(filepath)) {
-      throw new Exception(filepath + " does not exist!");
+      throw new RuntimeException(filepath + " does not exist!");
     }
   }
 

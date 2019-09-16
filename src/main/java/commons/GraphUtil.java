@@ -82,16 +82,16 @@ public class GraphUtil {
   /**
    * Read graph from a file.
    *
-   * @param graph_path
+   * @param graphPath
    * @return
    */
-  public static ArrayList<ArrayList<Integer>> ReadGraph(String graph_path) {
-    LOGGER.info("read graph from " + graph_path);
+  public static ArrayList<ArrayList<Integer>> ReadGraph(String graphPath) {
+    LOGGER.info("read graph from " + graphPath);
     ArrayList<ArrayList<Integer>> graph = null;
     BufferedReader reader = null;
     String str = "";
     try {
-      reader = new BufferedReader(new FileReader(new File(graph_path)));
+      reader = new BufferedReader(new FileReader(new File(graphPath)));
       str = reader.readLine();
       int nodeCount = Integer.parseInt(str);
       graph = new ArrayList<ArrayList<Integer>>(nodeCount);
@@ -168,20 +168,20 @@ public class GraphUtil {
   /**
    * Read entities
    * 
-   * @param entity_path
+   * @param entityPath
    * @return
    */
-  public static ArrayList<Entity> ReadEntity(String entity_path) {
-    LOGGER.info("read entities from " + entity_path);
+  public static ArrayList<Entity> ReadEntity(String entityPath) {
+    LOGGER.info("read entities from " + entityPath);
     ArrayList<Entity> entities = null;
     BufferedReader reader = null;
     String str = null;
     int id = 0;
     try {
-      if (!Util.pathExist(entity_path))
-        throw new Exception(entity_path + " does not exist");
+      if (!Util.pathExist(entityPath))
+        throw new Exception(entityPath + " does not exist");
 
-      reader = new BufferedReader(new FileReader(new File(entity_path)));
+      reader = new BufferedReader(new FileReader(new File(entityPath)));
       str = reader.readLine();
       int node_count = Integer.parseInt(str);
       entities = new ArrayList<Entity>(node_count);
