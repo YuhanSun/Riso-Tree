@@ -589,11 +589,9 @@ public class RisoTreeQueryPN {
   public void queryWithIgnore(String query) throws Exception {
     Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
     this.query_Graph = query_Graph;
-    Transaction tx = dbservice.beginTx();
+
     // queryWithIgnore(query, query_Graph);
     queryWithIgnoreNewLabel(query, query_Graph);
-    tx.success();
-    tx.close();
   }
 
   /**
@@ -606,6 +604,7 @@ public class RisoTreeQueryPN {
   public void queryWithIgnoreNewLabel(String query, Query_Graph query_Graph) throws Exception {
     iniLogParams();
     this.query_Graph = query_Graph;
+    Transaction tx = dbservice.beginTx();
     Map<Integer, Collection<Long>> candidateSets = getCandidateSetWithIgnore(query_Graph);
 
     if (candidateSets.isEmpty()) {
@@ -648,6 +647,8 @@ public class RisoTreeQueryPN {
     }
 
     recoverLabel(candidateSets, query_Graph.nodeVariables);
+    tx.success();
+    tx.close();
   }
 
   private String formQueryWithIgnoreNewLabel(String query,
