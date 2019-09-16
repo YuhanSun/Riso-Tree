@@ -246,9 +246,10 @@ public class Driver {
             break;
           case degreeSD:
             Analyze.degreeSD(cmd.getOptionValue(graphPath), cmd.getOptionValue(outputPath));
-            /**
-             * for wikidata
-             */
+            break;
+          /**
+           * for wikidata
+           */
           case wikidataLoadGraph:
             Wikidata.loadAllEntities(cmd.getOptionValue(entityPath),
                 cmd.getOptionValue(labelListPath), cmd.getOptionValue(entityStringLabelMapPath),
