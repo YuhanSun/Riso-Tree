@@ -2,10 +2,11 @@
 ./package.sh
 
 dir="/hdd/code/yuhansun"
-# outputPath="${dir}/data/degreeSD.csv"
-outputPath="${dir}/data/degreeAvg.csv"
+outputPathSD="${dir}/data/degreeSD.csv"
+outputPathAvg="${dir}/data/degreeAvg.csv"
 
-for dataset in "Yelp_100" "Gowalla_100" "Patents_100_random_20" "foursquare_100"
+# for dataset in "Yelp_100" "Gowalla_100" "Patents_100_random_20" "foursquare_100"
+for dataset in "wikidata"
 do
 
 	data_dir="${dir}/data/${dataset}"
@@ -27,11 +28,11 @@ do
 		-f degreeAvg \
 		-gp ${graph_path} \
 		-ep ${entity_path} \
-		-outputPath ${outputPath}
+		-outputPath ${outputPathAvg}
 
-	# java -Xmx100g -jar ${jar_path} \
-	# 	-f degreeSD \
-	# 	-gp ${graph_path} \
-	# 	-outputPath ${outputPath}
+	java -Xmx100g -jar ${jar_path} \
+		-f degreeSD \
+		-gp ${graph_path} \
+		-outputPath ${outputPathSD}
 
 done
