@@ -44,6 +44,6 @@ do
 		-d ${dataset} \
 		-MAX_HOPNUM 1 \
 		-queryPath ${query_path} \
-		-queryId ${query_count} \
+		-queryCount ${query_count} \
 		-outputPath ${output_path}
 done
