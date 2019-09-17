@@ -48,7 +48,7 @@ public class Driver {
      */
     generateRandomLabel, singleLabelListToLabelGraph, // for single label graph prepare
     generateQuery, // prepare
-    maxPNSizeRisoTreeQuery, // query
+    maxPNSizeRisoTreeQuery, maxPNSizeRisoTreeQueryMultiple,// query
   }
 
   private static FunctionName getFunctionEnum(String function) {
@@ -346,6 +346,12 @@ public class Driver {
             MaxPNSize.maxPNSizeRisoTreeQuery(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
                 cmd.getOptionValue(queryPath), Integer.parseInt(cmd.getOptionValue(queryId)),
+                cmd.getOptionValue(outputPath));
+            break;
+          case maxPNSizeRisoTreeQueryMultiple:
+            MaxPNSize.maxPNSizeRisoTreeQueryMultiple(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(dataset), Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
+                cmd.getOptionValue(queryPath), Integer.parseInt(cmd.getOptionValue(queryCount)),
                 cmd.getOptionValue(outputPath));
             break;
           default:

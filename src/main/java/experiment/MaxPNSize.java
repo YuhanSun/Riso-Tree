@@ -17,6 +17,64 @@ public class MaxPNSize {
 
   }
 
+
+  public static void maxPNSizeRisoTreeQueryMultiple(String dbPathsStr, String dataset,
+      int MAX_HOPNUM, String queryPath, int queryCount, String outputPath) throws Exception {
+    List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
+    List<String> queriesSlice = queries.subList(0, queryCount - 1);
+
+    String[] dbPaths = dbPathsStr.split(",");
+    for (String dbPath : dbPaths) {
+      Util.checkPathExist(dbPath);
+    }
+
+    List<List<ResultRecord>> dbsResult = new ArrayList<>();
+    for (String dbPath : dbPaths) {
+      GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+      RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOPNUM);
+      List<ResultRecord> resultRecords = new ArrayList<>(queryCount);
+      for (String query : queriesSlice) {
+        ResultRecord resultRecord = risoTreeQuery(query, risoTreeQueryPN);
+        resultRecords.add(resultRecord);
+      }
+      dbsResult.add(resultRecords);
+    }
+
+    String outputDetailPath = outputPath + "_details.csv";
+    String outputAvgPath = outputPath + "_avg.csv";
+    ReadWriteUtil.WriteFile(outputAvgPath, true, queryPath);
+
+    for (int i = 0; i < dbPaths.length; i++) {
+      List<ResultRecord> resultRecords = dbsResult.get(i);
+      String dbPath = dbPaths[i];
+      // details output
+      ReadWriteUtil.WriteFile(outputDetailPath, true, String.format("%s\n%s\n", dbPath, queryPath));
+      for (ResultRecord resultRecord : resultRecords) {
+        ReadWriteUtil.WriteFile(outputDetailPath, true,
+            String.format("%d\t%d\n", resultRecord.runTime, resultRecord.pageHit));
+      }
+      ReadWriteUtil.WriteFile(outputDetailPath, true, "\n");
+
+      // average output
+      ReadWriteUtil.WriteFile(outputAvgPath, true, String.format("%s\t%d\t%d\n", dbPath,
+          ResultRecord.getRunTimeAvg(resultRecords), ResultRecord.getPageHitAvg(resultRecords)));
+
+    }
+    ReadWriteUtil.WriteFile(outputDetailPath, true, "\n");
+    ReadWriteUtil.WriteFile(outputAvgPath, true, "\n");
+  }
+
+  /**
+   * Run the same query in different dbs.
+   *
+   * @param dbPathsStr
+   * @param dataset
+   * @param MAX_HOPNUM
+   * @param queryPath
+   * @param queryId
+   * @param outputPath
+   * @throws Exception
+   */
   public static void maxPNSizeRisoTreeQuery(String dbPathsStr, String dataset, int MAX_HOPNUM,
       String queryPath, int queryId, String outputPath) throws Exception {
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
@@ -35,6 +93,7 @@ public class MaxPNSize {
       ReadWriteUtil.WriteFile(outputPath, true,
           String.format("%s\t%d\t%d\n", dbPaths[i], resultRecord.runTime, resultRecord.pageHit));
     }
+    ReadWriteUtil.WriteFile(outputPath, true, "\n");
   }
 
   public static List<ResultRecord> risoTreeQuery(String[] dbPaths, String dataset, int MAX_HOPNUM,
