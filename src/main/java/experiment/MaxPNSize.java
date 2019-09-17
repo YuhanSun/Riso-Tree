@@ -42,7 +42,7 @@ public class MaxPNSize {
 
     String outputDetailPath = outputPath + "_details.csv";
     String outputAvgPath = outputPath + "_avg.csv";
-    ReadWriteUtil.WriteFile(outputAvgPath, true, queryPath);
+    ReadWriteUtil.WriteFile(outputAvgPath, true, String.format("%s\t%d\n", queryPath, queryCount));
 
     for (int i = 0; i < dbPaths.length; i++) {
       List<ResultRecord> resultRecords = dbsResult.get(i);
