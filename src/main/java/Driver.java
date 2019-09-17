@@ -22,7 +22,8 @@ public class Driver {
     convertSingleToBidirectinalGraph, // data preprocess
 
     tree, containID, // tree construction
-    LoadNonSpatialEntity, GetSpatialNodeMap, LoadGraphEdges, CalculateCount, LoadAll, // graph load
+    LoadNonSpatialEntity, GetSpatialNodeMap, LoadGraphEdges, loadGraphEdgesNoMap, CalculateCount, LoadAll, // graph
+                                                                                                           // load
     constructPN, loadPN, // PN load
 
     /**
@@ -199,6 +200,10 @@ public class Driver {
           case LoadGraphEdges:
             new LoadDataNoOSM(new Config(), true).LoadGraphEdges(cmd.getOptionValue(mapPath),
                 cmd.getOptionValue(dbPath), cmd.getOptionValue(graphPath));
+            break;
+          case loadGraphEdgesNoMap:
+            LoadDataNoOSM.loadGraphEdgesNoMap(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(graphPath));
             break;
           case CalculateCount:
             new LoadDataNoOSM(new Config(), true).CalculateCount(cmd.getOptionValue(dbPath),

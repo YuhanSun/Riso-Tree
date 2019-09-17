@@ -279,6 +279,38 @@ public class LoadDataNoOSM {
     }
   }
 
+  /**
+   * Load graph edges assuming neo4j_id = graph_id.
+   *
+   * @param dbPath
+   * @param graphPath
+   */
+  public static void loadGraphEdgesNoMap(String dbPath, String graphPath) {
+    BatchInserter inserter = null;
+    try {
+      Util.checkPathExist(dbPath);
+      inserter = Util.getBatchInserter(dbPath);
+
+      ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
+      for (int i = 0; i < graph.size(); i++) {
+        ArrayList<Integer> neighbors = graph.get(i);
+        for (int j = 0; j < neighbors.size(); j++) {
+          int neighbor = neighbors.get(j);
+          if (i < neighbor) {
+            inserter.createRelationship(i, neighbor, GraphRel.GRAPH_LINK, null);
+          }
+        }
+      }
+      inserter.shutdown();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      if (inserter != null)
+        inserter.shutdown();
+      System.exit(-1);
+    }
+  }
+
   public void LoadGraphEdges(String mapPath, String dbPath, String graphPath) {
     BatchInserter inserter = null;
     try {
