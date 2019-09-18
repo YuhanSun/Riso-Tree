@@ -581,6 +581,9 @@ public class Prepare {
       List<String> queries = generateExperimentCypherQuerySelectivity(graph, entities, spatialIds,
           graphLabels, labelStringMap, Double.parseDouble(selectivity), queryCount, nodeCount,
           stRtreeEntities, stRtreePoints);
+      if (queries == null) {
+        return;
+      }
       String outputPath = String.format("%s/%d_%s", outputDir, nodeCount, selectivity);
       ReadWriteUtil.WriteFile(outputPath, true, queries);
     }
@@ -610,6 +613,9 @@ public class Prepare {
     List<String> queries = new ArrayList<>(queryCount);
     int spatialCount = spatialIds.size();
     int K = (int) (selectivity * spatialCount);
+    if (K == 0) {
+      return null;
+    }
     // Get the center for each query graph. It may not appear in the query graph.
     Set<Integer> centerIds = new HashSet<>();
     Random random = new Random();
