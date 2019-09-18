@@ -613,14 +613,20 @@ public class OwnMethods {
 
     // expand the subgraph until its size is node_count. id in subgraph is the original graph_id.
     long start = System.currentTimeMillis();
+    int restartTimes = 0;
     while (subgraph_ids.size() < node_count) {
       if (System.currentTimeMillis() - start > 2000) {
+        if (restartTimes == 100) {
+          return null;
+        }
         Util.println("restart");
         for (ArrayList<Integer> neighbors : subgraph) {
           neighbors.clear();
         }
         subgraph_ids = new ArrayList<Integer>(node_count);
         subgraph_ids.add(startSpatialId);
+        start = System.currentTimeMillis();
+        restartTimes++;
         // return GenerateRandomGraphStringLabel(graph, labels, labelStringMap, entities,
         // node_count,
         // startSpatialId, queryRect);
