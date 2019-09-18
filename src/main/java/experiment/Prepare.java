@@ -636,9 +636,8 @@ public class Prepare {
       // sample ids will be used to generate the query pattern
       long start = System.currentTimeMillis();
       while (true) {
-        if (System.currentTimeMillis() - start > 5000) {
+        if (System.currentTimeMillis() - start > 1000) {
           centerIds.remove(centerId);
-          Util.println("break");
           break;
         }
         ArrayList<Integer> sampleIds =
