@@ -30,6 +30,7 @@ I will output **spatialNodesZeroOneHopPN_-1.txt**
 ### 4. Generate containID.txt
 
 1-4 are run by using constructTree_single.sh
+If fail the load step (either Step 2 or 3, need to delete this folder: data/databases/graph.db).
 
 ### 4. Rename the generated graph database folder to from neo4j-community-3.4.12_Gleenes_1.0_-1_new_version to four different folder names. It can done manually or using copy_maxPNSize.sh (path modification required).
 1. neo4j-community-3.4.12_Gleenes_1.0_10_new_version
