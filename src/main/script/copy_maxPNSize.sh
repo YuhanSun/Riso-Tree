@@ -14,7 +14,7 @@ do
 	echo ${suffix}
 
 	# source_path="${data_dir}/neo4j-community-3.4.12_node_edges/"
-	source_path="$data_dir/neo4j-community-3.4.12_${suffix}"
+	source_path="${data_dir}/neo4j-community-3.4.12_${suffix}"
 	target_path="${data_dir}/backup/neo4j-community-3.4.12_${suffix}"
 
 	echo ${source_path}
