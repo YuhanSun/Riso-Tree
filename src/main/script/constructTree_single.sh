@@ -1,7 +1,10 @@
 #!/bin/bash
+# for all datasets except for real wikidata.
 ./package.sh
 
-dataset="foursquare_100"
+# dataset="foursquare_100"
+# dataset="Gowalla_100"
+dataset="Yelp_100"
 
 # server
 dir="/hdd/code/yuhansun"
@@ -30,14 +33,14 @@ do
 	PNPathAndPrefix="${data_dir}/PathNeighbors_${suffix}"
 
 	# Generate the 0-1 hop pn for spatial nodes
-	# java -Xmx100g -jar ${jar_path} \
-	# -f wikigenerateZeroOneHopPNForSpatialNodes \
-	# -gp ${graph_path} \
-	# -lp ${label_path} \
-	# -ep ${entity_path} \
-	# -entityStringLabelMapPath ${entityStringLabelMapPath} \
-	# -maxPNSize -1 \
-	# -outputPath ${spatialNodePNPath}
+	java -Xmx100g -jar ${jar_path} \
+	-f wikigenerateZeroOneHopPNForSpatialNodes \
+	-gp ${graph_path} \
+	-lp ${label_path} \
+	-ep ${entity_path} \
+	-entityStringLabelMapPath ${entityStringLabelMapPath} \
+	-maxPNSize -1 \
+	-outputPath ${spatialNodePNPath}
 
 	# Load graph nodes.
 	java -Xmx100g -jar ${jar_path} -f wikidataLoadGraph \
@@ -45,6 +48,11 @@ do
 		-lp ${label_path} \
 		-entityStringLabelMapPath ${entityStringLabelMapPath} \
 		-dp ${db_path}
+
+	# Load graph edges
+	java -Xmx100g -jar ${jar_path} -f loadGraphEdgesNoMap \
+		-dp ${db_path}	\
+		-gp ${graph_path}
 
 	# Construct the tree structure
 	java -Xmx100g -jar ${jar_path} \
