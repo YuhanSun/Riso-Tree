@@ -638,12 +638,13 @@ public class Prepare {
       while (true) {
         if (System.currentTimeMillis() - start > 5000) {
           centerIds.remove(centerId);
+          Util.println("break");
           break;
         }
         ArrayList<Integer> sampleIds =
             OwnMethods.samplingWithinRange(stRtreeEntities, rectangle, 1);
         int startSpatialId = sampleIds.get(0);
-        Util.println("start spatial id: " + startSpatialId);
+        // Util.println("start spatial id: " + startSpatialId);
         if (graphLabels.get(startSpatialId).size() > 0 && graph.get(startSpatialId).size() > 0) {
           Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, graphLabels,
               labelStringMap, entities, node_count, startSpatialId, rectangle);
