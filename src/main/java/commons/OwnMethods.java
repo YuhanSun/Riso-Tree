@@ -615,8 +615,8 @@ public class OwnMethods {
     long start = System.currentTimeMillis();
     int restartTimes = 0;
     while (subgraph_ids.size() < node_count) {
-      if (System.currentTimeMillis() - start > 2000) {
-        if (restartTimes == 100) {
+      if (System.currentTimeMillis() - start > 1000) {
+        if (restartTimes == 20) {
           return null;
         }
         Util.println("restart");
