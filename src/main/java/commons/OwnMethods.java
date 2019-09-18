@@ -615,11 +615,17 @@ public class OwnMethods {
     long start = System.currentTimeMillis();
     while (subgraph_ids.size() < node_count) {
       if (System.currentTimeMillis() - start > 2000) {
-        Util.println("recursive");
-        return GenerateRandomGraphStringLabel(graph, labels, labelStringMap, entities, node_count,
-            startSpatialId, queryRect);
+        Util.println("restart");
+        for (ArrayList<Integer> neighbors : subgraph) {
+          neighbors.clear();
+        }
+        subgraph_ids = new ArrayList<Integer>(node_count);
+        subgraph_ids.add(startSpatialId);
+        // return GenerateRandomGraphStringLabel(graph, labels, labelStringMap, entities,
+        // node_count,
+        // startSpatialId, queryRect);
       }
-      Util.println(subgraph_ids.size());
+      // Util.println(subgraph_ids.size());
       int start_index = random.nextInt(subgraph_ids.size()); // pos in the subgraph_ids
       int start_id = subgraph_ids.get(start_index);
       ArrayList<Integer> neighbors = graph.get(start_id);

@@ -647,6 +647,10 @@ public class Prepare {
         if (graphLabels.get(startSpatialId).size() > 0 && graph.get(startSpatialId).size() > 0) {
           Query_Graph query_Graph = OwnMethods.GenerateRandomGraphStringLabel(graph, graphLabels,
               labelStringMap, entities, node_count, startSpatialId, rectangle);
+          if (query_Graph == null) {
+            centerIds.remove(centerId);
+            break;
+          }
           String query = CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing);
           Util.println(query);
           queries.add(query);
