@@ -614,6 +614,11 @@ public class OwnMethods {
     // expand the subgraph until its size is node_count. id in subgraph is the original graph_id.
     long start = System.currentTimeMillis();
     while (subgraph_ids.size() < node_count) {
+      if (System.currentTimeMillis() - start > 2000) {
+        Util.println("recursive");
+        return GenerateRandomGraphStringLabel(graph, labels, labelStringMap, entities, node_count,
+            startSpatialId, queryRect);
+      }
       Util.println(subgraph_ids.size());
       int start_index = random.nextInt(subgraph_ids.size()); // pos in the subgraph_ids
       int start_id = subgraph_ids.get(start_index);
@@ -635,11 +640,6 @@ public class OwnMethods {
       if (subgraph.get(start_index).contains(end_id) == false) {
         subgraph.get(start_index).add(end_id);
         subgraph.get(end_index).add(start_id);
-      }
-      if (System.currentTimeMillis() - start > 2000) {
-        Util.println("recursive");
-        return GenerateRandomGraphStringLabel(graph, labels, labelStringMap, entities, node_count,
-            startSpatialId, queryRect);
       }
     }
     Query_Graph query_Graph = new Query_Graph(node_count, LabelType.STRING);
