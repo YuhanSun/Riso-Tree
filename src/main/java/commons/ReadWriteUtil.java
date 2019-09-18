@@ -172,6 +172,7 @@ public class ReadWriteUtil {
 
   public static void WriteFile(String filename, boolean app, List<String> lines) {
     try {
+      Util.getFileWriter(filename, app);
       FileWriter fw = new FileWriter(filename, app);
       int i = 0;
       while (i < lines.size()) {
@@ -179,7 +180,7 @@ public class ReadWriteUtil {
         ++i;
       }
       fw.close();
-    } catch (IOException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
