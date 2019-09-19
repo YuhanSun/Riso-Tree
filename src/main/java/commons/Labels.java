@@ -18,7 +18,7 @@ public class Labels {
   }
 
   public static enum GraphRel implements RelationshipType {
-    GRAPH_LINK
+    GRAPH_LINK, GRAPH_INSERT,
   }
 
   public static enum RTreeRel implements RelationshipType {
