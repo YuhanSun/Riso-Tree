@@ -42,7 +42,7 @@ public class MaintenanceTest {
       break;
     }
     Util.println(testNode);
-    HashMap<String, HashSet<Node>> PNMap = Maintenance.getPN(dbservice, testNode, 2);
+    HashMap<String, HashSet<Node>> PNMap = MaintenanceUtil.getPN(dbservice, testNode, 2);
     Util.println(PNMap);
     Util.println(PNMap.remove("PN"));
     for (String propertyName : PNMap.keySet()) {
@@ -88,7 +88,7 @@ public class MaintenanceTest {
       break;
     }
     Util.println(testNode);
-    int labelId = Maintenance.getNodeLabelId(testNode);
+    int labelId = MaintenanceUtil.getNodeLabelId(testNode);
     tx.success();
     tx.close();
     assertEquals(2, labelId);
@@ -97,7 +97,7 @@ public class MaintenanceTest {
   @Test
   public void getReversePropertyNameTest() {
     String[] labelStrings = new String[] {"0", "10", "1"};
-    String res = Maintenance.getReversePropertyName(labelStrings);
+    String res = MaintenanceUtil.getReversePropertyName(labelStrings);
     Util.println(res);
   }
 
