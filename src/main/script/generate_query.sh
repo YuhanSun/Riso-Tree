@@ -1,8 +1,8 @@
 #!/bin/bash
 ./package.sh
 
-# for dataset in "Yelp_100" "foursquare_100" "Gowalla_100"
-for dataset in "Yelp_100"
+# for dataset in "Yelp_100" "foursquare_100" "Gowalla_100" "wikidata"
+for dataset in "wikidata"
 do
 	# server
 	dir="/hdd/code/yuhansun"
