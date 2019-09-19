@@ -12,11 +12,12 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
+import commons.Config;
 import commons.Labels.RTreeRel;
 import commons.Neo4jGraphUtility;
 import commons.Util;
 
-public class Maintenance {
+public class MaintenanceUtil {
 
   static boolean addEdge(GraphDatabaseService dbservice, Node src, Node trg, int bound) {
     HashMap<String, HashSet<Node>> pathNeighborsSrc = getPN(dbservice, src, bound - 1);
@@ -152,7 +153,7 @@ public class Maintenance {
   }
 
   public static String getReversePropertyName(String[] labelStrings) {
-    String prefix = "PN";
+    String prefix = Config.PNPrefix;
     for (int i = labelStrings.length - 2; i >= 0; i--) {
       prefix += "_" + labelStrings[i];
     }
