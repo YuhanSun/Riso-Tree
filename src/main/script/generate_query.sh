@@ -1,7 +1,8 @@
 #!/bin/bash
 ./package.sh
 
-for dataset in "Yelp_100" "foursquare_100" "Gowalla_100"
+# for dataset in "Yelp_100" "foursquare_100" "Gowalla_100"
+for dataset in "Yelp_100"
 do
 	# server
 	dir="/hdd/code/yuhansun"
@@ -16,8 +17,8 @@ do
 	spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
 
 	jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
-	# selectivitiesStr="0.000001,0.00001,0.0001,0.001,0.01,0.1"
-	selectivitiesStr="0.00001,0.0001,0.001,0.01,0.1"
+	selectivitiesStr="0.000001,0.00001,0.0001,0.001,0.01,0.1"
+	# selectivitiesStr="0.00001,0.0001,0.001,0.01,0.1"
 	queryCount=100
 	outputDir="/hdd/code/yuhansun/result/query/${dataset}"
 
