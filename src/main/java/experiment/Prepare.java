@@ -582,7 +582,7 @@ public class Prepare {
           graphLabels, labelStringMap, Double.parseDouble(selectivity), queryCount, nodeCount,
           stRtreeEntities, stRtreePoints);
       if (queries == null) {
-        return;
+        continue;
       }
       String outputPath = String.format("%s/%d_%s", outputDir, nodeCount, selectivity);
       ReadWriteUtil.WriteFile(outputPath, true, queries);
