@@ -172,8 +172,7 @@ public class ReadWriteUtil {
 
   public static void WriteFile(String filename, boolean app, List<String> lines) {
     try {
-      Util.getFileWriter(filename, app);
-      FileWriter fw = new FileWriter(filename, app);
+      FileWriter fw = Util.getFileWriter(filename, app);
       int i = 0;
       while (i < lines.size()) {
         fw.write(String.valueOf(lines.get(i)) + "\n");
