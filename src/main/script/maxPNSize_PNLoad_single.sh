@@ -3,7 +3,7 @@
 
 # for dataset in "Yelp_100" "Gowalla_100" "Patents_100_random_20"
 for dataset in "Yelp_100"
-
+do
 	# server
 	dir="/hdd/code/yuhansun"
 	data_dir="${dir}/data/${dataset}"
