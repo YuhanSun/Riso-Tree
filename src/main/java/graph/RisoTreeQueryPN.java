@@ -594,7 +594,8 @@ public class RisoTreeQueryPN {
   }
 
   /**
-   * Execute the query. Attach 'profile' to get profile statistics.
+   * Execute the query. Attach 'profile' to get profile statistics. Use the label way rather than id
+   * way to rewrite.
    *
    * @param query
    * @param query_Graph
@@ -611,6 +612,11 @@ public class RisoTreeQueryPN {
     }
 
     setNewLabel(candidateSets, query_Graph.nodeVariables);
+    // Output candidate set
+    for (int key : candidateSets.keySet()) {
+      Util.println(
+          String.format("%s:%d", query_Graph.nodeVariables[key], candidateSets.get(key).size()));
+    }
 
     String queryAfterRewrite = formQueryWithIgnoreNewLabel(query, candidateSets, query_Graph);
     queryAfterRewrite = "profile " + queryAfterRewrite;
