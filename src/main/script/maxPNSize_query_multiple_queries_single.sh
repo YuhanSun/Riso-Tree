@@ -26,7 +26,7 @@ db_path+=",${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_640_new_version/data/d
 query_dir="${dir}/result/query/${dataset}"
 node_count=3
 query_count=50
-for selectivity in 0.000001 0.00001 0.0001 0.001
+for selectivity in 0.000001 0.00001 0.0001 0.001 0.01
 do
 	query_path="${query_dir}/${node_count}_${selectivity}"
 
