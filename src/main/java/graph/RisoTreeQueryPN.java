@@ -21,7 +21,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import commons.ArrayUtil;
@@ -690,12 +689,12 @@ public class RisoTreeQueryPN {
         Node node = dbservice.getNodeById(neo4jId);
         node.addLabel(Label.label(nodeVariableName));
       }
-      ResourceIterator<Node> nodes = dbservice.findNodes(Label.label(nodeVariableName));
-      while (nodes.hasNext()) {
-        Node node = nodes.next();
-        Util.println(nodeVariableName);
-        Util.println(node.getId());
-      }
+      // ResourceIterator<Node> nodes = dbservice.findNodes(Label.label(nodeVariableName));
+      // while (nodes.hasNext()) {
+      // Node node = nodes.next();
+      // Util.println(nodeVariableName);
+      // Util.println(node.getId());
+      // }
     }
   }
 
