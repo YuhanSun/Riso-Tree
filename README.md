@@ -32,16 +32,17 @@ I will output **spatialNodesZeroOneHopPN_-1.txt**
 1-4 are run by using constructTree_single.sh
 If fail the load step (either Step 2 or 3, need to delete this folder: data/databases/graph.db).
 
-### 4. Rename the generated graph database folder to from neo4j-community-3.4.12_Gleenes_1.0_-1_new_version to four different folder names. It can done manually or using copy_maxPNSize.sh (path modification required).
+### 5. Rename the generated graph database folder to from neo4j-community-3.4.12_Gleenes_1.0_-1_new_version to four different folder names. It can done manually or using copy_maxPNSize.sh (path modification required).
 1. neo4j-community-3.4.12_Gleenes_1.0_10_new_version
 2. neo4j-community-3.4.12_Gleenes_1.0_40_new_version
 3. neo4j-community-3.4.12_Gleenes_1.0_160_new_version
 4. neo4j-community-3.4.12_Gleenes_1.0_640_new_version
 
 
-### 5. Generate the PN files (done already. Skip this time)
+### 6. Generate the PN files (done already. Skip this time)
+Run maxPNSize_construct_PN_single.sh
 
-### 6. Load PN files into graph db. (maxPNSize_PNLoad_single.sh)
+### 7. Load PN files into graph db. (maxPNSize_PNLoad_single.sh)
 **required files**
 
 1. PN files
