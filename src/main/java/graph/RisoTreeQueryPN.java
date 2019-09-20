@@ -13,7 +13,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.StringUtils;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
@@ -1102,7 +1101,7 @@ public class RisoTreeQueryPN {
     for (int endId : pN_propertyname_single_predicate.keySet()) {
       Set<String> pathsToSameNode = pN_propertyname_single_predicate.get(endId);
       for (String path : pathsToSameNode) {
-        pathsAndShorterPaths.put(path, formIgnoreSearchSet(path));
+        pathsAndShorterPaths.put(path, RisoTreeUtil.formIgnoreSearchSet(path));
       }
     }
 
@@ -1205,24 +1204,6 @@ public class RisoTreeQueryPN {
       }
     }
     return false;
-  }
-
-  /**
-   * Form the label paths set for the ignore case. Because longer path can be ignored. So check the
-   * shorter path that has value [].
-   * 
-   * @param path
-   * @return
-   */
-  public Set<String> formIgnoreSearchSet(String path) {
-    Set<String> searchPaths = new HashSet<>();
-    String[] strings = StringUtils.split(path, '_');
-    String curString = strings[0];
-    for (int i = 1; i < strings.length; i++) {
-      curString += "_" + strings[i];
-      searchPaths.add(curString);
-    }
-    return searchPaths;
   }
 
   /**
