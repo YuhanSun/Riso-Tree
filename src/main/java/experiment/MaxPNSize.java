@@ -28,33 +28,29 @@ public class MaxPNSize {
       Util.checkPathExist(dbPath);
     }
 
+    String outputDetailPath = outputPath + "_details.csv";
+    String outputAvgPath = outputPath + "_avg.csv";
     List<List<ResultRecord>> dbsResult = new ArrayList<>();
     for (String dbPath : dbPaths) {
+      ReadWriteUtil.WriteFile(outputDetailPath, true, String.format("%s\n%s\n", dbPath, queryPath));
       GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
       RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOPNUM);
       List<ResultRecord> resultRecords = new ArrayList<>(queryCount);
       for (String query : queriesSlice) {
         ResultRecord resultRecord = risoTreeQuery(query, risoTreeQueryPN);
         resultRecords.add(resultRecord);
+        ReadWriteUtil.WriteFile(outputDetailPath, true,
+            String.format("%d\t%d\n", resultRecord.runTime, resultRecord.pageHit));
       }
       dbsResult.add(resultRecords);
+      ReadWriteUtil.WriteFile(outputDetailPath, true, "\n");
     }
 
-    String outputDetailPath = outputPath + "_details.csv";
-    String outputAvgPath = outputPath + "_avg.csv";
     ReadWriteUtil.WriteFile(outputAvgPath, true, String.format("%s\t%d\n", queryPath, queryCount));
 
     for (int i = 0; i < dbPaths.length; i++) {
       List<ResultRecord> resultRecords = dbsResult.get(i);
       String dbPath = dbPaths[i];
-      // details output
-      ReadWriteUtil.WriteFile(outputDetailPath, true, String.format("%s\n%s\n", dbPath, queryPath));
-      for (ResultRecord resultRecord : resultRecords) {
-        ReadWriteUtil.WriteFile(outputDetailPath, true,
-            String.format("%d\t%d\n", resultRecord.runTime, resultRecord.pageHit));
-      }
-      ReadWriteUtil.WriteFile(outputDetailPath, true, "\n");
-
       // average output
       ReadWriteUtil.WriteFile(outputAvgPath, true, String.format("%s\t%d\t%d\n", dbPath,
           ResultRecord.getRunTimeAvg(resultRecords), ResultRecord.getPageHitAvg(resultRecords)));
