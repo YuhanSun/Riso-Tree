@@ -25,9 +25,10 @@ db_path+=",${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_-1_new_version/data/da
 # labelStrMapPath="${data_dir}/entity_string_label.txt"
 
 query_dir="${dir}/result/query/${dataset}"
-node_count=3
-query_count=50
-for selectivity in 0.000001 0.00001 0.0001 0.001 0.01
+node_count=4
+query_count=100
+# for selectivity in 0.000001 0.00001 0.0001 0.001 0.01
+for selectivity in 0.01 0.001 0.0001 0.00001 0.000001
 do
 	query_path="${query_dir}/${node_count}_${selectivity}"
 
