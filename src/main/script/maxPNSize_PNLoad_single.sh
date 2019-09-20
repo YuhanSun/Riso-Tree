@@ -15,7 +15,7 @@ split_mode="Gleenes"
 containId_suffix="${split_mode}_${alpha}_-1_new_version"
 containID_path="${data_dir}/containID_${containId_suffix}.txt"
 
-for maxPNSize in 10 40 160 640
+for maxPNSize in 10 40 160 640 -1
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 	db_path="${data_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
