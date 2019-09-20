@@ -2,7 +2,7 @@
 ./package.sh
 
 # for dataset in "Yelp_100" "Gowalla_100" "Patents_100_random_20"
-for dataset in foursquare_100
+for dataset in "Yelp_100"
 do
 	# server
 	dir="/hdd/code/yuhansun"
@@ -19,11 +19,12 @@ do
 
 	split_mode="Gleenes"
 	alpha="1.0"
-	# containID_suffix="${split_mode}_${alpha}_new_version"
-	containID_path="${data_dir}/containID.txt"
+	containID_suffix="${split_mode}_${alpha}_-1_new_version"
+	containID_path="${data_dir}/containID_${containID_suffix}.txt"
 
-	for maxPNSize in 10 20 40 80 160 320 640 1280 2560 -1
+	# for maxPNSize in 10 20 40 80 160 320 640 1280 2560 -1
 	# for maxPNSize in -1
+	for maxPNSize in 10 40 160 640 -1
 	do
 		suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 		PNPathAndPrefix="${data_dir}/PathNeighbors_${suffix}"
