@@ -17,6 +17,7 @@ db_path="${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_10_new_version/data/data
 db_path+=",${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_40_new_version/data/databases/graph.db"
 db_path+=",${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_160_new_version/data/databases/graph.db"
 db_path+=",${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_640_new_version/data/databases/graph.db"
+db_path+=",${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_-1_new_version/data/databases/graph.db"
 
 # graph_path="${data_dir}/graph.txt"
 # entity_path="${data_dir}/entity.txt"
@@ -43,7 +44,7 @@ do
 		-f maxPNSizeRisoTreeQueryMultiple \
 		-dp ${db_path} \
 		-d ${dataset} \
-		-MAX_HOPNUM 1 \
+		-MAX_HOPNUM 2 \
 		-queryPath ${query_path} \
 		-queryCount ${query_count} \
 		-outputPath ${output_path}
