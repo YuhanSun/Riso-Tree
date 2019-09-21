@@ -233,7 +233,8 @@ public class Util {
   }
 
   /**
-   * Merge two array. Expanded or not can be decided by the length of the array.
+   * Merge two array. Expanded or not can be decided by the length of the array. Assume that no
+   * duplicate for both input and output.
    *
    * @param i1
    * @param i2
