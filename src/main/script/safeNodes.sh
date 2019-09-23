@@ -4,7 +4,7 @@
 dir="/hdd/code/yuhansun"
 
 # for dataset in "Yelp_100" "Gowalla_100" "foursquare_100"
-dataset="wikidata"
+for dataset in "wikidata"
 do
 
 	data_dir="${dir}/data/${dataset}"
