@@ -35,5 +35,6 @@ do
 		-f generateSafeNodes	\
 		-PNPrefix ${PNPathAndPrefix}	\
 		-hopListStr ${hopListStr}	\
+		-nodeCount 47116657
 		-outputPath ${output_path}
 done
