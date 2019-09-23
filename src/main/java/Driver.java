@@ -39,7 +39,7 @@ public class Driver {
     wikidataLoadGraph, wikiLoadEdges, // load graph nodes and edges and spatial attributes
     wikisetZeroOneHopPNForSpatialNodes, wikigenerateZeroOneHopPNForSpatialNodes, //
 
-    wikiGenerateContainSpatialID, // one time prepare
+    wikiGenerateContainSpatialID, generateSafeNodes, // one time prepare
     wikiConstructRTree, wikiConstructPNTime, //
     wikiConstructPNTimeSingleHop, wikiLoadPN, wikiLoadAllHopPN, //
     wikiConstructPNTimeSingleHopNoGraphDb,
@@ -299,6 +299,11 @@ public class Driver {
           case wikiGenerateContainSpatialID:
             Construct_RisoTree.wikiGenerateContainSpatialID(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), cmd.getOptionValue(containIDPath));
+            break;
+          case generateSafeNodes:
+            Construct_RisoTree.generateSafeNodes(cmd.getOptionValue(PNPathAndPrefix),
+                cmd.getOptionValue(hopListStr), Integer.parseInt(cmd.getOptionValue(nodeCount)),
+                cmd.getOptionValue(outputPath));
             break;
           // case wikiConstructPNTime:
           // Construct_RisoTree.wikiConstructPNTime(cmd.getOptionValue(containIDPath),

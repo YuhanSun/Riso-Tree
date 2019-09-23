@@ -7,8 +7,10 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
@@ -750,6 +752,36 @@ public class Construct_RisoTree {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  public static void generateSafeNodes(String PNPathAndPreffix, String hopListStr, int nodeCount,
+      String outputPath) throws Exception {
+    List<String> paths = new ArrayList<>();
+    for (String hopStr : hopListStr.split(",")) {
+      int hop = Integer.parseInt(hopStr);
+      String filePath = getPNFileName(PNPathAndPreffix, hop);
+      Util.checkPathExist(filePath);
+      paths.add(filePath);
+    }
+    Set<Integer> unsafeNodes = new HashSet<>();
+    for (String path : paths) {
+      Map<Long, Map<String, int[]>> pn = ReadWriteUtil.readLeafNodesPathNeighbors(path);
+      for (Map<String, int[]> leafNodePn : pn.values()) {
+        for (int[] ids : leafNodePn.values()) {
+          for (int id : ids) {
+            unsafeNodes.add(id);
+          }
+        }
+      }
+    }
+    List<Integer> safeNodes = new ArrayList<>(nodeCount);
+    for (int i = 0; i < nodeCount; i++) {
+      if (unsafeNodes.contains(i)) {
+        continue;
+      }
+      safeNodes.add(i);
+    }
+    ReadWriteUtil.WriteArray(outputPath, safeNodes);
   }
 
   /**
