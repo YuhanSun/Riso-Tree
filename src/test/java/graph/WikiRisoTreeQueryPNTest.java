@@ -31,7 +31,7 @@ public class WikiRisoTreeQueryPNTest {
   GraphDatabaseService service = null;
 
   static final String queryDir = "D:\\Google_Drive\\Projects\\risotree\\cypher_query\\" + dataset;
-  static final String queryPath = queryDir + "\\2_0.0001";
+  static final String queryPath = queryDir + "\\3_0.0001";
   // String queryPath = queryDir + "\\4_0.0001";
   static final int queryCount = 10;
 
@@ -248,7 +248,7 @@ public class WikiRisoTreeQueryPNTest {
       risoTimes.add(risoTreeTime);
     }
 
-    for (int i = 0; i < queryId; i++) {
+    for (int i = 0; i < queryCount; i++) {
       if (naiveTimes.get(i) < risoTimes.get(i)) {
         naiveBetter.add(queries.get(i));
       } else {
