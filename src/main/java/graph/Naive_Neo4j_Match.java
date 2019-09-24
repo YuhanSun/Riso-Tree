@@ -40,6 +40,7 @@ public class Naive_Neo4j_Match {
   public long get_iterator_time, iterate_time;
   public long result_count = 0;
   public long page_access;
+  public ExecutionPlanDescription planDescription;
 
   public static boolean outputResult = false;
 
@@ -107,7 +108,8 @@ public class Naive_Neo4j_Match {
       }
     }
     iterate_time += System.currentTimeMillis() - start;
-    page_access = OwnMethods.GetTotalDBHits(result.getExecutionPlanDescription());
+    planDescription = result.getExecutionPlanDescription();
+    page_access = OwnMethods.GetTotalDBHits(planDescription);
   }
 
   // public Result Explain_SubgraphMatch_Spa_API(Query_Graph query_Graph, int limit)//use neo4j
