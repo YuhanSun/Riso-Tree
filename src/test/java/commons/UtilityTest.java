@@ -59,6 +59,24 @@ public class UtilityTest {
   }
 
   @Test
+  public void arraysDifferenceTest() {
+    int[] A = new int[] {0, 2, 3};
+    int[] B = new int[] {0, 1, 4};
+    int[] diff = Util.arraysDifference(A, B);
+    assertEquals(diff.length, 2);
+    assertEquals(diff[0], 2);
+    assertEquals(diff[1], 3);
+
+    A = new int[] {0, 2, 3, 4};
+    diff = Util.arraysDifference(A, B);
+    assertEquals(diff.length, 2);
+
+    A = new int[] {0, 2, 3, 5, 6};
+    diff = Util.arraysDifference(A, B);
+    assertEquals(diff.length, 4);
+  }
+
+  @Test
   public void distanceConvertTest() {
     float lat1 = 10, lat = 12, lon1 = 0, lon2 = 2;
     Util.println("Distance:" + Util.distFrom(lat1, lon1, lat, lon2));

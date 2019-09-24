@@ -152,6 +152,30 @@ public class Util {
       return false;
   }
 
+  public static int[] arraysDifference(int[] arraySource, int[] arrayTarget) {
+    ArrayList<Integer> arrayDiff = new ArrayList<>(arraySource.length);
+    int i = 0, j = 0;
+    while (i < arraySource.length && j < arrayTarget.length) {
+      if (arraySource[i] < arrayTarget[j]) {
+        arrayDiff.add(arraySource[i]);
+        i++;
+      } else {
+        if (arraySource[i] == arrayTarget[j]) {
+          i++;
+          j++;
+        } else {
+          j++;
+        }
+      }
+    }
+
+    while (i < arraySource.length) {
+      arrayDiff.add(arraySource[i]);
+      i++;
+    }
+    return arrayListToArrayInt(arrayDiff);
+  }
+
   /**
    * Compute the how many elements in source but not in target. Both arrays are sorted.
    *
@@ -260,7 +284,7 @@ public class Util {
           arrayList.add(i2[j]);
           j++;
         } else {
-          arrayList.add(i2[j]);
+          arrayList.add(i2[j]);// here can ensure no duplicates
           i++;
           j++;
         }
