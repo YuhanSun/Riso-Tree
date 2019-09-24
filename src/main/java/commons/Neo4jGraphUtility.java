@@ -3,6 +3,7 @@ package commons;
 import java.io.File;
 import java.util.HashSet;
 import java.util.logging.Logger;
+import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -12,6 +13,10 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 public class Neo4jGraphUtility {
 
   private static final Logger LOGGER = Logger.getLogger(Neo4jGraphUtility.class.getName());
+
+  public static boolean isNodeSpatial(Node node) {
+    return node.hasProperty(Config.latitude_property_name);
+  }
 
   /**
    * Return all the graph neighbors for the given node. Only consider "GRAPH_LINK". RTree-related
@@ -24,6 +29,26 @@ public class Neo4jGraphUtility {
     Iterable<Relationship> rels = node.getRelationships(RelationshipType.withName("GRAPH_LINK"));
     HashSet<Node> neighbors = new HashSet<>();
     for (Relationship relationship : rels) {
+      neighbors.add(relationship.getOtherNode(node));
+    }
+    return neighbors;
+  }
+
+  /**
+   * Return all the graph neighbors for the given node. Consider all edges except for RTree edges.
+   * This is used because the inserted edges is not "GRAPH_LINK" but "GRAPH_INSERT". If use the
+   * {@code getGraphNeighbors} function, those edges will be lost.
+   * 
+   * @param node
+   * @return
+   */
+  public static HashSet<Node> getGraphNeighborsNoRTree(Node node) {
+    Iterable<Relationship> rels = node.getRelationships();
+    HashSet<Node> neighbors = new HashSet<>();
+    for (Relationship relationship : rels) {
+      if (relationship.isType(RTreeRelationshipTypes.RTREE_REFERENCE)) {
+        continue;
+      }
       neighbors.add(relationship.getOtherNode(node));
     }
     return neighbors;
@@ -47,6 +72,9 @@ public class Neo4jGraphUtility {
   }
 
   public static GraphDatabaseService getDatabaseServiceNotExistCreate(String dbPath) {
+    if (!Util.pathExist(dbPath)) {
+      LOGGER.info("path does not exist and database is created in " + dbPath);
+    }
     return new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
   }
 
