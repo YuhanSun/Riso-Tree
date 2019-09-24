@@ -1111,7 +1111,7 @@ public class RisoTreeQueryPN {
     boolean isLeafLevel = false;
     while (!cur_list.isEmpty()) {
       long startLevel = System.currentTimeMillis();// for the level time
-
+      long expandTime = 0;
       if (!isLeafLevel) {
         Node firstNodeThisLevel = cur_list.get(0);
         isLeafLevel = RTreeUtility.isLeaf(firstNodeThisLevel);
@@ -1127,20 +1127,25 @@ public class RisoTreeQueryPN {
           }
           overlap_MBR_list.add(node);
           // record the next level tree nodes
+          long start = System.currentTimeMillis();
           Iterable<Relationship> rels =
               node.getRelationships(RTreeRel.RTREE_CHILD, Direction.OUTGOING);
           for (Relationship relationship : rels) {
             next_list.add(relationship.getEndNode());
           }
+          expandTime += System.currentTimeMillis() - start;
         }
       }
       located_in_count = overlap_MBR_list.size();
 
       if (outputLevelInfo) {
         String logWriteLine = String.format("level %d\n", level_index);
+        logWriteLine += String.format("cur list size: %d\n", cur_list.size());
         logWriteLine += String.format("Located in nodes: %d\n", located_in_count);
-        logWriteLine += String.format("level %d time: %d", level_index,
+        logWriteLine += String.format("next list size: %d\n", next_list.size());
+        logWriteLine += String.format("level %d time: %d\n", level_index,
             System.currentTimeMillis() - startLevel);
+        logWriteLine += String.format("expand time: %d\n", expandTime);
         LOGGER.info(logWriteLine);
       }
 
@@ -1183,11 +1188,14 @@ public class RisoTreeQueryPN {
    */
   public boolean isNodeContainAllPathsIgnore(Node node,
       Map<String, Set<String>> pathsAndShortPaths) {
+    long start = System.currentTimeMillis();
     for (String path : pathsAndShortPaths.keySet()) {
       if (!isNodeContainSinglePathIgnore(node, path, pathsAndShortPaths.get(path))) {
+        check_paths_time += System.currentTimeMillis() - start;
         return false;
       }
     }
+    check_paths_time += System.currentTimeMillis() - start;
     return true;
   }
 
