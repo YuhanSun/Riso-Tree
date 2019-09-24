@@ -50,7 +50,7 @@ public class GraphUtil {
   public static List<Edge> readEdges(String edgePath) throws Exception {
     LOGGER.info("read edges from " + edgePath);
     List<Edge> edges = new LinkedList<>();
-    BufferedReader reader = new BufferedReader(new FileReader(new File(edgePath)));
+    BufferedReader reader = Util.getBufferedReader(edgePath);
     String string = null;
     while ((string = reader.readLine()) != null) {
       String[] strings = string.split(",");
