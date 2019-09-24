@@ -229,4 +229,10 @@ public class RTreeUtility {
     throw new Exception(
         "RTree structure is inccorect! It does not have RTREE_CHILD or RTREE_REFERENCE relationship!");
   }
+
+  public static Node getParentLeafNode(Node geomNode) {
+    return geomNode
+        .getSingleRelationship(RTreeRelationshipTypes.RTREE_REFERENCE, Direction.INCOMING)
+        .getStartNode();
+  }
 }
