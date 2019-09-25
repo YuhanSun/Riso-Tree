@@ -1302,6 +1302,18 @@ public class OwnMethods {
     return node_count;
   }
 
+  public static void sleep(long millisec) throws Exception {
+    Thread.currentThread();
+    Thread.sleep(millisec);
+  }
+
+  public static String doubleClearCache(String password) throws Exception {
+    String result = ClearCache(password);
+    sleep(2000);
+    result += ClearCache(password);
+    return result;
+  }
+
   public static String ClearCache(String password) {
     String[] cmd = new String[] {"/bin/bash", "-c",
         "echo " + password + " | sudo -S sh -c \"sync; echo 3 > /proc/sys/vm/drop_caches\""};
