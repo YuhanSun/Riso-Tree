@@ -11,35 +11,29 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
-import commons.Config;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.ReadWriteUtil;
+import commons.RunTimeConfigure;
 import commons.Util;
 import experiment.ResultRecord;
 
 public class WikiRisoTreeQueryPNTest {
 
   private static final Logger logger = Logger.getLogger(WikiRisoTreeQueryPNTest.class.getName());
-  static final String dataset = "Yelp_100";
-  static final String suffix = "Gleenes_1.0_-1_new_version";
-  // String dbPath =
-  // "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt\\neo4j-community-3.4.12_risotree_test\\data\\databases\\graph.db";
-  // String dbPath =
-  // "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt\\neo4j-community-3.4.12_Gleenes_1.0_40_new_version\\data\\databases\\graph.db";
-  static final String dbPath =
-      String.format("D:/Project_Data/RisoTree/%s/neo4j-community-3.4.12_%s/data/databases/graph.db",
-          dataset, suffix);
+  static final String dataset = RunTimeConfigure.dataset;
+  static final String suffix = RunTimeConfigure.suffix;
+  static final String dbPath = RunTimeConfigure.dbPath;
 
   GraphDatabaseService service = null;
 
-  static final String queryDir = "D:\\Google_Drive\\Projects\\risotree\\cypher_query\\" + dataset;
-  static final String queryPath = queryDir + "\\2_0.001";
+  static final String queryDir = RunTimeConfigure.queryDir;
+  static final String queryPath = RunTimeConfigure.queryPath;
   // String queryPath = queryDir + "\\4_0.0001";
-  static final int queryCount = 10;
+  static final int queryCount = RunTimeConfigure.queryCount;
 
-  static final boolean clearCache = false;
-  static final String password = Config.password;
+  static final boolean clearCache = RunTimeConfigure.clearCache;
+  static final String password = RunTimeConfigure.password;
 
   @Before
   public void setUp() throws Exception {
