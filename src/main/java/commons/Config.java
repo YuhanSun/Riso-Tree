@@ -24,7 +24,7 @@ public class Config {
 
   public static String longitude_property_name = "lon";
   public static String latitude_property_name = "lat";
-  private String password = "syh19910205";
+  public static final String password = "syh19910205";
 
   // attention here, these settings change a lot
   private String neo4j_version = "neo4j-community-3.1.1";
