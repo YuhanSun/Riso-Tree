@@ -23,6 +23,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 import javax.swing.tree.DefaultMutableTreeNode;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -41,6 +42,8 @@ import commons.Query_Graph.LabelType;
 
 
 public class OwnMethods {
+
+  private static final Logger LOGGER = Logger.getLogger(OwnMethods.class.getName());
 
   public static boolean pathExist(String path) {
     File file = new File(path);
@@ -1303,6 +1306,7 @@ public class OwnMethods {
   }
 
   public static void sleep(long millisec) throws Exception {
+    LOGGER.info("sleep");
     Thread.currentThread();
     Thread.sleep(millisec);
   }
