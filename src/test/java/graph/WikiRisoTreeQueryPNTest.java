@@ -14,6 +14,7 @@ import org.neo4j.graphdb.Transaction;
 import commons.Neo4jGraphUtility;
 import commons.ReadWriteUtil;
 import commons.Util;
+import experiment.ResultRecord;
 
 public class WikiRisoTreeQueryPNTest {
 
@@ -31,7 +32,7 @@ public class WikiRisoTreeQueryPNTest {
   GraphDatabaseService service = null;
 
   static final String queryDir = "D:\\Google_Drive\\Projects\\risotree\\cypher_query\\" + dataset;
-  static final String queryPath = queryDir + "\\3_0.0001";
+  static final String queryPath = queryDir + "\\2_0.001";
   // String queryPath = queryDir + "\\4_0.0001";
   static final int queryCount = 10;
 
@@ -123,6 +124,8 @@ public class WikiRisoTreeQueryPNTest {
     List<String> naiveBetter = new ArrayList<>();
     List<String> risoTreeBetter = new ArrayList<>();
 
+    List<ResultRecord> naiveResults = new ArrayList<>();
+    List<ResultRecord> risoResults = new ArrayList<>();
     List<Long> naiveTimes = new ArrayList<>();
     List<Long> risoTimes = new ArrayList<>();
 
@@ -133,6 +136,17 @@ public class WikiRisoTreeQueryPNTest {
       queryId++;
       Util.println("query id: " + queryId);
       Util.println(query);
+      RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, 2);
+      long start2 = System.currentTimeMillis();
+      risoTreeQueryPN.queryWithIgnore(query);
+      long risoTreeTime = System.currentTimeMillis() - start2;
+      Util.println("time: " + risoTreeTime);
+      Util.println("result count: " + risoTreeQueryPN.result_count);
+      Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
+      Util.println(risoTreeQueryPN.planDescription);
+
+      service.shutdown();
+      service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
       Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
       long start1 = System.currentTimeMillis();
@@ -146,17 +160,6 @@ public class WikiRisoTreeQueryPNTest {
       service.shutdown();
       service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
-      RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, 2);
-      long start2 = System.currentTimeMillis();
-      risoTreeQueryPN.queryWithIgnore(query);
-      long risoTreeTime = System.currentTimeMillis() - start2;
-      Util.println("time: " + risoTreeTime);
-      Util.println("result count: " + risoTreeQueryPN.result_count);
-      Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
-      Util.println(risoTreeQueryPN.planDescription);
-
-      service.shutdown();
-      service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
       logger.info(query);
       Util.println("naive:");
@@ -176,6 +179,9 @@ public class WikiRisoTreeQueryPNTest {
       naiveTimes.add(naiveTime);
       risoTimes.add(risoTreeTime);
 
+      naiveResults.add(new ResultRecord(naiveTime, naive_Neo4j_Match.page_access));
+      risoResults.add(new ResultRecord(risoTreeTime, risoTreeQueryPN.page_hit_count));
+
       if (naiveTime < risoTreeTime) {
         naiveBetter.add(query);
       } else {
@@ -191,7 +197,8 @@ public class WikiRisoTreeQueryPNTest {
     Util.println(risoTreeBetter);
 
     for (int i = 0; i < naiveTimes.size(); i++) {
-      Util.println(String.format("%d\t%d", naiveTimes.get(i), risoTimes.get(i)));
+      Util.println(String.format("%d\t%d\t%d\t%d", naiveResults.get(i).runTime,
+          naiveResults.get(i).pageHit, risoResults.get(i).runTime, risoResults.get(i).pageHit));
     }
   }
 
@@ -227,9 +234,9 @@ public class WikiRisoTreeQueryPNTest {
       Util.println("page hit: " + naive_Neo4j_Match.page_access);
       Util.println(naive_Neo4j_Match.planDescription);
       naiveTimes.add(naiveTime);
+      service.shutdown();
+      service = Neo4jGraphUtility.getDatabaseService(dbPath);
     }
-    service.shutdown();
-    service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
     queryId = -1;
     for (String query : queries) {
@@ -246,6 +253,9 @@ public class WikiRisoTreeQueryPNTest {
       Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
       Util.println(risoTreeQueryPN.planDescription);
       risoTimes.add(risoTreeTime);
+      service.shutdown();
+      service = Neo4jGraphUtility.getDatabaseService(dbPath);
+
     }
 
     for (int i = 0; i < queryCount; i++) {
