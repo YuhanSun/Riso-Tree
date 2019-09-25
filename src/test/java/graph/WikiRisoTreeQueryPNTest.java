@@ -11,7 +11,9 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
+import commons.Config;
 import commons.Neo4jGraphUtility;
+import commons.OwnMethods;
 import commons.ReadWriteUtil;
 import commons.Util;
 import experiment.ResultRecord;
@@ -35,6 +37,9 @@ public class WikiRisoTreeQueryPNTest {
   static final String queryPath = queryDir + "\\2_0.001";
   // String queryPath = queryDir + "\\4_0.0001";
   static final int queryCount = 10;
+
+  static final boolean clearCache = false;
+  static final String password = Config.password;
 
   @Before
   public void setUp() throws Exception {
@@ -146,6 +151,9 @@ public class WikiRisoTreeQueryPNTest {
       Util.println(risoTreeQueryPN.planDescription);
 
       service.shutdown();
+      if (clearCache) {
+        OwnMethods.ClearCache(password);
+      }
       service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
       Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
@@ -158,6 +166,9 @@ public class WikiRisoTreeQueryPNTest {
       Util.println(naive_Neo4j_Match.planDescription);
 
       service.shutdown();
+      if (clearCache) {
+        OwnMethods.ClearCache(password);
+      }
       service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
 
