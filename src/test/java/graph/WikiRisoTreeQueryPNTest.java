@@ -240,6 +240,9 @@ public class WikiRisoTreeQueryPNTest {
       Util.println(naive_Neo4j_Match.planDescription);
       naiveTimes.add(naiveTime);
       service.shutdown();
+      if (clearCache) {
+        OwnMethods.ClearCache(password);
+      }
       service = Neo4jGraphUtility.getDatabaseService(dbPath);
     }
 
@@ -259,6 +262,9 @@ public class WikiRisoTreeQueryPNTest {
       Util.println(risoTreeQueryPN.planDescription);
       risoTimes.add(risoTreeTime);
       service.shutdown();
+      if (clearCache) {
+        OwnMethods.ClearCache(password);
+      }
       service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
     }
