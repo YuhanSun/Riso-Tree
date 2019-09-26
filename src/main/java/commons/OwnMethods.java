@@ -38,6 +38,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import commons.Config.ClearCacheMethod;
 import commons.Query_Graph.LabelType;
 
 
@@ -1309,6 +1310,17 @@ public class OwnMethods {
     LOGGER.info("sleep");
     Thread.currentThread();
     Thread.sleep(millisec);
+  }
+
+  public static String clearCache(String password, ClearCacheMethod method) throws Exception {
+    switch (method) {
+      case SINGLE:
+        return ClearCache(password);
+      case DOUBLE:
+        return doubleClearCache(password);
+      default:
+        throw new RuntimeException(method.toString() + " does not exist!");
+    }
   }
 
   public static String doubleClearCache(String password) throws Exception {

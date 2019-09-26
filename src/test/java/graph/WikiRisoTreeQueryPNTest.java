@@ -11,6 +11,7 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
+import commons.Config.ClearCacheMethod;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.ReadWriteUtil;
@@ -33,6 +34,7 @@ public class WikiRisoTreeQueryPNTest {
   static final int queryCount = RunTimeConfigure.queryCount;
 
   static final boolean clearCache = RunTimeConfigure.clearCache;
+  static final ClearCacheMethod method = RunTimeConfigure.clearMethod;
   static final String password = RunTimeConfigure.password;
 
   @Before
@@ -141,7 +143,7 @@ public class WikiRisoTreeQueryPNTest {
 
       service.shutdown();
       if (clearCache) {
-        OwnMethods.ClearCache(password);
+        OwnMethods.clearCache(password, method);
       }
       service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
@@ -156,7 +158,7 @@ public class WikiRisoTreeQueryPNTest {
 
       service.shutdown();
       if (clearCache) {
-        OwnMethods.ClearCache(password);
+        OwnMethods.clearCache(password, method);
       }
       service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
@@ -232,7 +234,7 @@ public class WikiRisoTreeQueryPNTest {
       naiveTimes.add(naiveTime);
       service.shutdown();
       if (clearCache) {
-        OwnMethods.ClearCache(password);
+        OwnMethods.clearCache(password, method);
       }
       service = Neo4jGraphUtility.getDatabaseService(dbPath);
     }
@@ -254,7 +256,7 @@ public class WikiRisoTreeQueryPNTest {
       risoTimes.add(risoTreeTime);
       service.shutdown();
       if (clearCache) {
-        OwnMethods.ClearCache(password);
+        OwnMethods.clearCache(password, method);
       }
       service = Neo4jGraphUtility.getDatabaseService(dbPath);
 

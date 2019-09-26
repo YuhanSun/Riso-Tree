@@ -16,6 +16,10 @@ public class Config {
     wikidata, wikidata_2, wikidata_100,
   }
 
+  public static enum ClearCacheMethod {
+    SINGLE, DOUBLE,
+  }
+
   public Config() {
 
   }
