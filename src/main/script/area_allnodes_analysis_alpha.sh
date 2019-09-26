@@ -7,6 +7,7 @@ dataset="Yelp_100"
 dir="/hdd/code/yuhansun"
 db_dir="${dir}/data/${dataset}/alpha"
 data_dir="${dir}/data/${dataset}"
+code_dir="${dir}/code"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 outputPath="${db_dir}/area_allnodes_analysis.csv"
