@@ -113,20 +113,14 @@ public class WikiRisoTreeQueryPNTest {
    */
   @Test
   public void queryWithIgnoreBulkRowTest() throws Exception {
-    // String query =
-    // "MATCH (a:`big city`)-[b:`located in the administrative territorial
-    // entity`]-(spatialnode:university) "
-    // + "WHERE 17.684805514724214 <= spatialnode.lat <= 33.97125439168383 AND 75.2649384026851 <=
-    // spatialnode.lon <= 98.33687275901212 "
-    // + "RETURN *";
-
     List<String> naiveBetter = new ArrayList<>();
     List<String> risoTreeBetter = new ArrayList<>();
+    List<Integer> naiveBetterIds = new ArrayList<>();
+    List<Integer> risoTreeBetterIds = new ArrayList<>();
 
     List<ResultRecord> naiveResults = new ArrayList<>();
     List<ResultRecord> risoResults = new ArrayList<>();
-    List<Long> naiveTimes = new ArrayList<>();
-    List<Long> risoTimes = new ArrayList<>();
+
 
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
     queries = queries.subList(0, queryCount);
@@ -140,6 +134,7 @@ public class WikiRisoTreeQueryPNTest {
       risoTreeQueryPN.queryWithIgnore(query);
       long risoTreeTime = System.currentTimeMillis() - start2;
       Util.println("time: " + risoTreeTime);
+      Util.println("range time: " + risoTreeQueryPN.range_query_time);
       Util.println("result count: " + risoTreeQueryPN.result_count);
       Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
       Util.println(risoTreeQueryPN.planDescription);
@@ -165,7 +160,6 @@ public class WikiRisoTreeQueryPNTest {
       }
       service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
-
       logger.info(query);
       Util.println("naive:");
       Util.println("time: " + naiveTime);
@@ -177,31 +171,28 @@ public class WikiRisoTreeQueryPNTest {
       Util.println("result count: " + risoTreeQueryPN.result_count);
       Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
 
-      // if (naive_Neo4j_Match.result_count != risoTreeQueryPN.result_count) {
-      // throw new RuntimeException("result count mismatck!");
-      // }
-
-      naiveTimes.add(naiveTime);
-      risoTimes.add(risoTreeTime);
-
       naiveResults.add(new ResultRecord(naiveTime, naive_Neo4j_Match.page_access));
       risoResults.add(new ResultRecord(risoTreeTime, risoTreeQueryPN.page_hit_count));
 
       if (naiveTime < risoTreeTime) {
         naiveBetter.add(query);
+        naiveBetterIds.add(queryId);
       } else {
         risoTreeBetter.add(query);
+        risoTreeBetterIds.add(queryId);
       }
       Util.println("End of one pass.\n");
     }
 
-    logger.info("naive is better:" + naiveBetter.size());
-    logger.info("risotree is better:" + risoTreeBetter.size());
+    Util.println("naive is better:" + naiveBetter.size());
+    Util.println("naive better query ids:" + naiveBetterIds);
+    Util.println("risotree is better:" + risoTreeBetter.size());
+    Util.println("risotree better query ids:" + risoTreeBetterIds);
 
     Util.println(naiveBetter);
     Util.println(risoTreeBetter);
 
-    for (int i = 0; i < naiveTimes.size(); i++) {
+    for (int i = 0; i < naiveResults.size(); i++) {
       Util.println(String.format("%d\t%d\t%d\t%d", naiveResults.get(i).runTime,
           naiveResults.get(i).pageHit, risoResults.get(i).runTime, risoResults.get(i).pageHit));
     }
