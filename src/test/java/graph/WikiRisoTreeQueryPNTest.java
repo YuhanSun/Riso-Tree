@@ -198,6 +198,10 @@ public class WikiRisoTreeQueryPNTest {
       Util.println(String.format("%d\t%d\t%d\t%d", naiveResults.get(i).runTime,
           naiveResults.get(i).pageHit, risoResults.get(i).runTime, risoResults.get(i).pageHit));
     }
+
+    Util.println("\nnaive average time: " + ResultRecord.getRunTimeAvg(naiveResults));
+    Util.println("risotree average time: " + ResultRecord.getRunTimeAvg(risoResults));
+
   }
 
   /**
