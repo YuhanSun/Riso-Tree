@@ -14,6 +14,7 @@ import commons.Edge;
 import commons.GraphUtil;
 import commons.Neo4jGraphUtility;
 import commons.ReadWriteUtil;
+import commons.Util;
 import graph.RisoTreeMaintenance;
 
 public class MaintenanceExperiment {
@@ -38,17 +39,21 @@ public class MaintenanceExperiment {
     ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(inputGraphPath);
     List<String> lines = ReadWriteUtil.readFileAllLines(edgePath);
     ArrayList<TreeSet<Integer>> graphTreeSet = GraphUtil.convertListGraphToTreeSetGraph(graph);
+    int notFound = 0;
     for (String line : lines) {
       String[] strings = line.split(",");
       int start = Integer.parseInt(strings[0]);
       int end = Integer.parseInt(strings[2]);
       if (!graphTreeSet.get(start).remove(end)) {
-        throw new RuntimeException(String.format("Edge %s is not found!", line));
+        // throw new RuntimeException(String.format("Edge %s is not found!", line));
+        notFound++;
       }
       if (!graphTreeSet.get(end).remove(start)) {
-        throw new RuntimeException(String.format("Edge %s is not found!", line));
+        // throw new RuntimeException(String.format("Edge %s is not found!", line));
+        notFound++;
       }
     }
+    Util.println("not found in graph.txt: " + notFound);
     GraphUtil.writeGraphTreeSet(graphTreeSet, outputGraphPath);
   }
 
@@ -56,6 +61,7 @@ public class MaintenanceExperiment {
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
     Transaction tx = service.beginTx();
     List<String> lines = ReadWriteUtil.readFileAllLines(edgePath);
+    int notFound = 0;
     for (String line : lines) {
       String[] strings = line.split(",");
       int start = Integer.parseInt(strings[0]);
@@ -63,9 +69,11 @@ public class MaintenanceExperiment {
       String edgeType = strings[1];
       boolean found = removeEdge(service, start, end, edgeType);
       if (!found) {
-        throw new RuntimeException(String.format("Edge %s is not found!", line));
+        // throw new RuntimeException(String.format("Edge %s is not found!", line));
+        notFound++;
       }
     }
+    Util.println("not found in graph.txt: " + notFound);
     tx.success();
     tx.close();
     service.shutdown();

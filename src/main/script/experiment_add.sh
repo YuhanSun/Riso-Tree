@@ -29,15 +29,15 @@ add_edge_path="${db_dir}/edges.txt"
 graph_after_removal_path="${db_dir}/graph.txt"
 db_after_removal_path="${db_dir}/neo4j-community-3.4.12_node_edges/data/databases/graph.db"
 
-java -Xmx100g -jar ${jar_path} \
-	-f sampleFile \
-	-inputPath ${graph_property_edge_path}	\
-	-ratio 0.01	\
-	-outputPath ${add_edge_path}
+# java -Xmx100g -jar ${jar_path} \
+# 	-f sampleFile \
+# 	-inputPath ${graph_property_edge_path}	\
+# 	-ratio 0.01	\
+# 	-outputPath ${add_edge_path}
 
 java -Xmx100g -jar ${jar_path} \
 	-f removeEdgesFromDb \
-	-dp ${graph_path}	\
+	-dp ${db_after_removal_path}	\
 	-edgePath ${add_edge_path}
 
 java -Xmx100g -jar ${jar_path} \
