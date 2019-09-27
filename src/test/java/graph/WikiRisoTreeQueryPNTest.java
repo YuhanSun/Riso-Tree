@@ -194,7 +194,7 @@ public class WikiRisoTreeQueryPNTest {
     Util.println("risotree better query ids:" + risoTreeBetterIds);
 
     for (int i = 0; i < naiveResults.size(); i++) {
-      Util.println(String.format("%d\t%d\t%d\t%d", naiveResults.get(i).runTime,
+      Util.println(String.format("%d\t%d\t%d\t%d\t%d", i, naiveResults.get(i).runTime,
           naiveResults.get(i).pageHit, risoResults.get(i).runTime, risoResults.get(i).pageHit));
     }
 
@@ -294,7 +294,7 @@ public class WikiRisoTreeQueryPNTest {
 
 
     for (int i = 0; i < naiveResults.size(); i++) {
-      Util.println(String.format("%d\t%d\t%d\t%d", naiveResults.get(i).runTime,
+      Util.println(String.format("%d\t%d\t%d\t%d\t%d", i, naiveResults.get(i).runTime,
           naiveResults.get(i).pageHit, risoResults.get(i).runTime, risoResults.get(i).pageHit));
     }
 
