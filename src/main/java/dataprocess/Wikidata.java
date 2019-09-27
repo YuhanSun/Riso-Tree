@@ -1628,7 +1628,7 @@ public class Wikidata {
     for (String line : lines) {
       String[] strings = line.split(",");
       int start = Integer.parseInt(strings[0]);
-      int end = Integer.parseInt(strings[1]);
+      int end = Integer.parseInt(strings[2]);
       if (treeGraph.get(start).contains(end)) {
         writer.write(line);
         continue;
