@@ -123,7 +123,6 @@ public class WikiRisoTreeQueryPNTest {
     List<ResultRecord> naiveResults = new ArrayList<>();
     List<ResultRecord> risoResults = new ArrayList<>();
 
-
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
     queries = queries.subList(0, queryCount);
     int queryId = -1;
@@ -186,13 +185,13 @@ public class WikiRisoTreeQueryPNTest {
       Util.println("End of one pass.\n");
     }
 
+    Util.println(naiveBetter);
+    Util.println(risoTreeBetter);
+
     Util.println("naive is better:" + naiveBetter.size());
     Util.println("naive better query ids:" + naiveBetterIds);
     Util.println("risotree is better:" + risoTreeBetter.size());
     Util.println("risotree better query ids:" + risoTreeBetterIds);
-
-    Util.println(naiveBetter);
-    Util.println(risoTreeBetter);
 
     for (int i = 0; i < naiveResults.size(); i++) {
       Util.println(String.format("%d\t%d\t%d\t%d", naiveResults.get(i).runTime,
@@ -213,9 +212,11 @@ public class WikiRisoTreeQueryPNTest {
   public void queryWithIgnoreBulkColumnTest() throws Exception {
     List<String> naiveBetter = new ArrayList<>();
     List<String> risoTreeBetter = new ArrayList<>();
+    List<Integer> naiveBetterIds = new ArrayList<>();
+    List<Integer> risoTreeBetterIds = new ArrayList<>();
 
-    List<Long> naiveTimes = new ArrayList<>();
-    List<Long> risoTimes = new ArrayList<>();
+    List<ResultRecord> naiveResults = new ArrayList<>();
+    List<ResultRecord> risoResults = new ArrayList<>();
 
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
     queries = queries.subList(0, queryCount);
@@ -231,17 +232,23 @@ public class WikiRisoTreeQueryPNTest {
       long start1 = System.currentTimeMillis();
       naive_Neo4j_Match.queryWithIgnore(query);
       long naiveTime = System.currentTimeMillis() - start1;
+
+      // service.shutdown();
+      if (clearCache) {
+        OwnMethods.clearCache(password, method);
+      }
+      // service = Neo4jGraphUtility.getDatabaseService(dbPath);
+
       Util.println("time: " + naiveTime);
       Util.println("result count: " + naive_Neo4j_Match.result_count);
       Util.println("page hit: " + naive_Neo4j_Match.page_access);
       Util.println(naive_Neo4j_Match.planDescription);
-      naiveTimes.add(naiveTime);
-      service.shutdown();
-      if (clearCache) {
-        OwnMethods.clearCache(password, method);
-      }
-      service = Neo4jGraphUtility.getDatabaseService(dbPath);
+      naiveResults.add(new ResultRecord(naiveTime, naive_Neo4j_Match.page_access));
     }
+
+    service.shutdown();
+    OwnMethods.clearCache(password, method);
+    service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
     queryId = -1;
     for (String query : queries) {
@@ -253,35 +260,45 @@ public class WikiRisoTreeQueryPNTest {
       long start2 = System.currentTimeMillis();
       risoTreeQueryPN.queryWithIgnore(query);
       long risoTreeTime = System.currentTimeMillis() - start2;
+
+      // service.shutdown();
+      if (clearCache) {
+        OwnMethods.clearCache(password, method);
+      }
+      // service = Neo4jGraphUtility.getDatabaseService(dbPath);
+
       Util.println("time: " + risoTreeTime);
       Util.println("result count: " + risoTreeQueryPN.result_count);
       Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
       Util.println(risoTreeQueryPN.planDescription);
-      risoTimes.add(risoTreeTime);
-      service.shutdown();
-      if (clearCache) {
-        OwnMethods.clearCache(password, method);
-      }
-      service = Neo4jGraphUtility.getDatabaseService(dbPath);
-
+      risoResults.add(new ResultRecord(risoTreeTime, risoTreeQueryPN.page_hit_count));
     }
 
     for (int i = 0; i < queryCount; i++) {
-      if (naiveTimes.get(i) < risoTimes.get(i)) {
+      if (naiveResults.get(i).runTime < risoResults.get(i).runTime) {
         naiveBetter.add(queries.get(i));
+        naiveBetterIds.add(i);
       } else {
         risoTreeBetter.add(queries.get(i));
+        risoTreeBetterIds.add(i);
       }
     }
-
-    logger.info("naive is better:" + naiveBetter.size());
-    logger.info("risotree is better:" + risoTreeBetter.size());
 
     Util.println(naiveBetter);
     Util.println(risoTreeBetter);
 
-    for (int i = 0; i < naiveTimes.size(); i++) {
-      Util.println(String.format("%d\t%d", naiveTimes.get(i), risoTimes.get(i)));
+    Util.println("naive is better:" + naiveBetter.size());
+    Util.println("naive better query ids:" + naiveBetterIds);
+    Util.println("risotree is better:" + risoTreeBetter.size());
+    Util.println("risotree better query ids:" + risoTreeBetterIds);
+
+
+    for (int i = 0; i < naiveResults.size(); i++) {
+      Util.println(String.format("%d\t%d\t%d\t%d", naiveResults.get(i).runTime,
+          naiveResults.get(i).pageHit, risoResults.get(i).runTime, risoResults.get(i).pageHit));
     }
+
+    Util.println("\nnaive average time: " + ResultRecord.getRunTimeAvg(naiveResults));
+    Util.println("risotree average time: " + ResultRecord.getRunTimeAvg(risoResults));
   }
 }
