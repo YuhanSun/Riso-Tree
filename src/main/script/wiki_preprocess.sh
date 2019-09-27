@@ -42,4 +42,5 @@ graph_property_edge_before="${data_dir}/graph_property_edge_no_instance_before_r
 java -Xmx100g -jar ${jar_path} \
 	-f refineGraphPropertyEdge \
 	-inputPath ${graph_property_edge_before}	\
+	-gp ${single_graph_path}	\
 	-outputPath ${graphPropertyEdgePath}
