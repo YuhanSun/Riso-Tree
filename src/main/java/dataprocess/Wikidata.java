@@ -1630,7 +1630,7 @@ public class Wikidata {
       int start = Integer.parseInt(strings[0]);
       int end = Integer.parseInt(strings[2]);
       if (treeGraph.get(start).contains(end)) {
-        writer.write(line);
+        writer.write(line + "\n");
         continue;
       }
       notFound++;
