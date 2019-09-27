@@ -158,6 +158,7 @@ public class GraphUtil {
    */
   public static ArrayList<TreeSet<Integer>> convertListGraphToTreeSetGraph(
       ArrayList<ArrayList<Integer>> listGraph) {
+    LOGGER.info("convert from list graph to treeset graph...");
     ArrayList<TreeSet<Integer>> graph = new ArrayList<>(listGraph.size());
     for (List<Integer> neighbors : listGraph) {
       graph.add(new TreeSet<>(neighbors));
