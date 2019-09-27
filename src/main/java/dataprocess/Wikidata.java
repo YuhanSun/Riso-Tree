@@ -1603,6 +1603,42 @@ public class Wikidata {
     writer.write("\n");
   }
 
+
+  /**
+   * Refine the graph_property_edge.txt file. Because even {@code graphPropertyEdgePathBefore} and
+   * single_graph are both extracted from {@code wiki_edge}, but might have different ignore rule.
+   * So to ensure the consistency, use {@code singleGraphPath} as base to filter the
+   * {@code graphPropertyEdgePathBefore}.
+   * 
+   * @param graphPropertyEdgePathBefore
+   * @param singleGraphPath
+   * @param graphPropertyEdgePathAfter
+   * @throws Exception
+   */
+  public static void refineGraphPropertyEdge(String graphPropertyEdgePathBefore,
+      String singleGraphPath, String graphPropertyEdgePathAfter) throws Exception {
+    Util.checkPathExist(graphPropertyEdgePathBefore);
+    Util.checkPathExist(singleGraphPath);
+
+    List<String> lines = ReadWriteUtil.readFileAllLines(graphPropertyEdgePathBefore);
+    ArrayList<ArrayList<Integer>> listGraph = GraphUtil.ReadGraph(singleGraphPath);
+    ArrayList<TreeSet<Integer>> treeGraph = GraphUtil.convertListGraphToTreeSetGraph(listGraph);
+    FileWriter writer = Util.getFileWriter(graphPropertyEdgePathAfter);
+    int notFound = 0;
+    for (String line : lines) {
+      String[] strings = line.split(",");
+      int start = Integer.parseInt(strings[0]);
+      int end = Integer.parseInt(strings[1]);
+      if (treeGraph.get(start).contains(end)) {
+        writer.write(line);
+        continue;
+      }
+      notFound++;
+    }
+    Util.close(writer);
+    Util.println("Not Found: " + notFound);
+  }
+
   /**
    * Generate the final entity file from location.txt.
    */

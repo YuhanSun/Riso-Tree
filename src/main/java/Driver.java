@@ -21,6 +21,7 @@ public class Driver {
   // function names
   private static enum FunctionName {
     convertSingleToBidirectinalGraph, // data preprocess
+    refineGraphPropertyEdge, // wikidata preprocess
 
     tree, containID, // tree construction
     LoadNonSpatialEntity, GetSpatialNodeMap, LoadGraphEdges, loadGraphEdgesNoMap, CalculateCount, LoadAll, // graph
@@ -185,6 +186,10 @@ public class Driver {
         switch (functionName) {
           case convertSingleToBidirectinalGraph:
             DataProcess.convertSingleToBidirectinalGraph(cmd.getOptionValue(dataDir));
+            break;
+          case refineGraphPropertyEdge:
+            Wikidata.refineGraphPropertyEdge(cmd.getOptionValue(inputPath),
+                cmd.getOptionValue(graphPath), cmd.getOptionValue(outputPath));
             break;
           case tree:
             new LoadDataNoOSM(new Config(), true).batchRTreeInsertOneHopAware(
