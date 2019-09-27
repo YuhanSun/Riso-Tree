@@ -10,6 +10,7 @@ import commons.Util;
 import dataprocess.Wikidata;
 import experiment.Analyze;
 import experiment.DataProcess;
+import experiment.MaintenanceExperiment;
 import experiment.MaxPNSize;
 import experiment.Prepare;
 import graph.Construct_RisoTree;
@@ -49,7 +50,12 @@ public class Driver {
      */
     generateRandomLabel, singleLabelListToLabelGraph, // for single label graph prepare
     generateQuery, // prepare
-    maxPNSizeRisoTreeQuery, maxPNSizeRisoTreeQueryMultiple,// query
+    maxPNSizeRisoTreeQuery, maxPNSizeRisoTreeQueryMultiple, // query
+
+    /**
+     * add experiment
+     */
+    sampleFile, removeEdgesFromGraphFile, removeEdgesFromDb, // one time prepare
   }
 
   private static FunctionName getFunctionEnum(String function) {
@@ -108,6 +114,9 @@ public class Driver {
   private static final String queryPath = "queryPath";
   private static final String queryId = "queryId";
 
+  private static final String ratio = "ratio";
+  private static final String edgePath = "edgePath";
+
 
   public Driver(String[] args) {
     this.args = args;
@@ -152,7 +161,8 @@ public class Driver {
     options.addOption(queryCount, "queryCount", true, "the number of queries to be generated");
     options.addOption(queryPath, "queryPath", true, "path of the query file");
     options.addOption(queryId, "queryId", true, "id of the query in the query file");
-
+    options.addOption(ratio, "ratio", true, "sampling ratio");
+    options.addOption(edgePath, "edgePath", true, "edge path");
   }
 
   public void parser() {
@@ -363,6 +373,19 @@ public class Driver {
                 cmd.getOptionValue(dataset), Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
                 cmd.getOptionValue(queryPath), Integer.parseInt(cmd.getOptionValue(queryCount)),
                 cmd.getOptionValue(outputPath));
+            break;
+          // add prepare one time run
+          case sampleFile:
+            MaintenanceExperiment.sampleFile(cmd.getOptionValue(inputPath),
+                Double.parseDouble(cmd.getOptionValue(ratio)), cmd.getOptionValue(outputPath));
+            break;
+          case removeEdgesFromGraphFile:
+            MaintenanceExperiment.removeEdgesFromGraphFile(cmd.getOptionValue(graphPath),
+                cmd.getOptionValue(edgePath), cmd.getOptionValue(outputPath));
+            break;
+          case removeEdgesFromDb:
+            MaintenanceExperiment.removeEdgesFromDb(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(edgePath));
             break;
           default:
             Util.println(String.format("Function %s does not exist!", functionNameString));
