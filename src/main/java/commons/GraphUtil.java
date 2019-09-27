@@ -228,6 +228,30 @@ public class GraphUtil {
     writer.close();
   }
 
+  /**
+   * Write a graph to a file.
+   * 
+   * @param graph
+   * @param graphPath
+   */
+  public static void writeGraphTreeSet(ArrayList<TreeSet<Integer>> graph, String graphPath) {
+    try {
+      FileWriter writer = new FileWriter(new File(graphPath));
+      writer.write(String.format("%d\n", graph.size())); // Write node count in the graph.
+      for (int i = 0; i < graph.size(); i++) {
+        TreeSet<Integer> neighborList = graph.get(i);
+        writer.write(String.format("%d,%d", i, neighborList.size()));
+        for (int neighbor : neighborList)
+          writer.write(String.format(",%d", neighbor));
+        writer.write("\n");
+      }
+      writer.close();
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(-1);
+    }
+  }
+
   public static void writeEntityToFile(ArrayList<Entity> entities, String entityPath) {
     FileWriter writer = null;
     try {

@@ -794,54 +794,6 @@ public class OwnMethods {
 
   }
 
-  /**
-   * Write a graph to a file.
-   * 
-   * @param graph
-   * @param graphPath
-   */
-  public static void writeGraphArrayList(ArrayList<ArrayList<Integer>> graph, String graphPath) {
-    try {
-      FileWriter writer = new FileWriter(new File(graphPath));
-      writer.write(String.format("%d\n", graph.size())); // Write node count in the graph.
-      for (int i = 0; i < graph.size(); i++) {
-        ArrayList<Integer> neighborList = graph.get(i);
-        writer.write(String.format("%d,%d", i, neighborList.size()));
-        for (int neighbor : neighborList)
-          writer.write(String.format(",%d", neighbor));
-        writer.write("\n");
-      }
-      writer.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.exit(-1);
-    }
-  }
-
-  /**
-   * Write a graph to a file.
-   * 
-   * @param graph
-   * @param graphPath
-   */
-  public static void writeGraphTreeSet(ArrayList<TreeSet<Integer>> graph, String graphPath) {
-    try {
-      FileWriter writer = new FileWriter(new File(graphPath));
-      writer.write(String.format("%d\n", graph.size())); // Write node count in the graph.
-      for (int i = 0; i < graph.size(); i++) {
-        TreeSet<Integer> neighborList = graph.get(i);
-        writer.write(String.format("%d,%d", i, neighborList.size()));
-        for (int neighbor : neighborList)
-          writer.write(String.format(",%d", neighbor));
-        writer.write("\n");
-      }
-      writer.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.exit(-1);
-    }
-  }
-
   public static boolean ReachabilityQuery(ArrayList<ArrayList<Integer>> graph,
       ArrayList<Entity> entities, int start_id, MyRectangle query_rect) {
     HashSet<Integer> visited_vertices = new HashSet<Integer>();
