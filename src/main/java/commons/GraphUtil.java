@@ -156,9 +156,9 @@ public class GraphUtil {
    * @param listGraph
    * @return
    */
-  public static List<Collection<Integer>> convertListGraphToTreeSetGraph(
+  public static ArrayList<TreeSet<Integer>> convertListGraphToTreeSetGraph(
       ArrayList<ArrayList<Integer>> listGraph) {
-    List<Collection<Integer>> graph = new ArrayList<>(listGraph.size());
+    ArrayList<TreeSet<Integer>> graph = new ArrayList<>(listGraph.size());
     for (List<Integer> neighbors : listGraph) {
       graph.add(new TreeSet<>(neighbors));
     }
@@ -239,7 +239,7 @@ public class GraphUtil {
       FileWriter writer = new FileWriter(new File(graphPath));
       writer.write(String.format("%d\n", graph.size())); // Write node count in the graph.
       for (int i = 0; i < graph.size(); i++) {
-        TreeSet<Integer> neighborList = graph.get(i);
+        Collection<Integer> neighborList = graph.get(i);
         writer.write(String.format("%d,%d", i, neighborList.size()));
         for (int neighbor : neighborList)
           writer.write(String.format(",%d", neighbor));

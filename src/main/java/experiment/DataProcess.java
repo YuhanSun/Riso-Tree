@@ -94,7 +94,7 @@ public class DataProcess {
         OwnMethods.singleDirectionalToBidirectionalGraph(graph);
 
     LOGGER.info("output birectional graph to " + bidirectionGraphPath);
-    OwnMethods.writeGraphTreeSet(bidirectionalGraph, bidirectionGraphPath);
+    GraphUtil.writeGraphTreeSet(bidirectionalGraph, bidirectionGraphPath);
   }
 
 }
