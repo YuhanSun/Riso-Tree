@@ -24,7 +24,7 @@ code_dir="${dir}/code"
 # db_path="${data_dir}/neo4j-community-3.4.12_0.5/data/databases/graph.db"
 
 # graph_path="${data_dir}/graph.txt"
-single_graph_path="${data_dir}/graph_single.txt"
+single_graph_path="${data_dir}/graph.txt"
 # entity_path="${data_dir}/entity.txt"
 # label_path="${data_dir}/graph_label.txt"
 # entityStringLabelMapPath="${data_dir}/entity_string_label.txt"
