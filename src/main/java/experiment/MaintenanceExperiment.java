@@ -2,7 +2,6 @@ package experiment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.TreeSet;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -13,6 +12,7 @@ import org.neo4j.graphdb.Transaction;
 import commons.Edge;
 import commons.GraphUtil;
 import commons.Neo4jGraphUtility;
+import commons.OwnMethods;
 import commons.ReadWriteUtil;
 import commons.Util;
 import graph.RisoTreeMaintenance;
@@ -22,15 +22,9 @@ public class MaintenanceExperiment {
   public static void sampleFile(String inputPath, double ratio, String outputPath)
       throws Exception {
     List<String> lines = ReadWriteUtil.readFileAllLines(inputPath);
-    List<String> linesArray = new ArrayList<>(lines);
-    int len = linesArray.size();
-    List<String> sampleLines = new ArrayList<>(len);
-    Random random = new Random();
-    int count = (int) (ratio * len);
-    for (int i = 0; i < count; i++) {
-      int lineId = random.nextInt(len);
-      sampleLines.add(linesArray.get(lineId));
-    }
+    ArrayList<String> linesArray = new ArrayList<>(lines);
+    int count = (int) (ratio * linesArray.size());
+    ArrayList<String> sampleLines = OwnMethods.GetRandom_NoDuplicate(linesArray, count);
     ReadWriteUtil.WriteFile(outputPath, false, sampleLines);
   }
 
@@ -44,12 +38,12 @@ public class MaintenanceExperiment {
       String[] strings = line.split(",");
       int start = Integer.parseInt(strings[0]);
       int end = Integer.parseInt(strings[2]);
-      if (!graphTreeSet.get(start).contains(end)) {
+      if (!graphTreeSet.get(start).remove((end))) {
         // throw new RuntimeException(String.format("Edge %s is not found!", line));
         Util.println(line);
         notFound1++;
       }
-      if (!graphTreeSet.get(end).contains(start)) {
+      if (!graphTreeSet.get(end).remove(start)) {
         // throw new RuntimeException(String.format("Edge %s is not found!", line));
         Util.println(line);
         notFound2++;
@@ -71,7 +65,7 @@ public class MaintenanceExperiment {
       String edgeType = strings[1];
       boolean found = removeEdge(service, start, end, edgeType);
       if (!found) {
-        // throw new RuntimeException(String.format("Edge %s is not found!", line));
+        Util.println(String.format("Edge %s is not found!", line));
         notFound++;
       }
     }
