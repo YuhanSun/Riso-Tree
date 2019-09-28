@@ -35,10 +35,10 @@ java -Xmx100g -jar ${jar_path} \
 	-ratio 0.01	\
 	-outputPath ${add_edge_path}
 
-# java -Xmx100g -jar ${jar_path} \
-# 	-f removeEdgesFromDb \
-# 	-dp ${db_after_removal_path}	\
-# 	-edgePath ${add_edge_path}
+java -Xmx100g -jar ${jar_path} \
+	-f removeEdgesFromDb \
+	-dp ${db_after_removal_path}	\
+	-edgePath ${add_edge_path}
 
 java -Xmx100g -jar ${jar_path} \
 	-f removeEdgesFromGraphFile \

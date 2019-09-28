@@ -1,7 +1,10 @@
 package experiment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.TreeSet;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -12,7 +15,6 @@ import org.neo4j.graphdb.Transaction;
 import commons.Edge;
 import commons.GraphUtil;
 import commons.Neo4jGraphUtility;
-import commons.OwnMethods;
 import commons.ReadWriteUtil;
 import commons.Util;
 import graph.RisoTreeMaintenance;
@@ -23,8 +25,27 @@ public class MaintenanceExperiment {
       throws Exception {
     List<String> lines = ReadWriteUtil.readFileAllLines(inputPath);
     ArrayList<String> linesArray = new ArrayList<>(lines);
-    int count = (int) (ratio * linesArray.size());
-    ArrayList<String> sampleLines = OwnMethods.GetRandom_NoDuplicate(linesArray, count);
+    int len = linesArray.size();
+    int count = (int) (ratio * len);
+
+    Map<String, String> sampleMap = new HashMap<>();
+    Random random = new Random();
+    while (sampleMap.size() < count) {
+      int id = random.nextInt(len);
+      String line = linesArray.get(id);
+      String[] strings = line.split(",");
+      int start = Integer.parseInt(strings[0]);
+      int end = Integer.parseInt(strings[1]);
+      int min = Math.min(start, end);
+      int max = Math.max(start, end);
+      String key = new Edge(min, max).toString();
+      if (sampleMap.containsKey(key)) {
+        continue;
+      }
+      sampleMap.put(key, line);
+    }
+
+    ArrayList<String> sampleLines = new ArrayList<>(sampleMap.values());
     ReadWriteUtil.WriteFile(outputPath, false, sampleLines);
   }
 
@@ -62,8 +83,8 @@ public class MaintenanceExperiment {
       String[] strings = line.split(",");
       int start = Integer.parseInt(strings[0]);
       int end = Integer.parseInt(strings[2]);
-      String edgeType = strings[1];
-      boolean found = removeEdge(service, start, end, edgeType);
+      // String edgeType = strings[1];
+      boolean found = removeEdge(service, start, end) || removeEdge(service, end, start);
       if (!found) {
         Util.println(String.format("Edge %s is not found!", line));
         notFound++;
@@ -73,6 +94,27 @@ public class MaintenanceExperiment {
     tx.success();
     tx.close();
     service.shutdown();
+  }
+
+  /**
+   * Remove all the edges from start to end.
+   *
+   * @param service
+   * @param start
+   * @param end
+   * @return
+   */
+  public static boolean removeEdge(GraphDatabaseService service, long start, long end) {
+    boolean exist = false;
+    Node startNode = service.getNodeById(start);
+    Iterable<Relationship> rels = startNode.getRelationships(Direction.OUTGOING);
+    for (Relationship relationship : rels) {
+      if (relationship.getEndNode().getId() == end) {
+        relationship.delete();
+        exist = true;
+      }
+    }
+    return exist;
   }
 
   public static boolean removeEdge(GraphDatabaseService service, long start, long end,
