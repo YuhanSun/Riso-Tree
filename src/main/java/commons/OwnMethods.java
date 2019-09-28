@@ -701,9 +701,9 @@ public class OwnMethods {
    * @param count count <= wholeset.size()
    * @return
    */
-  public static ArrayList<Integer> GetRandom_NoDuplicate(ArrayList<Integer> wholeset, int count) {
-    ArrayList<Integer> result = new ArrayList<Integer>(count);
-    HashSet<Integer> hashSet = new HashSet<Integer>();
+  public static <T> ArrayList<T> GetRandom_NoDuplicate(ArrayList<T> wholeset, int count) {
+    ArrayList<T> result = new ArrayList<>(count);
+    HashSet<Integer> hashSet = new HashSet<>();
     Random random = new Random();
     while (hashSet.size() < count) {
       int index = (int) (random.nextFloat() * wholeset.size());
