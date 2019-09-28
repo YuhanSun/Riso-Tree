@@ -5,7 +5,8 @@ dataset="wikidata"
 
 # server
 dir="/hdd/code/yuhansun"
-data_dir="${dir}/data/wikidata_source_backup"
+# data_dir="${dir}/data/wikidata_source_backup"
+data_dir="${dir}/data/${dataset}"
 code_dir="${dir}/code"
 
 # local test setup
@@ -28,7 +29,8 @@ single_graph_path="${data_dir}/graph.txt"
 # entity_path="${data_dir}/entity.txt"
 # label_path="${data_dir}/graph_label.txt"
 # entityStringLabelMapPath="${data_dir}/entity_string_label.txt"
-graphPropertyEdgePath="${data_dir}/graph_property_edge.txt"
+# graphPropertyEdgePath="${data_dir}/graph_property_edge.txt"
+graphPropertyEdgePath="${data_dir}/add/graph_property_edge.txt"
 # propertyMapPath="${data_dir}/property_map.txt"
 # spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
 
@@ -37,7 +39,7 @@ graphPropertyEdgePath="${data_dir}/graph_property_edge.txt"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
-graph_property_edge_before="${data_dir}/graph_property_edge_no_instance_before_refine.txt"
+graph_property_edge_before="${data_dir}/add/edges.txt"
 
 java -Xmx100g -jar ${jar_path} \
 	-f refineGraphPropertyEdge \
