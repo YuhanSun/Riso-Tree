@@ -39,21 +39,23 @@ public class MaintenanceExperiment {
     ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(inputGraphPath);
     List<String> lines = ReadWriteUtil.readFileAllLines(edgePath);
     ArrayList<TreeSet<Integer>> graphTreeSet = GraphUtil.convertListGraphToTreeSetGraph(graph);
-    int notFound = 0;
+    int notFound1 = 0, notFound2 = 0;
     for (String line : lines) {
       String[] strings = line.split(",");
       int start = Integer.parseInt(strings[0]);
       int end = Integer.parseInt(strings[2]);
       if (!graphTreeSet.get(start).remove(end)) {
         // throw new RuntimeException(String.format("Edge %s is not found!", line));
-        notFound++;
+        Util.println(line);
+        notFound1++;
       }
       if (!graphTreeSet.get(end).remove(start)) {
         // throw new RuntimeException(String.format("Edge %s is not found!", line));
-        notFound++;
+        Util.println(line);
+        notFound2++;
       }
     }
-    Util.println("not found in graph.txt: " + notFound);
+    Util.println(String.format("not found in graph.txt: %d\t%d", notFound1, notFound2));
     GraphUtil.writeGraphTreeSet(graphTreeSet, outputGraphPath);
   }
 
