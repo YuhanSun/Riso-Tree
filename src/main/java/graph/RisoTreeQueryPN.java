@@ -74,6 +74,9 @@ public class RisoTreeQueryPN {
   public long range_query_time;
   public long get_iterator_time;
   public long iterate_time;
+  public long set_label_time;
+  public long remove_label_time;
+
   public long result_count;
   public long page_hit_count;
   public long overlap_leaf_node_count;
@@ -688,6 +691,7 @@ public class RisoTreeQueryPN {
    * @param nodeVariables
    */
   private void setNewLabel(Map<Integer, Collection<Long>> candidateSets, String[] nodeVariables) {
+    long start = System.currentTimeMillis();
     for (int queryNodeId : candidateSets.keySet()) {
       String nodeVariableName = nodeVariables[queryNodeId];
       for (long neo4jId : candidateSets.get(queryNodeId)) {
@@ -701,9 +705,11 @@ public class RisoTreeQueryPN {
       // Util.println(node.getId());
       // }
     }
+    set_label_time += System.currentTimeMillis() - start;
   }
 
   private void recoverLabel(Map<Integer, Collection<Long>> candidateSets, String[] nodeVariables) {
+    long start = System.currentTimeMillis();
     for (int queryNodeId : candidateSets.keySet()) {
       String nodeVariableName = nodeVariables[queryNodeId];
       for (long neo4jId : candidateSets.get(queryNodeId)) {
@@ -711,6 +717,7 @@ public class RisoTreeQueryPN {
         node.removeLabel(Label.label(nodeVariableName));
       }
     }
+    remove_label_time += System.currentTimeMillis() - start;
   }
 
   /**
@@ -1539,6 +1546,8 @@ public class RisoTreeQueryPN {
   private void iniLogParams() {
     LOGGER.info("Initialize variables for query");
     range_query_time = 0;
+    set_label_time = 0;
+    remove_label_time = 0;
     get_iterator_time = 0;
     iterate_time = 0;
     result_count = 0;
