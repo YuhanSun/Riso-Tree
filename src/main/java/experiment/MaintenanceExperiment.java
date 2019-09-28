@@ -35,7 +35,7 @@ public class MaintenanceExperiment {
       String line = linesArray.get(id);
       String[] strings = line.split(",");
       int start = Integer.parseInt(strings[0]);
-      int end = Integer.parseInt(strings[1]);
+      int end = Integer.parseInt(strings[2]);
       int min = Math.min(start, end);
       int max = Math.max(start, end);
       String key = new Edge(min, max).toString();
@@ -51,6 +51,9 @@ public class MaintenanceExperiment {
 
   public static void removeEdgesFromGraphFile(String inputGraphPath, String edgePath,
       String outputGraphPath) throws Exception {
+    Util.checkPathExist(inputGraphPath);
+    Util.checkPathExist(edgePath);
+
     ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(inputGraphPath);
     List<String> lines = ReadWriteUtil.readFileAllLines(edgePath);
     ArrayList<TreeSet<Integer>> graphTreeSet = GraphUtil.convertListGraphToTreeSetGraph(graph);
@@ -75,6 +78,7 @@ public class MaintenanceExperiment {
   }
 
   public static void removeEdgesFromDb(String dbPath, String edgePath) throws Exception {
+    Util.checkPathExist(edgePath);
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
     Transaction tx = service.beginTx();
     List<String> lines = ReadWriteUtil.readFileAllLines(edgePath);
