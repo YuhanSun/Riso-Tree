@@ -44,12 +44,12 @@ public class MaintenanceExperiment {
       String[] strings = line.split(",");
       int start = Integer.parseInt(strings[0]);
       int end = Integer.parseInt(strings[2]);
-      if (!graphTreeSet.get(start).remove(end)) {
+      if (!graphTreeSet.get(start).contains(end)) {
         // throw new RuntimeException(String.format("Edge %s is not found!", line));
         Util.println(line);
         notFound1++;
       }
-      if (!graphTreeSet.get(end).remove(start)) {
+      if (!graphTreeSet.get(end).contains(start)) {
         // throw new RuntimeException(String.format("Edge %s is not found!", line));
         Util.println(line);
         notFound2++;
