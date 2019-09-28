@@ -73,7 +73,7 @@ public class MaintenanceExperiment {
         notFound++;
       }
     }
-    Util.println("not found in graph.txt: " + notFound);
+    Util.println("not found in db: " + notFound);
     tx.success();
     tx.close();
     service.shutdown();
