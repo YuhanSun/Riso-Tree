@@ -135,10 +135,7 @@ public class WikiRisoTreeQueryPNTest {
       risoTreeQueryPN.queryWithIgnore(query);
       long risoTreeTime = System.currentTimeMillis() - start2;
       Util.println("time: " + risoTreeTime);
-      Util.println("range time: " + risoTreeQueryPN.range_query_time);
-      Util.println("result count: " + risoTreeQueryPN.result_count);
-      Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
-      Util.println(risoTreeQueryPN.planDescription);
+      printRisoTreeTime(risoTreeQueryPN);
 
       service.shutdown();
       if (clearCache) {
@@ -201,6 +198,18 @@ public class WikiRisoTreeQueryPNTest {
     Util.println("\nnaive average time: " + ResultRecord.getRunTimeAvg(naiveResults));
     Util.println("risotree average time: " + ResultRecord.getRunTimeAvg(risoResults));
 
+  }
+
+  private void printRisoTreeTime(RisoTreeQueryPN risoTreeQueryPN) {
+    Util.println("range time: " + risoTreeQueryPN.range_query_time);
+    Util.println("set label time: " + risoTreeQueryPN.set_label_time);
+    Util.println("remove label time" + risoTreeQueryPN.remove_label_time);
+    Util.println("get iterator time" + risoTreeQueryPN.get_iterator_time);
+    Util.println("iterate time" + risoTreeQueryPN.iterate_time);
+
+    Util.println("result count: " + risoTreeQueryPN.result_count);
+    Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
+    Util.println(risoTreeQueryPN.planDescription);
   }
 
   /**
@@ -268,9 +277,7 @@ public class WikiRisoTreeQueryPNTest {
       // service = Neo4jGraphUtility.getDatabaseService(dbPath);
 
       Util.println("time: " + risoTreeTime);
-      Util.println("result count: " + risoTreeQueryPN.result_count);
-      Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
-      Util.println(risoTreeQueryPN.planDescription);
+      printRisoTreeTime(risoTreeQueryPN);
       risoResults.add(new ResultRecord(risoTreeTime, risoTreeQueryPN.page_hit_count));
     }
 
