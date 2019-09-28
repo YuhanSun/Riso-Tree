@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -131,7 +132,7 @@ public class ReadWriteUtil {
   }
 
   public static List<String> readFileAllLines(String filepath) throws Exception {
-    List<String> lines = new ArrayList<>();
+    List<String> lines = new LinkedList<>();
     BufferedReader reader = Util.getBufferedReader(filepath);
     String line = null;
     while ((line = reader.readLine()) != null) {
