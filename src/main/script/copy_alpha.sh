@@ -17,5 +17,6 @@ do
 
 	source_path="${data_dir}/neo4j-community-3.4.12_node_edge/"
 	target_path="${db_dir}/neo4j-community-3.4.12_${suffix}"
+	rm -r target_path
 	cp -a ${source_path} ${target_path}
 done

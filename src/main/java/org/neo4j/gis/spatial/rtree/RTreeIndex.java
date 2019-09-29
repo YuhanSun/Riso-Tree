@@ -155,14 +155,13 @@ public class RTreeIndex implements SpatialIndexWriter {
     // choose a path down to a leaf
     long start = System.currentTimeMillis();
     while (!nodeIsLeaf(parent)) {
-      // parent = chooseSubTree(parent, geomNode);
+      parent = chooseSubTree(parent, geomNode);
       // parent = chooseSubTree(parent, geomNode, pathNeighbors);
       parent = chooseSubTreeSmallestGSD(parent, geomNode, pathNeighbors);
     }
-
     // LOGGER.info("parent node: " + parent);
-
     chooseSubTreeTime += System.currentTimeMillis() - start;
+
     if (countChildren(parent, RTreeRelationshipTypes.RTREE_REFERENCE) >= maxNodeReferences) {
       // LOGGER.info(String.format("insertInLeaf(%s,%s,%s)", parent, geomNode, pathNeighbors));
       insertInLeaf(parent, geomNode, pathNeighbors);
@@ -1414,69 +1413,19 @@ public class RTreeIndex implements SpatialIndexWriter {
       }
     }
 
-    // more than one leaf nodes contains geomRootNode
     if (indexNodes.size() > 1) {
-      // return chooseIndexNodeWithSmallestArea(indexNodes);
-      // yuhan
-      Node node = chooseIndexNodeWithSmallestArea(indexNodes);
-      if (!spatialOnly && nodeIsLeaf(node)) {
-        chooseSmallestGDCount++;
-        Node nodeWithSmallestGD = chooseIndexnodeWithSmallestGD(indexNodes, geomRootNode);
-        if (node.equals(nodeWithSmallestGD) == false) {
-          differentTimes++;
-        }
-        node = nodeWithSmallestGD;
-      }
-      return node;
+      return chooseIndexNodeWithSmallestArea(indexNodes);
     } else if (indexNodes.size() == 1) {
       return indexNodes.get(0);
     }
 
-    // No leaf node contains geomRootNode
-    HashMap<String, int[]> locInGraph = null;
-    if (!spatialOnly) {
-      locInGraph = getLocInGraph(geomRootNode);
-    }
     // pick the child that needs the minimum enlargement to include the new geometry
     double minimumEnlargement = Double.POSITIVE_INFINITY;
-
-    // for evaluation comparison purpose, yuhan
-    noContainCount++;
-    double minimumEnlargementSpatial = Double.POSITIVE_INFINITY;
-    List<Node> minimumNodesSpatial = new LinkedList<>();
-
     relationships =
         parentIndexNode.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
-
-    // check whether current level is leaf to decide whether to consider the graph distance.
-    boolean isLeaf = false;
-    for (Relationship relationship : relationships) {
-      Node firstNode = relationship.getEndNode();
-      if (nodeIsLeaf(firstNode)) {
-        isLeaf = true;
-      }
-      break;
-    }
-
     for (Relationship relation : relationships) {
       Node indexNode = relation.getEndNode();
       double enlargementNeeded = getAreaEnlargement(indexNode, geomRootNode);
-
-      // for comparison, yuhan
-      if (enlargementNeeded < minimumEnlargementSpatial) {
-        minimumNodesSpatial.clear();
-        minimumNodesSpatial.add(indexNode);
-        minimumEnlargementSpatial = enlargementNeeded;
-      } else if (enlargementNeeded == minimumEnlargementSpatial) {
-        minimumNodesSpatial.add(indexNode);
-      }
-
-      // yuhan
-      if (!spatialOnly && isLeaf) {
-        int GD = getGD(indexNode, locInGraph);
-        enlargementNeeded = alpha * enlargementNeeded / (360 * 180)
-            + (1 - alpha) * (double) GD / Config.graphNodeCount;
-      }
 
       if (enlargementNeeded < minimumEnlargement) {
         indexNodes.clear();
@@ -1488,22 +1437,119 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
 
     if (indexNodes.size() > 1) {
-      // This happens very rarely because it requires two enlargement to be exactly the same.
       return chooseIndexNodeWithSmallestArea(indexNodes);
     } else if (indexNodes.size() == 1) {
-      // for comparison, yuhan
-      if (indexNodes.get(0).equals(minimumNodesSpatial.get(0))) {
-        noContainSame++;
-      } else {
-        noContainDifferent++;
-      }
-
       return indexNodes.get(0);
     } else {
       // this shouldn't happen
       throw new RuntimeException("No IndexNode found for new geometry");
     }
   }
+
+  // private Node chooseSubTree(Node parentIndexNode, Node geomRootNode) {
+  // // children that can contain the new geometry
+  // List<Node> indexNodes = new ArrayList<>();
+  //
+  // // pick the child that contains the new geometry bounding box
+  // Iterable<Relationship> relationships =
+  // parentIndexNode.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
+  // for (Relationship relation : relationships) {
+  // Node indexNode = relation.getEndNode();
+  // if (getIndexNodeEnvelope(indexNode).contains(getLeafNodeEnvelope(geomRootNode))) {
+  // indexNodes.add(indexNode);
+  // }
+  // }
+  //
+  // // more than one leaf nodes contains geomRootNode
+  // if (indexNodes.size() > 1) {
+  // // return chooseIndexNodeWithSmallestArea(indexNodes);
+  // // yuhan
+  // Node node = chooseIndexNodeWithSmallestArea(indexNodes);
+  // if (!spatialOnly && nodeIsLeaf(node)) {
+  // chooseSmallestGDCount++;
+  // Node nodeWithSmallestGD = chooseIndexnodeWithSmallestGD(indexNodes, geomRootNode);
+  // if (node.equals(nodeWithSmallestGD) == false) {
+  // differentTimes++;
+  // }
+  // node = nodeWithSmallestGD;
+  // }
+  // return node;
+  // } else if (indexNodes.size() == 1) {
+  // return indexNodes.get(0);
+  // }
+  //
+  // // No leaf node contains geomRootNode
+  // HashMap<String, int[]> locInGraph = null;
+  // if (!spatialOnly) {
+  // locInGraph = getLocInGraph(geomRootNode);
+  // }
+  // // pick the child that needs the minimum enlargement to include the new geometry
+  // double minimumEnlargement = Double.POSITIVE_INFINITY;
+  //
+  // // for evaluation comparison purpose, yuhan
+  // noContainCount++;
+  // double minimumEnlargementSpatial = Double.POSITIVE_INFINITY;
+  // List<Node> minimumNodesSpatial = new LinkedList<>();
+  //
+  // relationships =
+  // parentIndexNode.getRelationships(RTreeRelationshipTypes.RTREE_CHILD, Direction.OUTGOING);
+  //
+  // // check whether current level is leaf to decide whether to consider the graph distance.
+  // boolean isLeaf = false;
+  // for (Relationship relationship : relationships) {
+  // Node firstNode = relationship.getEndNode();
+  // if (nodeIsLeaf(firstNode)) {
+  // isLeaf = true;
+  // }
+  // break;
+  // }
+  //
+  // for (Relationship relation : relationships) {
+  // Node indexNode = relation.getEndNode();
+  // double enlargementNeeded = getAreaEnlargement(indexNode, geomRootNode);
+  //
+  // // for comparison, yuhan
+  // if (enlargementNeeded < minimumEnlargementSpatial) {
+  // minimumNodesSpatial.clear();
+  // minimumNodesSpatial.add(indexNode);
+  // minimumEnlargementSpatial = enlargementNeeded;
+  // } else if (enlargementNeeded == minimumEnlargementSpatial) {
+  // minimumNodesSpatial.add(indexNode);
+  // }
+  //
+  // // yuhan
+  // if (!spatialOnly && isLeaf) {
+  // int GD = getGD(indexNode, locInGraph);
+  // enlargementNeeded = alpha * enlargementNeeded / (360 * 180)
+  // + (1 - alpha) * (double) GD / Config.graphNodeCount;
+  // }
+  //
+  // if (enlargementNeeded < minimumEnlargement) {
+  // indexNodes.clear();
+  // indexNodes.add(indexNode);
+  // minimumEnlargement = enlargementNeeded;
+  // } else if (enlargementNeeded == minimumEnlargement) {
+  // indexNodes.add(indexNode);
+  // }
+  // }
+  //
+  // if (indexNodes.size() > 1) {
+  // // This happens very rarely because it requires two enlargement to be exactly the same.
+  // return chooseIndexNodeWithSmallestArea(indexNodes);
+  // } else if (indexNodes.size() == 1) {
+  // // for comparison, yuhan
+  // if (indexNodes.get(0).equals(minimumNodesSpatial.get(0))) {
+  // noContainSame++;
+  // } else {
+  // noContainDifferent++;
+  // }
+  //
+  // return indexNodes.get(0);
+  // } else {
+  // // this shouldn't happen
+  // throw new RuntimeException("No IndexNode found for new geometry");
+  // }
+  // }
 
   /**
    * Choose the node with the smallest GD. Since GD has many same values, use the area as a tie
