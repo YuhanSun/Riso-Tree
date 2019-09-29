@@ -1,11 +1,12 @@
 #!/bin/bash
 ./package.sh
 
-dataset="wikidata"
+dataset="Yelp_100"
 
 # server
 dir="/hdd/code/yuhansun"
-data_dir="${dir}/data/wikidata_risotree"
+data_dir="${dir}/data/${dataset}"
+db_dir="${data_dir}/alpha"
 code_dir="${dir}/code"
 
 # local test setup
@@ -30,30 +31,48 @@ spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
 split_mode="Gleenes"
-maxPNSize="100"
+maxPNSize="-1"
 
-# for alpha in 0 0.25 0.5 0.75 1.0
-for alpha in 0.9999
+for alpha in 0 0.25 0.5 0.75 1.0
+# for alpha in 0.9999
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 
-	db_path="${data_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
-	containID_path="${data_dir}/containID_${suffix}.txt"
-	PNPathAndPrefix="${data_dir}/PathNeighbors_${suffix}"
+	db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
+	containID_path="${db_dir}/containID_${suffix}.txt"
+	PNPathAndPrefix="${db_dir}/PathNeighbors_${suffix}"
 
 	# 0-hop
-	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
-	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
-
-	java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
-	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
+	-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
 	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 
 	# 1-hop
-	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
-	-dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
+	-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
 	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+
+	# 2-hop
+	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
+	-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	-lp ${label_path} -hop 2 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+
+
+
+	########## Construct based on the db (hop-1) path neighbor
+	# 0-hop
+	# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
+	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	# -lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+
+	# java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
+	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	# -lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+
+	# # 1-hop
+	# java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHop \
+	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+	# -lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 
 	# java -Xmx100g -jar ${jar_path} -f wikiLoadPN \
 	# -dp ${db_path} -c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
