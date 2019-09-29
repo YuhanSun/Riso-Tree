@@ -280,4 +280,23 @@ public class ReadWriteUtil {
     Util.close(reader);
     return nodesPN;
   }
+
+  public static void writeLeafNodesPathNeighbors(Map<Long, Map<String, int[]>> pathNeighbors,
+      String outputPath) throws Exception {
+    FileWriter writer = Util.getFileWriter(outputPath);
+    Iterator<Entry<Long, Map<String, int[]>>> iterator = pathNeighbors.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Entry<Long, Map<String, int[]>> entry = iterator.next();
+      long leafNodeId = entry.getKey();
+      writer.write(leafNodeId + "\n");
+      Iterator<Entry<String, int[]>> nodePnIter = entry.getValue().entrySet().iterator();
+      while (nodePnIter.hasNext()) {
+        Entry<String, int[]> singlePn = nodePnIter.next();
+        String labelPath = singlePn.getKey();
+        int[] neighbors = singlePn.getValue();
+        writer.write(String.format("%s,%s\n", labelPath, Arrays.toString(neighbors)));
+      }
+    }
+    Util.close(writer);
+  }
 }
