@@ -17,7 +17,6 @@
  */
 package org.neo4j.gis.spatial.rtree;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -365,9 +364,8 @@ public class RTreeIndex implements SpatialIndexWriter {
   }
 
   private void outputLeafNodesPathNeighors() throws Exception {
-    ClassLoader classLoader = getClass().getClassLoader();
-    File file = new File(classLoader.getResource("").getFile());
-    String outputPath = file.getAbsolutePath() + "/" + alpha;
+    String dir = RTreeIndex.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    String outputPath = dir + alpha;
     ReadWriteUtil.writeLeafNodesPathNeighbors(leafNodesPathNeighbors, outputPath);
   }
 
