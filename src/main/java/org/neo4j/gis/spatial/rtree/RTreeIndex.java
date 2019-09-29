@@ -17,6 +17,7 @@
  */
 package org.neo4j.gis.spatial.rtree;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -44,6 +45,7 @@ import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
 import commons.Config;
+import commons.ReadWriteUtil;
 import commons.Util;
 
 /**
@@ -155,7 +157,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     // choose a path down to a leaf
     long start = System.currentTimeMillis();
     while (!nodeIsLeaf(parent)) {
-      parent = chooseSubTree(parent, geomNode);
+      // parent = chooseSubTree(parent, geomNode);
       // parent = chooseSubTree(parent, geomNode, pathNeighbors);
       parent = chooseSubTreeSmallestGSD(parent, geomNode, pathNeighbors);
     }
@@ -359,6 +361,14 @@ public class RTreeIndex implements SpatialIndexWriter {
 
     printTimeTrack();
     printFunctionCallTrack();
+    outputLeafNodesPathNeighors();
+  }
+
+  private void outputLeafNodesPathNeighors() throws Exception {
+    ClassLoader classLoader = getClass().getClassLoader();
+    File file = new File(classLoader.getResource("").getFile());
+    String outputPath = file.getAbsolutePath() + "/" + alpha;
+    ReadWriteUtil.writeLeafNodesPathNeighbors(leafNodesPathNeighbors, outputPath);
   }
 
   private void initializeLeafNodesPathNeighbors() throws Exception {
@@ -2290,7 +2300,7 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   public final static String PN_PROP_PREFFIX = "PN_";
 
-  public HashMap<Long, Map<String, int[]>> leafNodesPathNeighbors = null;
+  public Map<Long, Map<String, int[]>> leafNodesPathNeighbors = null;
   public List<Map<String, int[]>> spatialNodesPathNeighbors = null;
 
   // ******** tracking time *********/
