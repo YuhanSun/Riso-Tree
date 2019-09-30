@@ -5,7 +5,7 @@ dataset="Yelp_100"
 
 # server
 dir="/hdd/code/yuhansun"
-data_dir="${dir}/data/${dataset}"
+data_dir="${dir}/data/${dataset}/alpha"
 code_dir="${dir}/code"
 
 # local test setup
