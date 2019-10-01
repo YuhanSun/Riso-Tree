@@ -203,9 +203,9 @@ public class WikiRisoTreeQueryPNTest {
   private void printRisoTreeTime(RisoTreeQueryPN risoTreeQueryPN) {
     Util.println("range time: " + risoTreeQueryPN.range_query_time);
     Util.println("set label time: " + risoTreeQueryPN.set_label_time);
-    Util.println("remove label time" + risoTreeQueryPN.remove_label_time);
-    Util.println("get iterator time" + risoTreeQueryPN.get_iterator_time);
-    Util.println("iterate time" + risoTreeQueryPN.iterate_time);
+    Util.println("remove label time: " + risoTreeQueryPN.remove_label_time);
+    Util.println("get iterator time: " + risoTreeQueryPN.get_iterator_time);
+    Util.println("iterate time: " + risoTreeQueryPN.iterate_time);
 
     Util.println("result count: " + risoTreeQueryPN.result_count);
     Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
@@ -239,7 +239,17 @@ public class WikiRisoTreeQueryPNTest {
 
       Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
       long start1 = System.currentTimeMillis();
-      naive_Neo4j_Match.queryWithIgnore(query);
+      try {
+        naive_Neo4j_Match.queryWithIgnore(query);
+      } catch (Exception e) {
+        e.printStackTrace();
+        // service.shutdown();
+        if (clearCache) {
+          OwnMethods.clearCache(password, method);
+        }
+        // service = Neo4jGraphUtility.getDatabaseService(dbPath);
+        continue;
+      }
       long naiveTime = System.currentTimeMillis() - start1;
 
       // service.shutdown();
@@ -267,7 +277,18 @@ public class WikiRisoTreeQueryPNTest {
 
       RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, 2);
       long start2 = System.currentTimeMillis();
-      risoTreeQueryPN.queryWithIgnore(query);
+      try {
+        risoTreeQueryPN.queryWithIgnore(query);
+      } catch (Exception e) {
+        // TODO: handle exception
+        e.printStackTrace();
+        // service.shutdown();
+        if (clearCache) {
+          OwnMethods.clearCache(password, method);
+        }
+        // service = Neo4jGraphUtility.getDatabaseService(dbPath);
+        continue;
+      }
       long risoTreeTime = System.currentTimeMillis() - start2;
 
       // service.shutdown();
