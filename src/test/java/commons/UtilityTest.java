@@ -1,10 +1,12 @@
 package commons;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -181,4 +183,19 @@ public class UtilityTest {
     i2 = new int[] {1, 4, 5};
     Util.println(Arrays.toString(Util.sortedArrayMerge(i1, i2)));
   }
+
+  @Test
+  public void sortedListMergeTest() {
+    List<Integer> l1 = new ArrayList<>(Arrays.asList(0, 2, 4));
+    List<Integer> l2 = new ArrayList<>(Arrays.asList(0, 2, 4));
+    assertTrue(Util.sortedListMerge(l1, l2).equals(new ArrayList<>(Arrays.asList(0, 2, 4))));
+
+    l2 = new ArrayList<>(Arrays.asList(0, 1, 2));
+    assertTrue(Util.sortedListMerge(l1, l2).equals(new ArrayList<>(Arrays.asList(0, 1, 2, 4))));
+
+    l2 = new ArrayList<>(Arrays.asList(1, 4, 5));
+    assertTrue(Util.sortedListMerge(l1, l2).equals(new ArrayList<>(Arrays.asList(0, 1, 2, 4, 5))));
+
+  }
+
 }

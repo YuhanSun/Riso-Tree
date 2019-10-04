@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -237,7 +238,7 @@ public class Util {
    * @param l2
    * @return
    */
-  public static ArrayList<Integer> sortedListIntersect(ArrayList<Integer> l1, int[] l2) {
+  public static ArrayList<Integer> sortedListIntersect(List<Integer> l1, int[] l2) {
     ArrayList<Integer> res = new ArrayList<>(l1.size() + l2.length);
     int i = 0, j = 0;
     while (i < l1.size() && j < l2.length) {
@@ -305,6 +306,74 @@ public class Util {
   }
 
   /**
+   * Merge two array. Expanded or not can be decided by the length of the array. Assume that no
+   * duplicate for both input and output.
+   *
+   * @param i1
+   * @param i2
+   * @return
+   */
+  public static <T extends Comparable> List<T> sortedListMerge(List<T> i1, List<T> i2) {
+    if (i1 == null) {
+      return i2;
+    }
+
+    if (i2 == null) {
+      return i1;
+    }
+
+    List<T> arrayList = new ArrayList<>(i1.size() + i2.size());
+    Iterator<T> iter1 = i1.iterator();
+    Iterator<T> iter2 = i2.iterator();
+
+    if (!iter1.hasNext()) {
+      return i2;
+    }
+
+    if (!iter2.hasNext()) {
+      return i1;
+    }
+
+    T t1 = iter1.next();
+    T t2 = iter2.next();
+    while (true) {
+      if (t1.compareTo(t2) < 0) {
+        arrayList.add(t1);
+        if (iter1.hasNext()) {
+          t1 = iter1.next();
+          continue;
+        }
+      } else {
+        if (t1.compareTo(t2) > 0) {
+          arrayList.add(t2);
+          if (iter2.hasNext()) {
+            t2 = iter2.next();
+            continue;
+          }
+        } else {
+          arrayList.add(t2);// here can ensure no duplicates
+          if (iter1.hasNext() && iter2.hasNext()) {
+            t1 = iter1.next();
+            t2 = iter2.next();
+            continue;
+          }
+        }
+      }
+      break;
+    }
+
+    while (iter1.hasNext()) {
+      arrayList.add(iter1.next());
+    }
+
+    while (iter2.hasNext()) {
+      arrayList.add(iter2.next());
+    }
+
+    return arrayList;
+  }
+
+  /**
    * Convert an ArrayList to int[]. Because ArrayList.toArray() cannot work for int type.
    *
    * @param arrayList
@@ -321,6 +390,20 @@ public class Util {
       i++;
     }
     return res;
+  }
+
+  /**
+   * Convert a array to list.
+   *
+   * @param array
+   * @return
+   */
+  public static List<Integer> intArrayToList(int[] array) {
+    List<Integer> list = new ArrayList<>(array.length);
+    for (int element : array) {
+      list.add(element);
+    }
+    return list;
   }
 
   /**
