@@ -19,7 +19,7 @@ public class ExecutionPlanDescriptionUtil {
 
   public static String[] getEdgeInExpandExpressionPlanNode(
       ExecutionPlanDescription planDescription) {
-    Util.println(planDescription);
+    // Util.println(planDescription);
     Object value = planDescription.getArguments().get(ArgKey.ExpandExpression.name());
     String[] nodeVariables = StringUtils.substringsBetween(value.toString(), "(", ")");
     String nodeVariable1 = nodeVariables[0];
