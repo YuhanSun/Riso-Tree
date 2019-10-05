@@ -104,7 +104,11 @@ public class RisoTreeQueryPN {
   public static final boolean outputExecutionPlan = false;
   public static final boolean outputResult = false;
 
+  // method control
   public static boolean forceGraphFirst = true;
+  public final static boolean completeStrategyUsed = true;// whether to use the complete approach
+  public static Boolean candidateComplete = null;
+  public static Map<Integer, boolean[]> queryNodesComplete = null;
 
   public RisoTreeQueryPN(String db_path, String p_dataset, long[] p_graph_pos_map, int pMAXHOPNUM,
       boolean forceGraphFirst) {
@@ -590,9 +594,57 @@ public class RisoTreeQueryPN {
   public void queryWithIgnore(String query) throws Exception {
     Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
     this.query_Graph = query_Graph;
+    candidateComplete = null;
+    queryNodesComplete = new HashMap<>();
+    for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
+      if (query_Graph.Has_Spa_Predicate[i]) {
+        queryNodesComplete.put(i, new boolean[query_Graph.graph.size()]);
+      }
+    }
 
     // queryWithIgnore(query, query_Graph);
     queryWithIgnoreNewLabel(query, query_Graph);
+  }
+
+  public String formQueryWithIgnoreNewLabelCombined(String query,
+      Map<Integer, Collection<Long>> candidateSets, Query_Graph query_Graph) {
+    String queryAfterRewrite = null;
+    if (completeStrategyUsed) {
+      if (candidateComplete == null) {
+        throw new RuntimeException("candidate complete is null!");
+      } else if (candidateComplete) {
+        queryAfterRewrite = formQueryWithIgnoreNewLabelComplete(query, candidateSets, query_Graph);
+      } else {
+        queryAfterRewrite = formQueryWithIgnoreNewLabel(query, candidateSets, query_Graph);
+      }
+    } else {
+      queryAfterRewrite = formQueryWithIgnoreNewLabel(query, candidateSets, query_Graph);
+    }
+
+    return ("profile " + queryAfterRewrite);
+  }
+
+  /**
+   * Generate a query without 'union all' and add all label constraints.
+   *
+   * @param query
+   * @param candidateSets
+   * @param query_Graph
+   * @return
+   */
+  private String formQueryWithIgnoreNewLabelComplete(String query,
+      Map<Integer, Collection<Long>> candidateSets, Query_Graph query_Graph) {
+    for (int id : candidateSets.keySet()) {
+      String variable = query_Graph.nodeVariables[id];
+      String label = query_Graph.label_list_string[id];
+      String replaceToken = String.format("%s:`%s`", variable, label);
+      if (!query.contains(replaceToken)) {
+        throw new RuntimeException(query + " does not have " + replaceToken);
+      }
+      query =
+          query.replace(replaceToken, replaceToken + ":`" + query_Graph.nodeVariables[id] + "`");
+    }
+    return query;
   }
 
   /**
@@ -613,16 +665,26 @@ public class RisoTreeQueryPN {
       return;
     }
 
-    setNewLabel(candidateSets, query_Graph.nodeVariables);
     // Output candidate set
+    Util.println("candidate complete: " + candidateComplete);
     for (int key : candidateSets.keySet()) {
       Util.println(
           String.format("%s:%d", query_Graph.nodeVariables[key], candidateSets.get(key).size()));
     }
 
-    String queryAfterRewrite = formQueryWithIgnoreNewLabel(query, candidateSets, query_Graph);
-    queryAfterRewrite = "profile " + queryAfterRewrite;
+    setNewLabel(candidateSets, query_Graph.nodeVariables);
+    String queryAfterRewrite =
+        formQueryWithIgnoreNewLabelCombined(query, candidateSets, query_Graph);
     LOGGER.info("query after rewrite: \n" + queryAfterRewrite);
+
+    runAndTrackTime(queryAfterRewrite);
+
+    recoverLabel(candidateSets, query_Graph.nodeVariables);
+    tx.success();
+    tx.close();
+  }
+
+  private void runAndTrackTime(String queryAfterRewrite) {
     long start = System.currentTimeMillis();
     Result result = dbservice.execute(queryAfterRewrite);
     get_iterator_time += System.currentTimeMillis() - start;
@@ -647,17 +709,21 @@ public class RisoTreeQueryPN {
       if (planDescription.hasProfilerStatistics()) {
         Util.println("cypher statistics: " + planDescription.getProfilerStatistics().getDbHits());
       } else {
-        throw new Exception("planDescription has no statistics!!");
+        throw new RuntimeException("planDescription has no statistics!!");
       }
 
       OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
     }
-
-    recoverLabel(candidateSets, query_Graph.nodeVariables);
-    tx.success();
-    tx.close();
   }
 
+  /**
+   * Form the query with union all. Used for the non-complete case.
+   *
+   * @param query
+   * @param candidateSets
+   * @param query_Graph
+   * @return
+   */
   private String formQueryWithIgnoreNewLabel(String query,
       Map<Integer, Collection<Long>> candidateSets, Query_Graph query_Graph) {
     List<String> subQueries = new ArrayList<>();
@@ -685,7 +751,8 @@ public class RisoTreeQueryPN {
   }
 
   /**
-   * Set the new label for cypher query execution.
+   * Set the new label for cypher query execution. For each <int, Collection> set its label with
+   * nodeVariableName string, i.e., a0, a1...
    *
    * @param candidateSets
    * @param nodeVariables
@@ -698,12 +765,6 @@ public class RisoTreeQueryPN {
         Node node = dbservice.getNodeById(neo4jId);
         node.addLabel(Label.label(nodeVariableName));
       }
-      // ResourceIterator<Node> nodes = dbservice.findNodes(Label.label(nodeVariableName));
-      // while (nodes.hasNext()) {
-      // Node node = nodes.next();
-      // Util.println(nodeVariableName);
-      // Util.println(node.getId());
-      // }
     }
     set_label_time += System.currentTimeMillis() - start;
   }
@@ -886,7 +947,6 @@ public class RisoTreeQueryPN {
       long start = System.currentTimeMillis();
       Map<Integer, List<Node>> overlapLeafNodes =
           getOverlapLeafNodes(root_node, spa_predicates, PN_list_propertyname);
-
       range_query_time += System.currentTimeMillis() - start;
       if (overlapLeafNodes == null) {
         LOGGER.info("No result satisfy the query.");
@@ -897,15 +957,108 @@ public class RisoTreeQueryPN {
         overlap_leaf_node_count += nodes.size();
       }
 
-      candidateSet =
-          getCandidateSetWithIgnore(overlapLeafNodes, PN_list_propertyname, PN_size_propertyname);
+      if (completeStrategyUsed) {
+        candidateSet = getCandidateSetWithIgnoreComplete(overlapLeafNodes, PN_list_propertyname);
+        for (int spatialId : queryNodesComplete.keySet()) {
+          for (boolean complete : queryNodesComplete.get(spatialId)) {
+            if (complete) {
+              candidateComplete = true;
+              break;
+            }
+          }
+        }
+        if (candidateComplete) {
+          for (int spatialId : queryNodesComplete.keySet()) {
+            for (int i = 0; i < queryNodesComplete.get(spatialId).length; i++) {
+              boolean complete = queryNodesComplete.get(spatialId)[i];
+              if (!complete) {
+                candidateSet.remove(i);
+              }
+            }
+            break;
+          }
+        }
+      } else {
+        candidateSet =
+            getCandidateSetWithIgnore(overlapLeafNodes, PN_list_propertyname, PN_size_propertyname);
+      }
       return candidateSet;
-
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
     }
     return null;
+  }
+
+  /**
+   * Set the value of {@code candidateComplete} here.
+   *
+   * @param overlapLeafNodes
+   * @param pN_list_propertyname
+   * @return
+   */
+  private Map<Integer, Collection<Long>> getCandidateSetWithIgnoreComplete(
+      Map<Integer, List<Node>> overlapLeafNodes,
+      Map<Integer, Map<Integer, Set<String>>> pN_list_propertyname) {
+    Map<Integer, Map<Integer, Collection<Long>>> pathNeighborMultiPredicates = new HashMap<>();
+    for (int spatialId : overlapLeafNodes.keySet()) {
+      Map<Integer, Collection<Long>> pathNeighbors = getPathNeighborsComplete(spatialId,
+          overlapLeafNodes.get(spatialId), pN_list_propertyname.get(spatialId));
+      pathNeighborMultiPredicates.put(spatialId, pathNeighbors);
+    }
+
+    Map<Integer, Collection<Long>> candidateSets =
+        refineMultiPredicatesCandidateSets(pathNeighborMultiPredicates);
+
+    return candidateSets;
+  }
+
+  private Map<Integer, Collection<Long>> getPathNeighborsComplete(int spatialId, List<Node> nodes,
+      Map<Integer, Set<String>> pN_list_propertyname) {
+    Map<Integer, Collection<Long>> pathNeighbors = new HashMap<>();
+    for (int endId : pN_list_propertyname.keySet()) {
+      Set<String> labelPaths = pN_list_propertyname.get(endId);
+      Boolean complete = true;
+      Collection<Long> candidates = getCadidates(nodes, labelPaths, complete);
+      queryNodesComplete.get(spatialId)[endId] = complete;
+      pathNeighbors.put(endId, candidates);
+    }
+    return pathNeighbors;
+  }
+
+  /**
+   * Get the candidates for an end query node.
+   *
+   * @param nodes
+   * @param labelPaths
+   * @return
+   */
+  private Collection<Long> getCadidates(List<Node> nodes, Set<String> labelPaths,
+      Boolean complete) {
+    List<Integer> candidates = new ArrayList<>();
+    for (Node node : nodes) {
+      List<Integer> curCandidates = new ArrayList<>();
+      for (String path : labelPaths) {
+        int[] pn = (int[]) node.getProperty(path);
+        if (pn == null || pn.length == 0) {
+          continue;
+        } else if (curCandidates.size() == 0) {
+          curCandidates = Util.intArrayToList(pn);
+        } else {
+          curCandidates = Util.sortedListIntersect(curCandidates, pn);
+        }
+      }
+      if (curCandidates.size() == 0) {
+        complete = false; // if any leaf node is [], the end query node is incomplete
+      }
+      candidates = Util.sortedListMerge(candidates, curCandidates);
+    }
+
+    List<Long> res = new ArrayList<>();
+    for (int id : candidates) {
+      res.add((long) id);
+    }
+    return res;
   }
 
   private Map<Integer, Collection<Long>> getCandidateSetWithIgnore(
@@ -917,8 +1070,8 @@ public class RisoTreeQueryPN {
       // Map<Integer, Collection<Long>> pathNeighbors =
       // getPathNeighbors(overlapLeafNodes.get(spatialId), pN_list_propertyname.get(spatialId),
       // pN_size_propertyname.get(spatialId));
-      Map<Integer, Collection<Long>> pathNeighbors =
-          getPathNeighbors(spatialId, overlapLeafNodes, pN_list_propertyname, pN_size_propertyname);
+      Map<Integer, Collection<Long>> pathNeighbors = getPathNeighbors(spatialId,
+          overlapLeafNodes.get(spatialId), pN_list_propertyname, pN_size_propertyname);
       pathNeighborMultiPredicates.put(spatialId, pathNeighbors);
     }
 
@@ -928,6 +1081,13 @@ public class RisoTreeQueryPN {
     return candidateSets;
   }
 
+  /**
+   * If multiple spatial predicates exist, choose the one with minimum sum pn size. Actually it is
+   * not used now.
+   *
+   * @param pathNeighborMultiPredicates
+   * @return
+   */
   private Map<Integer, Collection<Long>> refineMultiPredicatesCandidateSets(
       Map<Integer, Map<Integer, Collection<Long>>> pathNeighborMultiPredicates) {
     int minPredicate = -1, minCard = Integer.MAX_VALUE;
@@ -945,26 +1105,26 @@ public class RisoTreeQueryPN {
     return pathNeighborMultiPredicates.get(minPredicate);
   }
 
-  /**
-   * Get the candidateSet for one spatial predicate.
-   *
-   * @param list
-   * @param pN_list_propertyname
-   * @param pN_size_propertyname
-   * @return
-   * @throws Exception
-   */
-  private Map<Integer, Collection<Long>> getPathNeighbors(List<Node> list,
-      Map<Integer, Set<String>> pN_list_propertyname,
-      Map<Integer, Set<String>> pN_size_propertyname) throws Exception {
-    Map<Integer, Collection<Long>> candidateSets = new HashMap<>();
-
-    for (Node node : list) {
-      int minEndId = getEndIdWithMinCard(node, pN_size_propertyname);
-      addPathNeighbors(node, minEndId, pN_list_propertyname, candidateSets);
-    }
-    return candidateSets;
-  }
+  // /**
+  // * Get the candidateSet for one spatial predicate.
+  // *
+  // * @param list
+  // * @param pN_list_propertyname
+  // * @param pN_size_propertyname
+  // * @return
+  // * @throws Exception
+  // */
+  // private Map<Integer, Collection<Long>> getPathNeighbors(List<Node> list,
+  // Map<Integer, Set<String>> pN_list_propertyname,
+  // Map<Integer, Set<String>> pN_size_propertyname) throws Exception {
+  // Map<Integer, Collection<Long>> candidateSets = new HashMap<>();
+  //
+  // for (Node node : list) {
+  // int minEndId = getEndIdWithMinCard(node, pN_size_propertyname);
+  // addPathNeighbors(node, minEndId, pN_list_propertyname, candidateSets);
+  // }
+  // return candidateSets;
+  // }
 
   /**
    * Add the path neighbor of the minEndId into the corresponding node id of candidateSets.
@@ -976,14 +1136,15 @@ public class RisoTreeQueryPN {
    * @throws Exception
    */
   private void addPathNeighbors(Node node, int minEndId,
-      Map<Integer, Set<String>> pN_list_propertyname, Map<Integer, Collection<Long>> candidateSets)
-      throws Exception {
+      Map<Integer, Set<String>> pN_list_propertyname,
+      Map<Integer, Collection<Long>> candidateSets) {
     // Construct the candidateSet for a endId using different path neighbors ending at it.
     List<Integer> candidates = null;
     for (String path : pN_list_propertyname.get(minEndId)) {
       int[] pathNeighbors = (int[]) node.getProperty(path);
       if (pathNeighbors.length == 0) {
-        throw new Exception(String.format("%s has %s as minCard while it is dropped!", node, path));
+        throw new RuntimeException(
+            String.format("%s has %s as minCard while it is dropped!", node, path));
       }
       if (candidates == null) {
         candidates = ArrayUtil.intArrayToList(pathNeighbors);
@@ -999,13 +1160,23 @@ public class RisoTreeQueryPN {
     candidateSets.put(minEndId, candidateSet);
   }
 
+  /**
+   * For each spatial predicate, get the pn. Pn is collected for each leaf node. In each node, only
+   * the most selective pn will be returned. So it is not complete. Union is required.
+   *
+   * @param spatialId
+   * @param overlapLeafNodes
+   * @param pN_list_propertyname
+   * @param pN_size_propertyname
+   * @return
+   * @throws Exception
+   */
   private Map<Integer, Collection<Long>> getPathNeighbors(int spatialId,
-      Map<Integer, List<Node>> overlapLeafNodes,
-      Map<Integer, Map<Integer, Set<String>>> pN_list_propertyname,
+      List<Node> overlapLeafNodes, Map<Integer, Map<Integer, Set<String>>> pN_list_propertyname,
       Map<Integer, Map<Integer, Set<String>>> pN_size_propertyname) throws Exception {
     Map<Integer, Collection<Long>> candidateSets = new HashMap<>();
 
-    for (Node node : overlapLeafNodes.get(spatialId)) {
+    for (Node node : overlapLeafNodes) {
       int minEndId = getEndIdWithMinCard(node, pN_size_propertyname.get(spatialId));
       if (minEndId == -1) {
         addSpatialCandidate(node, spatialId, candidateSets);
@@ -1036,6 +1207,15 @@ public class RisoTreeQueryPN {
     candidateSets.put(spatialId, candidateSet);
   }
 
+  /**
+   * Get the query node id with the smallest pnsize. If one query node appears as the end node in
+   * more than one label path, the smallest one is considered.
+   *
+   * @param node
+   * @param pN_size_propertyname
+   * @return
+   * @throws Exception
+   */
   private int getEndIdWithMinCard(Node node, Map<Integer, Set<String>> pN_size_propertyname)
       throws Exception {
     int minCard = Integer.MAX_VALUE;
