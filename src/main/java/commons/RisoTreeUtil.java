@@ -30,16 +30,16 @@ public class RisoTreeUtil {
 
   /**
    * Form the label paths set for the ignore case. Because longer path can be ignored. So check the
-   * shorter path that has value [].
+   * shorter path that has value []. Path can either start with PN or PNSize.
    * 
    * @param path
-   * @return
+   * @return the shorter paths with the same label prefix.
    */
   public static Set<String> formIgnoreSearchSet(String path) {
     Set<String> searchPaths = new HashSet<>();
     String[] strings = StringUtils.split(path, '_');
     String curString = strings[0];
-    for (int i = 1; i < strings.length; i++) {
+    for (int i = 1; i < strings.length - 1; i++) {
       curString += "_" + strings[i];
       searchPaths.add(curString);
     }
