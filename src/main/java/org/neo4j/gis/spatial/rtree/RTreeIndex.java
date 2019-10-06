@@ -2255,8 +2255,8 @@ public class RTreeIndex implements SpatialIndexWriter {
   private Node rootNode; // actually it is the layerNode.
   private EnvelopeDecoder envelopeDecoder;
   private int maxNodeReferences;
-  private String splitMode = GREENES_SPLIT;
-  // private String splitMode = QUADRATIC_SPLIT;
+  // private String splitMode = GREENES_SPLIT;
+  private String splitMode = QUADRATIC_SPLIT;
   private boolean shouldMergeTrees = false;
 
   private Node metadataNode;
