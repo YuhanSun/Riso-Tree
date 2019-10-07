@@ -69,6 +69,8 @@ public class SpatialFirst_List {
   public long join_result_count;
   public long join_time;
 
+  public ExecutionPlanDescription planDescription;
+
   /**
    * 
    * @param db_path database location
@@ -463,7 +465,7 @@ public class SpatialFirst_List {
     // query += String.format(" id(a%d) in %s\n", pos, ids.toString());
 
     query += ")\n";
-    Util.println(String.format("spa_ids size: %d", ids.size()));
+    // Util.println(String.format("spa_ids size: %d", ids.size()));
 
     // return
     query += " return id(a0)";
@@ -694,7 +696,7 @@ public class SpatialFirst_List {
           iterate_time += System.currentTimeMillis() - start_1;
 
           if (cur_count != 0) {
-            ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+            planDescription = result.getExecutionPlanDescription();
             ExecutionPlanDescription.ProfilerStatistics profile =
                 planDescription.getProfilerStatistics();
             result_count += profile.getRows();
