@@ -196,6 +196,12 @@ public class UtilityTest {
     l2 = new ArrayList<>(Arrays.asList(1, 4, 5));
     assertTrue(Util.sortedListMerge(l1, l2).equals(new ArrayList<>(Arrays.asList(0, 1, 2, 4, 5))));
 
+    l1 = new ArrayList<>(Arrays.asList(6347, 27907, 78651, 161887, 219053, 277652, 280405, 290182,
+        399072, 409047, 437711, 446848, 551414));
+    l2 = new ArrayList<>(Arrays.asList(6347, 97667, 275395, 398112, 446734));
+    assertTrue(Util.sortedListMerge(l1, l2)
+        .equals(new ArrayList<>(Arrays.asList(6347, 27907, 78651, 97667, 161887, 219053, 275395,
+            277652, 280405, 290182, 398112, 399072, 409047, 437711, 446734, 446848, 551414))));
   }
 
 }

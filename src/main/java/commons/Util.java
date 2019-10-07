@@ -313,64 +313,57 @@ public class Util {
    * @param i2
    * @return
    */
-  public static <T extends Comparable> List<T> sortedListMerge(List<T> i1, List<T> i2) {
-    if (i1 == null) {
-      return i2;
+  public static <T extends Comparable> List<T> sortedListMerge(List<T> L1, List<T> L2) {
+    if (L1 == null) {
+      return L2;
     }
 
-    if (i2 == null) {
-      return i1;
+    if (L2 == null) {
+      return L1;
     }
 
-    List<T> arrayList = new ArrayList<>(i1.size() + i2.size());
-    Iterator<T> iter1 = i1.iterator();
-    Iterator<T> iter2 = i2.iterator();
+    List<T> L3 = new ArrayList<>(L1.size() + L2.size());
+    Iterator<T> it1 = L1.iterator();
+    Iterator<T> it2 = L2.iterator();
 
-    if (!iter1.hasNext()) {
-      return i2;
+    if (!it1.hasNext()) {
+      return L2;
     }
 
-    if (!iter2.hasNext()) {
-      return i1;
+    if (!it2.hasNext()) {
+      return L1;
     }
 
-    T t1 = iter1.next();
-    T t2 = iter2.next();
-    while (true) {
-      if (t1.compareTo(t2) < 0) {
-        arrayList.add(t1);
-        if (iter1.hasNext()) {
-          t1 = iter1.next();
-          continue;
-        }
+    T s1 = it1.hasNext() ? it1.next() : null;
+    T s2 = it2.hasNext() ? it2.next() : null;
+    while (s1 != null && s2 != null) {
+      if (s1.compareTo(s2) < 0) { // s1 comes before s2
+        L3.add(s1);
+        s1 = it1.hasNext() ? it1.next() : null;
+      } else if (s1.compareTo(s2) > 0) { // s1 and s2 are equal, or s2 comes before s1
+        L3.add(s2);
+        s2 = it2.hasNext() ? it2.next() : null;
       } else {
-        if (t1.compareTo(t2) > 0) {
-          arrayList.add(t2);
-          if (iter2.hasNext()) {
-            t2 = iter2.next();
-            continue;
-          }
-        } else {
-          arrayList.add(t2);// here can ensure no duplicates
-          if (iter1.hasNext() && iter2.hasNext()) {
-            t1 = iter1.next();
-            t2 = iter2.next();
-            continue;
-          }
-        }
+        L3.add(s1);
+        s1 = it1.hasNext() ? it1.next() : null;
+        s2 = it2.hasNext() ? it2.next() : null;
       }
-      break;
     }
 
-    while (iter1.hasNext()) {
-      arrayList.add(iter1.next());
+    // There is still at least one element from one of the lists which has not been added
+    if (s1 != null) {
+      L3.add(s1);
+      while (it1.hasNext()) {
+        L3.add(it1.next());
+      }
+    } else if (s2 != null) {
+      L3.add(s2);
+      while (it2.hasNext()) {
+        L3.add(it2.next());
+      }
     }
 
-    while (iter2.hasNext()) {
-      arrayList.add(iter2.next());
-    }
-
-    return arrayList;
+    return L3;
   }
 
   /**
