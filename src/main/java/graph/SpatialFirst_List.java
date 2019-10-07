@@ -17,18 +17,20 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
-import commons.Config.*;
+import commons.Config.Explain_Or_Profile;
+import commons.Config.system;
 import commons.Labels;
-import commons.MyPoint;
 import commons.Labels.RTreeRel;
-import knn.Element;
-import knn.KNNComparator;
-import knn.NodeAndRec;
+import commons.MyPoint;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
 import commons.Util;
+import cypher.middleware.CypherDecoder;
+import knn.Element;
+import knn.KNNComparator;
+import knn.NodeAndRec;
 
 /**
  * Implements SpatialFirst with NL_list. Two versions are implemented, simple version and blocked
@@ -52,6 +54,7 @@ public class SpatialFirst_List {
   public static system systemName = config.getSystemName();
 
   // query statistics
+  public long query_time;
   public long range_query_time;
   public long get_iterator_time;
   public long iterate_time;
@@ -76,6 +79,11 @@ public class SpatialFirst_List {
     dbservice = new GraphDatabaseFactory().newEmbeddedDatabase(new File(db_path));
     dataset = p_dataset;
     graph_pos_map_list = p_graph_pos_map;
+  }
+
+  public SpatialFirst_List(GraphDatabaseService service, String dataset) {
+    this.dbservice = service;
+    this.dataset = dataset;
   }
 
   public void shutdown() {
@@ -394,6 +402,89 @@ public class SpatialFirst_List {
    * @param spa_predicates spatial predicates except the min_pos spatial predicate
    * @param pos query graph node id with the trigger spatial predicate
    * @param ids corresponding spatial graph node ids that in this MBR (neo4j pos id)
+   * @return
+   */
+  public String formSubgraphQuery_Block_New(Query_Graph query_Graph, int limit,
+      Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates, int pos,
+      ArrayList<Long> ids) {
+    String query = "";
+    switch (explain_Or_Profile) {
+      case Profile:
+        query += "profile match ";
+        break;
+      case Explain:
+        query += "explain match ";
+        break;
+      case Nothing:
+        query += "match ";
+        break;
+    }
+
+    // label
+    for (int i = 0; i < query_Graph.graph.size(); i++) {
+      if (i == 0) {
+        query += String.format("(a%d:`%s`)", i, query_Graph.label_list_string[i]);
+      } else {
+        query += String.format(",(a%d:`%s`)", i, query_Graph.label_list_string[i]);
+      }
+    }
+
+    // edge
+    for (int i = 0; i < query_Graph.graph.size(); i++) {
+      for (int j = 0; j < query_Graph.graph.get(i).size(); j++) {
+        int neighbor = query_Graph.graph.get(i).get(j);
+        if (neighbor > i) {
+          query += String.format(",(a%d)--(a%d)", i, neighbor);
+        }
+      }
+    }
+
+    query += " where\n";
+
+    // spatial predicate
+    for (int key : spa_predicates.keySet()) {
+      if (key == pos) {
+        continue;
+      }
+      MyRectangle qRect = spa_predicates.get(key);
+      query += String.format(" %f <= a%d.%s <= %f ", qRect.min_x, key, lon_name, qRect.max_x);
+      query += String.format("and %f <= a%d.%s <= %f and", qRect.min_y, key, lat_name, qRect.max_y);
+    }
+
+    query += "\n";
+
+    // id
+    query += String.format(" (id(a%d)=%d", pos, ids.get(0));
+    if (ids.size() > 1)
+      for (int i = 1; i < ids.size(); i++)
+        query += String.format(" or id(a%d)=%d", pos, ids.get(i));
+    // use id(n) = n1 or id(n) = n2... because it provides a better selectivity estimation
+    // id(n) in [] will always return the same cost estimation no matter how many ids in [].
+    // query += String.format(" id(a%d) in %s\n", pos, ids.toString());
+
+    query += ")\n";
+    Util.println(String.format("spa_ids size: %d", ids.size()));
+
+    // return
+    query += " return id(a0)";
+    for (int i = 1; i < query_Graph.graph.size(); i++)
+      query += String.format(",id(a%d)", i);
+
+    if (limit != -1)
+      query += String.format(" limit %d", limit);
+
+    return query;
+  }
+
+  /**
+   * form the cypher query for MBR block
+   * 
+   * @param query_Graph
+   * @param limit -1 is no limit
+   * @param Explain_Or_Profile -1 is Explain; 1 is Profile; the rest is nothing
+   * @param spa_predicates spatial predicates except the min_pos spatial predicate
+   * @param pos query graph node id with the trigger spatial predicate
+   * @param ids corresponding spatial graph node ids that in this MBR (neo4j pos id)
    * @param NL_hopnum shrunk query node <query_graph_id, hop_num>
    * @param node the rtree node stores NL_list information
    * @return
@@ -498,6 +589,24 @@ public class SpatialFirst_List {
   }
 
 
+  public void initializeTrack() {
+    query_time = 0;
+    range_query_time = 0;
+    get_iterator_time = 0;
+    iterate_time = 0;
+    result_count = 0;
+    page_hit_count = 0;
+    queue_time = 0;
+    visit_spatial_object_count = 0;
+    join_result_count = 0;
+    join_time = 0;
+  }
+
+  public void query_Block(String query) throws Exception {
+    Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
+    query_Block(query_Graph, -1);
+  }
+
   /**
    * for spatial vertices in the same MBR run a cypher query using NL_list the one used in
    * experiment
@@ -507,12 +616,7 @@ public class SpatialFirst_List {
    */
   public void query_Block(Query_Graph query_Graph, int limit) {
     try {
-      range_query_time = 0;
-      get_iterator_time = 0;
-      iterate_time = 0;
-      result_count = 0;
-      page_hit_count = 0;
-
+      initializeTrack();
       long start = System.currentTimeMillis();
       Transaction tx = dbservice.beginTx();
 
@@ -564,9 +668,6 @@ public class SpatialFirst_List {
           MyRectangle bbox_rect = new MyRectangle(bbox);
           if (min_queryRectangle.intersect(bbox_rect) != null) {
             located_in_count++;
-            // Node node = geom.getSingleRelationship(OSMRelation.GEOM,
-            // Direction.INCOMING).getStartNode();
-            // long id = node.getId();
             long id = geom.getId();
             ids.add(id);
           }
@@ -575,8 +676,10 @@ public class SpatialFirst_List {
 
         if (ids.size() > 0) {
           start_1 = System.currentTimeMillis();
-          String query = formSubgraphQuery_Block(query_Graph, limit, Explain_Or_Profile.Profile,
-              spa_predicates, min_pos, ids, NL_hopnum, rtree_node);
+          // String query = formSubgraphQuery_Block(query_Graph, limit, Explain_Or_Profile.Profile,
+          // spa_predicates, min_pos, ids, NL_hopnum, rtree_node);
+          String query = formSubgraphQuery_Block_New(query_Graph, limit, Explain_Or_Profile.Profile,
+              spa_predicates, min_pos, ids);
           Util.println(query);
 
           Result result = dbservice.execute(query);
@@ -587,9 +690,6 @@ public class SpatialFirst_List {
           while (result.hasNext()) {
             cur_count++;
             result.next();
-            // Map<String, Object> row = result.next();
-            // String str = row.toString();
-            // OwnMethods.Print(row.toString());
           }
           iterate_time += System.currentTimeMillis() - start_1;
 
@@ -599,8 +699,6 @@ public class SpatialFirst_List {
                 planDescription.getProfilerStatistics();
             result_count += profile.getRows();
             page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-
-            // OwnMethods.Print(planDescription);
           }
         }
       }
@@ -608,9 +706,7 @@ public class SpatialFirst_List {
 
       tx.success();
       tx.close();
-      // OwnMethods.Print(String.format("result size: %d", result_count));
-      // OwnMethods.Print(String.format("time: %d", System.currentTimeMillis() - start));
-      // return result;
+      query_time += System.currentTimeMillis() - start;
     } catch (Exception e) {
       e.printStackTrace();
     }
