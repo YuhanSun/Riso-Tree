@@ -90,7 +90,7 @@ public class CypherDecoder {
     if (longitudes.size() != 2 || latitudes.size() != 2) {
       Util.println(longitudes);
       Util.println(latitudes);
-      throw new Exception(strings + " does not contain all the range values!");
+      throw new RuntimeException(strings + " does not contain all the range values!");
     }
     Double[] lons = longitudes.toArray(new Double[2]);
     Double[] lats = latitudes.toArray(new Double[2]);
@@ -100,12 +100,11 @@ public class CypherDecoder {
     return new MyRectangle(lons[0], lats[0], lons[1], lats[1]);
   }
 
-  public static String getSingleAttributeInScalaString(String string, String keyword)
-      throws Exception {
+  public static String getSingleAttributeInScalaString(String string, String keyword) {
     return getStringScala(string, keyword).get(0);
   }
 
-  private static Set<String> getSpatialNodeVariables(List<String> strings) throws Exception {
+  private static Set<String> getSpatialNodeVariables(List<String> strings) {
     Set<String> spatialNodeVariables = new HashSet<>();
     for (String string : strings) {
       String variable = getSingleAttributeInScalaString(string, variableKeyword);
@@ -114,11 +113,11 @@ public class CypherDecoder {
     return spatialNodeVariables;
   }
 
-  public static List<String> getStringScala(String string, String keyword) throws Exception {
+  public static List<String> getStringScala(String string, String keyword) {
     List<String> res = new LinkedList<>();
     List<String> strings = split(string, keyword);
     if (strings.size() == 1) {
-      throw new Exception(String.format("%s does not contain %s", string, keyword));
+      throw new RuntimeException(String.format("%s does not contain %s", string, keyword));
     }
 
     strings.remove(0);
@@ -168,7 +167,7 @@ public class CypherDecoder {
    * @return
    * @throws Exception
    */
-  public static String getContentWithinParentheses(String string) throws Exception {
+  public static String getContentWithinParentheses(String string) {
     int left = 0;
     int index = 0;
     for (char c : string.toCharArray()) {
@@ -182,7 +181,7 @@ public class CypherDecoder {
       }
       index++;
     }
-    throw new Exception(string + " is not valid!");
+    throw new RuntimeException(string + " is not valid!");
   }
 
   /**
@@ -220,7 +219,7 @@ public class CypherDecoder {
   }
 
   public static Query_Graph getQueryGraph(String query, Map<String, MyRectangle> spatialPredicates,
-      GraphDatabaseService service) throws Exception {
+      GraphDatabaseService service) {
     Query_Graph query_Graph = getQueryGraphWithoutSpatialPredicate(query, service);
     for (String spatialNode : spatialPredicates.keySet()) {
       setSpatialPredicate(query_Graph, spatialNode, spatialPredicates.get(spatialNode));
@@ -267,7 +266,7 @@ public class CypherDecoder {
    * @throws Exception
    */
   public static void setSpatialPredicate(Query_Graph query_Graph, String spatialNode,
-      MyRectangle rectangle) throws Exception {
+      MyRectangle rectangle) {
     int spatialId = 0;
     String[] nodeVariables = query_Graph.nodeVariables;
     for (String variable : nodeVariables) {
@@ -277,7 +276,7 @@ public class CypherDecoder {
       spatialId++;
     }
     if (spatialId == nodeVariables.length) {
-      throw new Exception(spatialNode + " does not exist in the query graph");
+      throw new RuntimeException(spatialNode + " does not exist in the query graph");
     }
     query_Graph.Has_Spa_Predicate[spatialId] = true;
     query_Graph.spa_predicate[spatialId] = rectangle;
