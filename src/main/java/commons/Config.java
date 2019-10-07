@@ -20,6 +20,10 @@ public class Config {
     SINGLE, DOUBLE,
   }
 
+  public static enum ExperimentMethod {
+    NAIVE, RISOTREE, SPATIAL_FIRST,
+  }
+
   public Config() {
 
   }
