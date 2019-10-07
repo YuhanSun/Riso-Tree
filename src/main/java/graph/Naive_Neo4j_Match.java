@@ -37,7 +37,7 @@ public class Naive_Neo4j_Match {
 
   public int query_node_count;
 
-  public long get_iterator_time, iterate_time;
+  public long run_time, get_iterator_time, iterate_time;
   public long result_count = 0;
   public long page_access;
   public ExecutionPlanDescription planDescription;
@@ -92,7 +92,8 @@ public class Naive_Neo4j_Match {
    *
    * @param query
    */
-  public void queryWithIgnore(String query) {
+  public void query(String query) {
+    long sumStart = System.currentTimeMillis();
     iniLogVariables();
     query = "profile " + query;
     long start = System.currentTimeMillis();
@@ -110,6 +111,7 @@ public class Naive_Neo4j_Match {
     iterate_time += System.currentTimeMillis() - start;
     planDescription = result.getExecutionPlanDescription();
     page_access = OwnMethods.GetTotalDBHits(planDescription);
+    run_time = System.currentTimeMillis() - sumStart;
   }
 
   // public Result Explain_SubgraphMatch_Spa_API(Query_Graph query_Graph, int limit)//use neo4j
@@ -257,6 +259,7 @@ public class Naive_Neo4j_Match {
   }
 
   private void iniLogVariables() {
+    run_time = 0;
     get_iterator_time = 0;
     iterate_time = 0;
     result_count = 0;

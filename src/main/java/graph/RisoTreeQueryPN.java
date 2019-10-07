@@ -71,6 +71,7 @@ public class RisoTreeQueryPN {
   String maxy_name = config.GetRectCornerName()[3];
 
   // query statistics
+  public long run_time;
   public long range_query_time;
   public long get_iterator_time;
   public long iterate_time;
@@ -645,6 +646,12 @@ public class RisoTreeQueryPN {
           query.replace(replaceToken, replaceToken + ":`" + query_Graph.nodeVariables[id] + "`");
     }
     return query;
+  }
+
+  public void query(String query) throws Exception {
+    iniLogParams();
+    Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
+    queryWithIgnore(query, query_Graph);
   }
 
   /**

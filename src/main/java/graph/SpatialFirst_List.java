@@ -54,7 +54,7 @@ public class SpatialFirst_List {
   public static system systemName = config.getSystemName();
 
   // query statistics
-  public long query_time;
+  public long run_time;
   public long range_query_time;
   public long get_iterator_time;
   public long iterate_time;
@@ -592,7 +592,7 @@ public class SpatialFirst_List {
 
 
   public void initializeTrack() {
-    query_time = 0;
+    run_time = 0;
     range_query_time = 0;
     get_iterator_time = 0;
     iterate_time = 0;
@@ -708,7 +708,7 @@ public class SpatialFirst_List {
 
       tx.success();
       tx.close();
-      query_time += System.currentTimeMillis() - start;
+      run_time += System.currentTimeMillis() - start;
     } catch (Exception e) {
       e.printStackTrace();
     }
