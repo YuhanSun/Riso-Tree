@@ -739,7 +739,7 @@ public class LoadDataNoOSM {
 
       LOGGER.info("layer.addAll(geomNodes)...");
       long start = System.currentTimeMillis();
-      layer.addAll(geomNodes, spatialNodesPathNeighbors, alpha, maxPNSize);
+      layer.addAll(geomNodes, spatialNodesPathNeighbors, entities.size(), alpha, maxPNSize);
 
       String message = "in memory time: " + (System.currentTimeMillis() - start) + "\n";
       message += "number of spatial objects: " + geomNodes.size() + "\n";

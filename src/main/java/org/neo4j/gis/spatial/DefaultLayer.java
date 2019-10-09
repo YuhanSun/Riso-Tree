@@ -86,7 +86,7 @@ public class DefaultLayer implements Constants, Layer, SpatialDataset {
   }
 
   public int addAll(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors,
-      double alpha, int maxPNSize) throws Exception {
+      int graphNodeCount, double alpha, int maxPNSize) throws Exception {
     GeometryEncoder geometryEncoder = getGeometryEncoder();
 
     for (Node geomNode : geomNodes) {
@@ -94,7 +94,7 @@ public class DefaultLayer implements Constants, Layer, SpatialDataset {
       // add BBOX to Node if it's missing
       geometryEncoder.encodeGeometry(geometry, geomNode);
     }
-    index.add(geomNodes, spatialNodesPathNeighbors, alpha, maxPNSize);
+    index.add(geomNodes, spatialNodesPathNeighbors, graphNodeCount, alpha, maxPNSize);
     return geomNodes.size();
   }
 
