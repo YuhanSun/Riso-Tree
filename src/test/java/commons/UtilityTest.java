@@ -54,10 +54,10 @@ public class UtilityTest {
   }
 
   @Test
-  public void arraysDifferenceCountTest() {
+  public void sortedArraysDifferenceCountTest() {
     int[] arraySource = new int[] {0, 2, 5, 8, 9, 11, 12};
     int[] arrayTarget = new int[] {1, 3, 5, 7, 9};
-    assertEquals(5, Util.arraysDifferenceCount(arraySource, arrayTarget));
+    assertEquals(5, Util.sortedArraysDifferenceCount(arraySource, arrayTarget));
   }
 
   @Test
