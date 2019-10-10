@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.neo4j.gis.spatial.rtree.filter.SearchFilter;
@@ -43,7 +44,6 @@ import org.neo4j.graphdb.traversal.Evaluator;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.graphdb.traversal.Traverser;
-import commons.Config;
 import commons.ReadWriteUtil;
 import commons.Util;
 
@@ -51,6 +51,10 @@ import commons.Util;
  *
  */
 public class RTreeIndex implements SpatialIndexWriter {
+
+  public enum NodeLayer {
+    LEAF, OBJECT, OTHER,
+  }
 
   public static final String INDEX_PROP_BBOX = "bbox";
 
@@ -209,44 +213,45 @@ public class RTreeIndex implements SpatialIndexWriter {
    * {@code parent} is leaf node.
    *
    * @param parent
-   * @param pathNeighbors
+   * @param pathNeighbors Path neighbors of the spatial object
    */
-  private void adjustGraphLoc(Node parent, Map<String, int[]> pathNeighbors) {
+  private void adjustGraphLoc(Node parent, Map<String, int[]> childLoc) {
     long start = System.currentTimeMillis();
     HashMap<String, int[]> parentLoc = getLocInGraph(parent);
-    Map<String, int[]> childLoc = pathNeighbors;
     long startWrite = System.currentTimeMillis();
-    for (String key : childLoc.keySet()) {
-      int[] childPN = childLoc.get(key);
+    adjustGraphLoc(parentLoc, childLoc);
+    adjustWriteTime += System.currentTimeMillis() - startWrite;
+    adjustGraphLocTime += System.currentTimeMillis() - start;
+  }
 
-      long parentId = parent.getId();
+  private void adjustGraphLoc(Map<String, int[]> basePNs, Map<String, int[]> otherPNs) {
+    for (String key : otherPNs.keySet()) {
+      int[] childPN = otherPNs.get(key);
       if (childPN.length == 0) {
         // childPN is the ignored PN, so directly make parent PN ignored.
-        leafNodesPathNeighbors.get(parentId).put(key, childPN);
+        basePNs.put(key, childPN);
         continue;
       }
 
-      int[] parentPN = parentLoc.get(key);
-      if (parentPN == null) {
-        leafNodesPathNeighbors.get(parentId).put(key, childPN);
+      int[] basePN = basePNs.get(key);
+      if (basePN == null) {
+        basePNs.put(key, childPN);
         continue;
       }
 
-      if (parentPN.length == 0) {
+      if (basePN.length == 0) {
         continue;
       }
 
       // both PNs are not ignored
-      int[] expandPN = Util.sortedArrayMerge(childPN, parentPN);
-      if (expandPN.length > parentPN.length) { // if PN is really expanded
+      int[] expandPN = Util.sortedArrayMerge(childPN, basePN);
+      if (expandPN.length > basePN.length) { // if PN is really expanded
         if (expandPN.length > MaxPNSize) {
           expandPN = new int[] {};
         }
-        leafNodesPathNeighbors.get(parentId).put(key, expandPN);
+        basePNs.put(key, expandPN);
       }
     }
-    adjustWriteTime += System.currentTimeMillis() - startWrite;
-    adjustGraphLocTime += System.currentTimeMillis() - start;
   }
 
   /**
@@ -332,7 +337,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   }
 
   public void add(List<Node> geomNodes, List<Map<String, int[]>> spatialNodesPathNeighbors,
-      double alpha, int maxPNSize) throws Exception {
+      int graphNodeCount, double alpha, int maxPNSize) throws Exception {
     List<NodeWithEnvelope> outliers = bulkInsertion(getIndexRoot(), getHeight(getIndexRoot(), 0),
         decodeGeometryNodeEnvelopes(geomNodes), 0.7);
     countSaved = false;
@@ -342,8 +347,10 @@ public class RTreeIndex implements SpatialIndexWriter {
     // initialize the map for leaf nodes path neighbors
     initializeLeafNodesPathNeighbors();
     this.spatialNodesPathNeighbors = spatialNodesPathNeighbors;
+    this.graphNodeCount = graphNodeCount;
     this.alpha = alpha;
     this.spatialOnly = Math.abs(alpha - 1) < 0.0000001 ? true : false;
+    this.graphOnly = Math.abs(alpha - 0) < 0.0000001 ? true : false;
     this.MaxPNSize = maxPNSize == -1 ? Integer.MAX_VALUE : maxPNSize;
 
     for (NodeWithEnvelope n : outliers) {
@@ -1248,19 +1255,14 @@ public class RTreeIndex implements SpatialIndexWriter {
       // yuhan
       // if graph influence is not zero
       if (!spatialOnly && isLeaf) {
-        int GD = getGD(indexNode, locInGraph);
-        double normSD = enlargementNeeded / (360.0 * 180.0);
-        double normGD = (double) GD / Config.graphNodeCount;
+        int GD = getExpandGD(indexNode, locInGraph);
+        double normSD = enlargementNeeded / spatialNorm;
+        double normGD = (double) GD / graphNodeCount;
 
         String logLine = String.format("normSD: %s, normGD: %s", Double.toString(normSD),
             Double.toString(normGD));
         Util.println(logLine);
-        // if graph influence is 1 (alpha = 0), in order to handle the tie breaks for GD
-        if (Math.abs(alpha - 0.0) < 0.0000000001) {
-          enlargementNeeded = 0.00000001 * normSD + (1 - alpha) * normGD;
-        } else {
-          enlargementNeeded = alpha * normSD + (1 - alpha) * normGD;
-        }
+        enlargementNeeded = getGSDGeneral(GD, enlargementNeeded);
       }
 
       // Util.println("after: " + enlargementNeeded);
@@ -1367,15 +1369,8 @@ public class RTreeIndex implements SpatialIndexWriter {
       // yuhan
       // if graph influence is not zero
       if (!spatialOnly && nodeIsLeaf(indexNode)) {
-        int GD = getGD(indexNode, locInGraph);
-        // if graph influence is 1 (alpha = 0), in order to handle the tie breaks for GD
-        if (Math.abs(alpha - 0.0) < 0.00000001) {
-          enlargementNeeded = 0.00000000001 * enlargementNeeded / (360 * 180)
-              + (1 - alpha) * (double) GD / Config.graphNodeCount;
-        } else {
-          enlargementNeeded = alpha * enlargementNeeded / (360 * 180)
-              + (1 - alpha) * (double) GD / Config.graphNodeCount;
-        }
+        int GD = getExpandGD(indexNode, locInGraph);
+        enlargementNeeded = getGSDGeneral(GD, enlargementNeeded);
       }
 
       if (enlargementNeeded < minimumEnlargement) {
@@ -1573,7 +1568,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     double smallestSGD = Double.MAX_VALUE;
     // Util.println("count: " + indexNodes.size());
     for (Node indexNode : indexNodes) {
-      int GD = getGD(indexNode, pathNeighbors);
+      int GD = getExpandGD(indexNode, pathNeighbors);
       double area = getArea(getIndexNodeEnvelope(indexNode));
       double SGD = 0.000000001 * area + GD; // Solve tie breaker using the smallest area.
       // Util.println(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
@@ -1604,7 +1599,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     // Util.println("count: " + indexNodes.size());
     HashMap<String, int[]> pathNeighbors = getLocInGraph(geomRootNode);
     for (Node indexNode : indexNodes) {
-      int GD = getGD(indexNode, pathNeighbors);
+      int GD = getExpandGD(indexNode, pathNeighbors);
       double area = getArea(getIndexNodeEnvelope(indexNode));
       double SGD = 0.000000001 * area + GD;
       // Util.println(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
@@ -1638,42 +1633,55 @@ public class RTreeIndex implements SpatialIndexWriter {
    * @param pathNeighbors
    * @return
    */
-  private int getGD(Node indexNode, Map<String, int[]> pathNeighbors) {
+  private int getExpandGD(Node indexNode, Map<String, int[]> pathNeighbors) {
     long start = System.currentTimeMillis();
     getGDCount++;
-    int GD = 0;
-
     long indexNodeId = indexNode.getId();
     Map<String, int[]> indexNodePathNeighbors = leafNodesPathNeighbors.get(indexNodeId);
+    int GD = getExpandGD(indexNodePathNeighbors, pathNeighbors);
+    getGDTime += System.currentTimeMillis() - start;
+    return GD;
+  }
 
-    for (String key : pathNeighbors.keySet()) {
-      int[] indexNodePathNeighbor = indexNodePathNeighbors.get(key);
-      int[] pn = pathNeighbors.get(key);
-      if (indexNodePathNeighbor == null) {
-        if (pn.length == 0) { // pn is ignored
-          GD += MaxPNSize;
+  /**
+   * Compute the expand if insert @{@code otherPN} into {@code basePN}. (e.g., {@code otherPNs} -
+   * {@code basePNs}).
+   *
+   * @param basePNs
+   * @param otherPNs
+   * @return
+   */
+  private int getExpandGD(Map<String, int[]> basePNs, Map<String, int[]> otherPNs) {
+    int expandCount = 0;
+    Iterator<Entry<String, int[]>> iterator = otherPNs.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Entry<String, int[]> entry = iterator.next();
+      String key = entry.getKey();
+      int[] basePN = basePNs.get(key);
+      int[] otherPN = entry.getValue();
+      if (basePN == null) {
+        if (otherPN.length == 0) { // otherPN ignored
+          expandCount += MaxPNSize;
         } else {
-          GD += pathNeighbors.get(key).length;
+          expandCount += otherPNs.get(key).length;
         }
         continue;
       }
 
-      if (indexNodePathNeighbor.length == 0) { // indexNode is ignored, GD keeps.
+      if (basePN.length == 0) { // indexNode is ignored, GD keeps.
         continue;
       }
 
       // indexNodePN exists and not ignored.
-      if (pn.length == 0) {
-        GD += MaxPNSize - indexNodePathNeighbor.length;
+      if (otherPN.length == 0) {
+        expandCount += MaxPNSize - basePN.length;
       } else {
         // mark here, current is fine, may be improved. If the |difference+indexNodePN| > maxPNSize,
         // then this GD is too much.
-        GD += Util.arraysDifferenceCount(pathNeighbors.get(key), indexNodePathNeighbor);
+        expandCount += Util.sortedArraysDifferenceCount(otherPNs.get(key), basePN);
       }
     }
-    getGDTime += System.currentTimeMillis() - start;
-    // LOGGER.info("GD: " + GD);
-    return GD;
+    return expandCount;
   }
 
   private double getAreaEnlargement(Node indexNode, Node geomRootNode) {
@@ -1777,6 +1785,14 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
   }
 
+  private Node quadraticSplitRiso(Node indexNode) {
+    if (nodeIsLeaf(indexNode)) {
+      return quadraticSplitRiso(indexNode, RTreeRelationshipTypes.RTREE_REFERENCE);
+    } else {
+      return quadraticSplitRiso(indexNode, RTreeRelationshipTypes.RTREE_CHILD);
+    }
+  }
+
   private Node greenesSplit(Node indexNode) {
     if (nodeIsLeaf(indexNode)) {
       // LOGGER.info("nodeIsLeaf case");
@@ -1796,6 +1812,39 @@ public class RTreeIndex implements SpatialIndexWriter {
       for (int j = i + 1; j < entries.size(); ++j) {
         NodeWithEnvelope e1 = entries.get(j);
         double deadSpace = e.envelope.separation(e1.envelope);
+        if (deadSpace > worst) {
+          worst = deadSpace;
+          seed1 = e;
+          seed2 = e1;
+        }
+      }
+    }
+    return new NodeWithEnvelope[] {seed1, seed2};
+  }
+
+  /**
+   * Consider both dead space and graph distance.
+   *
+   * @param entries
+   * @return
+   */
+  private NodeWithEnvelope[] mostDistantByDeadSpaceRiso(List<NodeWithEnvelope> entries,
+      Map<Node, Map<String, int[]>> childNodePNs) {
+    NodeWithEnvelope seed1 = entries.get(0);
+    NodeWithEnvelope seed2 = entries.get(0);
+    double worst = Double.NEGATIVE_INFINITY;
+    for (int i = 0; i < entries.size(); ++i) {
+      NodeWithEnvelope e = entries.get(i);
+      Map<String, int[]> basePNs = childNodePNs.get(e.node);
+      for (int j = i + 1; j < entries.size(); ++j) {
+        NodeWithEnvelope e1 = entries.get(j);
+        double deadSpace = e.envelope.separation(e1.envelope);
+        if (!spatialOnly && childNodePNs != null) {
+          Map<String, int[]> otherPNs = childNodePNs.get(e1.node);
+          int graphDist = getExpandGD(basePNs, otherPNs);
+          graphDist += getExpandGD(otherPNs, basePNs);
+          deadSpace = getGSD(graphDist, deadSpace);
+        }
         if (deadSpace > worst) {
           worst = deadSpace;
           seed1 = e;
@@ -1835,6 +1884,43 @@ public class RTreeIndex implements SpatialIndexWriter {
       relationship.delete();
     }
     return entries;
+  }
+
+  /**
+   * Get a map of <childNode, PNs>.
+   *
+   * @param indexNode
+   * @param relationshipType
+   * @return {@code null} if child nodes do not have PN.
+   */
+  private Map<Node, Map<String, int[]>> extractChildNodesWithPNs(Node indexNode,
+      RelationshipType relationshipType) {
+    Map<Node, Map<String, int[]>> childNodesPNs = new HashMap<>();
+    Iterable<Relationship> relationships =
+        indexNode.getRelationships(relationshipType, Direction.OUTGOING);
+    // if indexNode is leaf node
+    if (relationshipType.equals(RTreeRelationshipTypes.RTREE_REFERENCE)) {
+      for (Relationship relationship : relationships) {
+        Node childNode = relationship.getEndNode();
+        long id = childNode.getId();
+        childNodesPNs.put(childNode, spatialNodesPathNeighbors.get((int) id));
+      }
+      return childNodesPNs;
+    }
+
+    Node firstChild = relationships.iterator().next().getEndNode();
+    // if child is leaf layer
+    if (nodeIsLeaf(firstChild)) {
+      for (Relationship relationship : relationships) {
+        Node childnode = relationship.getEndNode();
+        long id = childnode.getId();
+        childNodesPNs.put(childnode, leafNodesPathNeighbors.get(id));
+      }
+      return childNodesPNs;
+    }
+
+    // children do not have PN.
+    return null;
   }
 
   /**
@@ -1947,6 +2033,112 @@ public class RTreeIndex implements SpatialIndexWriter {
     }
 
     return reconnectTwoChildGroups(indexNode, group1, group2, relationshipType);
+  }
+
+  private Node quadraticSplitRiso(Node indexNode, RelationshipType relationshipType) {
+    Map<Node, Map<String, int[]>> childNodePNs =
+        extractChildNodesWithPNs(indexNode, relationshipType);
+
+    // Disconnect all current children from the index and return them with their envelopes
+    List<NodeWithEnvelope> entries = extractChildNodesWithEnvelopes(indexNode, relationshipType);
+
+    // pick two seed entries such that the dead space (considering graph distance) is maximal
+    NodeWithEnvelope[] seeds = mostDistantByDeadSpaceRiso(entries, childNodePNs);
+
+    List<NodeWithEnvelope> group1 = new ArrayList<>();
+    group1.add(seeds[0]);
+    Envelope group1envelope = seeds[0].envelope;
+
+    List<NodeWithEnvelope> group2 = new ArrayList<>();
+    group2.add(seeds[1]);
+    Envelope group2envelope = seeds[1].envelope;
+
+    Map<String, int[]> group1PN = new HashMap<>(childNodePNs.get(seeds[0].node));
+    Map<String, int[]> group2PN = new HashMap<>(childNodePNs.get(seeds[1].node));
+
+    entries.remove(seeds[0]);
+    entries.remove(seeds[1]);
+    while (entries.size() > 0) {
+      // compute the cost of inserting each entry
+      List<NodeWithEnvelope> bestGroup = null;
+      Envelope bestGroupEnvelope = null;
+      NodeWithEnvelope bestEntry = null;
+      double expansionMin = Double.POSITIVE_INFINITY;
+      for (NodeWithEnvelope e : entries) {
+        double expansion1 =
+            getArea(createEnvelope(e.envelope, group1envelope)) - getArea(group1envelope);
+        if (!spatialOnly && childNodePNs != null) {
+          int expandPN = getExpandGD(group1PN, childNodePNs.get(e.node));
+          expansion1 = getGSDGeneral(expandPN, expansion1);
+        }
+        double expansion2 =
+            getArea(createEnvelope(e.envelope, group2envelope)) - getArea(group2envelope);
+        if (!spatialOnly && childNodePNs != null) {
+          int expandPN = getExpandGD(group2PN, childNodePNs.get(e.node));
+          expansion2 = getGSDGeneral(expandPN, expansion2);
+        }
+
+        if (expansion1 < expansion2 && expansion1 < expansionMin) {
+          bestGroup = group1;
+          bestGroupEnvelope = group1envelope;
+          bestEntry = e;
+          expansionMin = expansion1;
+        } else if (expansion2 < expansion1 && expansion2 < expansionMin) {
+          bestGroup = group2;
+          bestGroupEnvelope = group2envelope;
+          bestEntry = e;
+          expansionMin = expansion2;
+        } else if (expansion1 == expansion2 && expansion1 < expansionMin) {
+          // in case of equality choose the group with the smallest area
+          if (getArea(group1envelope) < getArea(group2envelope)) {
+            bestGroup = group1;
+            bestGroupEnvelope = group1envelope;
+          } else {
+            bestGroup = group2;
+            bestGroupEnvelope = group2envelope;
+          }
+          bestEntry = e;
+          expansionMin = expansion1;
+        }
+      }
+
+      if (bestEntry == null) {
+        throw new RuntimeException(
+            "Should not be possible to fail to find a best entry during quadratic split");
+      } else {
+        // insert the best candidate entry in the best group
+        bestGroup.add(bestEntry);
+        bestGroupEnvelope.expandToInclude(bestEntry.envelope);
+        if (bestGroup == group1) {
+          adjustGraphLoc(group1PN, childNodePNs.get(bestEntry.node));
+        } else if (bestGroup == group2) {
+          adjustGraphLoc(group2PN, childNodePNs.get(bestEntry.node));
+        } else {
+          throw new RuntimeException("best group is either 1 or 2!");
+        }
+        entries.remove(bestEntry);
+      }
+    }
+
+    return reconnectTwoChildGroups(indexNode, group1, group2, relationshipType);
+  }
+
+  private double getGSDGeneral(int expandPN, double spatialExpansion) {
+    if (graphOnly) {
+      return getGSDGraphOnly(expandPN, spatialExpansion);
+    } else {
+      return getGSD(expandPN, spatialExpansion);
+    }
+  }
+
+  private double getGSD(int expandPN, double spatialExpansion) {
+    return alpha * spatialExpansion / spatialNorm
+        + (1 - alpha) * ((double) expandPN) / ((double) graphNodeCount);
+  }
+
+  private double getGSDGraphOnly(int expandPN, double spatialExpansion) {
+    return adjustThreshold * spatialExpansion / spatialNorm
+        + (double) expandPN / (double) graphNodeCount;
   }
 
   /**
@@ -2272,13 +2464,26 @@ public class RTreeIndex implements SpatialIndexWriter {
    */
   private Double alpha = null;
 
+  private Integer graphNodeCount = null;
   private Integer MaxPNSize = null;
 
   /*
    * Control whether the PN comes into effect. It is set along with alpha. If alpha = 1.0, this
-   * value should be true. Otherwise, false.
+   * should be true. Otherwise, false.
    */
   private Boolean spatialOnly = null;
+  /**
+   * If alpha = 0.0.
+   */
+  private Boolean graphOnly = null;
+
+  static double onlyDecisionThreshold = 0.00000001;
+  /**
+   * If graph only, many SGD will be the same. So adjust the alpha to this value. It can ensure that
+   * GD take
+   */
+  static double adjustThreshold = 0.000000000001;
+  static double spatialNorm = 64800.0;
 
   private int chooseSmallestGDCount = 0;
   private int getGDCount = 0;
