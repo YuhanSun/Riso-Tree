@@ -805,7 +805,7 @@ public class RisoTreeQueryPN {
 
     String queryAfterRewrite = formQueryWithIgnore(query, candidateSets, query_Graph.nodeVariables);
     queryAfterRewrite = "profile " + queryAfterRewrite;
-    LOGGER.info("query after rewrite: \n" + queryAfterRewrite);
+    Util.println("query after rewrite: \n" + queryAfterRewrite);
     long start = System.currentTimeMillis();
     Result result = dbservice.execute(queryAfterRewrite);
     get_iterator_time += System.currentTimeMillis() - start;
@@ -832,8 +832,7 @@ public class RisoTreeQueryPN {
       } else {
         throw new Exception("planDescription has no statistics!!");
       }
-
-      OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
+      // OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
     }
   }
 
