@@ -2118,12 +2118,14 @@ public class RTreeIndex implements SpatialIndexWriter {
         // insert the best candidate entry in the best group
         bestGroup.add(bestEntry);
         bestGroupEnvelope.expandToInclude(bestEntry.envelope);
-        if (bestGroup == group1) {
-          adjustGraphLoc(group1PN, childNodePNs.get(bestEntry.node));
-        } else if (bestGroup == group2) {
-          adjustGraphLoc(group2PN, childNodePNs.get(bestEntry.node));
-        } else {
-          throw new RuntimeException("best group is either 1 or 2!");
+        if (childNodePNs != null) {
+          if (bestGroup == group1) {
+            adjustGraphLoc(group1PN, childNodePNs.get(bestEntry.node));
+          } else if (bestGroup == group2) {
+            adjustGraphLoc(group2PN, childNodePNs.get(bestEntry.node));
+          } else {
+            throw new RuntimeException("best group is either 1 or 2!");
+          }
         }
         entries.remove(bestEntry);
       }
