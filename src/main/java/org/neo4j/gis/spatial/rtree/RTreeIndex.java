@@ -2058,8 +2058,12 @@ public class RTreeIndex implements SpatialIndexWriter {
     group2.add(seeds[1]);
     Envelope group2envelope = seeds[1].envelope;
 
-    Map<String, int[]> group1PN = new HashMap<>(childNodePNs.get(seeds[0].node));
-    Map<String, int[]> group2PN = new HashMap<>(childNodePNs.get(seeds[1].node));
+    Map<String, int[]> group1PN = null;
+    Map<String, int[]> group2PN = null;
+    if (childNodePNs != null) {
+      group1PN = new HashMap<>(childNodePNs.get(seeds[0].node));
+      group2PN = new HashMap<>(childNodePNs.get(seeds[1].node));
+    }
 
     entries.remove(seeds[0]);
     entries.remove(seeds[1]);
