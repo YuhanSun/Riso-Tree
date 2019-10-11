@@ -2045,9 +2045,9 @@ public class RTreeIndex implements SpatialIndexWriter {
     // pick two seed entries such that the dead space (considering graph distance) is maximal
     NodeWithEnvelope[] seeds = null;
     if (childNodePNs == null) {
-      mostDistantByDeadSpace(entries);
+      seeds = mostDistantByDeadSpace(entries);
     } else {
-      mostDistantByDeadSpaceRiso(entries, childNodePNs);
+      seeds = mostDistantByDeadSpaceRiso(entries, childNodePNs);
     }
 
     List<NodeWithEnvelope> group1 = new ArrayList<>();
