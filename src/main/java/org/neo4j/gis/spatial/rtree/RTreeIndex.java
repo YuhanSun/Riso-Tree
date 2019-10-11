@@ -1256,12 +1256,12 @@ public class RTreeIndex implements SpatialIndexWriter {
       // if graph influence is not zero
       if (!spatialOnly && isLeaf) {
         int GD = getExpandGD(indexNode, locInGraph);
-        double normSD = enlargementNeeded / spatialNorm;
-        double normGD = (double) GD / graphNodeCount;
 
-        String logLine = String.format("normSD: %s, normGD: %s", Double.toString(normSD),
-            Double.toString(normGD));
-        Util.println(logLine);
+        // double normSD = enlargementNeeded / spatialNorm;
+        // double normGD = (double) GD / graphNodeCount;
+        // String logLine = String.format("normSD: %s, normGD: %s", Double.toString(normSD),
+        // Double.toString(normGD));
+        // Util.println(logLine);
         enlargementNeeded = getGSDGeneral(GD, enlargementNeeded);
       }
 
