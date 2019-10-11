@@ -1753,7 +1753,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     // LOGGER.info("greenesSplit");
     // PN is adjusted if indexNode is leaf nodes.
     Node newIndexNode =
-        splitMode.equals(GREENES_SPLIT) ? greenesSplit(indexNode) : quadraticSplit(indexNode);
+        splitMode.equals(GREENES_SPLIT) ? greenesSplit(indexNode) : quadraticSplitRiso(indexNode);
     Node parent = getIndexNodeParent(indexNode);
     // System.out.println("spitIndex " + newIndexNode.getId());
     // System.out.println("parent " + parent.getId());
