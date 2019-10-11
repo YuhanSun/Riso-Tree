@@ -1839,7 +1839,7 @@ public class RTreeIndex implements SpatialIndexWriter {
       for (int j = i + 1; j < entries.size(); ++j) {
         NodeWithEnvelope e1 = entries.get(j);
         double deadSpace = e.envelope.separation(e1.envelope);
-        if (!spatialOnly && childNodePNs != null) {
+        if (!spatialOnly) {
           Map<String, int[]> otherPNs = childNodePNs.get(e1.node);
           int graphDist = getExpandGD(basePNs, otherPNs);
           graphDist += getExpandGD(otherPNs, basePNs);
@@ -2043,7 +2043,12 @@ public class RTreeIndex implements SpatialIndexWriter {
     List<NodeWithEnvelope> entries = extractChildNodesWithEnvelopes(indexNode, relationshipType);
 
     // pick two seed entries such that the dead space (considering graph distance) is maximal
-    NodeWithEnvelope[] seeds = mostDistantByDeadSpaceRiso(entries, childNodePNs);
+    NodeWithEnvelope[] seeds = null;
+    if (childNodePNs == null) {
+      mostDistantByDeadSpace(entries);
+    } else {
+      mostDistantByDeadSpaceRiso(entries, childNodePNs);
+    }
 
     List<NodeWithEnvelope> group1 = new ArrayList<>();
     group1.add(seeds[0]);
