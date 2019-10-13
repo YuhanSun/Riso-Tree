@@ -6,26 +6,19 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 import org.neo4j.graphdb.ExecutionPlanDescription;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
-import commons.Config.ClearCacheMethod;
-import commons.Config.ExperimentMethod;
 import commons.Config.system;
 import commons.MyRectangle;
-import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.Query_Graph;
-import commons.ReadWriteUtil;
 import commons.Util;
 import graph.Naive_Neo4j_Match;
 import graph.Neo4j_API;
 import graph.RisoTreeQueryPN;
-import graph.SpatialFirst_List;
 
 public class ExperimentSpaceSelectivity {
   public static Config config = new Config();
@@ -675,59 +668,5 @@ public class ExperimentSpaceSelectivity {
 
   }
 
-  public static void runExperiment(String dbPath, String dataset, ExperimentMethod method,
-      int MAX_HOP, String queryPath, int queryCount, String password, boolean clearCache,
-      ClearCacheMethod clearCacheMethod, String outputPath) throws Exception {
-    List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
-    queries = queries.subList(0, queryCount);
-    int queryId = -1;
-    for (String query : queries) {
-      queryId++;
-      Util.println("query id: " + queryId);
-      Util.println(query);
-
-      GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
-      ResultRecord record = runExperiment(service, dataset, method, query, MAX_HOP);
-
-      // service.shutdown();
-      if (clearCache) {
-        OwnMethods.clearCache(password, clearCacheMethod);
-      }
-      // service = Neo4jGraphUtility.getDatabaseService(dbPath);
-
-      // Util.println("time: " + naiveTime);
-      // Util.println("result count: " + naive_Neo4j_Match.result_count);
-      // Util.println("page hit: " + naive_Neo4j_Match.page_access);
-      // Util.println(naive_Neo4j_Match.planDescription);
-      // naiveResults.add(new ResultRecord(naiveTime, naive_Neo4j_Match.page_access));
-    }
-  }
-
-  private static ResultRecord runExperiment(GraphDatabaseService service, String dataset,
-      ExperimentMethod method, String query, int mAX_HOP) throws Exception {
-    switch (method) {
-      case NAIVE:
-        Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
-        naive_Neo4j_Match.query(query);
-        return new ResultRecord(naive_Neo4j_Match.run_time, naive_Neo4j_Match.page_access,
-            naive_Neo4j_Match.get_iterator_time, naive_Neo4j_Match.iterate_time,
-            naive_Neo4j_Match.result_count);
-      case SPATIAL_FIRST:
-        SpatialFirst_List spatialFirst_List = new SpatialFirst_List(service, dataset);
-        spatialFirst_List.query_Block(query);
-        return new ResultRecord(spatialFirst_List.run_time, spatialFirst_List.page_hit_count,
-            spatialFirst_List.get_iterator_time, spatialFirst_List.iterate_time,
-            spatialFirst_List.result_count);
-      case RISOTREE:
-        RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, mAX_HOP);
-        risoTreeQueryPN.query(query);
-        return new ResultRecord(risoTreeQueryPN.run_time, risoTreeQueryPN.page_hit_count,
-            risoTreeQueryPN.get_iterator_time, risoTreeQueryPN.iterate_time,
-            risoTreeQueryPN.set_label_time, risoTreeQueryPN.remove_label_time,
-            risoTreeQueryPN.result_count);
-      default:
-        return null;
-    }
-  }
 
 }
