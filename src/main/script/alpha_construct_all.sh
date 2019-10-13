@@ -1,4 +1,5 @@
 #!/bin/bash
+./package.sh
 
 dataset="Yelp_100"
 
