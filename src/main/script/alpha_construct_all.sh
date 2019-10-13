@@ -7,6 +7,7 @@ dataset="Yelp_100"
 dir="/hdd/code/yuhansun"
 data_dir="${dir}/data/${dataset}"
 db_dir="${dir}/data/${dataset}/alpha"
+code_dir="${dir}/code"
 
 graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
