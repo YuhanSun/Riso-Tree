@@ -23,6 +23,8 @@ query_path+=",{query_dir}/{query_size}_0.1"
 outputPath="${result_dir}/result.txt"
 log_path="${result_dir}/log.txt"
 
+jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
+
 for alpha in 0 0.9 0.99 0.999 0.9999 1.0
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
