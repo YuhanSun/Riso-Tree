@@ -51,7 +51,7 @@ public class ExperimentUtil {
       if (clearCache) {
         OwnMethods.clearCache(password, clearCacheMethod);
       }
-      service = Neo4jGraphUtility.getDatabaseService(dbPath);
+      // service = Neo4jGraphUtility.getDatabaseService(dbPath);
     }
     return records;
   }
