@@ -6,8 +6,11 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import commons.Config;
+import commons.Config.ClearCacheMethod;
+import commons.Config.ExperimentMethod;
 import commons.Util;
 import dataprocess.Wikidata;
+import experiment.Alpha;
 import experiment.Analyze;
 import experiment.DataProcess;
 import experiment.MaintenanceExperiment;
@@ -52,6 +55,7 @@ public class Driver {
     generateRandomLabel, singleLabelListToLabelGraph, // for single label graph prepare
     generateQuery, // prepare
     maxPNSizeRisoTreeQuery, maxPNSizeRisoTreeQueryMultiple, // query
+    alphaExperiment, // alpha
 
     /**
      * add experiment
@@ -114,6 +118,10 @@ public class Driver {
   private static final String queryCount = "queryCount";
   private static final String queryPath = "queryPath";
   private static final String queryId = "queryId";
+  private static final String password = "password";
+  private static final String method = "method";
+  private static final String clearCache = "clearCache";
+  private static final String clearCacheMethod = "clearCacheMethod";
 
   private static final String ratio = "ratio";
   private static final String edgePath = "edgePath";
@@ -162,6 +170,11 @@ public class Driver {
     options.addOption(queryCount, "queryCount", true, "the number of queries to be generated");
     options.addOption(queryPath, "queryPath", true, "path of the query file");
     options.addOption(queryId, "queryId", true, "id of the query in the query file");
+    options.addOption(password, "password", true, "password");
+    options.addOption(method, "method", true, "experiment method");
+    options.addOption(clearCache, "clearCache", true, "whether to clear the cache or not");
+    options.addOption(clearCacheMethod, "clearCacheMethod", true, "clearCacheMethod");
+
     options.addOption(ratio, "ratio", true, "sampling ratio");
     options.addOption(edgePath, "edgePath", true, "edge path");
   }
@@ -377,6 +390,15 @@ public class Driver {
             MaxPNSize.maxPNSizeRisoTreeQueryMultiple(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
                 cmd.getOptionValue(queryPath), Integer.parseInt(cmd.getOptionValue(queryCount)),
+                cmd.getOptionValue(outputPath));
+            break;
+          case alphaExperiment:
+            Alpha.alphaExperiment(cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
+                ExperimentMethod.valueOf(cmd.getOptionValue(method)),
+                Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)), cmd.getOptionValue(queryPath),
+                Integer.parseInt(cmd.getOptionValue(queryCount)), cmd.getOptionValue(password),
+                Boolean.parseBoolean(cmd.getOptionValue(clearCache)),
+                ClearCacheMethod.valueOf(cmd.getOptionValue(clearCacheMethod)),
                 cmd.getOptionValue(outputPath));
             break;
           // add prepare one time run
