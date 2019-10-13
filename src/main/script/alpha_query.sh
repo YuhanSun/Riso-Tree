@@ -20,7 +20,7 @@ query_path+=",{query_dir}/{query_size}_0.01"
 query_path+=",{query_dir}/{query_size}_0.1"
 
 outputPath="${result_dir}/result.txt"
-log_path="{result_dir}/log.txt"
+log_path="${result_dir}/log.txt"
 
 for alpha in 0 0.9 0.99 0.999 0.9999 1.0
 do
