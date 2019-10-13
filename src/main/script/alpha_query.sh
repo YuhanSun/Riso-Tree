@@ -19,6 +19,9 @@ query_path+=",{query_dir}/{query_size}_0.001"
 query_path+=",{query_dir}/{query_size}_0.01"
 query_path+=",{query_dir}/{query_size}_0.1"
 
+outputPath="${result_dir}/result.txt"
+log_path="{result_dir}/log.txt"
+
 for alpha in 0 0.9 0.99 0.999 0.9999 1.0
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
@@ -31,33 +34,6 @@ do
 		-MAX_HOPNUM ${MAX_HOPNUM} \
 		-queryPath ${query_path} \
 		-queryCount ${query_count} \
-		-outputPath ${output_path}
-done
-db_path="${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_10_new_version/data/databases/graph.db"
-db_path+=",${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_40_new_version/data/databases/graph.db"
-db_path+=",${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_160_new_version/data/databases/graph.db"
-db_path+=",${data_dir}/neo4j-community-3.4.12_Gleenes_1.0_640_new_version/data/databases/graph.db"
-
-# graph_path="${data_dir}/graph.txt"
-# entity_path="${data_dir}/entity.txt"
-# label_path="${data_dir}/graph_label.txt"
-# labelStrMapPath="${data_dir}/entity_string_label.txt"
-
-query_dir="${dir}/result/query/${dataset}"
-node_count=3
-query_count=50
-for selectivity in 0.000001 0.00001 0.0001 0.001
-do
-	query_path="${query_dir}/${node_count}_${selectivity}"
-
-	output_path="${result_dir}/Riso-Tree/maxPNSizeRisoTreeQuery"
-
-	jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
-
-	# split_mode="Gleenes"
-	# alpha="1.0"
-	# containID_suffix="${split_mode}_${alpha}_new_version"
-	# containID_path="${data_dir}/containID.txt"
-
-	
+		-outputPath ${output_path}	\
+		>> ${log_path}
 done
