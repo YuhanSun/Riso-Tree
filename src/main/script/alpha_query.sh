@@ -41,6 +41,6 @@ do
 		-password ${password}	\
 		-clearCache "true"	\
 		-clearCacheMethod	"DOUBLE"\
-		-outputPath ${output_path}	\
+		-outputPath ${outputPath}	\
 		>> ${log_path}
 done
