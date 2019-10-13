@@ -145,7 +145,7 @@ public class WikiRisoTreeQueryPNTest {
 
       Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
       long start1 = System.currentTimeMillis();
-      naive_Neo4j_Match.queryWithIgnore(query);
+      naive_Neo4j_Match.query(query);
       long naiveTime = System.currentTimeMillis() - start1;
       Util.println("time: " + naiveTime);
       Util.println("result count: " + naive_Neo4j_Match.result_count);
@@ -240,7 +240,7 @@ public class WikiRisoTreeQueryPNTest {
       Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
       long start1 = System.currentTimeMillis();
       try {
-        naive_Neo4j_Match.queryWithIgnore(query);
+        naive_Neo4j_Match.query(query);
       } catch (Exception e) {
         e.printStackTrace();
         // service.shutdown();
