@@ -23,6 +23,23 @@ public class ResultRecord {
     this.pageHit = pageHit;
   }
 
+  @Override
+  public String toString() {
+    String string = "";
+    string += String.format("runTime: %d\n", runTime);
+    string += String.format("pageHit: %d\n", pageHit);
+    string += String.format("range_query_time: %d\n", range_query_time);
+    string += String.format("get_iterator_time: %d\n", get_iterator_time);
+    string += String.format("iterate_time: %d\n", iterate_time);
+    string += String.format("set_label_time: %d\n", set_label_time);
+    string += String.format("remove_label_time: %d\n", remove_label_time);
+    string += String.format("result_count: %d\n", result_count);
+    string += String.format("overlap_leaf_node_count: %d\n", overlap_leaf_node_count);
+    string += String.format("located_in_count: %d\n", located_in_count);
+
+    return string;
+  }
+
   /**
    * Naive approach
    *
@@ -61,5 +78,69 @@ public class ResultRecord {
       pageHits.add(resultRecord.pageHit);
     }
     return Util.Average(pageHits);
+  }
+
+  public static long getRangeQueryTimeAvg(List<ResultRecord> resultRecords) {
+    List<Long> rangeQueryTimes = new ArrayList<>(resultRecords.size());
+    for (ResultRecord resultRecord : resultRecords) {
+      rangeQueryTimes.add(resultRecord.range_query_time);
+    }
+    return Util.Average(rangeQueryTimes);
+  }
+
+  public static long getGetIteratorTimeAvg(List<ResultRecord> resultRecords) {
+    List<Long> times = new ArrayList<>(resultRecords.size());
+    for (ResultRecord resultRecord : resultRecords) {
+      times.add(resultRecord.get_iterator_time);
+    }
+    return Util.Average(times);
+  }
+
+  public static long getIterateTimeAvg(List<ResultRecord> resultRecords) {
+    List<Long> times = new ArrayList<>(resultRecords.size());
+    for (ResultRecord resultRecord : resultRecords) {
+      times.add(resultRecord.iterate_time);
+    }
+    return Util.Average(times);
+  }
+
+  public static long getSetLabelTimeAvg(List<ResultRecord> resultRecords) {
+    List<Long> times = new ArrayList<>(resultRecords.size());
+    for (ResultRecord resultRecord : resultRecords) {
+      times.add(resultRecord.set_label_time);
+    }
+    return Util.Average(times);
+  }
+
+  public static long getRemoveLabelTimeAvg(List<ResultRecord> resultRecords) {
+    List<Long> times = new ArrayList<>(resultRecords.size());
+    for (ResultRecord resultRecord : resultRecords) {
+      times.add(resultRecord.remove_label_time);
+    }
+    return Util.Average(times);
+  }
+
+  public static long getResultCountAvg(List<ResultRecord> resultRecords) {
+    List<Long> counts = new ArrayList<>(resultRecords.size());
+    for (ResultRecord resultRecord : resultRecords) {
+      counts.add(resultRecord.result_count);
+    }
+    return Util.Average(counts);
+  }
+
+  public static long getOverLapLeafCountAvg(List<ResultRecord> resultRecords) {
+    List<Long> counts = new ArrayList<>(resultRecords.size());
+    for (ResultRecord resultRecord : resultRecords) {
+      counts.add(resultRecord.overlap_leaf_node_count);
+    }
+    return Util.Average(counts);
+  }
+
+  public static long getLocatedInCountAvg(List<ResultRecord> resultRecords) {
+    List<Long> counts = new ArrayList<>(resultRecords.size());
+    for (ResultRecord resultRecord : resultRecords) {
+      counts.add(resultRecord.located_in_count);
+    }
+    return Util.Average(counts);
   }
 }
