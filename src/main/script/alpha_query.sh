@@ -27,6 +27,8 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
 for alpha in 0 0.9 0.99 0.999 0.9999 1.0
 do
+	split_mode="Gleenes"
+	maxPNSize="-1"
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 	db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
 	
