@@ -34,7 +34,7 @@ do
 		-f alphaExperiment \
 		-dp ${db_path} \
 		-d ${dataset} \
-		-method RISOTREE
+		-method RISOTREE	\
 		-MAX_HOPNUM ${MAX_HOPNUM} \
 		-queryPath ${query_path} \
 		-queryCount ${query_count} \
