@@ -15,10 +15,10 @@ query_dir="${dir}/result/query/${dataset}"
 
 query_size=2
 query_count=100
-query_path="${query_dir}/{query_size}_0.0001"
-query_path+=",{query_dir}/{query_size}_0.001"
-query_path+=",{query_dir}/{query_size}_0.01"
-query_path+=",{query_dir}/{query_size}_0.1"
+query_path="${query_dir}/${query_size}_0.0001"
+query_path+=",{query_dir}/${query_size}_0.001"
+query_path+=",{query_dir}/${query_size}_0.01"
+query_path+=",{query_dir}/${query_size}_0.1"
 
 outputPath="${result_dir}/result.txt"
 log_path="${result_dir}/log.txt"
