@@ -1,7 +1,7 @@
 #!/bin/bash
 ./package.sh
 
-dataset="Yelp_100"
+dataset="wikidata"
 
 # server
 dir="/hdd/code/yuhansun"
@@ -19,10 +19,10 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 split_mode="Gleenes"
 maxPNSize="-1"
 
-# for alpha in 0 0.25 0.5 0.75 1.0
+for alpha in 0 0.25 0.5 0.75 1.0
 # for alpha in 0
 # for alpha in 0.55 0.6 0.65 0.7 0.8 0.85 0.9 0.95
-for alpha in 0.999999
+# for alpha in 0.999999
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 	echo ${suffix}
@@ -52,19 +52,11 @@ do
 	-d ${dataset} \
 	-c ${containID_path}
 
-	# 0-hop
-	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
-	-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
-
-	# 1-hop
-	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
-	-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	-lp ${label_path} -hop 1 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
-
-	# 2-hop
-	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
-	-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-	-lp ${label_path} -hop 2 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
-
+	# modify
+	for hop in 0 1
+	do
+		java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
+			-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+			-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+	done
 done
