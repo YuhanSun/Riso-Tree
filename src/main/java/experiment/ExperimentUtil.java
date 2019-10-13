@@ -159,6 +159,7 @@ public class ExperimentUtil {
   public static void runExperimentQueryPathList(String dbPath, String dataset,
       ExperimentMethod method, int MAX_HOP, String queryPaths, int queryCount, String password,
       boolean clearCache, ClearCacheMethod clearCacheMethod, String outputPath) throws Exception {
+    Util.checkPathExist(dbPath);
     String header = getHeader(method);
     ReadWriteUtil.WriteFile(outputPath, true, "queryPath\t" + header + "\n");
     String[] queryPathList = queryPaths.split(",");

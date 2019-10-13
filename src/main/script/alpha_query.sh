@@ -5,6 +5,7 @@ dir="/hdd/code/yuhansun"
 
 dataset="Yelp_100"
 MAX_HOPNUM=2
+password="syhSYH.19910205"
 
 data_dir="${dir}/data/${dataset}"
 db_dir="${data_dir}/alpha"
@@ -31,9 +32,13 @@ do
 		-f alphaExperiment \
 		-dp ${db_path} \
 		-d ${dataset} \
+		-method RISOTREE
 		-MAX_HOPNUM ${MAX_HOPNUM} \
 		-queryPath ${query_path} \
 		-queryCount ${query_count} \
+		-password ${password}	\
+		-clearCache "true"	\
+		-clearCacheMethod	"DOUBLE"\
 		-outputPath ${output_path}	\
 		>> ${log_path}
 done
