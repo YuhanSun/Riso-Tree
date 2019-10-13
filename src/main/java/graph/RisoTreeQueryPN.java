@@ -107,7 +107,7 @@ public class RisoTreeQueryPN {
 
   // method control
   public static boolean forceGraphFirst = true;
-  public final static boolean completeStrategyUsed = true;// whether to use the complete approach
+  public final static boolean completeStrategyUsed = false;// whether to use the complete approach
   public static Boolean candidateComplete = null;
   public static Map<Integer, boolean[]> queryNodesComplete = null;
 
@@ -648,6 +648,12 @@ public class RisoTreeQueryPN {
     return query;
   }
 
+  /**
+   * Use the id-in way to rewrite the query.
+   *
+   * @param query
+   * @throws Exception
+   */
   public void query(String query) throws Exception {
     iniLogParams();
     Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
@@ -789,7 +795,8 @@ public class RisoTreeQueryPN {
   }
 
   /**
-   * Execute the query. Attach 'profile' to get profile statistics.
+   * Execute the query. Attach 'profile' to get profile statistics. id(a_i) is used. Not use
+   * setLabel.
    *
    * @param query
    * @param query_Graph
@@ -797,6 +804,7 @@ public class RisoTreeQueryPN {
    */
   public void queryWithIgnore(String query, Query_Graph query_Graph) throws Exception {
     iniLogParams();
+    Transaction tx = dbservice.beginTx();
     Map<Integer, Collection<Long>> candidateSets = getCandidateSetWithIgnore(query_Graph);
 
     if (candidateSets.isEmpty()) {
@@ -832,12 +840,13 @@ public class RisoTreeQueryPN {
       } else {
         throw new Exception("planDescription has no statistics!!");
       }
-      // OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
     }
+    tx.success();
+    tx.close();
   }
 
   /**
-   * Rewrite the query to include the candidateSets constraint.
+   * Rewrite the query to include the candidateSets constraint. id(a_i) in [] is used.
    *
    * @param query
    * @param candidateSets

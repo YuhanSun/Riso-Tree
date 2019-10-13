@@ -90,7 +90,7 @@ public class ExperimentUtil {
         break;
       case RISOTREE:
         RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOP);
-        risoTreeQueryPN.query(query);
+        risoTreeQueryPN.queryWithIgnore(query);
         record = new ResultRecord(risoTreeQueryPN.run_time, risoTreeQueryPN.page_hit_count,
             risoTreeQueryPN.get_iterator_time, risoTreeQueryPN.iterate_time,
             risoTreeQueryPN.set_label_time, risoTreeQueryPN.remove_label_time,
