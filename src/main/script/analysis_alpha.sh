@@ -30,7 +30,7 @@ code_dir="${dir}/code"
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 outputPath="${data_dir}/PNNonEmptyCount.csv"
 
-header="filepath\tPNPropertyCount\tPNNeighborCount\tPNPropertySize\tPNNeighborSize\ttotal_size\n"
+header="filepath\tPNPropertyCount\tnonEmptyPNCount\tPNNeighborCount\tPNPropertySize\tPNNeighborSize\ttotal_size\n"
 printf ${header} >> ${outputPath}
 
 split_mode="Gleenes"
