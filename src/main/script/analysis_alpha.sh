@@ -37,8 +37,9 @@ split_mode="Gleenes"
 maxPNSize="-1"
 
 # for alpha in 0 0.25 0.5 0.75 1.0
-for alpha in 0.55 0.6 0.65 0.7 0.8 0.85 0.9 0.95
+# for alpha in 0.55 0.6 0.65 0.7 0.8 0.85 0.9 0.95
 # for alpha in 0
+for alpha in 0.99 0.999 0.9999 0.99999 0.999999
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 	# suffix="${split_mode}_${alpha}_${maxPNSize}_test"
@@ -60,7 +61,8 @@ printf "\n" >> ${outputPath}
 printf ${header} >> ${outputPath}
 
 # for alpha in 0 0.25 0.5 0.75 1.0
-for alpha in 0.55 0.6 0.65 0.7 0.8 0.85 0.9 0.95
+# for alpha in 0.55 0.6 0.65 0.7 0.8 0.85 0.9 0.95
+for alpha in 0.99 0.999 0.9999 0.99999 0.999999
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 	# suffix="${split_mode}_${alpha}_${maxPNSize}_test"
@@ -76,7 +78,8 @@ printf "\n" >> ${outputPath}
 printf ${header} >> ${outputPath}
 
 # for alpha in 0 0.25 0.5 0.75 1.0
-for alpha in 0.55 0.6 0.65 0.7 0.8 0.85 0.9 0.95
+# for alpha in 0.55 0.6 0.65 0.7 0.8 0.85 0.9 0.95
+for alpha in 0.99 0.999 0.9999 0.99999 0.999999
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 	# suffix="${split_mode}_${alpha}_${maxPNSize}_test"
