@@ -31,6 +31,8 @@ done
 
 output_path="${result_dir}/${dataset}_result.txt"
 log_path="${result_dir}/${dataset}_log.txt"
+[[ -f $output_path ]] || touch $output_path
+[[ -f $log_path ]] || touch $log_path
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
