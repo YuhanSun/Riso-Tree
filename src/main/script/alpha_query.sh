@@ -20,8 +20,8 @@ query_path+=",{query_dir}/${query_size}_0.001"
 query_path+=",{query_dir}/${query_size}_0.01"
 query_path+=",{query_dir}/${query_size}_0.1"
 
-outputPath="${result_dir}/result.txt"
-log_path="${result_dir}/log.txt"
+outputPath="${result_dir}/${dataset}_result.txt"
+log_path="${result_dir}/${dataset}_log.txt"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
