@@ -22,8 +22,7 @@ db_path=""
 for alpha in 0 0.9 0.99 0.999 0.9999 1.0
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
-	if [-n $db_path]
-	then
+	if [-n $db_path];	then
 		db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
 	else
 		db_path+=",${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
