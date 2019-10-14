@@ -7,7 +7,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import commons.Config;
 import commons.Config.ClearCacheMethod;
-import commons.Config.ExperimentMethod;
 import commons.Util;
 import dataprocess.Wikidata;
 import experiment.Alpha;
@@ -394,7 +393,6 @@ public class Driver {
             break;
           case alphaExperiment:
             Alpha.alphaExperiment(cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
-                ExperimentMethod.valueOf(cmd.getOptionValue(method)),
                 Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)), cmd.getOptionValue(queryPath),
                 Integer.parseInt(cmd.getOptionValue(queryCount)), cmd.getOptionValue(password),
                 Boolean.parseBoolean(cmd.getOptionValue(clearCache)),
