@@ -592,6 +592,13 @@ public class RisoTreeQueryPN {
 
   private Query_Graph query_Graph = null;
 
+
+  /**
+   * Determine the query plan according to the {@code completeStrategyUsed} value.
+   *
+   * @param query
+   * @throws Exception
+   */
   public void queryWithIgnore(String query) throws Exception {
     Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
     this.query_Graph = query_Graph;
@@ -603,8 +610,10 @@ public class RisoTreeQueryPN {
       }
     }
 
+    long start = System.currentTimeMillis();
     // queryWithIgnore(query, query_Graph);
     queryWithIgnoreNewLabel(query, query_Graph);
+    run_time += System.currentTimeMillis() - start;
   }
 
   public String formQueryWithIgnoreNewLabelCombined(String query,
@@ -1270,6 +1279,7 @@ public class RisoTreeQueryPN {
   public Map<Integer, List<Node>> getOverlapLeafNodes(Node root_node,
       Map<Integer, MyRectangle> spa_predicates,
       Map<Integer, Map<Integer, Set<String>>> pN_list_propertyname) throws Exception {
+    long start = System.currentTimeMillis();
     Map<Integer, List<Node>> overlapLeafNodesMultiPredicate = new HashMap<>();
     // for each spatial predicate, get the overlapped leaf nodes.
     for (int spatialId : spa_predicates.keySet()) {
@@ -1280,6 +1290,7 @@ public class RisoTreeQueryPN {
       }
       overlapLeafNodesMultiPredicate.put(spatialId, overlapLeafNodes);
     }
+    range_query_time += System.currentTimeMillis() - start;
     return overlapLeafNodesMultiPredicate;
   }
 
