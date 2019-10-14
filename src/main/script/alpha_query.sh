@@ -36,9 +36,7 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
 for selectivity in 0.0001 0.001 0.01 0.1
 do
-	
 	query_path="${query_dir}/${query_size}_${selectivity}"
-
 	java -Xmx100g -jar ${jar_path} \
 		-f alphaExperiment \
 		-dp ${db_path} \
