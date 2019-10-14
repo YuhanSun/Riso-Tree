@@ -57,9 +57,23 @@ public class ResultRecord {
     this.result_count = resultCount;
   }
 
+
+  /**
+   * RisoTree approach.
+   *
+   * @param runTime
+   * @param pageHit
+   * @param getIteratorTime
+   * @param iterateTime
+   * @param setLabelTime
+   * @param removeLabelTime
+   * @param overlapLeafCount
+   * @param resultCount
+   */
   public ResultRecord(long runTime, long pageHit, long getIteratorTime, long iterateTime,
-      long setLabelTime, long removeLabelTime, long resultCount) {
+      long setLabelTime, long removeLabelTime, long overlapLeafCount, long resultCount) {
     this(runTime, pageHit, getIteratorTime, iterateTime, resultCount);
+    this.overlap_leaf_node_count = overlapLeafCount;
     this.set_label_time = setLabelTime;
     this.remove_label_time = removeLabelTime;
   }
