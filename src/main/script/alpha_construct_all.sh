@@ -57,6 +57,6 @@ do
 	do
 		java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
 			-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-			-lp ${label_path} -hop 0 -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+			-lp ${label_path} -hop ${hop} -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 	done
 done
