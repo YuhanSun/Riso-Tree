@@ -42,7 +42,7 @@ do
 		-queryCount ${query_count} \
 		-password ${password}	\
 		-clearCache "true"	\
-		-clearCacheMethod	"DOUBLE"\
-		-outputPath ${outputPath}	\
+		-clearCacheMethod "DOUBLE" \
+		-outputPath ${outputPath} \
 		>> ${log_path}
 done
