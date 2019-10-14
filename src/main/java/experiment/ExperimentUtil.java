@@ -31,7 +31,7 @@ public class ExperimentUtil {
    * @param outputPath
    * @throws Exception
    */
-  private static List<ResultRecord> runExperiment(String dbPath, String dataset,
+  public static List<ResultRecord> runExperiment(String dbPath, String dataset,
       ExperimentMethod method, int MAX_HOP, String queryPath, int queryCount, String password,
       boolean clearCache, ClearCacheMethod clearCacheMethod, String outputPath) throws Exception {
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
@@ -94,7 +94,7 @@ public class ExperimentUtil {
         record = new ResultRecord(risoTreeQueryPN.run_time, risoTreeQueryPN.page_hit_count,
             risoTreeQueryPN.get_iterator_time, risoTreeQueryPN.iterate_time,
             risoTreeQueryPN.set_label_time, risoTreeQueryPN.remove_label_time,
-            risoTreeQueryPN.result_count);
+            risoTreeQueryPN.overlap_leaf_node_count, risoTreeQueryPN.result_count);
         planDescription = risoTreeQueryPN.planDescription;
         break;
       default:
@@ -105,7 +105,7 @@ public class ExperimentUtil {
     return record;
   }
 
-  private static String getAverageResultOutput(String outputPath, List<ResultRecord> records,
+  public static String getAverageResultOutput(String outputPath, List<ResultRecord> records,
       ExperimentMethod method) {
     String string = "";
     switch (method) {
@@ -167,7 +167,8 @@ public class ExperimentUtil {
       List<ResultRecord> records = runExperiment(dbPath, dataset, method, MAX_HOP, queryPath,
           queryCount, password, clearCache, clearCacheMethod, outputPath);
       String string = getAverageResultOutput(outputPath, records, method);
-      ReadWriteUtil.WriteFile(outputPath, true, StringUtils.joinWith("\t", queryPath, string));
+      ReadWriteUtil.WriteFile(outputPath, true,
+          StringUtils.joinWith("\t", queryPath, string) + "\n");
     }
   }
 }
