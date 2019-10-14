@@ -688,7 +688,7 @@ public class RisoTreeQueryPN {
     setNewLabel(candidateSets, query_Graph.nodeVariables);
     String queryAfterRewrite =
         formQueryWithIgnoreNewLabelCombined(query, candidateSets, query_Graph);
-    LOGGER.info("query after rewrite: \n" + queryAfterRewrite);
+    Util.println("query after rewrite: \n" + queryAfterRewrite);
 
     runAndTrackTime(queryAfterRewrite);
 
@@ -931,7 +931,7 @@ public class RisoTreeQueryPN {
       // <spa_id, <end_id, path_name>> (path_name: PN_a_endid)
       Map<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
 
-      LOGGER.info(spaPathsMap.toString());
+      Util.println(spaPathsMap.toString());
 
       // Construct min_hop (compact structure for min_hop_array
       // and NL_size_propertyname and NL_list_propertyname
@@ -964,7 +964,7 @@ public class RisoTreeQueryPN {
           getOverlapLeafNodes(root_node, spa_predicates, PN_list_propertyname);
       range_query_time += System.currentTimeMillis() - start;
       if (overlapLeafNodes == null) {
-        LOGGER.info("No result satisfy the query.");
+        Util.println("No result satisfy the query.");
         return candidateSet;
       }
 
@@ -1307,7 +1307,7 @@ public class RisoTreeQueryPN {
       }
     }
 
-    LOGGER.info("paths and shorter paths: " + pathsAndShorterPaths.toString());
+    Util.println("paths and shorter paths: " + pathsAndShorterPaths.toString());
 
     int level_index = 0;
     boolean isLeafLevel = false;
@@ -1348,7 +1348,7 @@ public class RisoTreeQueryPN {
         logWriteLine += String.format("level %d time: %d\n", level_index,
             System.currentTimeMillis() - startLevel);
         logWriteLine += String.format("expand time: %d\n", expandTime);
-        LOGGER.info(logWriteLine);
+        Util.println(logWriteLine);
       }
 
       if (overlap_MBR_list.isEmpty() == true) {
@@ -1739,7 +1739,7 @@ public class RisoTreeQueryPN {
 
 
   private void iniLogParams() {
-    LOGGER.info("Initialize variables for query");
+    Util.println("Initialize variables for query");
     range_query_time = 0;
     set_label_time = 0;
     remove_label_time = 0;
