@@ -67,6 +67,14 @@ public class Util {
     }
   }
 
+  public static void checkPathExist(String[] filepaths) {
+    for (String filepath : filepaths) {
+      if (!Util.pathExist(filepath)) {
+        throw new RuntimeException(filepath + " does not exist!");
+      }
+    }
+  }
+
   public static FileWriter getFileWriter(String path) throws Exception {
     return new FileWriter(path, false);
   }
