@@ -6,7 +6,7 @@ dataset="Yelp_100"
 # server
 dir="/hdd/code/yuhansun"
 data_dir="${dir}/data/${dataset}"
-db_dir="data_dir/alpha"
+db_dir="${data_dir}/alpha"
 code_dir="${dir}/code"
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
