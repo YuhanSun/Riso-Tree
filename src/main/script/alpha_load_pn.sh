@@ -17,9 +17,9 @@ for alpha in 0 0.9 0.99 0.999 0.9999 1.0
 do
 	suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 	containId_suffix="${split_mode}_${alpha}_new_version"
-	containID_path="${data_dir}/containID_${containId_suffix}.txt"
+	containID_path="${db_dir}/containID_${containId_suffix}.txt"
 	db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
-	PNPathAndPrefix="${data_dir}/PathNeighbors_${suffix}"
+	PNPathAndPrefix="${db_dir}/PathNeighbors_${suffix}"
 	java -Xmx100g -jar ${jar_path} \
 		-f wikiLoadAllHopPN \
 		-PNPrefix ${PNPathAndPrefix} \
