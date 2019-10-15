@@ -6,15 +6,20 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
+import commons.Config.ClearCacheMethod;
+import commons.Config.ExperimentMethod;
 import commons.Config.system;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
+import commons.ReadWriteUtil;
 import commons.Util;
 import graph.Naive_Neo4j_Match;
 import graph.Neo4j_API;
@@ -664,7 +669,30 @@ public class ExperimentSpaceSelectivity {
     }
   }
 
-  public static void runCompare() {
+  public static void selectivityExperiment(String dbPath, String dataset, int MAX_HOP,
+      String queryPaths, int queryCount, String password, boolean clearCache,
+      ClearCacheMethod clearCacheMethod, String outputDir) throws Exception {
+    String[] queryPathsList = queryPaths.split(",");
+    Util.checkPathExist(queryPathsList);
+    List<ExperimentMethod> methods = new ArrayList<>(Arrays.asList(ExperimentMethod.NAIVE,
+        ExperimentMethod.SPATIAL_FIRST, ExperimentMethod.RISOTREE));
+
+    for (ExperimentMethod method : methods) {
+      String outputPath = String.format("%s/%s.txt", outputDir, method.toString());
+      String header = ExperimentUtil.getHeader(method);
+      ReadWriteUtil.WriteFile(outputPath, true, "queryPath\t" + header + "\n");
+    }
+
+    for (String queryPath : queryPathsList) {
+      for (ExperimentMethod method : methods) {
+        String outputPath = String.format("%s/%s.txt", outputDir, method.toString());
+        List<ResultRecord> records = ExperimentUtil.runExperiment(dbPath, dataset, method, MAX_HOP,
+            queryPath, queryCount, password, clearCache, clearCacheMethod, outputPath);
+        String string = ExperimentUtil.getAverageResultOutput(outputPath, records, method);
+        ReadWriteUtil.WriteFile(outputPath, true,
+            StringUtils.joinWith("\t", queryPath, string) + "\n");
+      }
+    }
 
   }
 
