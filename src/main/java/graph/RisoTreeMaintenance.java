@@ -30,6 +30,7 @@ public class RisoTreeMaintenance {
   String safeNodesPath;
   Set<Long> safeNodes;
 
+  public int safeCaseHappenCount = 0;
 
   public RisoTreeMaintenance(String dbPath, int MAX_HOPNUM, int maxPNSize, Boolean safeNodesUsed,
       String safeNodesPath) throws Exception {
@@ -59,6 +60,8 @@ public class RisoTreeMaintenance {
   public void addEdge(Node src, Node trg) {
     if (!safeNodes.contains(src.getId()) || !safeNodes.contains(trg.getId())) {
       addEdgeUpdateCase(src, trg);
+    } else {
+      safeCaseHappenCount++;
     }
     src.createRelationshipTo(trg, Labels.GraphRel.GRAPH_INSERT);
   }
