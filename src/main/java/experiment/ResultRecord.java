@@ -57,6 +57,12 @@ public class ResultRecord {
     this.result_count = resultCount;
   }
 
+  public ResultRecord(long runTime, long pageHit, long rangeQueryTime, long getIteratorTime,
+      long iterateTime, long overlapLeafCount, long resultCount) {
+    this(runTime, pageHit, getIteratorTime, iterateTime, resultCount);
+    this.range_query_time = rangeQueryTime;
+    this.overlap_leaf_node_count = overlapLeafCount;
+  }
 
   /**
    * RisoTree approach.
@@ -70,10 +76,11 @@ public class ResultRecord {
    * @param overlapLeafCount
    * @param resultCount
    */
-  public ResultRecord(long runTime, long pageHit, long getIteratorTime, long iterateTime,
-      long setLabelTime, long removeLabelTime, long overlapLeafCount, long resultCount) {
-    this(runTime, pageHit, getIteratorTime, iterateTime, resultCount);
-    this.overlap_leaf_node_count = overlapLeafCount;
+  public ResultRecord(long runTime, long pageHit, long rangeQueryTime, long getIteratorTime,
+      long iterateTime, long setLabelTime, long removeLabelTime, long overlapLeafCount,
+      long resultCount) {
+    this(runTime, pageHit, rangeQueryTime, getIteratorTime, iterateTime, overlapLeafCount,
+        resultCount);
     this.set_label_time = setLabelTime;
     this.remove_label_time = removeLabelTime;
   }

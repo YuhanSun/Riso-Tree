@@ -92,9 +92,10 @@ public class ExperimentUtil {
         RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOP);
         risoTreeQueryPN.queryWithIgnore(query);
         record = new ResultRecord(risoTreeQueryPN.run_time, risoTreeQueryPN.page_hit_count,
-            risoTreeQueryPN.get_iterator_time, risoTreeQueryPN.iterate_time,
-            risoTreeQueryPN.set_label_time, risoTreeQueryPN.remove_label_time,
-            risoTreeQueryPN.overlap_leaf_node_count, risoTreeQueryPN.result_count);
+            risoTreeQueryPN.range_query_time, risoTreeQueryPN.get_iterator_time,
+            risoTreeQueryPN.iterate_time, risoTreeQueryPN.set_label_time,
+            risoTreeQueryPN.remove_label_time, risoTreeQueryPN.overlap_leaf_node_count,
+            risoTreeQueryPN.result_count);
         planDescription = risoTreeQueryPN.planDescription;
         break;
       default:
