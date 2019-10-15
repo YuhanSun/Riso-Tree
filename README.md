@@ -51,7 +51,15 @@ Run maxPNSize_construct_PN_single.sh
 
 If this step fails after the graph db is accessed, need to re-run from scratch.
 
-### 7. Execute the query and output the result to disk. (maxPNSize_query_multiple_queries_single.sh)
+### 8. Execute the query and output the result to disk. (maxPNSize_query_multiple_queries_single.sh)
 
-
-
+## Add Experiment
+### Prepare--Run `maintenance_add_prepare.sh` 
+1. Copy the `node_edges` db to `add` data directory.
+2. `sampleFile`: Sampling requires the edge format graph file. Need to generate for datasets (except for wikidata).
+3. `removeEdgesFromDb`: 
+4. `removeEdgesFromGraphFile`
+5. Backup the current db. Rename it with suffix.
+6. Construct tree, containId file, and PN files.
+7. Backup suffix db.
+8. Load the PN.
