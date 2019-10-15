@@ -21,6 +21,17 @@ import graph.RisoTreeMaintenance;
 
 public class MaintenanceExperiment {
 
+  /**
+   * Sample the graph_property_edge.txt file. The edges between two nodes with different directions
+   * are treated as the same in the sample. As a result, the sampled edges will not be between the
+   * same two nodes. A map whose key is the edge (always from id min to id max) will be used to
+   * achieve this.
+   *
+   * @param inputPath
+   * @param ratio
+   * @param outputPath
+   * @throws Exception
+   */
   public static void sampleFile(String inputPath, double ratio, String outputPath)
       throws Exception {
     List<String> lines = ReadWriteUtil.readFileAllLines(inputPath);
@@ -49,6 +60,14 @@ public class MaintenanceExperiment {
     ReadWriteUtil.WriteFile(outputPath, false, sampleLines);
   }
 
+  /**
+   * Generate the correct graph.txt file for the new graph whose edges are removed.
+   *
+   * @param inputGraphPath
+   * @param edgePath
+   * @param outputGraphPath
+   * @throws Exception
+   */
   public static void removeEdgesFromGraphFile(String inputGraphPath, String edgePath,
       String outputGraphPath) throws Exception {
     Util.checkPathExist(inputGraphPath);
@@ -63,11 +82,13 @@ public class MaintenanceExperiment {
       int start = Integer.parseInt(strings[0]);
       int end = Integer.parseInt(strings[2]);
       if (!graphTreeSet.get(start).remove((end))) {
+        // This can happen when there exists an edge from a node to itself.
         // throw new RuntimeException(String.format("Edge %s is not found!", line));
         Util.println(line);
         notFound1++;
       }
       if (!graphTreeSet.get(end).remove(start)) {
+        // This can happen when there exists an edge from a node to itself.
         // throw new RuntimeException(String.format("Edge %s is not found!", line));
         Util.println(line);
         notFound2++;
@@ -77,6 +98,13 @@ public class MaintenanceExperiment {
     GraphUtil.writeGraphTreeSet(graphTreeSet, outputGraphPath);
   }
 
+  /**
+   * Remove the tested edges from the original graph database.
+   *
+   * @param dbPath
+   * @param edgePath
+   * @throws Exception
+   */
   public static void removeEdgesFromDb(String dbPath, String edgePath) throws Exception {
     Util.checkPathExist(edgePath);
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
@@ -106,7 +134,7 @@ public class MaintenanceExperiment {
    * @param service
    * @param start
    * @param end
-   * @return
+   * @return whether such an edge exists or not
    */
   public static boolean removeEdge(GraphDatabaseService service, long start, long end) {
     boolean exist = false;
@@ -135,7 +163,7 @@ public class MaintenanceExperiment {
     return false;
   }
 
-  public static void AddEdgeExperiment(String dbPath, int MAX_HOPNUM, int maxPNSize,
+  public static void addEdgeExperiment(String dbPath, int MAX_HOPNUM, int maxPNSize,
       String edgePath, int testCount, Boolean safeNodesUsed, String safeNodesPath,
       String outputPath) throws Exception {
     RisoTreeMaintenance maintenance =
@@ -152,15 +180,17 @@ public class MaintenanceExperiment {
     ReadWriteUtil.WriteFile(outputDetailPath, true,
         String.format("%s\t%s\t%d\n", dbPath, edgePath, testCount));
 
-
     for (Edge edge : testEdges) {
       long start = System.currentTimeMillis();
       maintenance.addEdge(edge.start, edge.end);
       long time = System.currentTimeMillis() - start;
       records.add(new ResultRecord(time, -1));
-      ReadWriteUtil.WriteFile(outputDetailPath, true, "" + time);
+      ReadWriteUtil.WriteFile(outputDetailPath, true, "" + time + "\n");
     }
-
+    ReadWriteUtil.WriteFile(outputAvgPath, true,
+        "avg time: " + ResultRecord.getRunTimeAvg(records) + "\n");
+    ReadWriteUtil.WriteFile(outputAvgPath, true,
+        "safeCaseHappenCount: " + maintenance.safeCaseHappenCount + "\n\n");
   }
 
 }

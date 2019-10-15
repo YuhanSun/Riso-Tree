@@ -62,6 +62,7 @@ public class Driver {
      * add experiment
      */
     sampleFile, removeEdgesFromGraphFile, removeEdgesFromDb, // one time prepare
+    addEdgeExperiment,
   }
 
   private static FunctionName getFunctionEnum(String function) {
@@ -126,6 +127,7 @@ public class Driver {
 
   private static final String ratio = "ratio";
   private static final String edgePath = "edgePath";
+  private static final String safeNodesPath = "safeNodesPath";
 
 
   public Driver(String[] args) {
@@ -178,6 +180,7 @@ public class Driver {
 
     options.addOption(ratio, "ratio", true, "sampling ratio");
     options.addOption(edgePath, "edgePath", true, "edge path");
+    options.addOption(safeNodesPath, "safeNodesPath", true, "safeNodesPath");
   }
 
   public void parser() {
@@ -421,6 +424,14 @@ public class Driver {
           case removeEdgesFromDb:
             MaintenanceExperiment.removeEdgesFromDb(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(edgePath));
+            break;
+          // maintenance experiment
+          case addEdgeExperiment:
+            MaintenanceExperiment.addEdgeExperiment(cmd.getOptionValue(dbPath),
+                Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
+                Integer.parseInt(cmd.getOptionValue(maxPNSize)), cmd.getOptionValue(edgePath),
+                Integer.parseInt(cmd.getOptionValue(queryCount)), true,
+                cmd.getOptionValue(safeNodesPath), cmd.getOptionValue(outputPath));
             break;
           default:
             Util.println(String.format("Function %s does not exist!", functionNameString));
