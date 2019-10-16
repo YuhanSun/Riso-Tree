@@ -69,6 +69,7 @@ java -Xmx100g -jar ${jar_path} \
 	-ep ${entity_path} \
 	-entityStringLabelMapPath ${entityStringLabelMapPath} \
 	-maxPNSize -1 \
+	-MAX_HOPNUM $MAX_HOPNUM	\
 	-outputPath ${output_path}
 
 # java -Xmx100g -jar ${jar_path} \
