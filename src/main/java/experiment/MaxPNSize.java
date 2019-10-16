@@ -20,6 +20,9 @@ public class MaxPNSize {
 
   public static void maxPNSizeRisoTreeQueryMultiple(String dbPathsStr, String dataset,
       int MAX_HOPNUM, String queryPath, int queryCount, String outputPath) throws Exception {
+    String[] dbPaths = dbPathsStr.split(",");
+    Util.checkPathExist(dbPaths);
+
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
     List<String> queriesSlice = queries.subList(0, queryCount - 1);
 
@@ -27,7 +30,7 @@ public class MaxPNSize {
     String outputAvgPath = outputPath + "_avg.csv";
     ReadWriteUtil.WriteFile(outputAvgPath, true, String.format("%s\t%d\n", queryPath, queryCount));
 
-    for (String dbPath : dbPathsStr.split(",")) {
+    for (String dbPath : dbPaths) {
       Util.checkPathExist(dbPath);
       ReadWriteUtil.WriteFile(outputDetailPath, true, String.format("%s\n%s\n", dbPath, queryPath));
       GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
@@ -63,9 +66,7 @@ public class MaxPNSize {
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
     String query = queries.get(queryId);
     String[] dbPaths = dbPathsStr.split(",");
-    for (String dbPath : dbPaths) {
-      Util.checkPathExist(dbPath);
-    }
+    Util.checkPathExist(dbPaths);
     List<ResultRecord> resultRecords = risoTreeQuery(dbPaths, dataset, MAX_HOPNUM, query);
     if (resultRecords.size() != dbPaths.length) {
       throw new RuntimeException("result records and dbpaths count mismatch!");
