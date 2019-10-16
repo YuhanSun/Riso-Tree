@@ -2,10 +2,14 @@
 ./package.sh
 
 dataset="wikidata"
-# always hard code this dir
-# because a rm -r will happen here
-db_dir="/hdd/code/yuhansun/data/${dataset}/add"
-backup_dir="${db_dir}/backup"
+cur_dir="/hdd/code/yuhansun/data/${dataset}/add"
+backup_dir="${cur_dir}/backup"
+
+split_mode="Gleenes"
+maxPNSize=-1
+alpha=1.0
+suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
+db_dir="${cur_dir}/neo4j-community-3.4.12_${suffix}"
 
 # server
 dir="/hdd/code/yuhansun"
@@ -23,21 +27,15 @@ labelStrMapPath="${data_dir}/entity_string_label.txt"
 spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
 graph_property_edge_path="${data_dir}/graph_property_edge.txt"
 
-db_folder_name="neo4j-community-3.4.12_node_edges"
-# cp -a ${data_dir}/${db_folder_name} ${db_dir}/${db_folder_name}
-# do it mannually
-
-add_edge_path="${db_dir}/edges.txt"
-graph_after_removal_path="${db_dir}/graph.txt"
-db_after_removal_path="${db_dir}/neo4j-community-3.4.12_node_edges/data/databases/graph.db"
-
-split_mode="Gleenes"
-containID_path="${db_dir}/containID_${suffix}.txt"
-PNPathAndPrefix="${db_dir}/PathNeighbors_${suffix}"
+add_edge_path="${cur_dir}/edges.txt"
 
 test_count=1000
-safe_nodes_path="${db_dir}/safeNodes.txt"
+safe_nodes_path="${cur_dir}/safeNodes.txt"
 output_path="${result_dir}/${dataset}.txt"
+
+# remove current db_dir and use the backup to restore
+rm -r ${db_dir}
+cp -a ${backup_dir}/neo4j-community-3.4.12_${suffix}_after_pn $db_dir
 
 java -Xmx100g -jar ${jar_path} \
 	-f addEdgeExperiment \

@@ -4,8 +4,8 @@
 dataset="wikidata"
 # always hard code this dir
 # because a rm -r will happen here
-db_dir="/hdd/code/yuhansun/data/${dataset}/add"
-backup_dir="${db_dir}/backup"
+cur_dir="/hdd/code/yuhansun/data/${dataset}/add"
+backup_dir="${cur_dir}/backup"
 
 # server
 dir="/hdd/code/yuhansun"
@@ -23,12 +23,12 @@ spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
 graph_property_edge_path="${data_dir}/graph_property_edge.txt"
 
 db_folder_name="neo4j-community-3.4.12_node_edges"
-# cp -a ${data_dir}/${db_folder_name} ${db_dir}/${db_folder_name}
+# cp -a ${data_dir}/${db_folder_name} ${cur_dir}/${db_folder_name}
 # do it mannually
 
-add_edge_path="${db_dir}/edges.txt"
-graph_after_removal_path="${db_dir}/graph.txt"
-db_after_removal_path="${db_dir}/neo4j-community-3.4.12_node_edges/data/databases/graph.db"
+add_edge_path="${cur_dir}/edges.txt"
+graph_after_removal_path="${cur_dir}/graph.txt"
+db_after_removal_path="${cur_dir}/neo4j-community-3.4.12_node_edges/data/databases/graph.db"
 
 # java -Xmx100g -jar ${jar_path} \
 # 	-f sampleFile \
@@ -48,16 +48,18 @@ db_after_removal_path="${db_dir}/neo4j-community-3.4.12_node_edges/data/database
 # 	-outputPath ${graph_after_removal_path}
 
 # Back up the new node_edges graph db.
-# cp -a ${db_dir}/${db_folder_name} ${backup_dir}/${db_folder_name}
+# cp -a ${cur_dir}/${db_folder_name} ${backup_dir}/${db_folder_name}
 
 # Rename db dir with suffix
-suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
-db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
-mv $db_after_removal_path $db_path
-
-# Construct the tree structure
+split_mode="Gleenes"
 alpha="1.0"
 maxPNSize=-1
+suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
+db_dir="${cur_dir}/neo4j-community-3.4.12_${suffix}"
+db_path="${db_dir}/data/databases/graph.db"
+mv ${cur_dir}/neo4j-community-3.4.12_node_edges $db_dir
+
+# Construct the tree structure
 java -Xmx100g -jar ${jar_path} \
 	-f wikiConstructRTree \
 	-dp ${db_path} \
@@ -68,11 +70,11 @@ java -Xmx100g -jar ${jar_path} \
 	-maxPNSize ${maxPNSize}
 
 # Backup the db after tree construction.
-cp -a ${db_dir}/neo4j-community-3.4.12_${suffix} ${backup_dir}/neo4j-community-3.4.12_${suffix}
+after_tree="${backup_dir}/neo4j-community-3.4.12_${suffix}_after_tree"
+cp -a $db_dir $after_tree
 
-split_mode="Gleenes"
-containID_path="${db_dir}/containID_${suffix}.txt"
-PNPathAndPrefix="${db_dir}/PathNeighbors_${suffix}"
+containID_path="${cur_dir}/containID_${suffix}.txt"
+PNPathAndPrefix="${cur_dir}/PathNeighbors_${suffix}"
 
 # Generate the leaf contain spatial node file
 java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
@@ -94,6 +96,9 @@ java -Xmx100g -jar ${jar_path} \
 		-hopListStr 0,1 \
 		-dp ${db_path} \
 		-c ${containID_path}	
+
+# Backup the db after pn load.
+cp -a $db_dir ${backup_dir}/neo4j-community-3.4.12_${suffix}_after_pn
 
 
 
