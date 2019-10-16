@@ -12,9 +12,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +45,7 @@ import commons.Neo4jGraphUtility;
 import commons.ReadWriteUtil;
 import commons.RisoTreeUtil;
 import commons.Util;
+import graph.Construct_RisoTree;
 
 public class Wikidata {
 
@@ -579,12 +582,9 @@ public class Wikidata {
   }
 
   public static void generateZeroOneHopPNForSpatialNodes(String graphPath, String labelPath,
-      String entityPath, String entityStringLabelMapPath, int maxPNSize, String outputPath)
-      throws Exception {
-    Util.checkPathExist(graphPath);
-    Util.checkPathExist(labelPath);
-    Util.checkPathExist(entityPath);
-    Util.checkPathExist(entityStringLabelMapPath);
+      String entityPath, String entityStringLabelMapPath, int maxPNSize, int MAX_HOPNUM,
+      String outputPath) throws Exception {
+    Util.checkPathExist(new String[] {graphPath, labelPath, entityPath, entityStringLabelMapPath});
     ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
     ArrayList<ArrayList<Integer>> graphLabels = GraphUtil.ReadGraph(labelPath);
     ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
@@ -593,40 +593,42 @@ public class Wikidata {
     maxPNSize = maxPNSize == -1 ? Integer.MAX_VALUE : maxPNSize;
     FileWriter writer = Util.getFileWriter(outputPath);
     generateZeroOneHopPNForSpatialNodes(graph, graphLabels, entities, labelStringMap, maxPNSize,
-        writer);
+        MAX_HOPNUM, writer);
     Util.close(writer);
   }
 
   private static void generateZeroOneHopPNForSpatialNodes(ArrayList<ArrayList<Integer>> graph,
       ArrayList<ArrayList<Integer>> graphLabels, ArrayList<Entity> entities,
-      String[] labelStringMap, int maxPNSize, FileWriter writer) throws Exception {
+      String[] labelStringMap, int maxPNSize, int MAX_HOPNUM, FileWriter writer) throws Exception {
     for (Entity entity : entities) {
       if (!entity.IsSpatial) {
         continue;
       }
       int id = entity.id;
       generateOutputZeroOneHopPNForSingleSpatialNode(graph, graphLabels, labelStringMap, id,
-          maxPNSize, writer);
+          maxPNSize, MAX_HOPNUM, writer);
     }
   }
 
   private static void generateOutputZeroOneHopPNForSingleSpatialNode(
       ArrayList<ArrayList<Integer>> graph, ArrayList<ArrayList<Integer>> graphLabels,
-      String[] labelStringMap, int id, int maxPNSize, FileWriter writer) throws Exception {
+      String[] labelStringMap, int id, int maxPNSize, int MAX_HOPNUM, FileWriter writer)
+      throws Exception {
     Map<String, ArrayList<Integer>> zeroHopPathNeighbors =
         generateZeroHopPNForSingleSpatialNode(id, graphLabels.get(id), labelStringMap);
-    Map<String, ArrayList<Integer>> oneHopPathNeighbors = generateOneHopPNForSingleSpatialNode(
-        zeroHopPathNeighbors, id, graph, graphLabels, labelStringMap, maxPNSize);
     writer.write(id + "\n");
     writePathNeighbors(writer, zeroHopPathNeighbors);
-    writePathNeighbors(writer, oneHopPathNeighbors);
+    Map<String, ArrayList<Integer>> pre = zeroHopPathNeighbors;
+    for (int i = 1; i < MAX_HOPNUM; i++) {
+      Map<String, ArrayList<Integer>> curHopPathNeighbors =
+          generateSecondHopPN(pre, graph, graphLabels, labelStringMap, maxPNSize);
+      writePathNeighbors(writer, curHopPathNeighbors);
+      pre = curHopPathNeighbors;
+    }
   }
-
-
 
   private static void writePathNeighbors(FileWriter writer,
       Map<String, ArrayList<Integer>> pathNeighbors) throws Exception {
-    // TODO Auto-generated method stub
     for (String key : pathNeighbors.keySet()) {
       writer.write(String.format("%s,%s\n", key, pathNeighbors.get(key)));
     }
@@ -691,6 +693,42 @@ public class Wikidata {
       }
     }
     return oneHopPathNeighbors;
+  }
+
+  private static Map<String, ArrayList<Integer>> generateSecondHopPN(
+      Map<String, ArrayList<Integer>> preHopPN, ArrayList<ArrayList<Integer>> graph,
+      ArrayList<ArrayList<Integer>> graphLabels, String[] labelStringMap, int maxPNSize) {
+    Map<String, ArrayList<Integer>> curHopPathNeighbors = new HashMap<>();
+    Iterator<Entry<String, ArrayList<Integer>>> iterator = preHopPN.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Entry<String, ArrayList<Integer>> entry = iterator.next();
+      String key = entry.getKey();
+      TreeSet<Integer> curNeighbors = getNextPathNeighborsInSet(entry.getValue(), graph);
+      HashMap<Integer, ArrayList<Integer>> pn =
+          Construct_RisoTree.dividedByLabels(curNeighbors, graphLabels, maxPNSize);
+      for (int pathEndLabel : pn.keySet()) {
+        String attach = labelStringMap[pathEndLabel];
+        String propertyName = RisoTreeUtil.getAttachName(key, attach);
+        curHopPathNeighbors.put(propertyName, pn.get(pathEndLabel));
+      }
+    }
+    return curHopPathNeighbors;
+  }
+
+  /**
+   * Get the neighbors for the next hop from a set of vertexes.
+   *
+   * @param curPathNeighbors
+   * @param graph
+   * @return
+   */
+  private static TreeSet<Integer> getNextPathNeighborsInSet(Iterable<Integer> curPathNeighbors,
+      ArrayList<ArrayList<Integer>> graph) {
+    TreeSet<Integer> nextPathNeighbors = new TreeSet<>();
+    for (int curNeighborID : curPathNeighbors)
+      for (int id : graph.get(curNeighborID))
+        nextPathNeighbors.add(id);
+    return nextPathNeighbors;
   }
 
   /**

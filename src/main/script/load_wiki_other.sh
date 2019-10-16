@@ -1,8 +1,8 @@
 #!/bin/bash
 ./package.sh
-# tree_type="Gleene_1.0"
 
 dataset="Yelp_100"
+MAX_HOPNUM=2
 
 # server
 dir="/hdd/code/yuhansun"
@@ -38,16 +38,16 @@ java -Xmx100g -jar ${jar_path} -h
 
 ###### Load ######
 # Load graph nodes, edges and spatial attributes.
-java -Xmx100g -jar ${jar_path} -f wikidataLoadGraph \
-	-ep ${entity_path} \
-	-lp ${label_path} \
-	-entityStringLabelMapPath ${entityStringLabelMapPath} \
-	-dp ${db_path}
+# java -Xmx100g -jar ${jar_path} -f wikidataLoadGraph \
+# 	-ep ${entity_path} \
+# 	-lp ${label_path} \
+# 	-entityStringLabelMapPath ${entityStringLabelMapPath} \
+# 	-dp ${db_path}
 
 # Load graph edges
-java -Xmx100g -jar ${jar_path} -f loadGraphEdgesNoMap \
-		-dp ${db_path}	\
-		-gp ${graph_path}
+# java -Xmx100g -jar ${jar_path} -f loadGraphEdgesNoMap \
+# 		-dp ${db_path}	\
+# 		-gp ${graph_path}
 
 # MAX_HOPNUM="2"
 # PNPathAndPreffix="${data_dir}/PathNeighbors_${tree_type}"
@@ -61,15 +61,15 @@ java -Xmx100g -jar ${jar_path} -f loadGraphEdgesNoMap \
 #  -entityStringLabelMapPath ${entityStringLabelMapPath} \
 #  -maxPNSize 100
 
-# java -Xmx100g -jar ${jar_path} \
-# 	-f wikigenerateZeroOneHopPNForSpatialNodes \
-# 	-gp ${graph_path} \
-# 	-lp ${label_path} \
-# 	-ep ${entity_path} \
-# 	-entityStringLabelMapPath ${entityStringLabelMapPath} \
-# 	-maxPNSize 100 \
-# 	-outputPath ${data_dir}/spatialNodesZeroOneHopPN.txt
-
+output_path="${data_dir}/spatialNodesZeroOneHopPN_-1_${MAX_HOPNUM}.txt"
+java -Xmx100g -jar ${jar_path} \
+	-f wikigenerateZeroOneHopPNForSpatialNodes \
+	-gp ${graph_path} \
+	-lp ${label_path} \
+	-ep ${entity_path} \
+	-entityStringLabelMapPath ${entityStringLabelMapPath} \
+	-maxPNSize -1 \
+	-outputPath ${output_path}
 
 # java -Xmx100g -jar ${jar_path} \
 # 	-f wikiConstructRTree \

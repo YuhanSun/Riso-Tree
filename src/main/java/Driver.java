@@ -317,7 +317,8 @@ public class Driver {
             Wikidata.generateZeroOneHopPNForSpatialNodes(cmd.getOptionValue(graphPath),
                 cmd.getOptionValue(labelListPath), cmd.getOptionValue(entityPath),
                 cmd.getOptionValue(entityStringLabelMapPath),
-                Integer.parseInt(cmd.getOptionValue(maxPNSize)), cmd.getOptionValue(outputPath));
+                Integer.parseInt(cmd.getOptionValue(maxPNSize)),
+                Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)), cmd.getOptionValue(outputPath));
             break;
           case wikiConstructRTree:
             // new LoadDataNoOSM(new Config(), true).wikiConstructRTree(cmd.getOptionValue(dbPath),
