@@ -619,7 +619,7 @@ public class Wikidata {
     writer.write(id + "\n");
     writePathNeighbors(writer, zeroHopPathNeighbors);
     Map<String, ArrayList<Integer>> pre = zeroHopPathNeighbors;
-    for (int i = 1; i < MAX_HOPNUM; i++) {
+    for (int i = 1; i <= MAX_HOPNUM; i++) {
       Map<String, ArrayList<Integer>> curHopPathNeighbors =
           generateSecondHopPN(pre, graph, graphLabels, labelStringMap, maxPNSize);
       writePathNeighbors(writer, curHopPathNeighbors);
