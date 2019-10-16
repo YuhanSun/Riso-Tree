@@ -22,7 +22,7 @@ code_dir="${dir}/code"
 
 
 # server setup
-db_path="${data_dir}/neo4j-community-3.4.12_node_edge/data/databases/graph.db"
+db_path="${data_dir}/neo4j-community-3.4.12_node_edges/data/databases/graph.db"
 
 
 graph_path="${data_dir}/graph.txt"
@@ -38,21 +38,22 @@ java -Xmx100g -jar ${jar_path} -h
 
 ###### Load ######
 # Load graph nodes, edges and spatial attributes.
-# java -Xmx100g -jar ${jar_path} -f wikidataLoadGraph \
-# 	-ep ${entity_path} \
-# 	-lp ${label_path} \
-# 	-entityStringLabelMapPath ${entityStringLabelMapPath} \
-# 	-dp ${db_path}
+java -Xmx100g -jar ${jar_path} -f wikidataLoadGraph \
+	-ep ${entity_path} \
+	-lp ${label_path} \
+	-entityStringLabelMapPath ${entityStringLabelMapPath} \
+	-dp ${db_path}
 
 # Load graph edges
-# java -Xmx100g -jar ${jar_path} -f loadGraphEdgesNoMap \
-# 		-dp ${db_path}	\
-# 		-gp ${graph_path}
+java -Xmx100g -jar ${jar_path} -f loadGraphEdgesNoMap \
+		-dp ${db_path}	\
+		-gp ${graph_path}
 
 # MAX_HOPNUM="2"
 # PNPathAndPreffix="${data_dir}/PathNeighbors_${tree_type}"
 # java -Xmx100g -jar ${jar_path} -f LoadAll -ep ${entity_path} -dp ${db_path} -c ${containID_path} -gp ${graph_path} -lp ${label_path} -MAX_HOPNUM ${MAX_HOPNUM} -PNPreffix ${PNPathAndPreffix} -mapPath ${map_path} -d ${dataset}
 
+####### Not used for efficiency reason ####
 # java -Xmx100g -jar ${jar_path} \
 #  -f wikisetZeroOneHopPNForSpatialNodes \
 #  -dp ${db_path} \
@@ -61,16 +62,16 @@ java -Xmx100g -jar ${jar_path} -h
 #  -entityStringLabelMapPath ${entityStringLabelMapPath} \
 #  -maxPNSize 100
 
-output_path="${data_dir}/spatialNodesZeroOneHopPN_-1_${MAX_HOPNUM}.txt"
-java -Xmx100g -jar ${jar_path} \
-	-f wikigenerateZeroOneHopPNForSpatialNodes \
-	-gp ${graph_path} \
-	-lp ${label_path} \
-	-ep ${entity_path} \
-	-entityStringLabelMapPath ${entityStringLabelMapPath} \
-	-maxPNSize -1 \
-	-MAX_HOPNUM $MAX_HOPNUM	\
-	-outputPath ${output_path}
+# output_path="${data_dir}/spatialNodesZeroOneHopPN_-1_${MAX_HOPNUM}.txt"
+# java -Xmx100g -jar ${jar_path} \
+# 	-f wikigenerateZeroOneHopPNForSpatialNodes \
+# 	-gp ${graph_path} \
+# 	-lp ${label_path} \
+# 	-ep ${entity_path} \
+# 	-entityStringLabelMapPath ${entityStringLabelMapPath} \
+# 	-maxPNSize -1 \
+# 	-MAX_HOPNUM $MAX_HOPNUM	\
+# 	-outputPath ${output_path}
 
 # java -Xmx100g -jar ${jar_path} \
 # 	-f wikiConstructRTree \
