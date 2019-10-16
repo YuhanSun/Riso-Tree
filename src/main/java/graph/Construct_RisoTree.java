@@ -1238,11 +1238,10 @@ public class Construct_RisoTree {
 
   private static String getAttachName(String key, int pathEndLabel, String[] labelStringMap) {
     String labelStr = labelStringMap[pathEndLabel];
-    return String.format("%s_%s", key, labelStr);
-
+    return RisoTreeUtil.getAttachName(key, labelStr);
   }
 
-  private static HashMap<Integer, ArrayList<Integer>> dividedByLabels(
+  public static HashMap<Integer, ArrayList<Integer>> dividedByLabels(
       TreeSet<Integer> nextPathNeighbors, ArrayList<ArrayList<Integer>> label_list, int maxPNSize) {
     HashMap<Integer, ArrayList<Integer>> pathLabelNeighbors =
         new HashMap<Integer, ArrayList<Integer>>();
