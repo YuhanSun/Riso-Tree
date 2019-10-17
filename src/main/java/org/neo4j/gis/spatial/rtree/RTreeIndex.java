@@ -84,6 +84,9 @@ public class RTreeIndex implements SpatialIndexWriter {
     this.rootNode = rootNode;
     this.envelopeDecoder = envelopeDecoder;
     this.maxNodeReferences = maxNodeReferences;
+
+    LOGGER.info("Set minNodeReference");
+    this.minNodeReferences = this.maxNodeReferences / 2;
     monitor = new EmptyMonitor();
     if (envelopeDecoder == null) {
       throw new NullPointerException("envelopeDecoder is NULL");
@@ -2072,42 +2075,53 @@ public class RTreeIndex implements SpatialIndexWriter {
       List<NodeWithEnvelope> bestGroup = null;
       Envelope bestGroupEnvelope = null;
       NodeWithEnvelope bestEntry = null;
-      double expansionMin = Double.POSITIVE_INFINITY;
-      for (NodeWithEnvelope e : entries) {
-        double expansion1 =
-            getArea(createEnvelope(e.envelope, group1envelope)) - getArea(group1envelope);
-        if (!spatialOnly && childNodePNs != null) {
-          int expandPN = getExpandGD(group1PN, childNodePNs.get(e.node));
-          expansion1 = getGSDGeneral(expandPN, expansion1);
-        }
-        double expansion2 =
-            getArea(createEnvelope(e.envelope, group2envelope)) - getArea(group2envelope);
-        if (!spatialOnly && childNodePNs != null) {
-          int expandPN = getExpandGD(group2PN, childNodePNs.get(e.node));
-          expansion2 = getGSDGeneral(expandPN, expansion2);
-        }
 
-        if (expansion1 < expansion2 && expansion1 < expansionMin) {
-          bestGroup = group1;
-          bestGroupEnvelope = group1envelope;
-          bestEntry = e;
-          expansionMin = expansion1;
-        } else if (expansion2 < expansion1 && expansion2 < expansionMin) {
-          bestGroup = group2;
-          bestGroupEnvelope = group2envelope;
-          bestEntry = e;
-          expansionMin = expansion2;
-        } else if (expansion1 == expansion2 && expansion1 < expansionMin) {
-          // in case of equality choose the group with the smallest area
-          if (getArea(group1envelope) < getArea(group2envelope)) {
+      if (group1.size() >= maxNodeReferences - minNodeReferences) {
+        bestGroup = group2;
+        bestEntry = entries.get(0);
+        bestGroupEnvelope = bestEntry.envelope;
+      } else if (group2.size() > maxNodeReferences - minNodeReferences) {
+        bestGroup = group1;
+        bestEntry = entries.get(0);
+        bestGroupEnvelope = bestEntry.envelope;
+      } else {
+        double expansionMin = Double.POSITIVE_INFINITY;
+        for (NodeWithEnvelope e : entries) {
+          double expansion1 =
+              getArea(createEnvelope(e.envelope, group1envelope)) - getArea(group1envelope);
+          if (!spatialOnly && childNodePNs != null) {
+            int expandPN = getExpandGD(group1PN, childNodePNs.get(e.node));
+            expansion1 = getGSDGeneral(expandPN, expansion1);
+          }
+          double expansion2 =
+              getArea(createEnvelope(e.envelope, group2envelope)) - getArea(group2envelope);
+          if (!spatialOnly && childNodePNs != null) {
+            int expandPN = getExpandGD(group2PN, childNodePNs.get(e.node));
+            expansion2 = getGSDGeneral(expandPN, expansion2);
+          }
+
+          if (expansion1 < expansion2 && expansion1 < expansionMin) {
             bestGroup = group1;
             bestGroupEnvelope = group1envelope;
-          } else {
+            bestEntry = e;
+            expansionMin = expansion1;
+          } else if (expansion2 < expansion1 && expansion2 < expansionMin) {
             bestGroup = group2;
             bestGroupEnvelope = group2envelope;
+            bestEntry = e;
+            expansionMin = expansion2;
+          } else if (expansion1 == expansion2 && expansion1 < expansionMin) {
+            // in case of equality choose the group with the smallest area
+            if (getArea(group1envelope) < getArea(group2envelope)) {
+              bestGroup = group1;
+              bestGroupEnvelope = group1envelope;
+            } else {
+              bestGroup = group2;
+              bestGroupEnvelope = group2envelope;
+            }
+            bestEntry = e;
+            expansionMin = expansion1;
           }
-          bestEntry = e;
-          expansionMin = expansion1;
         }
       }
 
@@ -2458,6 +2472,7 @@ public class RTreeIndex implements SpatialIndexWriter {
   private Node rootNode; // actually it is the layerNode.
   private EnvelopeDecoder envelopeDecoder;
   private int maxNodeReferences;
+  private int minNodeReferences;
   // private String splitMode = GREENES_SPLIT;
   private String splitMode = QUADRATIC_SPLIT;
   private boolean shouldMergeTrees = false;
