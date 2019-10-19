@@ -32,6 +32,7 @@ output_path="${result_dir}"
 log_path="${result_dir}/${dataset}_log.txt"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
+alpha=1.0
 suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
 
