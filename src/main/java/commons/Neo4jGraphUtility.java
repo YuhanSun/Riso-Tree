@@ -63,7 +63,7 @@ public class Neo4jGraphUtility {
   public static GraphDatabaseService getDatabaseService(String dbPath) {
     LOGGER.info("get dbservice from " + dbPath);
     if (!Util.pathExist(dbPath)) {
-      Util.println(dbPath + "does not exist!");
+      Util.println(dbPath + " does not exist!");
       System.exit(-1);
     }
     GraphDatabaseService dbservice =
