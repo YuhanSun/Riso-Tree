@@ -184,7 +184,7 @@ public class RisoTreeQueryPNTest {
     Util.println("Page access:" + risoTreeQueryPN.page_hit_count);
     Util.println("get iterator time:" + risoTreeQueryPN.get_iterator_time);
     Util.println("iterate time:" + risoTreeQueryPN.iterate_time);
-    Util.println("located in count:" + risoTreeQueryPN.located_in_count);
+    Util.println("located in count:" + risoTreeQueryPN.candidate_count);
 
     risoTreeQueryPN.dbservice.shutdown();
   }

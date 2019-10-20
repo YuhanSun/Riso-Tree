@@ -688,7 +688,7 @@ public class ExperimentSpaceSelectivity {
         String outputPath = String.format("%s/%s.txt", outputDir, method.toString());
         List<ResultRecord> records = ExperimentUtil.runExperiment(dbPath, dataset, method, MAX_HOP,
             queryPath, queryCount, password, clearCache, clearCacheMethod, outputPath);
-        String string = ExperimentUtil.getAverageResultOutput(outputPath, records, method);
+        String string = ExperimentUtil.getAverageResultOutput(records, method);
         ReadWriteUtil.WriteFile(outputPath, true,
             StringUtils.joinWith("\t", queryPath, string) + "\n");
       }

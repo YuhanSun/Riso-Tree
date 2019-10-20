@@ -81,7 +81,7 @@ public class RisoTreeQueryPN {
   public long result_count;
   public long page_hit_count;
   public long overlap_leaf_node_count;
-  public long located_in_count;
+  public long candidate_count;
   public String logPath;
   public ExecutionPlanDescription planDescription;
 
@@ -977,10 +977,6 @@ public class RisoTreeQueryPN {
         return candidateSet;
       }
 
-      for (List<Node> nodes : overlapLeafNodes.values()) {
-        overlap_leaf_node_count += nodes.size();
-      }
-
       if (completeStrategyUsed) {
         candidateSet = getCandidateSetWithIgnoreComplete(overlapLeafNodes, PN_list_propertyname);
         for (int spatialId : queryNodesComplete.keySet()) {
@@ -1006,6 +1002,11 @@ public class RisoTreeQueryPN {
         candidateSet =
             getCandidateSetWithIgnore(overlapLeafNodes, PN_list_propertyname, PN_size_propertyname);
       }
+
+      for (Collection<Long> candidates : candidateSet.values()) {
+        candidate_count += candidates.size();
+      }
+
       return candidateSet;
     } catch (Exception e) {
       e.printStackTrace();
@@ -1288,6 +1289,7 @@ public class RisoTreeQueryPN {
       if (overlapLeafNodes.isEmpty()) {
         return null;
       }
+      overlap_leaf_node_count += overlapLeafNodes.size();
       overlapLeafNodesMultiPredicate.put(spatialId, overlapLeafNodes);
     }
     range_query_time += System.currentTimeMillis() - start;
@@ -1349,7 +1351,7 @@ public class RisoTreeQueryPN {
           expandTime += System.currentTimeMillis() - start;
         }
       }
-      located_in_count = overlap_MBR_list.size();
+      int located_in_count = overlap_MBR_list.size();
 
       if (outputLevelInfo) {
         String logWriteLine = String.format("level %d\n", level_index);
@@ -1690,7 +1692,7 @@ public class RisoTreeQueryPN {
           } else { // if spatial predicate is more selective
             MyRectangle queryRect = spa_predicates.get(minSpaID);
             // get located in nodes
-            located_in_count = 0;
+            candidate_count = 0;
             int levelTime = 0;
             level_index++;
             double nodeIndex = 0;
@@ -1710,7 +1712,7 @@ public class RisoTreeQueryPN {
                 MyRectangle rectangle = new MyRectangle(bbox);
                 if (rectangle.intersect(queryRect) != null) {
                   candidateIds.add(geom.getId());
-                  located_in_count++;
+                  candidate_count++;
                 }
               }
               long time = System.currentTimeMillis() - start;
@@ -1722,7 +1724,7 @@ public class RisoTreeQueryPN {
             }
             if (outputLevelInfo) {
               logWriteLine = String.format("level %d\n", level_index);
-              logWriteLine += String.format("Located in nodes: %d\n", located_in_count);
+              logWriteLine += String.format("Located in nodes: %d\n", candidate_count);
               logWriteLine += String.format("level %d time: %d", level_index, levelTime);
               Util.println(logWriteLine);
             }
@@ -1759,7 +1761,7 @@ public class RisoTreeQueryPN {
     result_count = 0;
     page_hit_count = 0;
     overlap_leaf_node_count = 0;
-    located_in_count = 0;
+    candidate_count = 0;
   }
 
   /**
@@ -2130,7 +2132,7 @@ public class RisoTreeQueryPN {
           {
             MyRectangle queryRect = spa_predicates.get(minSpaID);
             // get located in nodes
-            located_in_count = 0;
+            candidate_count = 0;
             int levelTime = 0;
             level_index++;
             double nodeIndex = 0;
@@ -2150,7 +2152,7 @@ public class RisoTreeQueryPN {
                 MyRectangle rectangle = new MyRectangle(bbox);
                 if (rectangle.intersect(queryRect) != null) {
                   ids.add(geom.getId());
-                  located_in_count++;
+                  candidate_count++;
                 }
               }
               long time = System.currentTimeMillis() - start;
@@ -2200,7 +2202,7 @@ public class RisoTreeQueryPN {
             }
             if (outputLevelInfo) {
               logWriteLine = String.format("level %d\n", level_index);
-              logWriteLine += String.format("Located in nodes: %d\n", located_in_count);
+              logWriteLine += String.format("Located in nodes: %d\n", candidate_count);
               logWriteLine += String.format("level %d time: %d", level_index, levelTime);
               Util.println(logWriteLine);
               OwnMethods.WriteFile(logPath, true, logWriteLine + "\n\n");

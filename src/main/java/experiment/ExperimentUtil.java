@@ -95,7 +95,7 @@ public class ExperimentUtil {
             risoTreeQueryPN.range_query_time, risoTreeQueryPN.get_iterator_time,
             risoTreeQueryPN.iterate_time, risoTreeQueryPN.set_label_time,
             risoTreeQueryPN.remove_label_time, risoTreeQueryPN.overlap_leaf_node_count,
-            risoTreeQueryPN.result_count);
+            risoTreeQueryPN.candidate_count, risoTreeQueryPN.result_count);
         planDescription = risoTreeQueryPN.planDescription;
         break;
       default:
@@ -106,8 +106,7 @@ public class ExperimentUtil {
     return record;
   }
 
-  public static String getAverageResultOutput(String outputPath, List<ResultRecord> records,
-      ExperimentMethod method) {
+  public static String getAverageResultOutput(List<ResultRecord> records, ExperimentMethod method) {
     String string = "";
     switch (method) {
       case NAIVE:
@@ -133,6 +132,7 @@ public class ExperimentUtil {
         string += ResultRecord.getGetIteratorTimeAvg(records) + "\t";
         string += ResultRecord.getIterateTimeAvg(records) + "\t";
         string += ResultRecord.getOverLapLeafCountAvg(records) + "\t";
+        string += ResultRecord.getCandidateCountAvg(records) + "\t";
         string += ResultRecord.getResultCountAvg(records);
         break;
       default:
@@ -151,7 +151,8 @@ public class ExperimentUtil {
             "resultCount");
       case RISOTREE:
         return StringUtils.joinWith("\t", "runTime", "pageHit", "rangeQueryTime", "setLabelTime",
-            "removeLabelTime", "getIteratorTime", "iterateTime", "overlapLeafCount", "resultCount");
+            "removeLabelTime", "getIteratorTime", "iterateTime", "overlapLeafCount",
+            "candidateCount", "resultCount");
       default:
         throw new RuntimeException(String.format("method %s does not exist!", method));
     }
@@ -167,7 +168,7 @@ public class ExperimentUtil {
     for (String queryPath : queryPathList) {
       List<ResultRecord> records = runExperiment(dbPath, dataset, method, MAX_HOP, queryPath,
           queryCount, password, clearCache, clearCacheMethod, outputPath);
-      String string = getAverageResultOutput(outputPath, records, method);
+      String string = getAverageResultOutput(records, method);
       ReadWriteUtil.WriteFile(outputPath, true,
           StringUtils.joinWith("\t", queryPath, string) + "\n");
     }

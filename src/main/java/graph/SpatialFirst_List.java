@@ -58,6 +58,8 @@ public class SpatialFirst_List {
   public long range_query_time;
   public long get_iterator_time;
   public long iterate_time;
+  public long overlap_leaf_count;
+  public long candidate_count;
   public long result_count;
   public long page_hit_count;
 
@@ -596,6 +598,8 @@ public class SpatialFirst_List {
     range_query_time = 0;
     get_iterator_time = 0;
     iterate_time = 0;
+    overlap_leaf_count = 0;
+    candidate_count = 0;
     result_count = 0;
     page_hit_count = 0;
     queue_time = 0;
@@ -656,6 +660,7 @@ public class SpatialFirst_List {
       Util.println("query range: " + min_queryRectangle);
       LinkedList<Node> rangeQueryResult = this.rangeQuery(rootNode, min_queryRectangle);
       range_query_time = System.currentTimeMillis() - start_1;
+      overlap_leaf_count += rangeQueryResult.size();
 
       int located_in_count = 0;
       for (Node rtree_node : rangeQueryResult) {
@@ -704,7 +709,8 @@ public class SpatialFirst_List {
           }
         }
       }
-      Util.println("range query result count: " + located_in_count);
+      Util.println("located in spatial objects count: " + located_in_count);
+      candidate_count += located_in_count;
 
       tx.success();
       tx.close();

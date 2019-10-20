@@ -16,7 +16,7 @@ public class ResultRecord {
 
   public long result_count;
   public long overlap_leaf_node_count;
-  public long located_in_count;
+  public long candidate_count;
 
   public ResultRecord(long runTime, long pageHit) {
     this.runTime = runTime;
@@ -35,7 +35,7 @@ public class ResultRecord {
     string += String.format("remove_label_time: %d\n", remove_label_time);
     string += String.format("result_count: %d\n", result_count);
     string += String.format("overlap_leaf_node_count: %d\n", overlap_leaf_node_count);
-    string += String.format("located_in_count: %d\n", located_in_count);
+    string += String.format("candidate_count: %d\n", candidate_count);
 
     return string;
   }
@@ -57,11 +57,23 @@ public class ResultRecord {
     this.result_count = resultCount;
   }
 
+  /**
+   * Spatial-First-List approach.
+   *
+   * @param runTime
+   * @param pageHit
+   * @param rangeQueryTime
+   * @param getIteratorTime
+   * @param iterateTime
+   * @param overlapLeafCount
+   * @param resultCount
+   */
   public ResultRecord(long runTime, long pageHit, long rangeQueryTime, long getIteratorTime,
-      long iterateTime, long overlapLeafCount, long resultCount) {
+      long iterateTime, long overlapLeafCount, long candidateCount, long resultCount) {
     this(runTime, pageHit, getIteratorTime, iterateTime, resultCount);
     this.range_query_time = rangeQueryTime;
     this.overlap_leaf_node_count = overlapLeafCount;
+    this.candidate_count = candidateCount;
   }
 
   /**
@@ -78,9 +90,9 @@ public class ResultRecord {
    */
   public ResultRecord(long runTime, long pageHit, long rangeQueryTime, long getIteratorTime,
       long iterateTime, long setLabelTime, long removeLabelTime, long overlapLeafCount,
-      long resultCount) {
+      long candidateCount, long resultCount) {
     this(runTime, pageHit, rangeQueryTime, getIteratorTime, iterateTime, overlapLeafCount,
-        resultCount);
+        candidateCount, resultCount);
     this.set_label_time = setLabelTime;
     this.remove_label_time = removeLabelTime;
   }
@@ -157,10 +169,10 @@ public class ResultRecord {
     return Util.Average(counts);
   }
 
-  public static long getLocatedInCountAvg(List<ResultRecord> resultRecords) {
+  public static long getCandidateCountAvg(List<ResultRecord> resultRecords) {
     List<Long> counts = new ArrayList<>(resultRecords.size());
     for (ResultRecord resultRecord : resultRecords) {
-      counts.add(resultRecord.located_in_count);
+      counts.add(resultRecord.candidate_count);
     }
     return Util.Average(counts);
   }
