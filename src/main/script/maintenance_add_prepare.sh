@@ -120,7 +120,7 @@ done
 java -Xmx100g -jar ${jar_path} \
 		-f wikiLoadAllHopPN \
 		-PNPrefix ${PNPathAndPrefix} \
-		-hopListStr 0,1 \
+		-hopListStr 0,1,2 \
 		-dp ${db_path} \
 		-c ${containID_path}	
 
