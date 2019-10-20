@@ -113,7 +113,7 @@ java -Xmx100g -jar ${jar_path} \
 for hop in 0 1 2
 do
 	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
-		-c ${containID_path} -gp ${db_path} -labelStrMapPath ${labelStrMapPath}\
+		-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
 		-lp ${label_path} -hop ${hop} -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
 done
 
