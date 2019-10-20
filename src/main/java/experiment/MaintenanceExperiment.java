@@ -45,8 +45,16 @@ public class MaintenanceExperiment {
       int id = random.nextInt(len);
       String line = linesArray.get(id);
       String[] strings = line.split(",");
-      int start = Integer.parseInt(strings[0]);
-      int end = Integer.parseInt(strings[2]);
+      int start = 0, end = 0;
+      if (strings.length == 3) {
+        start = Integer.parseInt(strings[0]);
+        end = Integer.parseInt(strings[2]);
+      } else if (strings.length == 2) {
+        start = Integer.parseInt(strings[0]);
+        end = Integer.parseInt(strings[1]);
+      } else {
+        throw new RuntimeException(line + " is not edge-format!");
+      }
       int min = Math.min(start, end);
       int max = Math.max(start, end);
       String key = new Edge(min, max).toString();

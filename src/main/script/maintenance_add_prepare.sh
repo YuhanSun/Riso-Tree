@@ -1,11 +1,14 @@
 #!/bin/bash
 ./package.sh
 
-dataset="wikidata"
+# dataset="wikidata"
+dataset="Gowalla_100"
 # always hard code this dir
 # because a rm -r will happen here
 cur_dir="/hdd/code/yuhansun/data/${dataset}/add"
 backup_dir="${cur_dir}/backup"
+mkdir -p $cur_dir
+mkdir -p $backup_dir
 
 # server
 dir="/hdd/code/yuhansun"
@@ -23,32 +26,50 @@ spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
 graph_property_edge_path="${data_dir}/graph_property_edge.txt"
 
 db_folder_name="neo4j-community-3.4.12_node_edges"
-# cp -a ${data_dir}/${db_folder_name} ${cur_dir}/${db_folder_name}
-# do it mannually
+src_db_dir="${data_dir}/${db_folder_name}"
+cur_db_dir="${cur_dir}/${db_folder_name}"
+if [ ! -d "$cur_db_dir" ]; then
+	cp -a $src_db_dir $cur_db_dir
+fi
 
 add_edge_path="${cur_dir}/edges.txt"
 graph_after_removal_path="${cur_dir}/graph.txt"
 db_after_removal_path="${cur_dir}/neo4j-community-3.4.12_node_edges/data/databases/graph.db"
 
-# java -Xmx100g -jar ${jar_path} \
-# 	-f sampleFile \
-# 	-inputPath ${graph_property_edge_path}	\
-# 	-ratio 0.01	\
-# 	-outputPath ${add_edge_path}
+if [ ! -f "$graph_property_edge_path" ]; then
+	java -Xmx100g -jar ${jar_path} \
+		-f convertGraphToEdgeFormat \
+		-gp ${graph_path}	\
+		-ratio 0.01	\
+		-graph_property_edge_path ${graph_property_edge_path}
+fi
 
-# java -Xmx100g -jar ${jar_path} \
-# 	-f removeEdgesFromDb \
-# 	-dp ${db_after_removal_path}	\
-# 	-edgePath ${add_edge_path}
+if [ ! -f "$add_edge_path" ]; then
+	java -Xmx100g -jar ${jar_path} \
+		-f sampleFile \
+		-inputPath ${graph_property_edge_path}	\
+		-ratio 0.01	\
+		-outputPath ${add_edge_path}
+fi
 
-# java -Xmx100g -jar ${jar_path} \
-# 	-f removeEdgesFromGraphFile \
-# 	-gp ${graph_path}	\
-# 	-edgePath ${add_edge_path}	\
-# 	-outputPath ${graph_after_removal_path}
+java -Xmx100g -jar ${jar_path} \
+	-f removeEdgesFromDb \
+	-dp ${db_after_removal_path}	\
+	-edgePath ${add_edge_path}
+
+if [ ! -f "$graph_after_removal_path" ]; then
+	java -Xmx100g -jar ${jar_path} \
+		-f removeEdgesFromGraphFile \
+		-gp ${graph_path}	\
+		-edgePath ${add_edge_path}	\
+		-outputPath ${graph_after_removal_path}
+fi
 
 # Back up the new node_edges graph db.
-# cp -a ${cur_dir}/${db_folder_name} ${backup_dir}/${db_folder_name}
+backup_db_dir="${backup_dir}/${db_folder_name}"
+if [ ! -d "$backup_db_dir" ]; then
+	cp -a $cur_db_dir ${backup_dir}/${db_folder_name}
+fi
 
 # Rename db dir with suffix
 split_mode="Gleenes"
@@ -77,13 +98,14 @@ containID_path="${cur_dir}/containID_${suffix}.txt"
 PNPathAndPrefix="${cur_dir}/PathNeighbors_${suffix}"
 
 # Generate the leaf contain spatial node file
-java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
--dp ${db_path} \
--d ${dataset} \
--c ${containID_path}
+java -Xmx100g -jar ${jar_path} \
+	-f wikiGenerateContainSpatialID \
+	-dp ${db_path} \
+	-d ${dataset} \
+	-c ${containID_path}
 
 # modify
-for hop in 0 1
+for hop in 0 1 2
 do
 	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
 		-c ${containID_path} -gp ${db_path} -labelStrMapPath ${labelStrMapPath}\
@@ -98,7 +120,10 @@ java -Xmx100g -jar ${jar_path} \
 		-c ${containID_path}	
 
 # Backup the db after pn load.
-cp -a $db_dir ${backup_dir}/neo4j-community-3.4.12_${suffix}_after_pn
+after_pn_db_dir="${backup_dir}/neo4j-community-3.4.12_${suffix}_after_pn"
+if [ ! -d "$after_pn_db_dir" ]; then
+	cp -a $db_dir $after_pn_db_dir
+fi
 
 
 

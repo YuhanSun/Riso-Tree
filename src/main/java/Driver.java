@@ -7,6 +7,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import commons.Config;
 import commons.Config.ClearCacheMethod;
+import commons.GraphUtil;
 import commons.Util;
 import dataprocess.Wikidata;
 import experiment.Alpha;
@@ -61,7 +62,8 @@ public class Driver {
     /**
      * add experiment
      */
-    sampleFile, removeEdgesFromGraphFile, removeEdgesFromDb, // one time prepare
+    convertGraphToEdgeFormat, sampleFile, removeEdgesFromGraphFile, removeEdgesFromDb, // one time
+                                                                                       // prepare
     addEdgeExperiment,
   }
 
@@ -414,6 +416,10 @@ public class Driver {
                 cmd.getOptionValue(outputPath));
             break;
           // add prepare one time run
+          case convertGraphToEdgeFormat:
+            GraphUtil.convertGraphToEdgeFormat(cmd.getOptionValue(graphPath),
+                cmd.getOptionValue(graphPropertyEdgePath));
+            break;
           case sampleFile:
             MaintenanceExperiment.sampleFile(cmd.getOptionValue(inputPath),
                 Double.parseDouble(cmd.getOptionValue(ratio)), cmd.getOptionValue(outputPath));
