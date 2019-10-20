@@ -29,8 +29,9 @@ db_folder_name="neo4j-community-3.4.12_node_edges"
 src_db_dir="${data_dir}/${db_folder_name}"
 cur_db_dir="${cur_dir}/${db_folder_name}"
 if [ ! -d "$cur_db_dir" ]; then
-	cp -a $src_db_dir $cur_db_dir
+	rm -r $cur_db_dir
 fi
+cp -a $src_db_dir $cur_db_dir
 
 add_edge_path="${cur_dir}/edges.txt"
 graph_after_removal_path="${cur_dir}/graph.txt"
@@ -68,8 +69,9 @@ fi
 # Back up the new node_edges graph db.
 backup_db_dir="${backup_dir}/${db_folder_name}"
 if [ ! -d "$backup_db_dir" ]; then
-	cp -a $cur_db_dir ${backup_dir}/${db_folder_name}
+	rm -r $backup_db_dir
 fi
+cp -a $cur_db_dir $backup_db_dir
 
 # Rename db dir with suffix
 split_mode="Gleenes"
@@ -92,6 +94,9 @@ java -Xmx100g -jar ${jar_path} \
 
 # Backup the db after tree construction.
 after_tree="${backup_dir}/neo4j-community-3.4.12_${suffix}_after_tree"
+if [ -d "$after_tree" ]; then
+	rm -r $after_tree
+fi
 cp -a $db_dir $after_tree
 
 containID_path="${cur_dir}/containID_${suffix}.txt"
@@ -122,8 +127,9 @@ java -Xmx100g -jar ${jar_path} \
 # Backup the db after pn load.
 after_pn_db_dir="${backup_dir}/neo4j-community-3.4.12_${suffix}_after_pn"
 if [ ! -d "$after_pn_db_dir" ]; then
-	cp -a $db_dir $after_pn_db_dir
+	rm -r after_pn_db_dir
 fi
+cp -a $db_dir $after_pn_db_dir
 
 
 
