@@ -1,5 +1,6 @@
 package experiment;
 
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -106,6 +107,55 @@ public class ExperimentUtil {
     return record;
   }
 
+  public static String getOutputResult(ResultRecord record, ExperimentMethod method) {
+    String string = "";
+    switch (method) {
+      case NAIVE:
+        string += record.runTime + "\t";
+        string += record.pageHit + "\t";
+        string += record.get_iterator_time + "\t";
+        string += record.iterate_time + "\t";
+        string += record.result_count;
+        break;
+      case SPATIAL_FIRST:
+        string += record.runTime + "\t";
+        string += record.pageHit + "\t";
+        string += record.range_query_time + "\t";
+        string += record.get_iterator_time + "\t";
+        string += record.iterate_time + "\t";
+        string += record.overlap_leaf_node_count;
+        string += record.candidate_count;
+        string += record.result_count;
+        break;
+      case RISOTREE:
+        string += record.runTime + "\t";
+        string += record.pageHit + "\t";
+        string += record.range_query_time + "\t";
+        string += record.set_label_time + "\t";
+        string += record.remove_label_time + "\t";
+        string += record.get_iterator_time + "\t";
+        string += record.iterate_time + "\t";
+        string += record.overlap_leaf_node_count;
+        string += record.candidate_count;
+        string += record.result_count;
+        break;
+      default:
+        throw new RuntimeException(String.format("method %s does not exist!", method));
+    }
+    return string;
+  }
+
+  public static void outputDetailResult(List<ResultRecord> records, ExperimentMethod method,
+      String outputPath) throws Exception {
+    FileWriter writer = Util.getFileWriter(outputPath, true);
+    for (int i = 0; i < records.size(); i++) {
+      ResultRecord record = records.get(i);
+      writer.write(String.format("%d\t%s\n", i, getOutputResult(record, method)));
+    }
+    writer.write("\n");
+    writer.close();
+  }
+
   public static String getAverageResultOutput(List<ResultRecord> records, ExperimentMethod method) {
     String string = "";
     switch (method) {
@@ -119,8 +169,11 @@ public class ExperimentUtil {
       case SPATIAL_FIRST:
         string += ResultRecord.getRunTimeAvg(records) + "\t";
         string += ResultRecord.getPageHitAvg(records) + "\t";
+        string += ResultRecord.getRangeQueryTimeAvg(records) + "\t";
         string += ResultRecord.getGetIteratorTimeAvg(records) + "\t";
         string += ResultRecord.getIterateTimeAvg(records) + "\t";
+        string += ResultRecord.getOverLapLeafCountAvg(records);
+        string += ResultRecord.getCandidateCountAvg(records);
         string += ResultRecord.getResultCountAvg(records);
         break;
       case RISOTREE:
@@ -128,7 +181,7 @@ public class ExperimentUtil {
         string += ResultRecord.getPageHitAvg(records) + "\t";
         string += ResultRecord.getRangeQueryTimeAvg(records) + "\t";
         string += ResultRecord.getSetLabelTimeAvg(records) + "\t";
-        string += ResultRecord.getSetLabelTimeAvg(records) + "\t";
+        string += ResultRecord.getRemoveLabelTimeAvg(records) + "\t";
         string += ResultRecord.getGetIteratorTimeAvg(records) + "\t";
         string += ResultRecord.getIterateTimeAvg(records) + "\t";
         string += ResultRecord.getOverLapLeafCountAvg(records) + "\t";
@@ -147,8 +200,8 @@ public class ExperimentUtil {
         return StringUtils.joinWith("\t", "runTime", "pageHit", "getIteratorTime", "iterateTime",
             "resultCount");
       case SPATIAL_FIRST:
-        return StringUtils.joinWith("\t", "runTime", "pageHit", "getIteratorTime", "iterateTime",
-            "resultCount");
+        return StringUtils.joinWith("\t", "runTime", "pageHit", "rangeQueryTime", "getIteratorTime",
+            "iterateTime", "overlapLeafCount", "candidateCount", "resultCount");
       case RISOTREE:
         return StringUtils.joinWith("\t", "runTime", "pageHit", "rangeQueryTime", "setLabelTime",
             "removeLabelTime", "getIteratorTime", "iterateTime", "overlapLeafCount",
