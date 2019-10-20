@@ -149,7 +149,8 @@ public class Driver {
     options.addOption(spatialNodePNPath, "spatialNodePNPath", true, "spatialNodePNPath");
     options.addOption(entityStringLabelMapPath, "entityStringLabelMapPath", true,
         "the map from entity id to String label (name)");
-
+    options.addOption(graphPropertyEdgePath, "graphPropertyEdgePath", true,
+        "graphPropertyEdgePath");
 
     options.addOption(MAX_HOPNUM, "MAX_HOPNUM", true, "MAX_HOPNUM of RisoTree");
     options.addOption(hop, "hop", true, "hop");
