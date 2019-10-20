@@ -9,6 +9,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
 public class Neo4jGraphUtility {
 
@@ -66,8 +67,11 @@ public class Neo4jGraphUtility {
       Util.println(dbPath + " does not exist!");
       System.exit(-1);
     }
+    // GraphDatabaseService dbservice =
+    // new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
     GraphDatabaseService dbservice =
-        new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
+        new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(dbPath))
+            .setConfig(GraphDatabaseSettings.pagecache_memory, "20M").newGraphDatabase();
     return dbservice;
   }
 
