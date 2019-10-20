@@ -41,7 +41,7 @@ if [ ! -f "$graph_property_edge_path" ]; then
 		-f convertGraphToEdgeFormat \
 		-gp ${graph_path}	\
 		-ratio 0.01	\
-		-graph_property_edge_path ${graph_property_edge_path}
+		-graphPropertyEdgePath ${graph_property_edge_path}
 fi
 
 if [ ! -f "$add_edge_path" ]; then
