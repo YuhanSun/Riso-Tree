@@ -338,7 +338,7 @@ public class Driver {
             break;
           case generateSafeNodes:
             Construct_RisoTree.generateSafeNodes(cmd.getOptionValue(PNPathAndPrefix),
-                cmd.getOptionValue(hopListStr), Integer.parseInt(cmd.getOptionValue(nodeCount)),
+                cmd.getOptionValue(hopListStr), cmd.getOptionValue(entityPath),
                 cmd.getOptionValue(outputPath));
             break;
           // case wikiConstructPNTime:

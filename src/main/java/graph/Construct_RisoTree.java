@@ -754,8 +754,9 @@ public class Construct_RisoTree {
     }
   }
 
-  public static void generateSafeNodes(String PNPathAndPreffix, String hopListStr, int nodeCount,
-      String outputPath) throws Exception {
+  public static void generateSafeNodes(String PNPathAndPreffix, String hopListStr,
+      String entityPath, String outputPath) throws Exception {
+    int nodeCount = OwnMethods.getEntityCount(entityPath);
     List<String> paths = new ArrayList<>();
     for (String hopStr : hopListStr.split(",")) {
       int hop = Integer.parseInt(hopStr);
