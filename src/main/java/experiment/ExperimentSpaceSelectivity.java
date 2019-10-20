@@ -677,6 +677,7 @@ public class ExperimentSpaceSelectivity {
     List<ExperimentMethod> methods = new ArrayList<>(Arrays.asList(ExperimentMethod.NAIVE,
         ExperimentMethod.SPATIAL_FIRST, ExperimentMethod.RISOTREE));
 
+
     for (ExperimentMethod method : methods) {
       String outputPath = String.format("%s/%s.txt", outputDir, method.toString());
       String header = ExperimentUtil.getHeader(method);
@@ -685,9 +686,17 @@ public class ExperimentSpaceSelectivity {
 
     for (String queryPath : queryPathsList) {
       for (ExperimentMethod method : methods) {
+        String detailPath = String.format("%s/%s_detail.txt", outputDir, method.toString());
+        ReadWriteUtil.WriteFile(detailPath, true, queryPath + "\n");
+        String header = ExperimentUtil.getHeader(method);
+        ReadWriteUtil.WriteFile(detailPath, true, "id\t" + header + "\n");
+
         String outputPath = String.format("%s/%s.txt", outputDir, method.toString());
         List<ResultRecord> records = ExperimentUtil.runExperiment(dbPath, dataset, method, MAX_HOP,
             queryPath, queryCount, password, clearCache, clearCacheMethod, outputPath);
+
+        ExperimentUtil.outputDetailResult(records, method, detailPath);
+
         String string = ExperimentUtil.getAverageResultOutput(records, method);
         ReadWriteUtil.WriteFile(outputPath, true,
             StringUtils.joinWith("\t", queryPath, string) + "\n");
