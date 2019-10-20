@@ -10,8 +10,10 @@ password="syhSYH.19910205"
 data_dir="${dir}/data/${dataset}"
 db_dir="${data_dir}/selectivity"
 code_dir="${dir}/code"
-result_dir="${dir}/result/Riso-Tree/selectivity"
+result_dir="${dir}/result/Riso-Tree/selectivity/${dataset}"
 query_dir="${dir}/result/query/${dataset}"
+
+mkdir -p $result_dir
 
 query_size=2
 query_count=50
