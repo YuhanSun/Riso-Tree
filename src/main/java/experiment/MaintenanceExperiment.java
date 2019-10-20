@@ -21,6 +21,21 @@ import graph.RisoTreeMaintenance;
 
 public class MaintenanceExperiment {
 
+  public static int[] getStartEnd(String edgeString) {
+    String[] strings = edgeString.split(",");
+    int start = 0, end = 0;
+    if (strings.length == 3) {
+      start = Integer.parseInt(strings[0]);
+      end = Integer.parseInt(strings[2]);
+    } else if (strings.length == 2) {
+      start = Integer.parseInt(strings[0]);
+      end = Integer.parseInt(strings[1]);
+    } else {
+      throw new RuntimeException(edgeString + " is not edge-format!");
+    }
+    return new int[] {start, end};
+  }
+
   /**
    * Sample the graph_property_edge.txt file. The edges between two nodes with different directions
    * are treated as the same in the sample. As a result, the sampled edges will not be between the
@@ -44,17 +59,9 @@ public class MaintenanceExperiment {
     while (sampleMap.size() < count) {
       int id = random.nextInt(len);
       String line = linesArray.get(id);
-      String[] strings = line.split(",");
-      int start = 0, end = 0;
-      if (strings.length == 3) {
-        start = Integer.parseInt(strings[0]);
-        end = Integer.parseInt(strings[2]);
-      } else if (strings.length == 2) {
-        start = Integer.parseInt(strings[0]);
-        end = Integer.parseInt(strings[1]);
-      } else {
-        throw new RuntimeException(line + " is not edge-format!");
-      }
+      int[] startEnd = getStartEnd(line);
+      int start = startEnd[0];
+      int end = startEnd[1];
       int min = Math.min(start, end);
       int max = Math.max(start, end);
       String key = new Edge(min, max).toString();
@@ -86,9 +93,9 @@ public class MaintenanceExperiment {
     ArrayList<TreeSet<Integer>> graphTreeSet = GraphUtil.convertListGraphToTreeSetGraph(graph);
     int notFound1 = 0, notFound2 = 0;
     for (String line : lines) {
-      String[] strings = line.split(",");
-      int start = Integer.parseInt(strings[0]);
-      int end = Integer.parseInt(strings[2]);
+      int[] startEnd = getStartEnd(line);
+      int start = startEnd[0];
+      int end = startEnd[1];
       if (!graphTreeSet.get(start).remove((end))) {
         // This can happen when there exists an edge from a node to itself.
         // throw new RuntimeException(String.format("Edge %s is not found!", line));
@@ -120,10 +127,9 @@ public class MaintenanceExperiment {
     List<String> lines = ReadWriteUtil.readFileAllLines(edgePath);
     int notFound = 0;
     for (String line : lines) {
-      String[] strings = line.split(",");
-      int start = Integer.parseInt(strings[0]);
-      int end = Integer.parseInt(strings[2]);
-      // String edgeType = strings[1];
+      int[] startEnd = getStartEnd(line);
+      int start = startEnd[0];
+      int end = startEnd[1];
       boolean found = removeEdge(service, start, end) || removeEdge(service, end, start);
       if (!found) {
         Util.println(String.format("Edge %s is not found!", line));
