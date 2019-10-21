@@ -191,8 +191,10 @@ public class MaintenanceExperiment {
   public static void addEdgeExperiment(String dbPath, int MAX_HOPNUM, int maxPNSize,
       String edgePath, int testCount, String safeNodesPath, String outputPath) throws Exception {
     boolean safeNodesUsed = safeNodesPath.isEmpty() ? false : true;
-    RisoTreeMaintenance maintenance =
-        new RisoTreeMaintenance(dbPath, MAX_HOPNUM, maxPNSize, safeNodesUsed, safeNodesPath);
+    GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
+    RisoTreeMaintenance maintenance = new RisoTreeMaintenance(databaseService, MAX_HOPNUM,
+        maxPNSize, safeNodesUsed, safeNodesPath);
+    int safeCount = maintenance.safeNodes.size();
     List<Edge> edges = GraphUtil.readEdges(edgePath);
     List<Edge> testEdges = edges.subList(0, testCount);
     List<ResultRecord> records = new ArrayList<>(testCount);
@@ -216,6 +218,11 @@ public class MaintenanceExperiment {
         "avg time: " + ResultRecord.getRunTimeAvg(records) + "\n");
     ReadWriteUtil.WriteFile(outputAvgPath, true,
         "safeCaseHappenCount: " + maintenance.safeCaseHappenCount + "\n\n");
+    ReadWriteUtil.WriteFile(outputAvgPath, true, "safe count before add: " + safeCount + "\n\n");
+    ReadWriteUtil.WriteFile(outputAvgPath, true,
+        "safe count after add: " + maintenance.safeNodes.size() + "\n\n");
+    maintenance.writeBackSafeNodes();
+    databaseService.shutdown();
   }
 
 }
