@@ -202,11 +202,15 @@ public class MaintenanceExperiment {
     // Write header
     String outputDetailPath = outputPath + "_details.csv";
     String outputAvgPath = outputPath + "_avg.csv";
+    Util.println("output detail path: " + outputPath);
+    Util.println("output avg path: " + outputAvgPath);
+
     ReadWriteUtil.WriteFile(outputAvgPath, true,
         String.format("%s\t%s\t%d\n", dbPath, edgePath, testCount));
     ReadWriteUtil.WriteFile(outputDetailPath, true,
         String.format("%s\t%s\t%d\n", dbPath, edgePath, testCount));
 
+    Util.println("test edges count: " + testEdges.size());
     for (Edge edge : testEdges) {
       long start = System.currentTimeMillis();
       maintenance.addEdge(edge.start, edge.end);
