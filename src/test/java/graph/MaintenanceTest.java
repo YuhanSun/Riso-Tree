@@ -13,7 +13,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import commons.Neo4jGraphUtility;
 import commons.Util;
 
 public class MaintenanceTest {
@@ -24,12 +23,14 @@ public class MaintenanceTest {
 
   @Before
   public void setUp() throws Exception {
-    dbservice = Neo4jGraphUtility.getDatabaseService(dbPath);
+    // dbservice = Neo4jGraphUtility.getDatabaseService(dbPath);
   }
 
   @After
   public void tearDown() throws Exception {
-    dbservice.shutdown();
+    if (dbservice != null) {
+      dbservice.shutdown();
+    }
   }
 
   @Test

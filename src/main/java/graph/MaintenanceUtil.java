@@ -233,7 +233,7 @@ public class MaintenanceUtil {
 
   public static String getReversePropertyName(String[] labelStrings) {
     String prefix = Config.PNPrefix;
-    for (int i = labelStrings.length - 2; i >= 0; i--) {
+    for (int i = labelStrings.length - 1; i >= 0; i--) {
       prefix += "_" + labelStrings[i];
     }
     return prefix;
