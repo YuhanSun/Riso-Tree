@@ -35,6 +35,8 @@ graph_property_edge_path="${data_dir}/graph_property_edge.txt"
 add_edge_path="${cur_dir}/edges.txt"
 
 test_count=1000
+
+##### No safe nodes strategy #####
 safe_nodes_path="${cur_dir}/safeNodes.txt"
 output_path="${result_dir}/${dataset}"
 
@@ -52,11 +54,11 @@ java -Xmx100g -jar ${jar_path} \
 	-maxPNSize ${maxPNSize}	\
 	-edgePath ${add_edge_path}	\
 	-queryCount ${test_count}	\
-	-safeNodesPath ${safe_nodes_path}	\
+	-safeNodesPath ""	\
 	-outputPath ${output_path}
 
 
-###### No safe nodes strategy used #######
+###### Safe nodes strategy used #######
 output_path="${result_dir}/${dataset}_with_safe"
 
 # remove current db_dir and use the backup to restore
@@ -70,7 +72,7 @@ java -Xmx100g -jar ${jar_path} \
 	-maxPNSize ${maxPNSize}	\
 	-edgePath ${add_edge_path}	\
 	-queryCount ${test_count}	\
-	-safeNodesPath ""	\
+	-safeNodesPath $safe_nodes_path	\
 	-outputPath ${output_path}
 
 
