@@ -1,5 +1,6 @@
 package graph;
 
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
 import commons.Labels;
 import commons.Neo4jGraphUtility;
 import commons.RTreeUtility;
@@ -28,12 +30,12 @@ public class RisoTreeMaintenance {
    * is required.
    */
   String safeNodesPath;
-  Set<Long> safeNodes;
+  public Set<Long> safeNodes;
 
   public int safeCaseHappenCount = 0;
 
-  public RisoTreeMaintenance(String dbPath, int MAX_HOPNUM, int maxPNSize, Boolean safeNodesUsed,
-      String safeNodesPath) throws Exception {
+  public RisoTreeMaintenance(GraphDatabaseService service, int MAX_HOPNUM, int maxPNSize,
+      Boolean safeNodesUsed, String safeNodesPath) throws Exception {
     this.MAX_HOPNUM = MAX_HOPNUM;
     this.maxPNSize = maxPNSize == -1 ? Integer.MAX_VALUE : maxPNSize;
     this.safeNodesUsed = safeNodesUsed;
@@ -41,7 +43,7 @@ public class RisoTreeMaintenance {
       this.safeNodesPath = safeNodesPath;
       this.safeNodes = readSafeNodes();
     }
-    this.databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
+    this.databaseService = service;
   }
 
   private Set<Long> readSafeNodes() throws Exception {
@@ -54,7 +56,10 @@ public class RisoTreeMaintenance {
   }
 
   public void addEdge(long src, long trg) {
+    Transaction tx = databaseService.beginTx();
     addEdge(databaseService.getNodeById(src), databaseService.getNodeById(trg));
+    tx.success();
+    tx.close();
   }
 
   public void addEdge(Node src, Node trg) {
@@ -137,13 +142,19 @@ public class RisoTreeMaintenance {
     }
   }
 
+  /**
+   * Remove a node from safeNodes if its distance to spatial nodes are within B.
+   *
+   * @param pathNeighborsTrgSortedIds
+   * @param updateUpperBound
+   */
   private void updateSafeNodes(Map<String, int[]> pathNeighborsTrgSortedIds, int updateUpperBound) {
     Iterator<Entry<String, int[]>> iterator = pathNeighborsTrgSortedIds.entrySet().iterator();
     while (iterator.hasNext()) {
       Entry<String, int[]> entry = iterator.next();
       if (RisoTreeUtil.getHopNumber(entry.getKey()) <= updateUpperBound) {
         for (int id : entry.getValue()) {
-          safeNodes.add((long) id);
+          safeNodes.remove((long) id);
         }
       }
     }
@@ -213,5 +224,13 @@ public class RisoTreeMaintenance {
   private void deleteEdge(Node nodeById, Node nodeById2) {
     // TODO Auto-generated method stub
 
+  }
+
+  public void writeBackSafeNodes() throws Exception {
+    FileWriter writer = Util.getFileWriter(safeNodesPath);
+    for (long id : safeNodes) {
+      writer.write(id + "\n");
+    }
+    Util.close(writer);
   }
 }
