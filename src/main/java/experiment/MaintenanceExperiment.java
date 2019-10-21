@@ -212,6 +212,7 @@ public class MaintenanceExperiment {
 
     Util.println("test edges count: " + testEdges.size());
     for (Edge edge : testEdges) {
+      Util.println(edge);
       long start = System.currentTimeMillis();
       maintenance.addEdge(edge.start, edge.end);
       long time = System.currentTimeMillis() - start;
