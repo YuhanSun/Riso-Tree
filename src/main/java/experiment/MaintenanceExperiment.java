@@ -219,13 +219,15 @@ public class MaintenanceExperiment {
       records.add(new ResultRecord(time, -1));
       ReadWriteUtil.WriteFile(outputDetailPath, true, "" + time + "\n");
     }
-    ReadWriteUtil.WriteFile(outputAvgPath, true,
-        "avg time: " + ResultRecord.getRunTimeAvg(records) + "\n");
-    ReadWriteUtil.WriteFile(outputAvgPath, true,
-        "safeCaseHappenCount: " + maintenance.safeCaseHappenCount + "\n\n");
-    ReadWriteUtil.WriteFile(outputAvgPath, true, "safe count before add: " + safeCount + "\n\n");
-    ReadWriteUtil.WriteFile(outputAvgPath, true,
-        "safe count after add: " + maintenance.safeNodes.size() + "\n\n");
+
+    String outString = "";
+    outString += "avg time: " + ResultRecord.getRunTimeAvg(records) + "\n";
+    outString += "safeCaseHappenCount: " + maintenance.safeCaseHappenCount + "\n";
+    outString += "safe count before add: " + safeCount + "\n";
+    outString += "safe count after add: " + maintenance.safeNodes.size() + "\n";
+    outString += "visited nodes count: " + maintenance.visitedNodeCount + "\n";
+    outString += "update PN count: " + maintenance.updatePNCount + "\n";
+    ReadWriteUtil.WriteFile(outputAvgPath, true, outString);
     if (safeNodesUsed) {
       maintenance.writeBackSafeNodes();
     }

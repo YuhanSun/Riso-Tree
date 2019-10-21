@@ -33,6 +33,8 @@ public class RisoTreeMaintenance {
   public Set<Long> safeNodes;
 
   public int safeCaseHappenCount = 0;
+  public int visitedNodeCount = 0;
+  public int updatePNCount = 0;
 
   public RisoTreeMaintenance(GraphDatabaseService service, int MAX_HOPNUM, int maxPNSize,
       Boolean safeNodesUsed, String safeNodesPath) throws Exception {
@@ -77,6 +79,14 @@ public class RisoTreeMaintenance {
         MaintenanceUtil.getPNGeneral(databaseService, src, MAX_HOPNUM - 1);
     Map<String, Set<Node>> pathNeighborsTrg =
         MaintenanceUtil.getPNGeneral(databaseService, trg, MAX_HOPNUM - 1);
+
+    for (Set<Node> nodes : pathNeighborsSrc.values()) {
+      visitedNodeCount += nodes.size();
+    }
+
+    for (Set<Node> nodes : pathNeighborsTrg.values()) {
+      visitedNodeCount += nodes.size();
+    }
 
     // src has spatial pn
     if (!safeNodes.contains(src.getId())) {
@@ -175,7 +185,8 @@ public class RisoTreeMaintenance {
     int length = RisoTreeUtil.getHopNumber(leftPnName);
     for (String rightPnName : pathNeighborsTrg.keySet()) {
       int rightLength = RisoTreeUtil.getHopNumber(rightPnName);
-      if (length + rightLength <= MAX_HOPNUM) {
+      if (length + rightLength < MAX_HOPNUM) {// not equal because the inserted edge will count for
+                                              // 1 more hop
         int[] nodesAdded = pathNeighborsTrg.get(rightPnName);
         String pnName = MaintenanceUtil.concatenatePnNames(leftPnName, rightPnName);
         updateLeafNodeSinglePn(leafNode, pnName, nodesAdded);
@@ -191,6 +202,7 @@ public class RisoTreeMaintenance {
    * @param nodesAdded
    */
   private void updateLeafNodeSinglePn(Node leafNode, String pnName, int[] nodesAdded) {
+    updatePNCount++;
     Set<String> shorterPaths = RisoTreeUtil.formIgnoreSearchSet(pnName);
     Map<String, Object> properties = leafNode.getAllProperties();
     Iterator<Map.Entry<String, Object>> iterator = properties.entrySet().iterator();
