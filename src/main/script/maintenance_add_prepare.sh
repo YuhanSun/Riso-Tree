@@ -133,7 +133,7 @@ graph_property_edge_path="${data_dir}/graph_property_edge.txt"
 # cp -a $db_dir $after_pn_db_dir
 
 # Safe nodes generation
-PNPathAndPrefix="${backup_dir}/PathNeighbors_Gleenes_1.0_-1_new_version"
+PNPathAndPrefix="${cur_dir}/PathNeighbors_Gleenes_1.0_-1_new_version"
 output_path="${backup_dir}/safeNodes.txt"
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
