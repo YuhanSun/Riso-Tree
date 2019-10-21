@@ -1,6 +1,7 @@
 package graph;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -98,8 +99,18 @@ public class MaintenanceTest {
   @Test
   public void getReversePropertyNameTest() {
     String[] labelStrings = new String[] {"0", "10", "1"};
-    String res = MaintenanceUtil.getReversePropertyName(labelStrings);
-    Util.println(res);
+    assertTrue(MaintenanceUtil.getReversePropertyName(labelStrings).equals("PN_1_10_0"));
+  }
+
+  @Test
+  public void getReversePnNameTest() {
+    String pnName;
+
+    pnName = "PN_0";
+    assertTrue(MaintenanceUtil.getReversePnName(pnName).equals("PN_0"));
+
+    pnName = "PN_0_1";
+    assertTrue(MaintenanceUtil.getReversePnName(pnName).equals("PN_1_0"));
   }
 
 }
