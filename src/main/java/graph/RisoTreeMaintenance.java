@@ -35,7 +35,7 @@ public class RisoTreeMaintenance {
   public RisoTreeMaintenance(String dbPath, int MAX_HOPNUM, int maxPNSize, Boolean safeNodesUsed,
       String safeNodesPath) throws Exception {
     this.MAX_HOPNUM = MAX_HOPNUM;
-    this.maxPNSize = maxPNSize;
+    this.maxPNSize = maxPNSize == -1 ? Integer.MAX_VALUE : maxPNSize;
     this.safeNodesUsed = safeNodesUsed;
     if (this.safeNodesUsed) {
       this.safeNodesPath = safeNodesPath;

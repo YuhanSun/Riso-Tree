@@ -177,9 +177,20 @@ public class MaintenanceExperiment {
     return false;
   }
 
+  /**
+   * 
+   * @param dbPath
+   * @param MAX_HOPNUM
+   * @param maxPNSize
+   * @param edgePath
+   * @param testCount
+   * @param safeNodesPath
+   * @param outputPath the directory
+   * @throws Exception
+   */
   public static void addEdgeExperiment(String dbPath, int MAX_HOPNUM, int maxPNSize,
-      String edgePath, int testCount, Boolean safeNodesUsed, String safeNodesPath,
-      String outputPath) throws Exception {
+      String edgePath, int testCount, String safeNodesPath, String outputPath) throws Exception {
+    boolean safeNodesUsed = safeNodesPath.isEmpty() ? false : true;
     RisoTreeMaintenance maintenance =
         new RisoTreeMaintenance(dbPath, MAX_HOPNUM, maxPNSize, safeNodesUsed, safeNodesPath);
     List<Edge> edges = GraphUtil.readEdges(edgePath);

@@ -438,8 +438,8 @@ public class Driver {
             MaintenanceExperiment.addEdgeExperiment(cmd.getOptionValue(dbPath),
                 Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
                 Integer.parseInt(cmd.getOptionValue(maxPNSize)), cmd.getOptionValue(edgePath),
-                Integer.parseInt(cmd.getOptionValue(queryCount)), true,
-                cmd.getOptionValue(safeNodesPath), cmd.getOptionValue(outputPath));
+                Integer.parseInt(cmd.getOptionValue(queryCount)), cmd.getOptionValue(safeNodesPath),
+                cmd.getOptionValue(outputPath));
             break;
           default:
             Util.println(String.format("Function %s does not exist!", functionNameString));

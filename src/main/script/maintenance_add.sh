@@ -1,7 +1,10 @@
 #!/bin/bash
 ./package.sh
 
-dataset="wikidata"
+# dataset="wikidata"
+dataset="Gowalla_100"
+MAX_HOPNUM=2
+
 cur_dir="/hdd/code/yuhansun/data/${dataset}/add"
 backup_dir="${cur_dir}/backup"
 
@@ -10,6 +13,7 @@ maxPNSize=-1
 alpha=1.0
 suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 db_dir="${cur_dir}/neo4j-community-3.4.12_${suffix}"
+db_path="${db_dir}/data/databases/graph.db"
 
 # server
 dir="/hdd/code/yuhansun"
@@ -31,7 +35,28 @@ add_edge_path="${cur_dir}/edges.txt"
 
 test_count=1000
 safe_nodes_path="${cur_dir}/safeNodes.txt"
-output_path="${result_dir}/${dataset}.txt"
+output_path="${result_dir}/${dataset}"
+
+# remove current db_dir and use the backup to restore
+rm -r ${db_dir}
+cp -a ${backup_dir}/neo4j-community-3.4.12_${suffix}_after_pn $db_dir
+
+rm $safe_nodes_path
+cp ${backup_dir}/safeNodes.txt $safe_nodes_path
+
+java -Xmx100g -jar ${jar_path} \
+	-f addEdgeExperiment \
+	-dp ${db_path}	\
+	-MAX_HOPNUM ${MAX_HOPNUM}	\
+	-maxPNSize ${maxPNSize}	\
+	-edgePath ${add_edge_path}	\
+	-queryCount ${test_count}	\
+	-safeNodesPath ${safe_nodes_path}	\
+	-outputPath ${output_path}
+
+
+###### No safe nodes strategy used #######
+output_path="${result_dir}/${dataset}_with_safe"
 
 # remove current db_dir and use the backup to restore
 rm -r ${db_dir}
@@ -44,8 +69,7 @@ java -Xmx100g -jar ${jar_path} \
 	-maxPNSize ${maxPNSize}	\
 	-edgePath ${add_edge_path}	\
 	-queryCount ${test_count}	\
-	-safeNodesPath ${safe_nodes_path}	\
+	-safeNodesPath ""	\
 	-outputPath ${output_path}
-
 
 
