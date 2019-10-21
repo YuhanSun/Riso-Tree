@@ -19,7 +19,7 @@ db_path="${db_dir}/data/databases/graph.db"
 dir="/hdd/code/yuhansun"
 data_dir="${dir}/data/${dataset}"
 code_dir="${dir}/code"
-result_dir="{$dir}/result/Riso-Tree/add"
+result_dir="${dir}/result/Riso-Tree/add"
 mkdir -p $result_dir
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"

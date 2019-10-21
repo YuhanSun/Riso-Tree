@@ -202,7 +202,7 @@ public class MaintenanceExperiment {
     // Write header
     String outputDetailPath = outputPath + "_details.csv";
     String outputAvgPath = outputPath + "_avg.csv";
-    Util.println("output detail path: " + outputPath);
+    Util.println("output detail path: " + outputDetailPath);
     Util.println("output avg path: " + outputAvgPath);
 
     ReadWriteUtil.WriteFile(outputAvgPath, true,
