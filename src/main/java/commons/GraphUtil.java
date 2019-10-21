@@ -43,6 +43,7 @@ public class GraphUtil {
       for (int neighbor : neighbors) {
         writer.write(String.format("%d,%d\n", id, neighbor));
       }
+      id++;
     }
     writer.close();
   }
