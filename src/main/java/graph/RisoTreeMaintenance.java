@@ -41,18 +41,19 @@ public class RisoTreeMaintenance {
     this.safeNodesUsed = safeNodesUsed;
     if (this.safeNodesUsed) {
       this.safeNodesPath = safeNodesPath;
-      this.safeNodes = readSafeNodes();
+      readSafeNodes();
+    } else {
+      this.safeNodes = new HashSet<>();
     }
     this.databaseService = service;
   }
 
-  private Set<Long> readSafeNodes() throws Exception {
+  private void readSafeNodes() throws Exception {
     List<String> arrayList = ReadWriteUtil.readFileAllLines(safeNodesPath);
-    Set<Long> safeNodes = new HashSet<>();
+    safeNodes = new HashSet<>();
     for (String id : arrayList) {
       safeNodes.add(Long.parseLong(id));
     }
-    return safeNodes;
   }
 
   public void addEdge(long src, long trg) {
