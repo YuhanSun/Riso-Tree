@@ -221,7 +221,9 @@ public class MaintenanceExperiment {
     ReadWriteUtil.WriteFile(outputAvgPath, true, "safe count before add: " + safeCount + "\n\n");
     ReadWriteUtil.WriteFile(outputAvgPath, true,
         "safe count after add: " + maintenance.safeNodes.size() + "\n\n");
-    maintenance.writeBackSafeNodes();
+    if (safeNodesUsed) {
+      maintenance.writeBackSafeNodes();
+    }
     databaseService.shutdown();
   }
 
