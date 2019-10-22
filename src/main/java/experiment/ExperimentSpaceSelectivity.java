@@ -679,7 +679,7 @@ public class ExperimentSpaceSelectivity {
 
 
     for (ExperimentMethod method : methods) {
-      String outputPath = String.format("%s/%s.txt", outputDir, method.toString());
+      String outputPath = getAvgOutputPath(outputDir, method);
       ReadWriteUtil.WriteFile(outputPath, true,
           String.format("clear: %s, clearMethod: %s\n", clearCache, clearCacheMethod));
       String header = ExperimentUtil.getHeader(method);
@@ -688,12 +688,12 @@ public class ExperimentSpaceSelectivity {
 
     for (String queryPath : queryPathsList) {
       for (ExperimentMethod method : methods) {
-        String detailPath = String.format("%s/%s_detail.txt", outputDir, method.toString());
+        String detailPath = getDetailOutputPath(outputDir, method);
         ReadWriteUtil.WriteFile(detailPath, true, queryPath + "\n");
         String header = ExperimentUtil.getHeader(method);
         ReadWriteUtil.WriteFile(detailPath, true, "id\t" + header + "\n");
 
-        String outputPath = String.format("%s/%s.txt", outputDir, method.toString());
+        String outputPath = getAvgOutputPath(outputDir, method);
         List<ResultRecord> records = ExperimentUtil.runExperiment(dbPath, dataset, method, MAX_HOP,
             queryPath, queryCount, password, clearCache, clearCacheMethod, outputPath);
 
@@ -704,8 +704,14 @@ public class ExperimentSpaceSelectivity {
             StringUtils.joinWith("\t", queryPath, string) + "\n");
       }
     }
-
+    ReadWriteUtil.WriteFile(outputPath, true, "\n");
   }
 
+  public static String getAvgOutputPath(String outputDir, ExperimentMethod method) {
+    return String.format("%s/%s.txt", outputDir, method.toString());
+  }
 
+  public static String getDetailOutputPath(String outputDir, ExperimentMethod method) {
+    return String.format("%s/%s_detail.txt", outputDir, method.toString());
+  }
 }

@@ -146,7 +146,7 @@ public class ExperimentUtil {
     }
     for (int i = 0; i < records.size(); i++) {
       ResultRecord record = records.get(i);
-      writer.write(i);
+      writer.write(i + "\n");
       writer.write(record.toString() + "\n");
       writer.write(record.planDescription.toString());
     }
