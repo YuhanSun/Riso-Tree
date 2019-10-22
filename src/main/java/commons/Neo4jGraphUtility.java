@@ -8,6 +8,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 
@@ -82,4 +83,45 @@ public class Neo4jGraphUtility {
     return new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
   }
 
+  public static long getOutEdgeCount(GraphDatabaseService service, String label) {
+    String query = String.format("match (n:`%s`)-[]->() return count(*)", label);
+    Result result = service.execute(query);
+    long count = -1;
+    while (result.hasNext()) {
+      count = (long) result.next().get("count(*)");
+      break;
+    }
+    if (count == -1) {
+      throw new RuntimeException(query + " \nis wrong!");
+    }
+    return count;
+  }
+
+  public static long getInEdgeCount(GraphDatabaseService service, String label) {
+    String query = String.format("match (n:`%s`)<-[]-() return count(*)", label);
+    Result result = service.execute(query);
+    long count = -1;
+    while (result.hasNext()) {
+      count = (long) result.next().get("count(*)");
+      break;
+    }
+    if (count == -1) {
+      throw new RuntimeException(query + " \nis wrong!");
+    }
+    return count;
+  }
+
+  public static long getLabelCount(GraphDatabaseService service, String label) {
+    String query = String.format("match (n:`%s`) return count(*)", label);
+    Result result = service.execute(query);
+    long count = -1;
+    while (result.hasNext()) {
+      count = (long) result.next().get("count(*)");
+      break;
+    }
+    if (count == -1) {
+      throw new RuntimeException(query + " \nis wrong!");
+    }
+    return count;
+  }
 }

@@ -12,8 +12,12 @@ import org.neo4j.graphdb.Transaction;
 
 public class Neo4jGraphUtilityTest {
 
+  // private String dbPath =
+  // "D:\\Ubuntu_shared\\GeoMinHop\\data\\Yelp_100\\neo4j-community-3.1.1_Yelp_100_withPN\\data\\databases\\graph.db";
+
   private String dbPath =
-      "D:\\Ubuntu_shared\\GeoMinHop\\data\\Yelp_100\\neo4j-community-3.1.1_Yelp_100_withPN\\data\\databases\\graph.db";
+      "/Users/zhouyang/Documents/tmp/neo4j-community-3.4.12_Gleenes_1.0_-1_new_version/data/databases/graph.db";
+
   private GraphDatabaseService dbservice = null;
 
   @Before
@@ -60,4 +64,21 @@ public class Neo4jGraphUtilityTest {
     tx.close();
   }
 
+  @Test
+  public void getOutEdgeCountTest() {
+    Transaction tx = dbservice.beginTx();
+    long count = Neo4jGraphUtility.getOutEdgeCount(dbservice, "2");
+    Util.println(count);
+    tx.success();
+    tx.close();
+  }
+
+  @Test
+  public void getLabelCountTest() {
+    Transaction tx = dbservice.beginTx();
+    long count = Neo4jGraphUtility.getLabelCount(dbservice, "2");
+    Util.println(count);
+    tx.success();
+    tx.close();
+  }
 }
