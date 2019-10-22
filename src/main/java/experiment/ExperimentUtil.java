@@ -150,13 +150,13 @@ public class ExperimentUtil {
     FileWriter writer = Util.getFileWriter(outputPath, true);
     for (int i = 0; i < records.size(); i++) {
       ResultRecord record = records.get(i);
-      writer.write(i);
-      writer.write(record.toString() + "\n");
-      writer.write(record.planDescription.toString());
+      writer.write(String.format("%d\t%s\n", i, getOutputResult(record, method)));
     }
     for (int i = 0; i < records.size(); i++) {
       ResultRecord record = records.get(i);
-      writer.write(String.format("%d\t%s\n", i, getOutputResult(record, method)));
+      writer.write(i);
+      writer.write(record.toString() + "\n");
+      writer.write(record.planDescription.toString());
     }
     writer.write("\n");
     writer.close();
