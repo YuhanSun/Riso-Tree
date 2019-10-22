@@ -128,7 +128,7 @@ java -Xmx100g -jar ${jar_path} \
 # Backup the db after pn load.
 after_pn_db_dir="${backup_dir}/neo4j-community-3.4.12_${suffix}_after_pn"
 if [ ! -d "$after_pn_db_dir" ]; then
-	rm -r after_pn_db_dir
+	rm -r $after_pn_db_dir
 fi
 cp -a $db_dir $after_pn_db_dir
 
