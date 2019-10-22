@@ -704,7 +704,11 @@ public class ExperimentSpaceSelectivity {
             StringUtils.joinWith("\t", queryPath, string) + "\n");
       }
     }
-    ReadWriteUtil.WriteFile(outputPath, true, "\n");
+
+    for (ExperimentMethod method : methods) {
+      String outputPath = getAvgOutputPath(outputDir, method);
+      ReadWriteUtil.WriteFile(outputPath, true, "\n");
+    }
   }
 
   public static String getAvgOutputPath(String outputDir, ExperimentMethod method) {
