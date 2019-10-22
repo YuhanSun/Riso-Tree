@@ -680,6 +680,8 @@ public class ExperimentSpaceSelectivity {
 
     for (ExperimentMethod method : methods) {
       String outputPath = String.format("%s/%s.txt", outputDir, method.toString());
+      ReadWriteUtil.WriteFile(outputPath, true,
+          String.format("clear: %s, clearMethod: %s\n", clearCache, clearCacheMethod));
       String header = ExperimentUtil.getHeader(method);
       ReadWriteUtil.WriteFile(outputPath, true, "queryPath\t" + header + "\n");
     }
