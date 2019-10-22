@@ -54,10 +54,8 @@ public class GraphUtil {
     BufferedReader reader = Util.getBufferedReader(edgePath);
     String string = null;
     while ((string = reader.readLine()) != null) {
-      String[] strings = string.split(",");
-      long start = Long.parseLong(strings[0]);
-      long end = Long.parseLong(strings[1]);
-      Edge edge = new Edge(start, end);
+      int[] startEnd = getEdgeStartEnd(string);
+      Edge edge = new Edge(startEnd[0], startEnd[1]);
       edges.add(edge);
     }
     reader.close();
@@ -273,6 +271,21 @@ public class GraphUtil {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  public static int[] getEdgeStartEnd(String edgeString) {
+    String[] strings = edgeString.split(",");
+    int start = 0, end = 0;
+    if (strings.length == 3) {
+      start = Integer.parseInt(strings[0]);
+      end = Integer.parseInt(strings[2]);
+    } else if (strings.length == 2) {
+      start = Integer.parseInt(strings[0]);
+      end = Integer.parseInt(strings[1]);
+    } else {
+      throw new RuntimeException(edgeString + " is not edge-format!");
+    }
+    return new int[] {start, end};
   }
 
 }
