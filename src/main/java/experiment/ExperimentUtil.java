@@ -77,27 +77,19 @@ public class ExperimentUtil {
         Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
         naive_Neo4j_Match.query(query);
         planDescription = naive_Neo4j_Match.planDescription;
-        record = new ResultRecord(naive_Neo4j_Match.run_time, naive_Neo4j_Match.page_access,
-            naive_Neo4j_Match.get_iterator_time, naive_Neo4j_Match.iterate_time,
-            naive_Neo4j_Match.result_count, planDescription);
+        record = new ResultRecord(naive_Neo4j_Match);
         break;
       case SPATIAL_FIRST:
         SpatialFirst_List spatialFirst_List = new SpatialFirst_List(service, dataset);
         spatialFirst_List.query_Block(query);
         planDescription = spatialFirst_List.planDescription;
-        record = new ResultRecord(spatialFirst_List.run_time, spatialFirst_List.page_hit_count,
-            spatialFirst_List.get_iterator_time, spatialFirst_List.iterate_time,
-            spatialFirst_List.result_count, planDescription);
+        record = new ResultRecord(spatialFirst_List);
         break;
       case RISOTREE:
         RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOP);
         risoTreeQueryPN.queryWithIgnore(query);
         planDescription = risoTreeQueryPN.planDescription;
-        record = new ResultRecord(risoTreeQueryPN.run_time, risoTreeQueryPN.page_hit_count,
-            risoTreeQueryPN.range_query_time, risoTreeQueryPN.get_iterator_time,
-            risoTreeQueryPN.iterate_time, risoTreeQueryPN.set_label_time,
-            risoTreeQueryPN.remove_label_time, risoTreeQueryPN.overlap_leaf_node_count,
-            risoTreeQueryPN.candidate_count, risoTreeQueryPN.result_count, planDescription);
+        record = new ResultRecord(risoTreeQueryPN);
         break;
       default:
         throw new RuntimeException(String.format("method %s does not exist!", method));
@@ -178,8 +170,8 @@ public class ExperimentUtil {
         string += ResultRecord.getRangeQueryTimeAvg(records) + "\t";
         string += ResultRecord.getGetIteratorTimeAvg(records) + "\t";
         string += ResultRecord.getIterateTimeAvg(records) + "\t";
-        string += ResultRecord.getOverLapLeafCountAvg(records);
-        string += ResultRecord.getCandidateCountAvg(records);
+        string += ResultRecord.getOverLapLeafCountAvg(records) + "\t";
+        string += ResultRecord.getCandidateCountAvg(records) + "\t";
         string += ResultRecord.getResultCountAvg(records);
         break;
       case RISOTREE:

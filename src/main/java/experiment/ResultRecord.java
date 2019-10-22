@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import commons.Util;
+import graph.Naive_Neo4j_Match;
+import graph.RisoTreeQueryPN;
+import graph.SpatialFirst_List;
 
 public class ResultRecord {
   public long runTime;
@@ -66,6 +69,12 @@ public class ResultRecord {
     this.planDescription = planDescription;
   }
 
+  public ResultRecord(Naive_Neo4j_Match naive_Neo4j_Match) {
+    this(naive_Neo4j_Match.run_time, naive_Neo4j_Match.page_access,
+        naive_Neo4j_Match.get_iterator_time, naive_Neo4j_Match.iterate_time,
+        naive_Neo4j_Match.result_count, naive_Neo4j_Match.planDescription);
+  }
+
   /**
    * Spatial-First-List approach.
    *
@@ -91,6 +100,14 @@ public class ResultRecord {
     this(runTime, pageHit, rangeQueryTime, getIteratorTime, iterateTime, overlapLeafCount,
         candidateCount, resultCount);
     this.planDescription = planDescription;
+  }
+
+  public ResultRecord(SpatialFirst_List spatialFirst_List) {
+    this(spatialFirst_List.run_time, spatialFirst_List.page_hit_count,
+        spatialFirst_List.range_query_time, spatialFirst_List.get_iterator_time,
+        spatialFirst_List.iterate_time, spatialFirst_List.overlap_leaf_count,
+        spatialFirst_List.candidate_count, spatialFirst_List.result_count,
+        spatialFirst_List.planDescription);
   }
 
   /**
@@ -122,6 +139,16 @@ public class ResultRecord {
     this.planDescription = planDescription;
   }
 
+  public ResultRecord(RisoTreeQueryPN risoTreeQueryPN) {
+    this(risoTreeQueryPN.run_time, risoTreeQueryPN.page_hit_count, risoTreeQueryPN.range_query_time,
+        risoTreeQueryPN.get_iterator_time, risoTreeQueryPN.iterate_time,
+        risoTreeQueryPN.set_label_time, risoTreeQueryPN.remove_label_time,
+        risoTreeQueryPN.overlap_leaf_node_count, risoTreeQueryPN.candidate_count,
+        risoTreeQueryPN.result_count, risoTreeQueryPN.planDescription);
+  }
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////
   public static long getRunTimeAvg(List<ResultRecord> resultRecords) {
     List<Long> runTimes = new ArrayList<>(resultRecords.size());
     for (ResultRecord resultRecord : resultRecords) {
