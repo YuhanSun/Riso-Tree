@@ -2,6 +2,7 @@ package experiment;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.neo4j.graphdb.ExecutionPlanDescription;
 import commons.Util;
 
 public class ResultRecord {
@@ -17,6 +18,8 @@ public class ResultRecord {
   public long result_count;
   public long overlap_leaf_node_count;
   public long candidate_count;
+
+  public ExecutionPlanDescription planDescription;
 
   public ResultRecord(long runTime, long pageHit) {
     this.runTime = runTime;
@@ -57,6 +60,12 @@ public class ResultRecord {
     this.result_count = resultCount;
   }
 
+  public ResultRecord(long runTime, long pageHit, long getIteratorTime, long iterateTime,
+      long resultCount, ExecutionPlanDescription planDescription) {
+    this(runTime, pageHit, getIteratorTime, iterateTime, resultCount);
+    this.planDescription = planDescription;
+  }
+
   /**
    * Spatial-First-List approach.
    *
@@ -74,6 +83,14 @@ public class ResultRecord {
     this.range_query_time = rangeQueryTime;
     this.overlap_leaf_node_count = overlapLeafCount;
     this.candidate_count = candidateCount;
+  }
+
+  public ResultRecord(long runTime, long pageHit, long rangeQueryTime, long getIteratorTime,
+      long iterateTime, long overlapLeafCount, long candidateCount, long resultCount,
+      ExecutionPlanDescription planDescription) {
+    this(runTime, pageHit, rangeQueryTime, getIteratorTime, iterateTime, overlapLeafCount,
+        candidateCount, resultCount);
+    this.planDescription = planDescription;
   }
 
   /**
@@ -95,6 +112,14 @@ public class ResultRecord {
         candidateCount, resultCount);
     this.set_label_time = setLabelTime;
     this.remove_label_time = removeLabelTime;
+  }
+
+  public ResultRecord(long runTime, long pageHit, long rangeQueryTime, long getIteratorTime,
+      long iterateTime, long setLabelTime, long removeLabelTime, long overlapLeafCount,
+      long candidateCount, long resultCount, ExecutionPlanDescription planDescription) {
+    this(runTime, pageHit, rangeQueryTime, getIteratorTime, iterateTime, setLabelTime,
+        removeLabelTime, overlapLeafCount, candidateCount, resultCount);
+    this.planDescription = planDescription;
   }
 
   public static long getRunTimeAvg(List<ResultRecord> resultRecords) {

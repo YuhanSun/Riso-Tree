@@ -76,28 +76,28 @@ public class ExperimentUtil {
       case NAIVE:
         Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
         naive_Neo4j_Match.query(query);
+        planDescription = naive_Neo4j_Match.planDescription;
         record = new ResultRecord(naive_Neo4j_Match.run_time, naive_Neo4j_Match.page_access,
             naive_Neo4j_Match.get_iterator_time, naive_Neo4j_Match.iterate_time,
-            naive_Neo4j_Match.result_count);
-        planDescription = naive_Neo4j_Match.planDescription;
+            naive_Neo4j_Match.result_count, planDescription);
         break;
       case SPATIAL_FIRST:
         SpatialFirst_List spatialFirst_List = new SpatialFirst_List(service, dataset);
         spatialFirst_List.query_Block(query);
+        planDescription = spatialFirst_List.planDescription;
         record = new ResultRecord(spatialFirst_List.run_time, spatialFirst_List.page_hit_count,
             spatialFirst_List.get_iterator_time, spatialFirst_List.iterate_time,
-            spatialFirst_List.result_count);
-        planDescription = spatialFirst_List.planDescription;
+            spatialFirst_List.result_count, planDescription);
         break;
       case RISOTREE:
         RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOP);
         risoTreeQueryPN.queryWithIgnore(query);
+        planDescription = risoTreeQueryPN.planDescription;
         record = new ResultRecord(risoTreeQueryPN.run_time, risoTreeQueryPN.page_hit_count,
             risoTreeQueryPN.range_query_time, risoTreeQueryPN.get_iterator_time,
             risoTreeQueryPN.iterate_time, risoTreeQueryPN.set_label_time,
             risoTreeQueryPN.remove_label_time, risoTreeQueryPN.overlap_leaf_node_count,
-            risoTreeQueryPN.candidate_count, risoTreeQueryPN.result_count);
-        planDescription = risoTreeQueryPN.planDescription;
+            risoTreeQueryPN.candidate_count, risoTreeQueryPN.result_count, planDescription);
         break;
       default:
         throw new RuntimeException(String.format("method %s does not exist!", method));
@@ -148,6 +148,12 @@ public class ExperimentUtil {
   public static void outputDetailResult(List<ResultRecord> records, ExperimentMethod method,
       String outputPath) throws Exception {
     FileWriter writer = Util.getFileWriter(outputPath, true);
+    for (int i = 0; i < records.size(); i++) {
+      ResultRecord record = records.get(i);
+      writer.write(i);
+      writer.write(record.toString() + "\n");
+      writer.write(record.planDescription.toString());
+    }
     for (int i = 0; i < records.size(); i++) {
       ResultRecord record = records.get(i);
       writer.write(String.format("%d\t%s\n", i, getOutputResult(record, method)));
