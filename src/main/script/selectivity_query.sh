@@ -50,3 +50,16 @@ java -Xmx100g -jar ${jar_path} \
 	-clearCacheMethod "DOUBLE" \
 	-outputPath ${output_path} \
 	>> ${log_path}
+
+java -Xmx100g -jar ${jar_path} \
+	-f selectivityExperiment \
+	-dp ${db_path} \
+	-d ${dataset} \
+	-MAX_HOPNUM ${MAX_HOPNUM} \
+	-queryPath ${query_path} \
+	-queryCount ${query_count} \
+	-password ${password}	\
+	-clearCache "false"	\
+	-clearCacheMethod "" \
+	-outputPath ${output_path} \
+	>> ${log_path}
