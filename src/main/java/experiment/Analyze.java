@@ -24,6 +24,7 @@ import commons.OwnMethods;
 import commons.RTreeUtility;
 import commons.ReadWriteUtil;
 import commons.RisoTreeUtil;
+import commons.SaveRectanglesAsImage;
 import commons.Util;
 
 /**
@@ -331,6 +332,18 @@ public class Analyze {
     tx.close();
     Util.close(service);
     ReadWriteUtil.WriteMap(outputPath, false, histgram);
+  }
+
+  public static void visualizeLeafNodes(String dbPath, String dataset, String rectanglesExtend,
+      String imageExtend, String outputPath) throws Exception {
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    List<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(service, dataset);
+    List<MyRectangle> rectangles = new ArrayList<>(nodes.size());
+    for (Node node : nodes) {
+      MyRectangle rectangle = RTreeUtility.getNodeMBR(node);
+      rectangles.add(rectangle);
+    }
+    SaveRectanglesAsImage.saveAsJPG(rectangles, rectanglesExtend, imageExtend, outputPath);
   }
 
   private static void getNodePNSizeDistribution(Node node, Map<Object, Object> histgram) {

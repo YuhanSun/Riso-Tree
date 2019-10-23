@@ -38,6 +38,7 @@ public class Driver {
     getPNSizeDistribution, getPNNonEmptyCount, // PN
     overlapAnalysis, areaAnalysis, treeNodesAvgArea, // area
     degreeSD, degreeAvg, // graph degree
+    visualizeLeafNodes,
 
     /**
      * for wikidata
@@ -113,6 +114,9 @@ public class Driver {
   private static final String inputPath = "inputPath";
   private static final String outputPath = "outputPath";
 
+  private static final String input1 = "input1";
+  private static final String input2 = "input2";
+
   // Experiment
   private static final String labelCount = "labelCount"; // for single-label graph
   private static final String nodeCount = "nodeCount";
@@ -164,6 +168,8 @@ public class Driver {
     // Analyze
     options.addOption(outputPath, "outputPath", true, "The output path for analyze");
     options.addOption(inputPath, "inputPath", true, "The input path for analyze");
+    options.addOption(input1, "inputPath1", true, "The input 1 for analyze");
+    options.addOption(input2, "inputPath2", true, "The input 2 for analyze");
 
     // Experiment
     options.addOption(labelCount, "labelCount", true,
@@ -293,6 +299,11 @@ public class Driver {
             break;
           case degreeAvg:
             Analyze.degreeAvg(cmd.getOptionValue(graphPath), cmd.getOptionValue(entityPath),
+                cmd.getOptionValue(outputPath));
+            break;
+          case visualizeLeafNodes:
+            Analyze.visualizeLeafNodes(cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
+                cmd.getOptionValue(input1), cmd.getOptionValue(input2),
                 cmd.getOptionValue(outputPath));
             break;
           case degreeSD:
