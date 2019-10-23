@@ -337,6 +337,7 @@ public class Analyze {
   public static void visualizeLeafNodes(String dbPath, String dataset, String rectanglesExtend,
       String imageExtend, String outputPath) throws Exception {
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    Transaction tx = service.beginTx();
     List<Node> nodes = RTreeUtility.getRTreeLeafLevelNodes(service, dataset);
     List<MyRectangle> rectangles = new ArrayList<>(nodes.size());
     for (Node node : nodes) {
@@ -344,6 +345,9 @@ public class Analyze {
       rectangles.add(rectangle);
     }
     SaveRectanglesAsImage.saveAsJPG(rectangles, rectanglesExtend, imageExtend, outputPath);
+    tx.success();
+    tx.close();
+    service.shutdown();
   }
 
   private static void getNodePNSizeDistribution(Node node, Map<Object, Object> histgram) {
