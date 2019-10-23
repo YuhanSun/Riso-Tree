@@ -23,12 +23,18 @@ import commons.Neo4jGraphUtility;
 import commons.RTreeUtility;
 import commons.Util;
 
+/**
+ * Draw a set of rectangles from {@code spaceExtend} to {@code drawExtend}.
+ *
+ * @author yuhan sun
+ *
+ */
 public class DrawRectanglesFrame extends JFrame {
 
   DrawRectangles drawRectangles;
   List<MyRectangle> rectangles;
-  MyRectangle spaceExtend;
-  MyRectangle drawExtend;
+  MyRectangle spaceExtend;// the screen space
+  MyRectangle drawExtend;// the geospatial space
 
   public DrawRectanglesFrame(MyRectangle spaceExtend, MyRectangle drawExtend,
       List<MyRectangle> rectangles) {
