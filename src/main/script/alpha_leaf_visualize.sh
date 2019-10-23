@@ -25,6 +25,8 @@ do
 
 	java -Xmx100g -jar ${jar_path} \
 	-f visualizeLeafNodes \
+	-dp $db_path
+	-d $dataset
 	-input1 "(-180,-90,180,90)"	\
 	-input2 "(0,0,1000,1000)"	\
 	-outputPath ${outputPath}
