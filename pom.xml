@@ -43,6 +43,10 @@
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 						</manifest>
+						<manifestEntries>
+							<Specification-Vendor>MyCompany</Specification-Vendor>
+							<Implementation-Vendor>MyCompany</Implementation-Vendor>
+						</manifestEntries>
 					</archive>
 				</configuration>
 			</plugin>
