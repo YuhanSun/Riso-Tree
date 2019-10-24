@@ -28,7 +28,7 @@ do
 	-dp $db_path	\
 	-d $dataset	\
 	-input1 "(-180,-90,180,90)"	\
-	-input2 "(0,0,1000,1000)"	\
+	-input2 "(0,0,20000,10000)"	\
 	-outputPath ${outputPath}
 done
 printf "\n" >> ${outputPath}
