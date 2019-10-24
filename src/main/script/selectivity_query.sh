@@ -60,6 +60,6 @@ java -Xmx100g -jar ${jar_path} \
 	-queryCount ${query_count} \
 	-password ${password}	\
 	-clearCache "false"	\
-	-clearCacheMethod "" \
+	-clearCacheMethod "NULL" \
 	-outputPath ${output_path} \
 	>> ${log_path}

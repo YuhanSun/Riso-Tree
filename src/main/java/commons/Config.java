@@ -17,7 +17,7 @@ public class Config {
   }
 
   public static enum ClearCacheMethod {
-    SINGLE, DOUBLE,
+    SINGLE, DOUBLE, NULL,
   }
 
   public static enum ExperimentMethod {
