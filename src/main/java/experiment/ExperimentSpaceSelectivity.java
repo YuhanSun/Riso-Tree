@@ -681,7 +681,7 @@ public class ExperimentSpaceSelectivity {
     for (ExperimentMethod method : methods) {
       String outputPath = getAvgOutputPath(outputDir, method);
       ReadWriteUtil.WriteFile(outputPath, true,
-          getRunningArgs(MAX_HOP, queryCount, clearCache, clearCacheMethod) + "\n");
+          String.format("clear: %s, clearMethod: %s\n", clearCache, clearCacheMethod));
       String header = ExperimentUtil.getHeader(method);
       ReadWriteUtil.WriteFile(outputPath, true, "queryPath\t" + header + "\n");
     }
@@ -709,12 +709,6 @@ public class ExperimentSpaceSelectivity {
       String outputPath = getAvgOutputPath(outputDir, method);
       ReadWriteUtil.WriteFile(outputPath, true, "\n");
     }
-  }
-
-  public static String getRunningArgs(int MAX_HOP, int queryCount, boolean clearCache,
-      ClearCacheMethod clearCacheMethod) {
-    return String.format("MAX_HOP:%d, queryCount:%d, clearCache:%s, ClearCacheMethod:%s", MAX_HOP,
-        queryCount, clearCache, clearCacheMethod);
   }
 
   public static String getAvgOutputPath(String outputDir, ExperimentMethod method) {
