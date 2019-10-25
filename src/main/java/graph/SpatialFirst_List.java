@@ -700,13 +700,9 @@ public class SpatialFirst_List {
           }
           iterate_time += System.currentTimeMillis() - start_1;
 
-          if (cur_count != 0) {
-            planDescription = result.getExecutionPlanDescription();
-            ExecutionPlanDescription.ProfilerStatistics profile =
-                planDescription.getProfilerStatistics();
-            result_count += profile.getRows();
-            page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-          }
+          planDescription = result.getExecutionPlanDescription();
+          result_count += cur_count;
+          page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
         }
       }
       Util.println("located in spatial objects count: " + located_in_count);
