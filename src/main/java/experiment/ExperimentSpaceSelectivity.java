@@ -711,6 +711,12 @@ public class ExperimentSpaceSelectivity {
     }
   }
 
+  public static String getRunningArgs(int MAX_HOP, int queryCount, boolean clearCache,
+      ClearCacheMethod clearCacheMethod) {
+    return String.format("MAX_HOP:%d, queryCount:%d, clearCache:%s, ClearCacheMethod:%s", MAX_HOP,
+        queryCount, clearCache, clearCacheMethod);
+  }
+
   public static String getAvgOutputPath(String outputDir, ExperimentMethod method) {
     return String.format("%s/%s.txt", outputDir, method.toString());
   }
