@@ -148,7 +148,7 @@ public class ExperimentUtil {
       ResultRecord record = records.get(i);
       writer.write(i + "\n");
       writer.write(record.toString() + "\n");
-      writer.write(String.format("%s", record.planDescription.toString()));
+      writer.write(String.format("%s", record.planDescription));
     }
     writer.write("\n");
     writer.close();
