@@ -7,6 +7,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import commons.Config;
 import commons.Config.ClearCacheMethod;
+import commons.Config.ExperimentMethod;
 import commons.GraphUtil;
 import commons.Util;
 import dataprocess.Wikidata;
@@ -59,6 +60,7 @@ public class Driver {
     maxPNSizeRisoTreeQuery, maxPNSizeRisoTreeQueryMultiple, // query
     alphaExperiment, // alpha
     selectivityExperiment, // selectivity
+    selectivityExperimentSingleMethod,
 
     /**
      * add experiment
@@ -421,6 +423,15 @@ public class Driver {
             break;
           case selectivityExperiment:
             ExperimentSpaceSelectivity.selectivityExperiment(cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(dataset), Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
+                cmd.getOptionValue(queryPath), Integer.parseInt(cmd.getOptionValue(queryCount)),
+                cmd.getOptionValue(password), Boolean.parseBoolean(cmd.getOptionValue(clearCache)),
+                ClearCacheMethod.valueOf(cmd.getOptionValue(clearCacheMethod)),
+                cmd.getOptionValue(outputPath));
+            break;
+          case selectivityExperimentSingleMethod:
+            ExperimentSpaceSelectivity.selectivityExperimentSingleMethod(
+                ExperimentMethod.valueOf(cmd.getOptionValue(method)), cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
                 cmd.getOptionValue(queryPath), Integer.parseInt(cmd.getOptionValue(queryCount)),
                 cmd.getOptionValue(password), Boolean.parseBoolean(cmd.getOptionValue(clearCache)),

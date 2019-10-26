@@ -711,6 +711,37 @@ public class ExperimentSpaceSelectivity {
     }
   }
 
+  public static void selectivityExperimentSingleMethod(ExperimentMethod method, String dbPath,
+      String dataset, int MAX_HOP, String queryPaths, int queryCount, String password,
+      boolean clearCache, ClearCacheMethod clearCacheMethod, String outputDir) throws Exception {
+    String[] queryPathsList = queryPaths.split(",");
+    Util.checkPathExist(queryPathsList);
+
+    String avgPath = getAvgOutputPath(outputDir, method);
+    String detailPath = getDetailOutputPath(outputDir, method);
+
+    ReadWriteUtil.WriteFile(avgPath, true,
+        getRunningArgs(MAX_HOP, queryCount, clearCache, clearCacheMethod) + "\n");
+    String header = ExperimentUtil.getHeader(method);
+    ReadWriteUtil.WriteFile(avgPath, true, "queryPath\t" + header + "\n");
+
+    for (String queryPath : queryPathsList) {
+      ReadWriteUtil.WriteFile(detailPath, true, queryPath + "\n");
+      ReadWriteUtil.WriteFile(detailPath, true, "id\t" + header + "\n");
+
+      List<ResultRecord> records = ExperimentUtil.runExperiment(dbPath, dataset, method, MAX_HOP,
+          queryPath, queryCount, password, clearCache, clearCacheMethod, avgPath);
+
+      ExperimentUtil.outputDetailResult(records, method, detailPath);
+
+      String string = ExperimentUtil.getAverageResultOutput(records, method);
+      ReadWriteUtil.WriteFile(avgPath, true, StringUtils.joinWith("\t", queryPath, string) + "\n");
+    }
+
+    ReadWriteUtil.WriteFile(detailPath, true, "\n");
+    ReadWriteUtil.WriteFile(avgPath, true, "\n");
+  }
+
   public static String getRunningArgs(int MAX_HOP, int queryCount, boolean clearCache,
       ClearCacheMethod clearCacheMethod) {
     return String.format("MAX_HOP:%d, queryCount:%d, clearCache:%s, ClearCacheMethod:%s", MAX_HOP,
