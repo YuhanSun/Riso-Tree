@@ -2,7 +2,8 @@
 ./package.sh
 
 # dataset="wikidata"
-dataset="Gowalla_100"
+# dataset="Gowalla_100"
+dataset="foursquare_100"
 
 # server
 dir="/hdd/code/yuhansun"
@@ -32,6 +33,7 @@ do
 	target_path="${db_dir}/neo4j-community-3.4.12_${suffix}"
 	rm -r ${target_path}
 	cp -a ${source_path} ${target_path}
+	touch ${target_path}
 
 	db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
 	containID_path="${db_dir}/containID_${suffix}.txt"
