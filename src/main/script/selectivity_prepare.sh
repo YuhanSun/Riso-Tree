@@ -38,7 +38,7 @@ if [ ! -d "$node_edges_db_dir" ];	then
 			-gp ${graph_path}
 fi
 
-if [ ! -z "$spatialNodePNPath" ];	then
+if [ ! -f "$spatialNodePNPath" ];	then
 	java -Xmx100g -jar ${jar_path} \
 	-f wikigenerateZeroOneHopPNForSpatialNodes \
 	-gp ${graph_path} \
@@ -46,9 +46,9 @@ if [ ! -z "$spatialNodePNPath" ];	then
 	-ep ${entity_path} \
 	-entityStringLabelMapPath ${entityStringLabelMapPath} \
 	-maxPNSize -1 \
+	-MAX_HOPNUM 1 \
 	-outputPath ${spatialNodePNPath}
 fi
-
 
 split_mode="Gleenes"
 maxPNSize="-1"
@@ -69,7 +69,7 @@ fi
 
 
 containID_path="${db_dir}/containID_${suffix}.txt"
-if [ ! -z "$containID_path" ];	then
+if [ ! -f "$containID_path" ];	then
 	# Construct the tree structure
 	java -Xmx100g -jar ${jar_path} \
 	-f wikiConstructRTree \
@@ -89,7 +89,7 @@ fi
 
 # modify
 PNPathAndPrefix="${db_dir}/PathNeighbors_${suffix}"
-if [ ! -z "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
+if [ ! -f "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
 	for hop in 0 1 2
 	do
 		java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
