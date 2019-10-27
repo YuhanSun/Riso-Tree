@@ -4,6 +4,7 @@
 # dataset="wikidata"
 # dataset="Gowalla_100"
 dataset="foursquare_100"
+MAX_HOPNUM=2
 
 # server
 dir="/hdd/code/yuhansun"
@@ -16,6 +17,7 @@ mkdir -p $db_dir
 graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
 label_path="${data_dir}/graph_label.txt"
+labelStrMapPath="${data_dir}/entity_string_label.txt"
 entityStringLabelMapPath="${data_dir}/entity_string_label.txt"
 spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN_-1.txt"
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
@@ -55,18 +57,19 @@ alpha=1.0
 
 suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 echo ${suffix}
+db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
 
 source_path="${data_dir}/neo4j-community-3.4.12_node_edges/"
 target_path="${db_dir}/neo4j-community-3.4.12_${suffix}"
 if [ ! -d "$target_path" ];	then
-	# rm -r ${target_path}
+	# Copy the node edges db dir to ./selectivity.
 	cp -a ${source_path} ${target_path}
 	touch ${target_path}
+fi
 
-	db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
-	containID_path="${db_dir}/containID_${suffix}.txt"
-	PNPathAndPrefix="${db_dir}/PathNeighbors_${suffix}"
 
+containID_path="${db_dir}/containID_${suffix}.txt"
+if [ ! -z "$containID_path" ];	then
 	# Construct the tree structure
 	java -Xmx100g -jar ${jar_path} \
 	-f wikiConstructRTree \
@@ -82,8 +85,11 @@ if [ ! -d "$target_path" ];	then
 	-dp ${db_path} \
 	-d ${dataset} \
 	-c ${containID_path}
+fi
 
-	# modify
+# modify
+PNPathAndPrefix="${db_dir}/PathNeighbors_${suffix}"
+if [ ! -z "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
 	for hop in 0 1 2
 	do
 		java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
@@ -96,6 +102,7 @@ if [ ! -d "$target_path" ];	then
 		-PNPrefix ${PNPathAndPrefix} \
 		-hopListStr 0,1,2 \
 		-dp ${db_path} \
-		-c ${containID_path}	
+		-c ${containID_path}
 fi
+
 
