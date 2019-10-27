@@ -3,7 +3,9 @@
 
 dir="/hdd/code/yuhansun"
 
-dataset="Yelp_100"
+# dataset="Yelp_100"
+# dataset="foursquare_100"
+dataset="Gowalla_100"
 MAX_HOPNUM=2
 password="syhSYH.19910205"
 
@@ -16,12 +18,13 @@ query_dir="${dir}/result/query/${dataset}"
 mkdir -p $result_dir
 
 query_size=2
-query_count=50
+query_count=20
 
 split_mode="Gleenes"
 maxPNSize="-1"
 query_path=""
-for selectivity in 0.0001 0.001 0.01 0.1
+# for selectivity in 0.0001 0.001 0.01 0.1
+for selectivity in 0.000001 0.00001 0.0001 0.001 0.01
 do
 	if [ -z "$query_path" ];	then
 		query_path="${query_dir}/${query_size}_${selectivity}"
