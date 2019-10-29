@@ -52,7 +52,6 @@ public class ExperimentUtil {
       if (clearCache) {
         OwnMethods.clearCache(password, clearCacheMethod);
       }
-      // service = Neo4jGraphUtility.getDatabaseService(dbPath);
     }
     return records;
   }
@@ -123,6 +122,7 @@ public class ExperimentUtil {
         string += record.runTime + "\t";
         string += record.pageHit + "\t";
         string += record.range_query_time + "\t";
+        string += record.check_path_time + "\t";
         string += record.set_label_time + "\t";
         string += record.remove_label_time + "\t";
         string += record.get_iterator_time + "\t";
@@ -178,6 +178,7 @@ public class ExperimentUtil {
         string += ResultRecord.getRunTimeAvg(records) + "\t";
         string += ResultRecord.getPageHitAvg(records) + "\t";
         string += ResultRecord.getRangeQueryTimeAvg(records) + "\t";
+        string += ResultRecord.getCheckPathTimeAvg(records) + "\t";
         string += ResultRecord.getSetLabelTimeAvg(records) + "\t";
         string += ResultRecord.getRemoveLabelTimeAvg(records) + "\t";
         string += ResultRecord.getGetIteratorTimeAvg(records) + "\t";
@@ -201,8 +202,8 @@ public class ExperimentUtil {
         return StringUtils.joinWith("\t", "runTime", "pageHit", "rangeQueryTime", "getIteratorTime",
             "iterateTime", "overlapLeafCount", "candidateCount", "resultCount");
       case RISOTREE:
-        return StringUtils.joinWith("\t", "runTime", "pageHit", "rangeQueryTime", "setLabelTime",
-            "removeLabelTime", "getIteratorTime", "iterateTime", "overlapLeafCount",
+        return StringUtils.joinWith("\t", "runTime", "pageHit", "rangeQueryTime", "checkPathTime",
+            "setLabelTime", "removeLabelTime", "getIteratorTime", "iterateTime", "overlapLeafCount",
             "candidateCount", "resultCount");
       default:
         throw new RuntimeException(String.format("method %s does not exist!", method));

@@ -85,7 +85,7 @@ public class RisoTreeQueryPN {
   public String logPath;
   public ExecutionPlanDescription planDescription;
 
-  // for both knn and join
+  // for range, knn and join
   public long check_paths_time;
   // public long has_relation_time;
   // public long has_relation_time_addition;
@@ -968,10 +968,10 @@ public class RisoTreeQueryPN {
 
       Node root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
 
-      long start = System.currentTimeMillis();
+      // long start = System.currentTimeMillis();
       Map<Integer, List<Node>> overlapLeafNodes =
           getOverlapLeafNodes(root_node, spa_predicates, PN_list_propertyname);
-      range_query_time += System.currentTimeMillis() - start;
+      // range_query_time += System.currentTimeMillis() - start;
       if (overlapLeafNodes == null) {
         Util.println("No result satisfy the query.");
         return candidateSet;
@@ -1754,6 +1754,7 @@ public class RisoTreeQueryPN {
   private void iniLogParams() {
     Util.println("Initialize variables for query");
     range_query_time = 0;
+    check_paths_time = 0;
     set_label_time = 0;
     remove_label_time = 0;
     get_iterator_time = 0;

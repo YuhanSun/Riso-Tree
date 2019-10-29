@@ -13,6 +13,7 @@ public class ResultRecord {
   public long pageHit;
 
   public long range_query_time;
+  public long check_path_time;
   public long get_iterator_time;
   public long iterate_time;
   public long set_label_time;
@@ -35,6 +36,7 @@ public class ResultRecord {
     string += String.format("runTime: %d\n", runTime);
     string += String.format("pageHit: %d\n", pageHit);
     string += String.format("range_query_time: %d\n", range_query_time);
+    string += String.format("check_path_time: %d\n", check_path_time);
     string += String.format("get_iterator_time: %d\n", get_iterator_time);
     string += String.format("iterate_time: %d\n", iterate_time);
     string += String.format("set_label_time: %d\n", set_label_time);
@@ -122,29 +124,32 @@ public class ResultRecord {
    * @param overlapLeafCount
    * @param resultCount
    */
-  public ResultRecord(long runTime, long pageHit, long rangeQueryTime, long getIteratorTime,
-      long iterateTime, long setLabelTime, long removeLabelTime, long overlapLeafCount,
-      long candidateCount, long resultCount) {
+  public ResultRecord(long runTime, long pageHit, long rangeQueryTime, long checkPathTime,
+      long getIteratorTime, long iterateTime, long setLabelTime, long removeLabelTime,
+      long overlapLeafCount, long candidateCount, long resultCount) {
     this(runTime, pageHit, rangeQueryTime, getIteratorTime, iterateTime, overlapLeafCount,
         candidateCount, resultCount);
+    this.check_path_time = checkPathTime;
     this.set_label_time = setLabelTime;
     this.remove_label_time = removeLabelTime;
   }
 
-  public ResultRecord(long runTime, long pageHit, long rangeQueryTime, long getIteratorTime,
-      long iterateTime, long setLabelTime, long removeLabelTime, long overlapLeafCount,
-      long candidateCount, long resultCount, ExecutionPlanDescription planDescription) {
-    this(runTime, pageHit, rangeQueryTime, getIteratorTime, iterateTime, setLabelTime,
-        removeLabelTime, overlapLeafCount, candidateCount, resultCount);
+  public ResultRecord(long runTime, long pageHit, long rangeQueryTime, long checkPathTime,
+      long getIteratorTime, long iterateTime, long setLabelTime, long removeLabelTime,
+      long overlapLeafCount, long candidateCount, long resultCount,
+      ExecutionPlanDescription planDescription) {
+    this(runTime, pageHit, rangeQueryTime, checkPathTime, getIteratorTime, iterateTime,
+        setLabelTime, removeLabelTime, overlapLeafCount, candidateCount, resultCount);
     this.planDescription = planDescription;
   }
 
   public ResultRecord(RisoTreeQueryPN risoTreeQueryPN) {
     this(risoTreeQueryPN.run_time, risoTreeQueryPN.page_hit_count, risoTreeQueryPN.range_query_time,
-        risoTreeQueryPN.get_iterator_time, risoTreeQueryPN.iterate_time,
-        risoTreeQueryPN.set_label_time, risoTreeQueryPN.remove_label_time,
-        risoTreeQueryPN.overlap_leaf_node_count, risoTreeQueryPN.candidate_count,
-        risoTreeQueryPN.result_count, risoTreeQueryPN.planDescription);
+        risoTreeQueryPN.check_paths_time, risoTreeQueryPN.get_iterator_time,
+        risoTreeQueryPN.iterate_time, risoTreeQueryPN.set_label_time,
+        risoTreeQueryPN.remove_label_time, risoTreeQueryPN.overlap_leaf_node_count,
+        risoTreeQueryPN.candidate_count, risoTreeQueryPN.result_count,
+        risoTreeQueryPN.planDescription);
   }
 
 
@@ -169,6 +174,14 @@ public class ResultRecord {
     List<Long> rangeQueryTimes = new ArrayList<>(resultRecords.size());
     for (ResultRecord resultRecord : resultRecords) {
       rangeQueryTimes.add(resultRecord.range_query_time);
+    }
+    return Util.Average(rangeQueryTimes);
+  }
+
+  public static long getCheckPathTimeAvg(List<ResultRecord> resultRecords) {
+    List<Long> rangeQueryTimes = new ArrayList<>(resultRecords.size());
+    for (ResultRecord resultRecord : resultRecords) {
+      rangeQueryTimes.add(resultRecord.check_path_time);
     }
     return Util.Average(rangeQueryTimes);
   }
