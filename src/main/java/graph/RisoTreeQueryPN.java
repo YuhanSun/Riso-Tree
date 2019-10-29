@@ -107,7 +107,7 @@ public class RisoTreeQueryPN {
 
   // method control
   public static boolean forceGraphFirst = true;
-  public final static boolean completeStrategyUsed = false;// whether to use the complete approach
+  public final static boolean completeStrategyUsed = true;// whether to use the complete approach
   public static Boolean candidateComplete = null;
   public static Map<Integer, boolean[]> queryNodesComplete = null;
 
@@ -616,6 +616,14 @@ public class RisoTreeQueryPN {
     run_time += System.currentTimeMillis() - start;
   }
 
+  /**
+   * Combined for complete strategy used or not.
+   *
+   * @param query
+   * @param candidateSets
+   * @param query_Graph
+   * @return
+   */
   public String formQueryWithIgnoreNewLabelCombined(String query,
       Map<Integer, Collection<Long>> candidateSets, Query_Graph query_Graph) {
     String queryAfterRewrite = null;
@@ -987,6 +995,9 @@ public class RisoTreeQueryPN {
             }
           }
         }
+        // If any query node is complete, we can use the complete strategy
+        // which is to form the cypher query without union.
+        // But the uncomplete query nodes need to be removed from the candidateSet.
         if (candidateComplete) {
           for (int spatialId : queryNodesComplete.keySet()) {
             for (int i = 0; i < queryNodesComplete.get(spatialId).length; i++) {
