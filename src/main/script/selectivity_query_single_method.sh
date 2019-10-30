@@ -83,7 +83,7 @@ fi
 ##### RISOTREE ######
 log_path="${result_dir}/${dataset}_risotree_log.txt"
 run_risotree=1
-if [ $run_spatial == 1 ];	then
+if [ $run_risotree == 1 ];	then
 	# java -Xmx100g -jar ${jar_path} \
 	# 	-f selectivityExperimentSingleMethod \
 	# 	-method "RISOTREE"	\
