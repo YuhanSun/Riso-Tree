@@ -737,7 +737,7 @@ public class RisoTreeQueryPN {
       throw new RuntimeException("minEntry is null");
     }
     Map<Integer, Collection<Long>> res = new HashMap<>();
-    res.entrySet().add(minEntry);
+    res.put(minEntry.getKey(), minEntry.getValue());
     return res;
   }
 
