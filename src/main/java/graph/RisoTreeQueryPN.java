@@ -108,6 +108,7 @@ public class RisoTreeQueryPN {
   // method control
   public static boolean forceGraphFirst = true;
   public final static boolean completeStrategyUsed = true;// whether to use the complete approach
+  public final static boolean selectivityEstimate = true;
   public static Boolean candidateComplete = null;
   public static Map<Integer, boolean[]> queryNodesComplete = null;
 
@@ -702,6 +703,10 @@ public class RisoTreeQueryPN {
           String.format("%s:%d", query_Graph.nodeVariables[key], candidateSets.get(key).size()));
     }
 
+    if (candidateComplete == true && selectivityEstimate) {
+      pickup(candidateSets);
+    }
+
     setNewLabel(candidateSets, query_Graph.nodeVariables);
     String queryAfterRewrite =
         formQueryWithIgnoreNewLabelCombined(query, candidateSets, query_Graph);
@@ -712,6 +717,20 @@ public class RisoTreeQueryPN {
     recoverLabel(candidateSets, query_Graph.nodeVariables);
     tx.success();
     tx.close();
+  }
+
+  private void pickup(Map<Integer, Collection<Long>> candidateSets) {
+    int minSize = Integer.MAX_VALUE;
+    Iterator<Map.Entry<Integer, Collection<Long>>> iterator = candidateSets.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Map.Entry<Integer, Collection<Long>> entry = iterator.next();
+      if (entry.getValue().size() < minSize) {
+        iterator.remove();
+      }
+    }
+    if (candidateSets.size() != 1) {
+      throw new RuntimeException("candidateSets size is " + candidateSets.size());
+    }
   }
 
   private void runAndTrackTime(String queryAfterRewrite) {
