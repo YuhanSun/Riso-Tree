@@ -724,7 +724,9 @@ public class RisoTreeQueryPN {
     Iterator<Map.Entry<Integer, Collection<Long>>> iterator = candidateSets.entrySet().iterator();
     while (iterator.hasNext()) {
       Map.Entry<Integer, Collection<Long>> entry = iterator.next();
-      if (entry.getValue().size() < minSize) {
+      int size = entry.getValue().size();
+      if (size < minSize) {
+        minSize = size;
         iterator.remove();
       }
     }
