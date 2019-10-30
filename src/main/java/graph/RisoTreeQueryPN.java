@@ -727,6 +727,7 @@ public class RisoTreeQueryPN {
       int size = entry.getValue().size();
       if (size < minSize) {
         minSize = size;
+      } else {
         iterator.remove();
       }
     }
