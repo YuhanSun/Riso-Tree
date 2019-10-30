@@ -704,7 +704,7 @@ public class RisoTreeQueryPN {
     }
 
     if (candidateComplete == true && selectivityEstimate) {
-      pickup(candidateSets);
+      candidateSets = pickup(candidateSets);
     }
 
     setNewLabel(candidateSets, query_Graph.nodeVariables);
@@ -719,21 +719,26 @@ public class RisoTreeQueryPN {
     tx.close();
   }
 
-  private void pickup(Map<Integer, Collection<Long>> candidateSets) {
-    int minSize = Integer.MAX_VALUE;
+  private Map<Integer, Collection<Long>> pickup(Map<Integer, Collection<Long>> candidateSets) {
+    Map.Entry<Integer, Collection<Long>> minEntry = null;
     Iterator<Map.Entry<Integer, Collection<Long>>> iterator = candidateSets.entrySet().iterator();
     while (iterator.hasNext()) {
       Map.Entry<Integer, Collection<Long>> entry = iterator.next();
+      if (minEntry == null) {
+        minEntry = entry;
+        continue;
+      }
       int size = entry.getValue().size();
-      if (size < minSize) {
-        minSize = size;
-      } else {
-        iterator.remove();
+      if (size < minEntry.getValue().size()) {
+        minEntry = entry;
       }
     }
-    if (candidateSets.size() != 1) {
-      throw new RuntimeException("candidateSets size is " + candidateSets.size());
+    if (minEntry == null) {
+      throw new RuntimeException("minEntry is null");
     }
+    Map<Integer, Collection<Long>> res = new HashMap<>();
+    res.entrySet().add(minEntry);
+    return res;
   }
 
   private void runAndTrackTime(String queryAfterRewrite) {
