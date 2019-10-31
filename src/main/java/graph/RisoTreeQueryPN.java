@@ -701,7 +701,9 @@ public class RisoTreeQueryPN {
     printCandidateSets(candidateSets);
 
     if (candidateComplete == true && selectivityEstimate) {
-      candidateSets = pickup(candidateSets);
+      if (candidate_count > 200) {
+        candidateSets = pickup(candidateSets);
+      }
     }
 
     printCandidateSets(candidateSets);
@@ -723,6 +725,7 @@ public class RisoTreeQueryPN {
       Util.println(
           String.format("%s:%d", query_Graph.nodeVariables[key], candidateSets.get(key).size()));
     }
+    Util.println("\n");
   }
 
   private Map<Integer, Collection<Long>> pickup(Map<Integer, Collection<Long>> candidateSets) {
