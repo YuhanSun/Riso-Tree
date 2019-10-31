@@ -111,7 +111,7 @@ if [ ! -f "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
 	java -Xmx100g -jar ${jar_path} \
 		-f wikiLoadAllHopPN \
 		-PNPrefix ${PNPathAndPrefix} \
-		-hopListStr $hopListStr \
+		-hopListStr "$hopListStr" \
 		-dp ${db_path} \
 		-c ${containID_path}
 fi
