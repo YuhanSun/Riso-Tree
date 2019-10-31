@@ -13,6 +13,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Logger;
+import org.apache.commons.lang.mutable.MutableBoolean;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
@@ -110,7 +111,7 @@ public class RisoTreeQueryPN {
   public final static boolean completeStrategyUsed = true;// whether to use the complete approach
   public final static boolean selectivityEstimate = true;
   public static Boolean candidateComplete = null;
-  public static Map<Integer, boolean[]> queryNodesComplete = null;
+  public static Map<Integer, MutableBoolean[]> queryNodesComplete = null;
 
   public RisoTreeQueryPN(String db_path, String p_dataset, long[] p_graph_pos_map, int pMAXHOPNUM,
       boolean forceGraphFirst) {
@@ -607,7 +608,7 @@ public class RisoTreeQueryPN {
     queryNodesComplete = new HashMap<>();
     for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
       if (query_Graph.Has_Spa_Predicate[i]) {
-        queryNodesComplete.put(i, new boolean[query_Graph.graph.size()]);
+        queryNodesComplete.put(i, new MutableBoolean[query_Graph.graph.size()]);
       }
     }
 
@@ -1015,8 +1016,8 @@ public class RisoTreeQueryPN {
       if (completeStrategyUsed) {
         candidateSet = getCandidateSetWithIgnoreComplete(overlapLeafNodes, PN_list_propertyname);
         for (int spatialId : queryNodesComplete.keySet()) {
-          for (boolean complete : queryNodesComplete.get(spatialId)) {
-            if (complete) {
+          for (MutableBoolean complete : queryNodesComplete.get(spatialId)) {
+            if (complete.booleanValue()) {
               candidateComplete = true;
               break;
             }
@@ -1028,8 +1029,8 @@ public class RisoTreeQueryPN {
         if (candidateComplete) {
           for (int spatialId : queryNodesComplete.keySet()) {
             for (int i = 0; i < queryNodesComplete.get(spatialId).length; i++) {
-              boolean complete = queryNodesComplete.get(spatialId)[i];
-              if (!complete) {
+              MutableBoolean complete = queryNodesComplete.get(spatialId)[i];
+              if (!complete.booleanValue()) {
                 candidateSet.remove(i);
               }
             }
@@ -1081,7 +1082,7 @@ public class RisoTreeQueryPN {
     Map<Integer, Collection<Long>> pathNeighbors = new HashMap<>();
     for (int endId : pN_list_propertyname.keySet()) {
       Set<String> labelPaths = pN_list_propertyname.get(endId);
-      Boolean complete = true;
+      MutableBoolean complete = new MutableBoolean(true);
       Collection<Long> candidates = getCadidates(nodes, labelPaths, complete);
       queryNodesComplete.get(spatialId)[endId] = complete;
       pathNeighbors.put(endId, candidates);
@@ -1097,12 +1098,12 @@ public class RisoTreeQueryPN {
    * @return
    */
   private Collection<Long> getCadidates(List<Node> nodes, Set<String> labelPaths,
-      Boolean complete) {
+      MutableBoolean complete) {
     List<Integer> candidates = new ArrayList<>();
     for (Node node : nodes) {
       List<Integer> curCandidates = new ArrayList<>();
       for (String path : labelPaths) {
-        int[] pn = (int[]) node.getProperty(path);
+        int[] pn = (int[]) node.getProperty(path, null);
         if (pn == null || pn.length == 0) {
           continue;
         } else if (curCandidates.size() == 0) {
@@ -1112,7 +1113,8 @@ public class RisoTreeQueryPN {
         }
       }
       if (curCandidates.size() == 0) {
-        complete = false; // if any leaf node is [], the end query node is incomplete
+        complete.setValue(false); // if any leaf node is [], the end query node is
+                                  // incomplete
       }
       candidates = Util.sortedListMerge(candidates, curCandidates);
     }
