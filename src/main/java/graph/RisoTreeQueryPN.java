@@ -13,7 +13,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Logger;
-import org.apache.commons.lang.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
