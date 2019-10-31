@@ -47,8 +47,11 @@ alpha=1.0
 suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
 
+source ./utility.sh
+time=$(get_time)
+
 ##### SPATIAL_FIRST ######
-log_path="${result_dir}/${dataset}_spatialfirst_log.txt"
+log_path="${result_dir}/${dataset}_spatialfirst_log_${time}.txt"
 run_spatial=0
 if [ $run_spatial == 1 ];	then
 # java -Xmx100g -jar ${jar_path} \
@@ -81,7 +84,7 @@ java -Xmx100g -jar ${jar_path} \
 fi
 
 ##### RISOTREE ######
-log_path="${result_dir}/${dataset}_risotree_log.txt"
+log_path="${result_dir}/${dataset}_risotree_log_${time}.txt"
 run_risotree=1
 if [ $run_risotree == 1 ];	then
 	# java -Xmx100g -jar ${jar_path} \
