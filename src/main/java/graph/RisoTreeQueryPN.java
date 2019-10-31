@@ -1015,6 +1015,7 @@ public class RisoTreeQueryPN {
       }
 
       if (completeStrategyUsed) {
+        candidateComplete = false;
         candidateSet = getCandidateSetWithIgnoreComplete(overlapLeafNodes, PN_list_propertyname);
         for (int spatialId : queryNodesComplete.keySet()) {
           for (MutableBoolean complete : queryNodesComplete.get(spatialId)) {
