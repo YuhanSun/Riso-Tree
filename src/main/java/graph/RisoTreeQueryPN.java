@@ -697,16 +697,14 @@ public class RisoTreeQueryPN {
       return;
     }
 
-    // Output candidate set
     Util.println("candidate complete: " + candidateComplete);
-    for (int key : candidateSets.keySet()) {
-      Util.println(
-          String.format("%s:%d", query_Graph.nodeVariables[key], candidateSets.get(key).size()));
-    }
+    printCandidateSets(candidateSets);
 
     if (candidateComplete == true && selectivityEstimate) {
       candidateSets = pickup(candidateSets);
     }
+
+    printCandidateSets(candidateSets);
 
     setNewLabel(candidateSets, query_Graph.nodeVariables);
     String queryAfterRewrite =
@@ -718,6 +716,13 @@ public class RisoTreeQueryPN {
     recoverLabel(candidateSets, query_Graph.nodeVariables);
     tx.success();
     tx.close();
+  }
+
+  private void printCandidateSets(Map<Integer, Collection<Long>> candidateSets) {
+    for (int key : candidateSets.keySet()) {
+      Util.println(
+          String.format("%s:%d", query_Graph.nodeVariables[key], candidateSets.get(key).size()));
+    }
   }
 
   private Map<Integer, Collection<Long>> pickup(Map<Integer, Collection<Long>> candidateSets) {
