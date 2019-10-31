@@ -739,6 +739,7 @@ public class RisoTreeQueryPN {
     }
     Map<Integer, Collection<Long>> res = new HashMap<>();
     res.put(minEntry.getKey(), minEntry.getValue());
+    candidate_count = minEntry.getValue().size();
     return res;
   }
 
