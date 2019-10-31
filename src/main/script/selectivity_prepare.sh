@@ -96,9 +96,16 @@ PNPathAndPrefix="${db_dir}/PathNeighbors_${suffix}"
 if [ ! -f "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
 	for hop in $hopListStr
 	do
-		java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
+		# Always keep all 0-hop path neighbors
+		if [ $hop == 0 ];	then
+			java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
 			-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-			-lp ${label_path} -hop ${hop} -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+			-lp ${label_path} -hop ${hop} -PNPrefix ${PNPathAndPrefix} -maxPNSize -1
+		else
+			java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
+				-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
+				-lp ${label_path} -hop ${hop} -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+		fi
 	done
 
 	java -Xmx100g -jar ${jar_path} \
