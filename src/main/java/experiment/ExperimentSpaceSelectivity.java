@@ -681,7 +681,7 @@ public class ExperimentSpaceSelectivity {
     for (ExperimentMethod method : methods) {
       String outputPath = getAvgOutputPath(outputDir, method);
       ReadWriteUtil.WriteFile(outputPath, true,
-          getRunningArgs(MAX_HOP, queryCount, clearCache, clearCacheMethod) + "\n");
+          getRunningArgs(dbPath, MAX_HOP, queryCount, clearCache, clearCacheMethod) + "\n");
       String header = ExperimentUtil.getHeader(method);
       ReadWriteUtil.WriteFile(outputPath, true, "queryPath\t" + header + "\n");
     }
@@ -721,7 +721,7 @@ public class ExperimentSpaceSelectivity {
     String detailPath = getDetailOutputPath(outputDir, method);
 
     ReadWriteUtil.WriteFile(avgPath, true,
-        getRunningArgs(MAX_HOP, queryCount, clearCache, clearCacheMethod) + "\n");
+        getRunningArgs(dbPath, MAX_HOP, queryCount, clearCache, clearCacheMethod) + "\n");
     String header = ExperimentUtil.getHeader(method);
     ReadWriteUtil.WriteFile(avgPath, true, "queryPath\t" + header + "\n");
 
@@ -742,10 +742,10 @@ public class ExperimentSpaceSelectivity {
     ReadWriteUtil.WriteFile(avgPath, true, "\n");
   }
 
-  public static String getRunningArgs(int MAX_HOP, int queryCount, boolean clearCache,
-      ClearCacheMethod clearCacheMethod) {
-    return String.format("MAX_HOP:%d, queryCount:%d, clearCache:%s, ClearCacheMethod:%s", MAX_HOP,
-        queryCount, clearCache, clearCacheMethod);
+  public static String getRunningArgs(String dbPath, int MAX_HOP, int queryCount,
+      boolean clearCache, ClearCacheMethod clearCacheMethod) {
+    return String.format("dbPath:%s, MAX_HOP:%d, queryCount:%d, clearCache:%s, ClearCacheMethod:%s",
+        dbPath, MAX_HOP, queryCount, clearCache, clearCacheMethod);
   }
 
   public static String getAvgOutputPath(String outputDir, ExperimentMethod method) {
