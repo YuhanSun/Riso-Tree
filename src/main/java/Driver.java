@@ -480,7 +480,6 @@ public class Driver {
     System.exit(0);
   }
 
-
   public static void main(String[] args) {
     // String dataDir = "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt";
     //

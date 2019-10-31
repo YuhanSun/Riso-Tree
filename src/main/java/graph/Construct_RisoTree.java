@@ -350,7 +350,7 @@ public class Construct_RisoTree {
     Util.checkPathExist(containIDPath);
     List<Map<Long, Map<String, int[]>>> allHopPns = new ArrayList<>();
     List<String> paths = new ArrayList<>();
-    for (String hopStr : hopListStr.split(",")) {
+    for (String hopStr : Util.getStringList(hopListStr)) {
       int hop = Integer.parseInt(hopStr);
       String filePath = getPNFileName(PNPathAndPreffix, hop);
       Util.checkPathExist(filePath);
@@ -758,7 +758,7 @@ public class Construct_RisoTree {
       String entityPath, String outputPath) throws Exception {
     int nodeCount = OwnMethods.getEntityCount(entityPath);
     List<String> paths = new ArrayList<>();
-    for (String hopStr : hopListStr.split(",")) {
+    for (String hopStr : Util.getStringList(hopListStr)) {
       int hop = Integer.parseInt(hopStr);
       String filePath = getPNFileName(PNPathAndPreffix, hop);
       Util.checkPathExist(filePath);

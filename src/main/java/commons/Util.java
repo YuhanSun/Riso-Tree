@@ -22,6 +22,16 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 
 public class Util {
 
+  public static String[] getStringList(String stringList) {
+    if (stringList.contains(",")) {
+      return stringList.split(",");
+    } else if (stringList.contains(" ")) {
+      return stringList.split(" ");
+    } else {
+      throw new RuntimeException(stringList + " format error!");
+    }
+  }
+
   /**
    * Get the boundary of all the entities.
    * 
