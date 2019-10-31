@@ -2,9 +2,18 @@
 ./package.sh
 
 # dataset="wikidata"
-# dataset="Gowalla_100"
-dataset="foursquare_100"
+# AX_HOPNUM=1
+# hopListStr="0 1"
+
+dataset="Gowalla_100"
+# dataset="foursquare_100"
 MAX_HOPNUM=2
+hopListStr="0 1 2"
+
+####################
+split_mode="Gleenes"
+maxPNSize="-1"
+alpha=1.0
 
 # server
 dir="/hdd/code/yuhansun"
@@ -50,11 +59,6 @@ if [ ! -f "$spatialNodePNPath" ];	then
 	-outputPath ${spatialNodePNPath}
 fi
 
-split_mode="Gleenes"
-maxPNSize="-1"
-
-alpha=1.0
-
 suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 echo ${suffix}
 db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
@@ -90,7 +94,7 @@ fi
 # modify
 PNPathAndPrefix="${db_dir}/PathNeighbors_${suffix}"
 if [ ! -f "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
-	for hop in 0 1 2
+	for hop in $hopListStr
 	do
 		java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
 			-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
@@ -100,7 +104,7 @@ if [ ! -f "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
 	java -Xmx100g -jar ${jar_path} \
 		-f wikiLoadAllHopPN \
 		-PNPrefix ${PNPathAndPrefix} \
-		-hopListStr 0,1,2 \
+		-hopListStr $hopListStr \
 		-dp ${db_path} \
 		-c ${containID_path}
 fi
