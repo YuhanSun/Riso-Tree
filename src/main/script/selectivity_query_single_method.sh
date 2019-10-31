@@ -5,14 +5,14 @@ dir="/hdd/code/yuhansun"
 
 # dataset="Yelp_100"
 # selectivity_list="0.0001 0.001 0.01 0.1"
-# dataset="Gowalla_100"
-# dataset="foursquare_100"
-# selectivity_list="0.000001 0.00001 0.0001 0.001"
-# MAX_HOPNUM=2
-
-dataset="wikidata"
-MAX_HOPNUM=1
+dataset="Gowalla_100"
+#dataset="foursquare_100"
 selectivity_list="0.000001 0.00001 0.0001 0.001"
+MAX_HOPNUM=2
+
+#dataset="wikidata"
+#MAX_HOPNUM=1
+#selectivity_list="0.000001 0.00001 0.0001 0.001"
 
 password="syhSYH.19910205"
 
@@ -24,11 +24,11 @@ query_dir="${dir}/result/query/${dataset}"
 
 mkdir -p $result_dir
 
-query_size=2
+query_size=3
 query_count=5
 
 split_mode="Gleenes"
-maxPNSize="-1"
+maxPNSize="40"
 query_path=""
 for selectivity in $selectivity_list
 do
@@ -49,7 +49,7 @@ db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
 
 ##### SPATIAL_FIRST ######
 log_path="${result_dir}/${dataset}_spatialfirst_log.txt"
-run_spatial=1
+run_spatial=0
 if [ $run_spatial == 1 ];	then
 # java -Xmx100g -jar ${jar_path} \
 # 	-f selectivityExperimentSingleMethod \
