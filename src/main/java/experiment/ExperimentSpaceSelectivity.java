@@ -749,7 +749,7 @@ public class ExperimentSpaceSelectivity {
   }
 
   public static String getAvgOutputPath(String outputDir, ExperimentMethod method) {
-    return String.format("%s/%s.txt", outputDir, method.toString());
+    return String.format("%s/%s_avg.csv", outputDir, method.toString());
   }
 
   public static String getDetailOutputPath(String outputDir, ExperimentMethod method) {
