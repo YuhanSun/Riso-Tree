@@ -114,8 +114,8 @@ public class ExperimentUtil {
         string += record.range_query_time + "\t";
         string += record.get_iterator_time + "\t";
         string += record.iterate_time + "\t";
-        string += record.overlap_leaf_node_count;
-        string += record.candidate_count;
+        string += record.overlap_leaf_node_count + "\t";
+        string += record.candidate_count + "\t";
         string += record.result_count;
         break;
       case RISOTREE:
@@ -127,8 +127,8 @@ public class ExperimentUtil {
         string += record.remove_label_time + "\t";
         string += record.get_iterator_time + "\t";
         string += record.iterate_time + "\t";
-        string += record.overlap_leaf_node_count;
-        string += record.candidate_count;
+        string += record.overlap_leaf_node_count + "\t";
+        string += record.candidate_count + "\t";
         string += record.result_count;
         break;
       default:
