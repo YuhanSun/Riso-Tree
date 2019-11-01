@@ -702,9 +702,9 @@ public class RisoTreeQueryPN {
 
     if (candidateComplete == true && selectivityEstimate) {
       spatialFilterAllPredicates(candidateSets);
-      // if (candidate_count > 200) {
-      candidateSets = pickup(candidateSets);
-      // }
+      if (candidate_count > 1000) {
+        candidateSets = pickup(candidateSets);
+      }
     }
 
     printCandidateSets(candidateSets);
