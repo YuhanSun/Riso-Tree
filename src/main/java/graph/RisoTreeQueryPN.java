@@ -701,9 +701,10 @@ public class RisoTreeQueryPN {
     printCandidateSets(candidateSets);
 
     if (candidateComplete == true && selectivityEstimate) {
-      if (candidate_count > 200) {
-        candidateSets = pickup(candidateSets);
-      }
+      spatialFilterAllPredicates(candidateSets);
+      // if (candidate_count > 200) {
+      candidateSets = pickup(candidateSets);
+      // }
     }
 
     printCandidateSets(candidateSets);
@@ -720,6 +721,36 @@ public class RisoTreeQueryPN {
     tx.close();
   }
 
+  /**
+   * Filter the spatial objects using spatial predicate if |spatial_nodes|<2000. Allow Multiple
+   * spatial predicates.
+   *
+   * @param candidateSets
+   * @param query_Graph2
+   */
+  private void spatialFilterAllPredicates(Map<Integer, Collection<Long>> candidateSets) {
+    for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
+      if (query_Graph.Has_Spa_Predicate[i]) {
+        Collection<Long> ids = candidateSets.get(i);
+        if (ids.size() > 2000) {
+          continue;
+        }
+        Collection<Long> idsAfterFilter = spatialFilter(ids, query_Graph.spa_predicate[i]);
+        candidateSets.put(i, idsAfterFilter);
+      }
+    }
+  }
+
+  private Collection<Long> spatialFilter(Collection<Long> ids, MyRectangle queryRectangle) {
+    Collection<Long> idsAfterFilter = new ArrayList<>(ids.size());
+    for (long id : ids) {
+      if (isNodeOverlapRectangle(dbservice.getNodeById(id), queryRectangle)) {
+        idsAfterFilter.add(id);
+      }
+    }
+    return idsAfterFilter;
+  }
+
   private void printCandidateSets(Map<Integer, Collection<Long>> candidateSets) {
     for (int key : candidateSets.keySet()) {
       Util.println(
@@ -728,6 +759,12 @@ public class RisoTreeQueryPN {
     Util.println("\n");
   }
 
+  /**
+   * Only keep the most selective query node in candidateSets.
+   *
+   * @param candidateSets
+   * @return
+   */
   private Map<Integer, Collection<Long>> pickup(Map<Integer, Collection<Long>> candidateSets) {
     Map.Entry<Integer, Collection<Long>> minEntry = null;
     Iterator<Map.Entry<Integer, Collection<Long>>> iterator = candidateSets.entrySet().iterator();
@@ -1432,14 +1469,14 @@ public class RisoTreeQueryPN {
     return cur_list;
   }
 
-  private boolean isNodeOverlapRectangle(Node node, MyRectangle queryRectangle) throws Exception {
+  private boolean isNodeOverlapRectangle(Node node, MyRectangle queryRectangle) {
     if (node.hasProperty(Config.BBoxName)) {
       double[] bbox = (double[]) node.getProperty(Config.BBoxName);
       MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
       MyRectangle intersect = MBR.intersect(queryRectangle);
       return intersect != null;
     } else {
-      throw new Exception(
+      throw new RuntimeException(
           String.format("node %s does not has \"%s\" property", node, Config.BBoxName));
     }
   }
