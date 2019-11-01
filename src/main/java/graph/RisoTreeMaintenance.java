@@ -32,6 +32,10 @@ public class RisoTreeMaintenance {
   String safeNodesPath;
   public Set<Long> safeNodes;
 
+  public long getPNTime = 0;
+  public long convertIdTime = 0;
+  public long updateTime = 0;
+
   public int safeCaseHappenCount = 0;
   public int visitedNodeCount = 0;
   public int updatePNCount = 0;
@@ -75,10 +79,12 @@ public class RisoTreeMaintenance {
   }
 
   private void addEdgeUpdateCase(Node src, Node trg) {
+    long start = System.currentTimeMillis();
     Map<String, Set<Node>> pathNeighborsSrc =
         MaintenanceUtil.getPNGeneral(databaseService, src, MAX_HOPNUM - 1);
     Map<String, Set<Node>> pathNeighborsTrg =
         MaintenanceUtil.getPNGeneral(databaseService, trg, MAX_HOPNUM - 1);
+    getPNTime += System.currentTimeMillis() - start;
 
     for (Set<Node> nodes : pathNeighborsSrc.values()) {
       visitedNodeCount += nodes.size();
@@ -105,7 +111,8 @@ public class RisoTreeMaintenance {
    * @param pathNeighbors
    * @return
    */
-  public static Map<String, int[]> convertToPNSortedIds(Map<String, Set<Node>> pathNeighbors) {
+  public Map<String, int[]> convertToPNSortedIds(Map<String, Set<Node>> pathNeighbors) {
+    long start = System.currentTimeMillis();
     Map<String, int[]> pnIds = new HashMap<>();
     for (String key : pathNeighbors.keySet()) {
       Set<Node> nodes = pathNeighbors.get(key);
@@ -124,6 +131,7 @@ public class RisoTreeMaintenance {
       }
       pnIds.put(key, ids);
     }
+    convertIdTime += System.currentTimeMillis() - start;
     return pnIds;
   }
 
@@ -135,6 +143,7 @@ public class RisoTreeMaintenance {
    */
   private void addEdgeUpdateSingleDirection(Map<String, Set<Node>> pathNeighborsSrc,
       Map<String, int[]> pathNeighborsTrgSortedIds) {
+    long start = System.currentTimeMillis();
     Iterator<Entry<String, Set<Node>>> iterator = pathNeighborsSrc.entrySet().iterator();
     int minDist = Integer.MAX_VALUE;// min dist from spatial node to src node
     while (iterator.hasNext()) {
@@ -151,6 +160,7 @@ public class RisoTreeMaintenance {
     if (safeNodesUsed) {
       updateSafeNodes(pathNeighborsTrgSortedIds, MAX_HOPNUM - minDist);
     }
+    updateTime += System.currentTimeMillis() - start;
   }
 
   /**
