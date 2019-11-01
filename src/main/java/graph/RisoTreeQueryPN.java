@@ -2,12 +2,14 @@ package graph;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -112,6 +114,7 @@ public class RisoTreeQueryPN {
   public final static boolean selectivityEstimate = true;
   public static Boolean candidateComplete = null;
   public static Map<Integer, MutableBoolean[]> queryNodesComplete = null;
+  public final static int candidateSetsSizeLimit = 2000;
 
   public RisoTreeQueryPN(String db_path, String p_dataset, long[] p_graph_pos_map, int pMAXHOPNUM,
       boolean forceGraphFirst) {
@@ -702,8 +705,8 @@ public class RisoTreeQueryPN {
 
     if (candidateComplete == true && selectivityEstimate) {
       spatialFilterAllPredicates(candidateSets);
-      if (candidate_count > 1000) {
-        candidateSets = pickup(candidateSets);
+      if (candidate_count > candidateSetsSizeLimit) {
+        pickup(candidateSets);
       }
     }
 
@@ -762,32 +765,26 @@ public class RisoTreeQueryPN {
   }
 
   /**
-   * Only keep the most selective query node in candidateSets.
+   * If |{@code candidateSets}| larger than limit, remove from the largest candidate set until limit
+   * or only one element exist.
    *
    * @param candidateSets
    * @return
    */
-  private Map<Integer, Collection<Long>> pickup(Map<Integer, Collection<Long>> candidateSets) {
-    Map.Entry<Integer, Collection<Long>> minEntry = null;
-    Iterator<Map.Entry<Integer, Collection<Long>>> iterator = candidateSets.entrySet().iterator();
-    while (iterator.hasNext()) {
-      Map.Entry<Integer, Collection<Long>> entry = iterator.next();
-      if (minEntry == null) {
-        minEntry = entry;
-        continue;
+  private void pickup(Map<Integer, Collection<Long>> candidateSets) {
+    List<Entry<Integer, Collection<Long>>> list = new ArrayList<>(candidateSets.entrySet());
+    list.sort(Entry.comparingByValue(new Comparator<Collection<Long>>() {
+      @Override
+      public int compare(Collection<Long> o1, Collection<Long> o2) {
+        return o2.size() - o1.size();
       }
-      int size = entry.getValue().size();
-      if (size < minEntry.getValue().size()) {
-        minEntry = entry;
-      }
+    }));
+    Iterator<Entry<Integer, Collection<Long>>> iterator = list.iterator();
+    while (candidateSets.size() > 1 && candidate_count > 2000) {
+      Entry<Integer, Collection<Long>> entry = iterator.next();
+      candidateSets.remove(entry.getKey());
+      candidate_count -= entry.getValue().size();
     }
-    if (minEntry == null) {
-      throw new RuntimeException("minEntry is null");
-    }
-    Map<Integer, Collection<Long>> res = new HashMap<>();
-    res.put(minEntry.getKey(), minEntry.getValue());
-    candidate_count = minEntry.getValue().size();
-    return res;
   }
 
   private void runAndTrackTime(String queryAfterRewrite) {
@@ -1074,7 +1071,7 @@ public class RisoTreeQueryPN {
         }
         // If any query node is complete, we can use the complete strategy
         // which is to form the cypher query without union.
-        // But the uncomplete query nodes need to be removed from the candidateSet.
+        // But the incomplete query nodes need to be removed from the candidateSet.
         if (candidateComplete) {
           for (int spatialId : queryNodesComplete.keySet()) {
             for (int i = 0; i < queryNodesComplete.get(spatialId).length; i++) {
