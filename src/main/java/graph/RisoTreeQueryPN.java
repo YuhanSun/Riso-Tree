@@ -729,6 +729,7 @@ public class RisoTreeQueryPN {
    * @param query_Graph2
    */
   private void spatialFilterAllPredicates(Map<Integer, Collection<Long>> candidateSets) {
+    long start = System.currentTimeMillis();
     for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
       if (query_Graph.Has_Spa_Predicate[i]) {
         Collection<Long> ids = candidateSets.get(i);
@@ -739,6 +740,7 @@ public class RisoTreeQueryPN {
         candidateSets.put(i, idsAfterFilter);
       }
     }
+    range_query_time += System.currentTimeMillis() - start;
   }
 
   private Collection<Long> spatialFilter(Collection<Long> ids, MyRectangle queryRectangle) {
