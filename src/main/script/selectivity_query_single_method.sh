@@ -3,9 +3,9 @@
 
 dir="/hdd/code/yuhansun"
 
-# dataset="Yelp_100"
+dataset="Yelp_100"
 # selectivity_list="0.0001 0.001 0.01 0.1"
-dataset="Gowalla_100"
+# dataset="Gowalla_100"
 #dataset="foursquare_100"
 selectivity_list="0.000001 0.00001 0.0001 0.001"
 MAX_HOPNUM=2
@@ -14,21 +14,25 @@ MAX_HOPNUM=2
 #MAX_HOPNUM=1
 #selectivity_list="0.000001 0.00001 0.0001 0.001"
 
-password="syhSYH.19910205"
+run_spatial=0
+run_risotree=0
+run_naive=0
 
+split_mode="Gleenes"
+maxPNSize="80"
+alpha=1.0
+
+query_size=3
+query_count=5
+
+password="syhSYH.19910205"
 data_dir="${dir}/data/${dataset}"
 db_dir="${data_dir}/selectivity"
 code_dir="${dir}/code"
 result_dir="${dir}/result/Riso-Tree/selectivity/${dataset}"
 query_dir="${dir}/result/query/${dataset}"
-
 mkdir -p $result_dir
 
-query_size=3
-query_count=5
-
-split_mode="Gleenes"
-maxPNSize="40"
 query_path=""
 for selectivity in $selectivity_list
 do
@@ -43,7 +47,6 @@ output_path="${result_dir}"
 log_path="${result_dir}/${dataset}_log.txt"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
-alpha=1.0
 suffix="${split_mode}_${alpha}_${maxPNSize}_new_version"
 db_path="${db_dir}/neo4j-community-3.4.12_${suffix}/data/databases/graph.db"
 
@@ -52,7 +55,6 @@ time=$(get_time)
 
 ##### SPATIAL_FIRST ######
 log_path="${result_dir}/${dataset}_spatialfirst_log_${time}.txt"
-run_spatial=0
 if [ $run_spatial == 1 ];	then
 # java -Xmx100g -jar ${jar_path} \
 # 	-f selectivityExperimentSingleMethod \
@@ -85,7 +87,6 @@ fi
 
 ##### RISOTREE ######
 log_path="${result_dir}/${dataset}_risotree_log_${time}.txt"
-run_risotree=1
 if [ $run_risotree == 1 ];	then
 	# java -Xmx100g -jar ${jar_path} \
 	# 	-f selectivityExperimentSingleMethod \
@@ -104,6 +105,38 @@ if [ $run_risotree == 1 ];	then
 	java -Xmx100g -jar ${jar_path} \
 		-f selectivityExperimentSingleMethod \
 		-method "RISOTREE"	\
+		-dp ${db_path} \
+		-d ${dataset} \
+		-MAX_HOPNUM ${MAX_HOPNUM} \
+		-queryPath ${query_path} \
+		-queryCount ${query_count} \
+		-password ${password}	\
+		-clearCache "false"	\
+		-clearCacheMethod "NULL" \
+		-outputPath ${output_path} \
+		>> ${log_path}
+fi
+
+##### NAIVE ######
+log_path="${result_dir}/${dataset}_naive_log_${time}.txt"
+if [ $run_naive == 1 ];	then
+	# java -Xmx100g -jar ${jar_path} \
+	# 	-f selectivityExperimentSingleMethod \
+	# 	-method "NAIVE"	\
+	# 	-dp ${db_path} \
+	# 	-d ${dataset} \
+	# 	-MAX_HOPNUM ${MAX_HOPNUM} \
+	# 	-queryPath ${query_path} \
+	# 	-queryCount ${query_count} \
+	# 	-password ${password}	\
+	# 	-clearCache "true"	\
+	# 	-clearCacheMethod "DOUBLE" \
+	# 	-outputPath ${output_path} \
+	# 	>> ${log_path}
+
+	java -Xmx100g -jar ${jar_path} \
+		-f selectivityExperimentSingleMethod \
+		-method "NAIVE"	\
 		-dp ${db_path} \
 		-d ${dataset} \
 		-MAX_HOPNUM ${MAX_HOPNUM} \
