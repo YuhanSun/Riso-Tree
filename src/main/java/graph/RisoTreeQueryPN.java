@@ -729,7 +729,6 @@ public class RisoTreeQueryPN {
    * spatial predicates.
    *
    * @param candidateSets
-   * @param query_Graph2
    */
   private void spatialFilterAllPredicates(Map<Integer, Collection<Long>> candidateSets) {
     long start = System.currentTimeMillis();
@@ -1000,7 +999,9 @@ public class RisoTreeQueryPN {
   }
 
   /**
-   * For a given query to get the most selective query node and its candidate set. Consider the
+   * For a given query to get several query nodes and their candidate set. Set the complete
+   * variables here. If complete, all complete query nodes will be kept and incomplete removed. If
+   * not complete, all query nodes are kept and the union strategy will be used. Consider the
    * ignored PN with [] and PNSize is 0. Assume that only 1 spatial predicate exists.
    *
    * @param query_Graph use the String[] label_list
@@ -1008,7 +1009,7 @@ public class RisoTreeQueryPN {
    */
   public Map<Integer, Collection<Long>> getCandidateSetWithIgnore(Query_Graph query_Graph) {
     try {
-      Map<Integer, Collection<Long>> candidateSet = new HashMap<>();
+      Map<Integer, Collection<Long>> candidateSets = new HashMap<>();
 
       // <spa_id, rectangle> all query rectangles
       Map<Integer, MyRectangle> spa_predicates = new HashMap<Integer, MyRectangle>();
@@ -1055,12 +1056,13 @@ public class RisoTreeQueryPN {
       // range_query_time += System.currentTimeMillis() - start;
       if (overlapLeafNodes == null) {
         Util.println("No result satisfy the query.");
-        return candidateSet;
+        return candidateSets;
       }
 
+      // current candidateComplete strategy only works for single spatial range predicate
       if (completeStrategyUsed) {
         candidateComplete = false;
-        candidateSet = getCandidateSetWithIgnoreComplete(overlapLeafNodes, PN_list_propertyname);
+        candidateSets = getCandidateSetWithIgnoreComplete(overlapLeafNodes, PN_list_propertyname);
         for (int spatialId : queryNodesComplete.keySet()) {
           for (MutableBoolean complete : queryNodesComplete.get(spatialId)) {
             if (complete.booleanValue()) {
@@ -1076,23 +1078,23 @@ public class RisoTreeQueryPN {
           for (int spatialId : queryNodesComplete.keySet()) {
             for (int i = 0; i < queryNodesComplete.get(spatialId).length; i++) {
               MutableBoolean complete = queryNodesComplete.get(spatialId)[i];
-              if (!complete.booleanValue()) {
-                candidateSet.remove(i);
+              if (complete == null || !complete.booleanValue()) {
+                candidateSets.remove(i);
               }
             }
             break;
           }
         }
       } else {
-        candidateSet =
+        candidateSets =
             getCandidateSetWithIgnore(overlapLeafNodes, PN_list_propertyname, PN_size_propertyname);
       }
 
-      for (Collection<Long> candidates : candidateSet.values()) {
+      for (Collection<Long> candidates : candidateSets.values()) {
         candidate_count += candidates.size();
       }
 
-      return candidateSet;
+      return candidateSets;
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
@@ -1123,6 +1125,14 @@ public class RisoTreeQueryPN {
     return candidateSets;
   }
 
+  /**
+   * Set the {@code queryNodesComplete} here.
+   *
+   * @param spatialId
+   * @param nodes
+   * @param pN_list_propertyname
+   * @return
+   */
   private Map<Integer, Collection<Long>> getPathNeighborsComplete(int spatialId, List<Node> nodes,
       Map<Integer, Set<String>> pN_list_propertyname) {
     Map<Integer, Collection<Long>> pathNeighbors = new HashMap<>();
