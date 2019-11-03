@@ -75,7 +75,7 @@ fi
 
 containID_path="${cur_dir}/containID_${suffix}.txt"
 if [ ! -f "$containID_path" ];	then
-	log_path="${result_dir}/tree_construct.txt"
+	log_path="${result_dir}/tree_construct_${suffix}.txt"
 	# Construct the tree structure
 	java -Xmx100g -jar ${jar_path} \
 	-f wikiConstructRTree \
@@ -103,7 +103,7 @@ fi
 PNPathAndPrefix="${cur_dir}/PathNeighbors_${suffix}"
 header="\nfilepath\tPNPropertyCount\tnonEmptyPNCount\tPNNeighborCount\tPNPropertySize\tPNNeighborSize\ttotal_size\n"
 if [ ! -f "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
-	log_path="${result_dir}/pn_construct.txt"
+	log_path="${result_dir}/pn_construct_${suffix}.txt"
 	printf ${header} >> ${log_path}
 	for hop in $hopListStr
 	do
