@@ -12,7 +12,7 @@ hopListStr="0 1 2"
 
 ####################
 split_mode="Gleenes"
-maxPNSize="-1"
+maxPNSize="80"
 alpha=1.0
 
 # server
@@ -73,9 +73,6 @@ if [ ! -d "$target_path" ];	then
 	touch ${target_path}
 fi
 
-source ./utility.sh
-time=$(get_time)
-
 containID_path="${cur_dir}/containID_${suffix}.txt"
 if [ ! -f "$containID_path" ];	then
 	log_path="${result_dir}/tree_construct.txt"
@@ -97,8 +94,10 @@ if [ ! -f "$containID_path" ];	then
 fi
 
 PNPathAndPrefix="${cur_dir}/PathNeighbors_${suffix}"
+header="\nfilepath\tPNPropertyCount\tnonEmptyPNCount\tPNNeighborCount\tPNPropertySize\tPNNeighborSize\ttotal_size\n"
 if [ ! -f "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
 	log_path="${result_dir}/pn_construct.txt"
+	printf ${header} >> ${log_path}
 	for hop in $hopListStr
 	do
 		# Always keep all 0-hop path neighbors
@@ -109,16 +108,14 @@ if [ ! -f "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
 		else
 			java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
 				-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
-				-lp ${label_path} -hop ${hop} -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize}
+				-lp ${label_path} -hop ${hop} -PNPrefix ${PNPathAndPrefix} -maxPNSize ${maxPNSize} >> $log_path
 		fi
+		inputPath="${PNPathAndPrefix}_${hop}.txt"
+		java -Xmx100g -jar ${jar_path} \
+			-f getPNNonEmptyCount \
+			-inputPath ${inputPath} \
+			-outputPath ${outputPath}
 	done
-
-	java -Xmx100g -jar ${jar_path} \
-		-f wikiLoadAllHopPN \
-		-PNPrefix ${PNPathAndPrefix} \
-		-hopListStr "$hopListStr" \
-		-dp ${db_path} \
-		-c ${containID_path}
 fi
 
 
