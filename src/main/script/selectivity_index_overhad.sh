@@ -121,7 +121,7 @@ if [ ! -f "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
 		java -Xmx100g -jar ${jar_path} \
 			-f getPNNonEmptyCount \
 			-inputPath ${inputPath} \
-			-outputPath ${outputPath}
+			-outputPath ${log_path}
 	done
 fi
 
