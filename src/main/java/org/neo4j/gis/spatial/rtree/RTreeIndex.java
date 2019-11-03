@@ -163,13 +163,17 @@ public class RTreeIndex implements SpatialIndexWriter {
     // choose a path down to a leaf
     long start = System.currentTimeMillis();
     while (!nodeIsLeaf(parent)) {
-      // parent = chooseSubTree(parent, geomNode);
-      // parent = chooseSubTree(parent, geomNode, pathNeighbors);
-      parent = chooseSubTreeSmallestGSD(parent, geomNode, pathNeighbors);
+      if (spatialOnly) {
+        parent = chooseSubTree(parent, geomNode);
+      } else {
+        // parent = chooseSubTree(parent, geomNode, pathNeighbors);
+        parent = chooseSubTreeSmallestGSD(parent, geomNode, pathNeighbors);
+      }
     }
     // LOGGER.info("parent node: " + parent);
     chooseSubTreeTime += System.currentTimeMillis() - start;
 
+    start = System.currentTimeMillis();
     if (countChildren(parent, RTreeRelationshipTypes.RTREE_REFERENCE) >= maxNodeReferences) {
       // LOGGER.info(String.format("insertInLeaf(%s,%s,%s)", parent, geomNode, pathNeighbors));
       insertInLeaf(parent, geomNode, pathNeighbors);
@@ -185,6 +189,7 @@ public class RTreeIndex implements SpatialIndexWriter {
         adjustGraphLoc(parent, pathNeighbors);// yuhan
       }
     }
+    insertAndAdjustTime += System.currentTimeMillis() - start;
   }
 
   /**
@@ -319,6 +324,8 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   public void printTimeTrack() {
     Util.println("chooseSubTree time: " + chooseSubTreeTime);
+    Util.println("insertAndAdjust time: " + insertAndAdjustTime);
+
     Util.println("getLocInGraph time: " + getLocInGraphTime);
     Util.println("getGDTime time: " + getGDTime);
     Util.println("adjustWrite time: " + adjustWriteTime);
@@ -352,25 +359,27 @@ public class RTreeIndex implements SpatialIndexWriter {
     this.spatialNodesPathNeighbors = spatialNodesPathNeighbors;
     this.graphNodeCount = graphNodeCount;
     this.alpha = alpha;
-    this.spatialOnly = Math.abs(alpha - 1) < 0.0000001 ? true : false;
-    this.graphOnly = Math.abs(alpha - 0) < 0.0000001 ? true : false;
+    this.spatialOnly = Math.abs(alpha - 1) < onlyDecisionThreshold ? true : false;
+    this.graphOnly = Math.abs(alpha - 0) < onlyDecisionThreshold ? true : false;
     this.MaxPNSize = maxPNSize == -1 ? Integer.MAX_VALUE : maxPNSize;
 
+    long start = System.currentTimeMillis();
     for (NodeWithEnvelope n : outliers) {
       index++;
       // LOGGER.info("" + index);
       if (index % 10000 == 0) {
         LOGGER.info("" + index);
       }
-      long start = System.currentTimeMillis();
       Map<String, int[]> pathNeighbors = spatialNodesPathNeighbors.get((int) n.node.getId());
       add(n.node, pathNeighbors);
-      totalTime += System.currentTimeMillis() - start;
     }
+    totalTime += System.currentTimeMillis() - start;
 
     printTimeTrack();
     printFunctionCallTrack();
-    outputLeafNodesPathNeighors();
+    if (outputLeafNodesPathNeighors) {
+      outputLeafNodesPathNeighors();
+    }
   }
 
   private void outputLeafNodesPathNeighors() throws Exception {
@@ -1573,7 +1582,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     for (Node indexNode : indexNodes) {
       int GD = getExpandGD(indexNode, pathNeighbors);
       double area = getArea(getIndexNodeEnvelope(indexNode));
-      double SGD = 0.000000001 * area + GD; // Solve tie breaker using the smallest area.
+      double SGD = adjustThreshold * area + GD; // Solve tie breaker using the smallest area.
       // Util.println(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
       if (result == null || SGD < smallestSGD) {
         result = indexNode;
@@ -1604,7 +1613,7 @@ public class RTreeIndex implements SpatialIndexWriter {
     for (Node indexNode : indexNodes) {
       int GD = getExpandGD(indexNode, pathNeighbors);
       double area = getArea(getIndexNodeEnvelope(indexNode));
-      double SGD = 0.000000001 * area + GD;
+      double SGD = adjustThreshold * area + GD;
       // Util.println(String.format("%s: %d, %s", indexNode, GD, String.valueOf(SGD)));
       if (result == null || SGD < smallestSGD) {
         result = indexNode;
@@ -2509,6 +2518,7 @@ public class RTreeIndex implements SpatialIndexWriter {
    * GD take
    */
   static double adjustThreshold = 0.000000000001;
+  static final boolean outputLeafNodesPathNeighors = false;
   static double spatialNorm = 64800.0;
 
   private int chooseSmallestGDCount = 0;
@@ -2534,6 +2544,7 @@ public class RTreeIndex implements SpatialIndexWriter {
 
   // ******** tracking time *********/
   public long chooseSubTreeTime = 0;
+  public long insertAndAdjustTime = 0;
   public long getLocInGraphTime = 0;
   public long getGDTime = 0;
   public long adjustGraphLocTime = 0;
