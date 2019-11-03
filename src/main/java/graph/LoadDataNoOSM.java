@@ -723,7 +723,8 @@ public class LoadDataNoOSM {
       SpatialDatabaseService spatialDatabaseService = new SpatialDatabaseService(service);
 
       Transaction tx = service.beginTx();
-      LOGGER.info("create layer: " + layerName);
+      // LOGGER.info("create layer: " + layerName);
+      Util.println("create layer: " + layerName);
       SimplePointLayer layer = (SimplePointLayer) createLayer(layerName, spatialDatabaseService);
 
       ArrayList<Node> geomNodes = new ArrayList<Node>(entities.size());
@@ -750,6 +751,7 @@ public class LoadDataNoOSM {
       spatialDatabaseService.getDatabase().shutdown();
       message += "shut down time: " + (System.currentTimeMillis() - start);
       LOGGER.info(message);
+      Util.println(message);
 
     } catch (Exception e) {
       e.printStackTrace();
