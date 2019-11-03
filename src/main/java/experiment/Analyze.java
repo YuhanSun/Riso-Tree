@@ -278,7 +278,7 @@ public class Analyze {
       treeNodeCount += nodeThisLevel.size();
       level++;
     }
-    double sizeInBytes = treeNodeCount * 5 * 4;
+    int sizeInBytes = treeNodeCount * 5 * 4;
     double sizeInMBs = sizeInBytes / 1024;
     Util.println(String.format("RTree size: %d bytes (%f MB)\n", sizeInBytes, sizeInMBs));
 
