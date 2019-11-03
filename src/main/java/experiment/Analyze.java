@@ -307,7 +307,7 @@ public class Analyze {
       }
     }
 
-    int sizeInBytes = treeNodeCount * 5 * 4;
+    int sizeInBytes = treeNodeCount * 5 * 8;
     double sizeInMBs = sizeInBytes / 1024 / 1024;
     ReadWriteUtil.WriteFile(outputPath, true,
         String.format("RTree size: %d bytes (%f MB)\n\n", sizeInBytes, sizeInMBs));
