@@ -210,8 +210,12 @@ public class App {
     // Util.println(Arrays.toString(StringUtils.split(string, "LessThanOrEqual")));
     // RelationshipType type = RTreeRelationshipTypes.RTREE_CHILD;
     // Util.println(type.equals(RTreeRelationshipTypes.RTREE_CHILD));
-    int[] array = new int[0];
-    Util.println(Arrays.toString(array));
+    // ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+    String path = App.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    Util.println(path);
+
+    // classLoader.getParent().classLoader.getResource(".");
+
   }
 
   public static void restartNeo4jJava() {

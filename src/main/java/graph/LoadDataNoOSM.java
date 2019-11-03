@@ -692,7 +692,7 @@ public class LoadDataNoOSM {
 
   /**
    * Construct RTree for the Wikidata. Nodes have been created already. Nodes can possess multiple
-   * labels. ZeroOneHopPN read from disk and stored in memory.
+   * labels. ZeroOneHopPN or MoreHopPN read from disk and stored in memory.
    *
    * @param dbPath
    * @param dataset
@@ -701,10 +701,7 @@ public class LoadDataNoOSM {
    */
   public void wikiConstructRTree(String dbPath, String dataset, String entityPath,
       String spatialNodePNPath, double alpha, int maxPNSize) throws Exception {
-    Util.checkPathExist(dbPath);
-    Util.checkPathExist(entityPath);
-    Util.checkPathExist(spatialNodePNPath);
-
+    Util.checkPathExist(new String[] {dbPath, entityPath, spatialNodePNPath});
     ArrayList<Entity> entities = GraphUtil.ReadEntity(entityPath);
     List<Map<String, int[]>> spatialNodesPathNeighbors = readSpatialNodesPN(spatialNodePNPath);
     wikiConstructRTree(dbPath, dataset, entities, spatialNodesPathNeighbors, alpha, maxPNSize);
@@ -872,7 +869,7 @@ public class LoadDataNoOSM {
 
   /**
    * Create spatial nodes and spatial index from any empty db. Label list assumes that each node has
-   * one label.
+   * one label. Spatial object pn is stored in disk, which is extremely slow.
    *
    * @param dbPath
    * @param dataset
