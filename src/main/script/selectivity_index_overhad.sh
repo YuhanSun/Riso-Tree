@@ -86,6 +86,13 @@ if [ ! -f "$containID_path" ];	then
 	-alpha ${alpha} \
 	-maxPNSize ${maxPNSize} >> $log_path
 
+	# Analyze the RTree index size
+	java -Xmx100g -jar ${jar_path} \
+	-f treeNodesAvgArea \
+	-dp ${db_path} \
+	-d ${dataset} \
+	-outputPath ${log_path}
+
 	# Generate the leaf contain spatial node file
 	java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
 	-dp ${db_path} \

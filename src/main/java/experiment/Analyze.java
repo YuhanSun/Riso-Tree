@@ -264,6 +264,7 @@ public class Analyze {
     Transaction tx = service.beginTx();
     List<List<Node>> nodes = RTreeUtility.getRTreeNodesInLevels(service, dataset);
     int level = 0;
+    int treeNodeCount = 0;
     ReadWriteUtil.WriteFile(logPath, true, dbPath + "\n");
     ReadWriteUtil.WriteFile(logPath, true, "level\ttotal\tcount\tavg\n");
     for (List<Node> nodeThisLevel : nodes) {
@@ -274,8 +275,12 @@ public class Analyze {
       }
       ReadWriteUtil.WriteFile(logPath, true, String.format("%d\t%f\t%d\t%f\n", level, total,
           nodeThisLevel.size(), total / nodeThisLevel.size()));
+      treeNodeCount += nodeThisLevel.size();
       level++;
     }
+    double sizeInBytes = treeNodeCount * 5 * 4;
+    double sizeInMBs = sizeInBytes / 1024;
+    Util.println(String.format("RTree size: %d bytes (%f MB)\n", sizeInBytes, sizeInMBs));
 
     tx.success();
     tx.close();
