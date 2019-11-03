@@ -2,7 +2,7 @@
 ./package.sh
 
 # dataset="wikidata"
-# AX_HOPNUM=1
+# MAX_HOPNUM=1
 # hopListStr="0 1"
 
 dataset="Gowalla_100"
