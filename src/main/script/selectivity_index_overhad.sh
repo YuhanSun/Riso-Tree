@@ -19,6 +19,7 @@ alpha=1.0
 dir="/hdd/code/yuhansun"
 data_dir="${dir}/data/${dataset}"
 cur_dir="${dir}/data/${dataset}/selectivity/index_overhead"
+result_dir="${dir}/result/Riso-Tree/selectivity/${dataset}"
 code_dir="${dir}/code"
 
 rm -r $cur_dir
@@ -77,7 +78,7 @@ time=$(get_time)
 
 containID_path="${cur_dir}/containID_${suffix}.txt"
 if [ ! -f "$containID_path" ];	then
-	log_path="${cur_dir}/tree_construct_${time}.txt"
+	log_path="${result_dir}/tree_construct.txt"
 	# Construct the tree structure
 	java -Xmx100g -jar ${jar_path} \
 	-f wikiConstructRTree \
@@ -97,7 +98,7 @@ fi
 
 PNPathAndPrefix="${cur_dir}/PathNeighbors_${suffix}"
 if [ ! -f "${PNPathAndPrefix}_${MAX_HOPNUM}.txt" ];	then
-	log_path="${cur_dir}/pn_construct_${time}.txt"
+	log_path="${result_dir}/pn_construct.txt"
 	for hop in $hopListStr
 	do
 		# Always keep all 0-hop path neighbors
