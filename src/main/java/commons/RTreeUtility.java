@@ -167,7 +167,7 @@ public class RTreeUtility {
    * @throws Exception
    */
   public static List<List<Node>> getRTreeNodesInLevels(GraphDatabaseService service,
-      String layerName) throws Exception {
+      String layerName) {
     Node rtree_root_node = getRTreeRoot(service, layerName);
     if (rtree_root_node == null) {
       return new LinkedList<>();
@@ -190,7 +190,7 @@ public class RTreeUtility {
         }
       }
     }
-    throw new Exception(
+    throw new RuntimeException(
         "RTree structure is inccorect! It does not have RTREE_CHILD or RTREE_REFERENCE relationship!");
   }
 
