@@ -91,7 +91,7 @@ if [ ! -f "$containID_path" ];	then
 	-f treeNodesAvgArea \
 	-dp ${db_path} \
 	-d ${dataset} \
-	-outputPath ${log_path}
+	-outputPath ${log_path} >> ${log_path}
 
 	# Generate the leaf contain spatial node file
 	java -Xmx100g -jar ${jar_path} -f wikiGenerateContainSpatialID \
