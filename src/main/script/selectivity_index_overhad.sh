@@ -24,6 +24,7 @@ code_dir="${dir}/code"
 
 rm -r $cur_dir
 mkdir -p $cur_dir
+mkdir -p $result_dir
 
 graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
