@@ -36,6 +36,7 @@ public class Driver {
     /**
      * analyze
      */
+    getSpatialIndexSize, // rtree spatial index
     getPNSizeDistribution, getPNNonEmptyCount, // PN
     overlapAnalysis, areaAnalysis, treeNodesAvgArea, // area
     degreeSD, degreeAvg, // graph degree
@@ -279,6 +280,10 @@ public class Driver {
           /**
            * analyze
            */
+          case getSpatialIndexSize:
+            Analyze.getSpatialIndexSize(cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
+                cmd.getOptionValue(outputPath));
+            break;
           case getPNSizeDistribution:
             Analyze.getPNSizeDistribution(cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
                 cmd.getOptionValue(outputPath));

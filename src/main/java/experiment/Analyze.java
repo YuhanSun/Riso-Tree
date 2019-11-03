@@ -3,13 +3,17 @@ package experiment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.strtree.STRtree;
@@ -258,8 +262,7 @@ public class Analyze {
         String.format("%s\t%f\t%f\n", dbPath, total, total / leafNodes.size()));
   }
 
-  public static void treeNodesAvgArea(String dbPath, String dataset, String logPath)
-      throws Exception {
+  public static void treeNodesAvgArea(String dbPath, String dataset, String logPath) {
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
     Transaction tx = service.beginTx();
     List<List<Node>> nodes = RTreeUtility.getRTreeNodesInLevels(service, dataset);
@@ -278,9 +281,36 @@ public class Analyze {
       treeNodeCount += nodeThisLevel.size();
       level++;
     }
+
+    tx.success();
+    tx.close();
+    Util.close(service);
+  }
+
+  public static void getSpatialIndexSize(String dbPath, String dataset, String outputPath) {
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    Transaction tx = service.beginTx();
+    List<List<Node>> nodes = RTreeUtility.getRTreeNodesInLevels(service, dataset);
+    int treeNodeCount = 0;
+    for (List<Node> nodeThisLevel : nodes) {
+      treeNodeCount += nodeThisLevel.size();
+    }
+
+    List<Node> leafNodes = nodes.get(nodes.size() - 1);
+    for (Node node : leafNodes) {
+      Iterable<Relationship> rels =
+          node.getRelationships(Direction.OUTGOING, RTreeRelationshipTypes.RTREE_REFERENCE);
+      Iterator<Relationship> iterator = rels.iterator();
+      while (iterator.hasNext()) {
+        iterator.next();
+        treeNodeCount++;
+      }
+    }
+
     int sizeInBytes = treeNodeCount * 5 * 4;
-    double sizeInMBs = sizeInBytes / 1024;
-    Util.println(String.format("RTree size: %d bytes (%f MB)\n", sizeInBytes, sizeInMBs));
+    double sizeInMBs = sizeInBytes / 1024 / 1024;
+    ReadWriteUtil.WriteFile(outputPath, true,
+        String.format("RTree size: %d bytes (%f MB)\n\n", sizeInBytes, sizeInMBs));
 
     tx.success();
     tx.close();
