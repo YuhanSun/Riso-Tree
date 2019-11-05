@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Transaction;
 import commons.Labels;
 import commons.Neo4jGraphUtility;
 import commons.RTreeUtility;
@@ -64,10 +63,7 @@ public class RisoTreeMaintenance {
   }
 
   public void addEdge(long src, long trg) {
-    Transaction tx = databaseService.beginTx();
     addEdge(databaseService.getNodeById(src), databaseService.getNodeById(trg));
-    tx.success();
-    tx.close();
   }
 
   public void addEdge(Node src, Node trg) {

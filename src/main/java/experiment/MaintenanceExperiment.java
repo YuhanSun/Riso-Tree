@@ -195,6 +195,7 @@ public class MaintenanceExperiment {
     ReadWriteUtil.WriteFile(outputDetailPath, true,
         String.format("%s\t%s\t%d\n", dbPath, edgePath, testCount));
 
+    Transaction tx = databaseService.beginTx();
     Util.println("test edges count: " + testEdges.size());
     for (Edge edge : testEdges) {
       Util.println(edge);
@@ -204,6 +205,10 @@ public class MaintenanceExperiment {
       records.add(new ResultRecord(time, -1));
       ReadWriteUtil.WriteFile(outputDetailPath, true, "" + time + "\n");
     }
+    long start = System.currentTimeMillis();
+    tx.success();
+    tx.close();
+    long commitTime = System.currentTimeMillis() - start;
 
     String outString = "";
     outString += "avg time: " + ResultRecord.getRunTimeAvg(records) + "\n";
@@ -211,6 +216,7 @@ public class MaintenanceExperiment {
     outString += "convertIdTime: " + maintenance.convertIdTime + "\n";
     outString += "updateTime: " + maintenance.updateTime + "\n";
     outString += "createEdgeTime: " + maintenance.createEdgeTime + "\n";
+    outString += "commitTime: " + commitTime + "\n";
 
     outString += "safeCaseHappenCount: " + maintenance.safeCaseHappenCount + "\n";
     outString += "safe count before add: " + safeCount + "\n";
