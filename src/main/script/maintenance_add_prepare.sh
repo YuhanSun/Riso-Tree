@@ -7,9 +7,9 @@ dataset="foursquare_100"
 hopListStr="0 1 2"
 MAX_HOPNUM=2
 
-dataset="wikidata"
-hopListStr="0 1"
-MAX_HOPNUM=1
+# dataset="wikidata"
+# hopListStr="0 1"
+# MAX_HOPNUM=1
 
 # always hard code this dir
 # because a rm -r will happen here
