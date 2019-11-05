@@ -28,7 +28,7 @@ public class Util {
     } else if (stringList.contains(" ")) {
       return stringList.split(" ");
     } else {
-      throw new RuntimeException(stringList + " format error!");
+      return new String[] {stringList};
     }
   }
 
