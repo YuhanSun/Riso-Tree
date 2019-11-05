@@ -1,10 +1,16 @@
 #!/bin/bash
 ./package.sh
 
-# dataset="wikidata"
+# dataset="Yelp_100"
 # dataset="Gowalla_100"
 dataset="foursquare_100"
 hopListStr="0 1 2"
+MAX_HOPNUM=2
+
+dataset="wikidata"
+hopListStr="0 1"
+MAX_HOPNUM=1
+
 # always hard code this dir
 # because a rm -r will happen here
 cur_dir="/hdd/code/yuhansun/data/${dataset}/add"
@@ -162,7 +168,7 @@ jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 java -Xmx100g -jar ${jar_path}	\
 	-f generateSafeNodes	\
 	-PNPrefix ${PNPathAndPrefix}	\
-	-hopListStr ${hopListStr}	\
+	-MAX_HOPNUM ${MAX_HOPNUM}	\
 	-ep $entity_path	\
 	-outputPath ${output_path}
 

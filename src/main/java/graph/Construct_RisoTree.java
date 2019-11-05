@@ -754,12 +754,11 @@ public class Construct_RisoTree {
     }
   }
 
-  public static void generateSafeNodes(String PNPathAndPreffix, String hopListStr,
-      String entityPath, String outputPath) throws Exception {
+  public static void generateSafeNodes(String PNPathAndPreffix, int MAX_HOPNUM, String entityPath,
+      String outputPath) throws Exception {
     int nodeCount = OwnMethods.getEntityCount(entityPath);
     List<String> paths = new ArrayList<>();
-    for (String hopStr : Util.getStringList(hopListStr)) {
-      int hop = Integer.parseInt(hopStr);
+    for (int hop = 0; hop < MAX_HOPNUM; hop++) {
       String filePath = getPNFileName(PNPathAndPreffix, hop);
       Util.checkPathExist(filePath);
       paths.add(filePath);
