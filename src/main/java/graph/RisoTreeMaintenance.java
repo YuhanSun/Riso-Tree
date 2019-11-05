@@ -35,6 +35,7 @@ public class RisoTreeMaintenance {
   public long getPNTime = 0;
   public long convertIdTime = 0;
   public long updateTime = 0;
+  public long createEdgeTime = 0;
 
   public int safeCaseHappenCount = 0;
   public int visitedNodeCount = 0;
@@ -75,7 +76,9 @@ public class RisoTreeMaintenance {
     } else {
       safeCaseHappenCount++;
     }
+    long start = System.currentTimeMillis();
     src.createRelationshipTo(trg, Labels.GraphRel.GRAPH_INSERT);
+    createEdgeTime += System.currentTimeMillis() - start;
   }
 
   private void addEdgeUpdateCase(Node src, Node trg) {

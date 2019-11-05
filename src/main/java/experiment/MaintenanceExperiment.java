@@ -210,6 +210,8 @@ public class MaintenanceExperiment {
     outString += "getPNTime: " + maintenance.getPNTime + "\n";
     outString += "convertIdTime: " + maintenance.convertIdTime + "\n";
     outString += "updateTime: " + maintenance.updateTime + "\n";
+    outString += "createEdgeTime: " + maintenance.createEdgeTime + "\n";
+
     outString += "safeCaseHappenCount: " + maintenance.safeCaseHappenCount + "\n";
     outString += "safe count before add: " + safeCount + "\n";
     outString += "safe count after add: " + maintenance.safeNodes.size() + "\n";
