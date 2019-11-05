@@ -2,8 +2,9 @@
 ./package.sh
 
 # dataset="wikidata"
-dataset="Gowalla_100"
-hopListStr="0,1,2"
+# dataset="Gowalla_100"
+dataset="foursquare_100"
+hopListStr="0 1 2"
 # always hard code this dir
 # because a rm -r will happen here
 cur_dir="/hdd/code/yuhansun/data/${dataset}/add"
@@ -26,50 +27,72 @@ labelStrMapPath="${data_dir}/entity_string_label.txt"
 spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
 graph_property_edge_path="${data_dir}/graph_property_edge.txt"
 
+# Create node_edges db if it does exist.
+node_edges_db_dir="${data_dir}/neo4j-community-3.4.12_node_edges"
+if [ ! -d "$node_edges_db_dir" ];	then
+	node_edges_db_path="$node_edges_db_dir/data/databases/graph.db"
+	cp -a ${dir}/data/neo4j_versions/neo4j-community-3.4.12_ip_modified $node_edges_db_dir
+
+	java -Xmx100g -jar ${jar_path} -f wikidataLoadGraph \
+		-ep ${entity_path} \
+		-lp ${label_path} \
+		-entityStringLabelMapPath ${entityStringLabelMapPath} \
+		-dp ${node_edges_db_path}
+
+	java -Xmx100g -jar ${jar_path} -f loadGraphEdgesNoMap \
+			-dp ${node_edges_db_path}	\
+			-gp ${graph_path}
+fi
+
+# Copy node_edges db to current add/ dir. Remove if already exist.
 db_folder_name="neo4j-community-3.4.12_node_edges"
 src_db_dir="${data_dir}/${db_folder_name}"
 cur_db_dir="${cur_dir}/${db_folder_name}"
-if [ ! -d "$cur_db_dir" ]; then
+if [ -d "$cur_db_dir" ]; then
 	rm -r $cur_db_dir
 fi
 cp -a $src_db_dir $cur_db_dir
+
 
 add_edge_path="${cur_dir}/edges.txt"
 graph_after_removal_path="${cur_dir}/graph.txt"
 db_after_removal_path="${cur_dir}/neo4j-community-3.4.12_node_edges/data/databases/graph.db"
 
+# Convert the graph.txt to edge format if not exist.
 if [ ! -f "$graph_property_edge_path" ]; then
 	java -Xmx100g -jar ${jar_path} \
 		-f convertGraphToEdgeFormat \
 		-gp ${graph_path}	\
-		-ratio 0.01	\
 		-graphPropertyEdgePath ${graph_property_edge_path}
 fi
 
+# Sample edge.txt if not exist.
 if [ ! -f "$add_edge_path" ]; then
 	java -Xmx100g -jar ${jar_path} \
 		-f sampleFile \
 		-inputPath ${graph_property_edge_path}	\
 		-ratio 0.01	\
 		-outputPath ${add_edge_path}
-fi
 
-java -Xmx100g -jar ${jar_path} \
-	-f removeEdgesFromDb \
-	-dp ${db_after_removal_path}	\
-	-edgePath ${add_edge_path}
-
-if [ ! -f "$graph_after_removal_path" ]; then
+	# Remove edges from node_edges db
 	java -Xmx100g -jar ${jar_path} \
-		-f removeEdgesFromGraphFile \
-		-gp ${graph_path}	\
-		-edgePath ${add_edge_path}	\
-		-outputPath ${graph_after_removal_path}
+		-f removeEdgesFromDb \
+		-dp ${db_after_removal_path}	\
+		-edgePath ${add_edge_path}
+
+
+	if [ ! -f "$graph_after_removal_path" ]; then
+		java -Xmx100g -jar ${jar_path} \
+			-f removeEdgesFromGraphFile \
+			-gp ${graph_path}	\
+			-edgePath ${add_edge_path}	\
+			-outputPath ${graph_after_removal_path}
+	fi
 fi
 
-# Back up the new node_edges graph db.
+# Back up the new node_edges graph db (after edge removal). Remove the target db if exist.
 backup_db_dir="${backup_dir}/${db_folder_name}"
-if [ ! -d "$backup_db_dir" ]; then
+if [ -d "$backup_db_dir" ]; then
 	rm -r $backup_db_dir
 fi
 cp -a $cur_db_dir $backup_db_dir
@@ -110,8 +133,7 @@ java -Xmx100g -jar ${jar_path} \
 	-d ${dataset} \
 	-c ${containID_path}
 
-# modify
-for hop in 0 1 2
+for hop in $hopListStr
 do
 	java -Xmx100g -jar ${jar_path} -f wikiConstructPNTimeSingleHopNoGraphDb \
 		-c ${containID_path} -gp ${graph_path} -labelStrMapPath ${labelStrMapPath}\
