@@ -31,7 +31,7 @@ graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
 label_path="${data_dir}/graph_label.txt"
 labelStrMapPath="${data_dir}/entity_string_label.txt"
-spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
+spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN_-1.txt"
 graph_property_edge_path="${data_dir}/graph_property_edge.txt"
 
 # Create node_edges db if it does exist.
@@ -50,6 +50,18 @@ if [ ! -d "$node_edges_db_dir" ];	then
 	java -Xmx100g -jar ${jar_path} -f loadGraphEdgesNoMap \
 			-dp ${node_edges_db_path}	\
 			-gp ${graph_path}
+fi
+
+if [ ! -f "$spatialNodePNPath" ];	then
+	java -Xmx100g -jar ${jar_path} \
+	-f wikigenerateZeroOneHopPNForSpatialNodes \
+	-gp ${graph_path} \
+	-lp ${label_path} \
+	-ep ${entity_path} \
+	-entityStringLabelMapPath ${entityStringLabelMapPath} \
+	-maxPNSize -1 \
+	-MAX_HOPNUM 1 \
+	-outputPath ${spatialNodePNPath}
 fi
 
 # Copy node_edges db to current add/ dir. Remove if already exist.
