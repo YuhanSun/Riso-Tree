@@ -13,6 +13,7 @@ MAX_HOPNUM=1
 
 # always hard code this dir
 # because a rm -r will happen here
+dir="/hdd/code/yuhansun"
 cur_dir="/hdd/code/yuhansun/data/${dataset}/add"
 backup_dir="${cur_dir}/backup"
 mkdir -p $cur_dir
@@ -38,6 +39,7 @@ node_edges_db_dir="${data_dir}/neo4j-community-3.4.12_node_edges"
 if [ ! -d "$node_edges_db_dir" ];	then
 	node_edges_db_path="$node_edges_db_dir/data/databases/graph.db"
 	cp -a ${dir}/data/neo4j_versions/neo4j-community-3.4.12_ip_modified $node_edges_db_dir
+	touch $node_edges_db_dir
 
 	java -Xmx100g -jar ${jar_path} -f wikidataLoadGraph \
 		-ep ${entity_path} \
@@ -58,6 +60,7 @@ if [ -d "$cur_db_dir" ]; then
 	rm -r $cur_db_dir
 fi
 cp -a $src_db_dir $cur_db_dir
+touch $cur_db_dir
 
 
 add_edge_path="${cur_dir}/edges.txt"
@@ -102,6 +105,7 @@ if [ -d "$backup_db_dir" ]; then
 	rm -r $backup_db_dir
 fi
 cp -a $cur_db_dir $backup_db_dir
+touch $backup_db_dir
 
 # Rename db dir with suffix
 split_mode="Gleenes"
@@ -128,6 +132,7 @@ if [ -d "$after_tree" ]; then
 	rm -r $after_tree
 fi
 cp -a $db_dir $after_tree
+touch $after_tree
 
 containID_path="${cur_dir}/containID_${suffix}.txt"
 PNPathAndPrefix="${cur_dir}/PathNeighbors_${suffix}"
@@ -159,6 +164,7 @@ if [ ! -d "$after_pn_db_dir" ]; then
 	rm -r $after_pn_db_dir
 fi
 cp -a $db_dir $after_pn_db_dir
+touch $after_pn_db_dir
 
 # Safe nodes generation
 PNPathAndPrefix="${cur_dir}/PathNeighbors_Gleenes_1.0_-1_new_version"
