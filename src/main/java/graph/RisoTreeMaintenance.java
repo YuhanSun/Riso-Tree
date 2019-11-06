@@ -33,7 +33,8 @@ public class RisoTreeMaintenance {
 
   public long getPNTime = 0;
   public long convertIdTime = 0;
-  public long updateTime = 0;
+  public long updatePNTime = 0;
+  public long updateSafeNodesTime = 0;
   public long createEdgeTime = 0;
 
   public int safeCaseHappenCount = 0;
@@ -156,10 +157,10 @@ public class RisoTreeMaintenance {
         }
       }
     }
+    updatePNTime += System.currentTimeMillis() - start;
     if (safeNodesUsed) {
       updateSafeNodes(pathNeighborsTrgSortedIds, MAX_HOPNUM - minDist);
     }
-    updateTime += System.currentTimeMillis() - start;
   }
 
   /**
@@ -169,6 +170,7 @@ public class RisoTreeMaintenance {
    * @param updateUpperBound
    */
   private void updateSafeNodes(Map<String, int[]> pathNeighborsTrgSortedIds, int updateUpperBound) {
+    long start = System.currentTimeMillis();
     Iterator<Entry<String, int[]>> iterator = pathNeighborsTrgSortedIds.entrySet().iterator();
     while (iterator.hasNext()) {
       Entry<String, int[]> entry = iterator.next();
@@ -178,6 +180,7 @@ public class RisoTreeMaintenance {
         }
       }
     }
+    updateSafeNodesTime += System.currentTimeMillis() - start;
   }
 
   /**

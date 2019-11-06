@@ -214,7 +214,8 @@ public class MaintenanceExperiment {
     outString += "avg time: " + ResultRecord.getRunTimeAvg(records) + "\n";
     outString += "getPNTime: " + maintenance.getPNTime + "\n";
     outString += "convertIdTime: " + maintenance.convertIdTime + "\n";
-    outString += "updateTime: " + maintenance.updateTime + "\n";
+    outString += "updatePNTime: " + maintenance.updatePNTime + "\n";
+    outString += "updateSafeNodesTime: " + maintenance.updateSafeNodesTime + "\n";
     outString += "createEdgeTime: " + maintenance.createEdgeTime + "\n";
     outString += "commitTime: " + commitTime + "\n";
 
