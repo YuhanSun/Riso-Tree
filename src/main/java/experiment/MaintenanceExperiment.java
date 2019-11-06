@@ -218,6 +218,7 @@ public class MaintenanceExperiment {
     outString += "updateSafeNodesTime: " + maintenance.updateSafeNodesTime + "\n";
     outString += "getRTreeLeafNodeTime: " + maintenance.getRTreeLeafNodeTime + "\n";
     outString += "updateLeafNodePNTime: " + maintenance.updateLeafNodePNTime + "\n";
+    outString += "updateLeafNodeTimeMap: " + maintenance.updateLeafNodeTimeMap + "\n";
 
     outString += "createEdgeTime: " + maintenance.createEdgeTime + "\n";
     outString += "commitTime: " + commitTime + "\n";

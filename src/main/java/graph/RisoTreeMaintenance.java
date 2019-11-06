@@ -39,6 +39,8 @@ public class RisoTreeMaintenance {
   public long updateSafeNodesTime = 0;
   public long createEdgeTime = 0;
 
+  public Map<Long, Long> updateLeafNodeTimeMap = new HashMap<>();
+
   public int safeCaseHappenCount = 0;
   public int visitedNodeCount = 0;
   public int updatePNCount = 0;
@@ -200,6 +202,7 @@ public class RisoTreeMaintenance {
    */
   private void updateLeafNodePN(Node leafNode, String propertyName,
       Map<String, int[]> pathNeighborsTrg) {
+    long start = System.currentTimeMillis();
     String leftPnName = MaintenanceUtil.getReversePnName(propertyName);
     int length = RisoTreeUtil.getHopNumber(leftPnName);
     for (String rightPnName : pathNeighborsTrg.keySet()) {
@@ -211,6 +214,10 @@ public class RisoTreeMaintenance {
         updateLeafNodeSinglePn(leafNode, pnName, nodesAdded);
       }
     }
+    long time = System.currentTimeMillis() - start;
+    long id = leafNode.getId();
+
+    updateLeafNodeTimeMap.put(id, updateLeafNodeTimeMap.getOrDefault(id, (long) 0) + time);
   }
 
   /**
