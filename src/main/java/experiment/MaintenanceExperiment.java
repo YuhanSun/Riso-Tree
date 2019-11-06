@@ -216,6 +216,9 @@ public class MaintenanceExperiment {
     outString += "convertIdTime: " + maintenance.convertIdTime + "\n";
     outString += "updatePNTime: " + maintenance.updatePNTime + "\n";
     outString += "updateSafeNodesTime: " + maintenance.updateSafeNodesTime + "\n";
+    outString += "getRTreeLeafNodeTime: " + maintenance.getRTreeLeafNodeTime + "\n";
+    outString += "updateLeafNodePNTime: " + maintenance.updateLeafNodePNTime + "\n";
+
     outString += "createEdgeTime: " + maintenance.createEdgeTime + "\n";
     outString += "commitTime: " + commitTime + "\n";
 

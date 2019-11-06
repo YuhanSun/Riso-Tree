@@ -34,6 +34,8 @@ public class RisoTreeMaintenance {
   public long getPNTime = 0;
   public long convertIdTime = 0;
   public long updatePNTime = 0;
+  public long getRTreeLeafNodeTime = 0;
+  public long updateLeafNodePNTime = 0;
   public long updateSafeNodesTime = 0;
   public long createEdgeTime = 0;
 
@@ -152,8 +154,13 @@ public class RisoTreeMaintenance {
       for (Node node : entry.getValue()) {
         if (Neo4jGraphUtility.isNodeSpatial(node)) {
           minDist = Math.min(RisoTreeUtil.getHopNumber(propertyName), minDist);
+          long start2 = System.currentTimeMillis();
           Node leafNode = RTreeUtility.getParentLeafNode(node);
+          getRTreeLeafNodeTime += System.currentTimeMillis() - start2;
+
+          start2 = System.currentTimeMillis();
           updateLeafNodePN(leafNode, propertyName, pathNeighborsTrgSortedIds);
+          updateLeafNodePNTime += System.currentTimeMillis() - start2;
         }
       }
     }
