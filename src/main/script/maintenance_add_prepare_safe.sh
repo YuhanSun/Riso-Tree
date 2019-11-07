@@ -161,6 +161,7 @@ if [ ! -f "$add_edge_path" ]; then
 		-f generateRandomAddEdgeSafeNodes \
 		-gp ${graph_path}	\
 		-safeNodesPath $safeNodesPath	\
+		-nodeCount 10000	\
 		-outputPath ${add_edge_path}
 fi
 
