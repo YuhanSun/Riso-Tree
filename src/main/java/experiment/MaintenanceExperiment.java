@@ -61,6 +61,71 @@ public class MaintenanceExperiment {
   }
 
   /**
+   * Generate random edge without considering current edges. (totally random)
+   *
+   * @param graphPath
+   * @param count
+   * @param outputPath
+   */
+  public static void generateRandomAddEdge(String graphPath, int count, String outputPath) {
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
+    ArrayList<TreeSet<Integer>> treeGraph = GraphUtil.convertListGraphToTreeSetGraph(graph);
+    int len = graph.size();
+    Map<String, String> sampleMap = new HashMap<>();
+    Random random = new Random();
+    while (sampleMap.size() < count) {
+      int start = random.nextInt(len);
+      int end = random.nextInt(len);
+      int min = Math.min(start, end);
+      int max = Math.max(start, end);
+      String key = new Edge(min, max).toString();
+      if (sampleMap.containsKey(key) || treeGraph.get(start).contains(end)) {
+        continue;
+      }
+      sampleMap.put(key, key);
+    }
+
+    ArrayList<String> sampleLines = new ArrayList<>(sampleMap.values());
+    ReadWriteUtil.WriteFile(outputPath, false, sampleLines);
+  }
+
+  /**
+   * Generate added edge only for safeNodes.
+   *
+   * @param graphPath
+   * @param count
+   * @param outputPath
+   * @throws Exception
+   */
+  public static void generateRandomAddEdgeSafeNodes(String graphPath, String safeNodesPath,
+      int count, String outputPath) throws Exception {
+    ArrayList<ArrayList<Integer>> graph = GraphUtil.ReadGraph(graphPath);
+    ArrayList<TreeSet<Integer>> treeGraph = GraphUtil.convertListGraphToTreeSetGraph(graph);
+    List<String> arrayList = ReadWriteUtil.readFileAllLines(safeNodesPath);
+    List<Integer> safeNodes = new ArrayList<>(arrayList.size());
+    for (String id : arrayList) {
+      safeNodes.add(Integer.parseInt(id));
+    }
+    int len = safeNodes.size();
+    Map<String, String> sampleMap = new HashMap<>();
+    Random random = new Random();
+    while (sampleMap.size() < count) {
+      int start = safeNodes.get(random.nextInt(len));
+      int end = safeNodes.get(random.nextInt(len));
+      int min = Math.min(start, end);
+      int max = Math.max(start, end);
+      String key = new Edge(min, max).toString();
+      if (sampleMap.containsKey(key) || treeGraph.get(start).contains(end)) {
+        continue;
+      }
+      sampleMap.put(key, key);
+    }
+
+    ArrayList<String> sampleLines = new ArrayList<>(sampleMap.values());
+    ReadWriteUtil.WriteFile(outputPath, false, sampleLines);
+  }
+
+  /**
    * Generate the correct graph.txt file for the new graph whose edges are removed.
    *
    * @param inputGraphPath
@@ -197,11 +262,13 @@ public class MaintenanceExperiment {
 
     Transaction tx = databaseService.beginTx();
     Util.println("test edges count: " + testEdges.size());
+    long totalTime = 0;
     for (Edge edge : testEdges) {
       Util.println(edge);
       long start = System.currentTimeMillis();
       maintenance.addEdge(edge.start, edge.end);
       long time = System.currentTimeMillis() - start;
+      totalTime += time;
       records.add(new ResultRecord(time, -1));
       ReadWriteUtil.WriteFile(outputDetailPath, true, "" + time + "\n");
     }
@@ -211,6 +278,7 @@ public class MaintenanceExperiment {
     long commitTime = System.currentTimeMillis() - start;
 
     String outString = "";
+    outString += "total time: " + totalTime + "\n";
     outString += "avg time: " + ResultRecord.getRunTimeAvg(records) + "\n";
     outString += "getPNTime: " + maintenance.getPNTime + "\n";
     outString += "convertIdTime: " + maintenance.convertIdTime + "\n";

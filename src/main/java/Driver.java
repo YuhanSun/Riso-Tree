@@ -66,8 +66,9 @@ public class Driver {
     /**
      * add experiment
      */
-    convertGraphToEdgeFormat, sampleFile, removeEdgesFromGraphFile, removeEdgesFromDb, // one time
-                                                                                       // prepare
+    convertGraphToEdgeFormat, sampleFile, generateRandomAddEdgeSafeNodes, removeEdgesFromGraphFile, removeEdgesFromDb, // one
+                                                                                                                       // time
+    // prepare
     addEdgeExperiment,
   }
 
@@ -451,6 +452,11 @@ public class Driver {
           case sampleFile:
             MaintenanceExperiment.sampleFile(cmd.getOptionValue(inputPath),
                 Double.parseDouble(cmd.getOptionValue(ratio)), cmd.getOptionValue(outputPath));
+            break;
+          case generateRandomAddEdgeSafeNodes:
+            MaintenanceExperiment.generateRandomAddEdgeSafeNodes(cmd.getOptionValue(graphPath),
+                cmd.getOptionValue(safeNodesPath), Integer.parseInt(cmd.getOptionValue(nodeCount)),
+                cmd.getOptionValue(outputPath));
             break;
           case removeEdgesFromGraphFile:
             MaintenanceExperiment.removeEdgesFromGraphFile(cmd.getOptionValue(graphPath),
