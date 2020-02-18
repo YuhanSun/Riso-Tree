@@ -16,6 +16,26 @@ public class ExecutionPlanDescriptionUtil {
     ExpandExpression, LabelName,
   }
 
+  /**
+   * Find the first operator with the given {@code type}.
+   *
+   * @param description
+   * @param type
+   * @return null if the given type does not exist.
+   */
+  public static ExecutionPlanDescription findFirstNodeType(ExecutionPlanDescription description,
+      PlanExecutionType type) {
+    if (getPlanExecutionType(description.getName()).equals(type)) {
+      return description;
+    }
+    for (ExecutionPlanDescription childrenDescription : description.getChildren()) {
+      ExecutionPlanDescription resultDescription = findFirstNodeType(childrenDescription, type);
+      if (resultDescription != null) {
+        return resultDescription;
+      }
+    }
+    return null;
+  }
 
   public static String[] getEdgeInExpandExpressionPlanNode(
       ExecutionPlanDescription planDescription) {
