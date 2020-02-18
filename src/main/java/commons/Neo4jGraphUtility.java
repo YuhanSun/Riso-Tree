@@ -83,6 +83,10 @@ public class Neo4jGraphUtility {
     return new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbPath));
   }
 
+  public static long getInAndOutEdgeCount(GraphDatabaseService service, String label) {
+    return getInEdgeCount(service, label) + getOutEdgeCount(service, label);
+  }
+
   public static long getOutEdgeCount(GraphDatabaseService service, String label) {
     String query = String.format("match (n:`%s`)-[]->() return count(*)", label);
     Result result = service.execute(query);
