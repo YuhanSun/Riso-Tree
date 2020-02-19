@@ -57,7 +57,7 @@ public class Neo4jGraphUtility {
   }
 
   /**
-   * Get dababase service. Stop the program if dbPath does not exist.
+   * Get database service. Stop the program if dbPath does not exist.
    *
    * @param dbPath
    * @return
