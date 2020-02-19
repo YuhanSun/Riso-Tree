@@ -13,8 +13,10 @@ import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import com.vividsolutions.jts.geom.Envelope;
@@ -112,6 +114,62 @@ public class Analyze {
     // get2HopNeighborCount();
     // filterOnLabelReductionFactorAnalysis();
     getNeighborDistribution();
+  }
+
+
+  public static void getSecondHopLabelAverageDegree() {
+    String labelString = "hill";
+    Label label = Label.label(labelString);
+    String query =
+        String.format("match (a0:`%s`),(a1),(a0)--(a1) return DISTINCT LABELS(a1) as label",
+            labelString);
+    dbPath = RunTimeConfigure.dbPath;
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    Result result = service.execute(query);
+    long sumCount = Neo4jGraphUtility.getInAndOutEdgeCount(service, labelString);
+    long nodeCount = Neo4jGraphUtility.getLabelCount(service, labelString);
+    double averageDegree = (double) sumCount / nodeCount;
+
+    List<String> outputList = new LinkedList<>();
+    HashSet<String> visistedLabelStrings = new HashSet<>();
+    while (result.hasNext()) {
+      Map<String, Object> row = result.next();
+      Util.println(row.toString());
+      ArrayList<?> neighborLabels = (ArrayList<?>) row.get("label");
+      for (Object neighborLabel : neighborLabels) {
+        if (visistedLabelStrings.contains(neighborLabel.toString())) {
+          continue;
+        } else {
+          visistedLabelStrings.add(neighborLabel.toString());
+        }
+        ResourceIterator<Node> nodeIterator =
+            service.findNodes(Label.label(neighborLabel.toString()));
+        int edgeCount = 0;
+        int intermediateNodeCount = 0;
+        while (nodeIterator.hasNext()) {
+          Node firstNode = nodeIterator.next();
+          Iterable<Relationship> relationsIterable = firstNode.getRelationships();
+          for (Relationship firstRelationship : relationsIterable) {
+            Node secondNode = firstRelationship.getOtherNode(firstNode);
+            if (secondNode.hasLabel(label)) {
+              intermediateNodeCount++;
+              Iterable<Relationship> secondRelationsIterable = secondNode.getRelationships();
+              for (Iterator<Relationship> iterator = secondRelationsIterable.iterator(); iterator
+                  .hasNext();) {
+                edgeCount++;
+              }
+            }
+          }
+        }
+        String line = String.format("%s,%d,%d,%s", neighborLabel, intermediateNodeCount, edgeCount,
+            String.valueOf((double) edgeCount / intermediateNodeCount));
+        Util.println(line);
+        outputList.add(line);
+      }
+    }
+    service.shutdown();
+    ReadWriteUtil.WriteFile("D:\\temp\\two_hop_cardinality.txt", false, outputList);
+    Util.println(String.format("average degree: %s", Double.valueOf(averageDegree)));
   }
 
   public static void getNeighborDistribution() {
