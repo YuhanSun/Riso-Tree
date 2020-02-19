@@ -11,16 +11,19 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config;
-import commons.Config.Datasets;
 import commons.Config.system;
 import commons.Entity;
+import commons.ExecutionPlanDescriptionUtil;
+import commons.ExecutionPlanDescriptionUtil.PlanExecutionType;
 import commons.GraphUtil;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
@@ -28,8 +31,11 @@ import commons.OwnMethods;
 import commons.RTreeUtility;
 import commons.ReadWriteUtil;
 import commons.RisoTreeUtil;
+import commons.RunTimeConfigure;
 import commons.SaveRectanglesAsImage;
 import commons.Util;
+import cypher.middleware.CypherUtil;
+import graph.Naive_Neo4j_Match;
 
 /**
  * This is used for analyze experiment results in the RisoTree Paper.
@@ -96,15 +102,90 @@ public class Analyze {
     // entities = OwnMethods.ReadEntity(entityPath);
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     // TODO Auto-generated method stub
-    Util.println(config.getDatasetName());
-    config.setDatasetName(Datasets.Yelp_100.toString());
-    initParameters();
+    // Util.println(config.getDatasetName());
+    // config.setDatasetName(Datasets.Yelp_100.toString());
+    // initParameters();
     // getAverageDegree();
     // getSpatialEntityCount();
     // get2HopNeighborCount();
+    // filterOnLabelReductionFactorAnalysis();
+    getNeighborDistribution();
+  }
 
+  public static void getNeighborDistribution() {
+    String label = "hill";
+    String query = String.format(
+        "match (a0:`%s`),(a1),(a0)--(a1) return DISTINCT LABELS(a1) as label, COUNT(a1) as count",
+        label);
+    dbPath = RunTimeConfigure.dbPath;
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    Result result = service.execute(query);
+    long sumCount = Neo4jGraphUtility.getInAndOutEdgeCount(service, label);
+    List<String> outputList = new LinkedList<>();
+    while (result.hasNext()) {
+      Map<String, Object> row = result.next();
+      Util.println(row.toString());
+      ArrayList<?> neighborLabels = (ArrayList<?>) row.get("label");
+      // Util.println(String.valueOf(neighborLabels));
+      for (Object neighborLabel : neighborLabels) {
+        long count = (long) (row.get("count"));
+        long neighborSumEdgeCount =
+            Neo4jGraphUtility.getInAndOutEdgeCount(service, neighborLabel.toString());
+        // Util.println(neighborSumEdgeCount);
+        String line = String.format("%s,%d,%d,%s,%s", neighborLabel, count, neighborSumEdgeCount,
+            String.valueOf((double) count / sumCount), (double) count / neighborSumEdgeCount);
+        Util.println(line);
+        outputList.add(line);
+      }
+    }
+    service.shutdown();
+    ReadWriteUtil.WriteFile("D:\\temp\\label_to_label_count.txt", false, outputList);
+  }
+
+  public static void filterOnLabelReductionFactorAnalysis() throws Exception {
+    dbPath = RunTimeConfigure.dbPath;
+    String queryPath = RunTimeConfigure.queryPath;
+    filterOnLabelReductionFactor(dbPath, queryPath, 2);
+  }
+
+  public static void filterOnLabelReductionFactor(String dbPath, String queryPath, int count)
+      throws Exception {
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    List<String> queryList = ReadWriteUtil.readFileAllLines(queryPath);
+    List<String> newQueryList = new ArrayList<>(count);
+    for (int i = 0; i < count; i++) {
+      newQueryList.add(CypherUtil.removeWhere(queryList.get(i)));
+    }
+    filterOnLabelReductionFactor(service, newQueryList);
+    service.shutdown();
+  }
+
+  public static void filterOnLabelReductionFactor(GraphDatabaseService service,
+      List<String> queries) {
+    for (String queryString : queries) {
+      Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
+      Util.println(queryString);
+      naive_Neo4j_Match.query(queryString);
+      ExecutionPlanDescription description = naive_Neo4j_Match.planDescription;
+      Util.println(description.toString());
+
+      ExecutionPlanDescription labelScanDescription = ExecutionPlanDescriptionUtil
+          .findFirstNodeType(description, PlanExecutionType.NodeByLabelScan);
+      long rowCountLabelScan = labelScanDescription.getProfilerStatistics().getRows();
+      Util.println("rowCountLabelScan: " + rowCountLabelScan);
+
+      ExecutionPlanDescription expandOperatorDescription =
+          ExecutionPlanDescriptionUtil.findFirstNodeType(description, PlanExecutionType.Expand);
+      long rowCountAfterExpand = expandOperatorDescription.getProfilerStatistics().getRows();
+      Util.println("rowCountAfterExpand: " + rowCountAfterExpand);
+
+      ExecutionPlanDescription filterDescription =
+          ExecutionPlanDescriptionUtil.findFirstNodeType(description, PlanExecutionType.Filter);
+      long rowCountAfterFilter = filterDescription.getProfilerStatistics().getRows();
+      Util.println("rowCountAfterFilter: " + rowCountAfterFilter);
+    }
   }
 
   public static void degreeAvg(String graphPath, String entityPath, String outputPath) {
