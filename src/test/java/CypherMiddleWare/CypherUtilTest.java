@@ -1,6 +1,6 @@
 package CypherMiddleWare;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import commons.Util;
 import cypher.middleware.CypherUtil;
 
