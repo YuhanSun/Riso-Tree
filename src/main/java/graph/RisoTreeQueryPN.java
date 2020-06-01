@@ -2753,7 +2753,7 @@ public class RisoTreeQueryPN {
           }
         }
         // spatial object
-        else if (node.hasLabel(Labels.GraphLabel.GRAPH_1)) {
+        else if (Neo4jGraphUtility.isNodeSpatial(node)) {
           visit_spatial_object_count++;
           long id = node.getId();
           // OwnMethods.Print(id);
