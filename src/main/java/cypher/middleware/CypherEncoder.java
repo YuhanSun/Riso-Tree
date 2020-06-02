@@ -4,6 +4,7 @@ import commons.Config;
 import commons.Config.Explain_Or_Profile;
 import commons.MyRectangle;
 import commons.Query_Graph;
+import commons.Util;
 
 public class CypherEncoder {
 
@@ -57,6 +58,39 @@ public class CypherEncoder {
     return query;
   }
 
+  public static String getMatchGraphSkeletonString(Query_Graph query_Graph) {
+    return getMatchNodeLabelString(query_Graph) + getMatchEdgeString(query_Graph);
+  }
+
+  public static String getMatchReturnString(Query_Graph query_Graph) {
+    String query = "return id(a0)";
+    for (int i = 1; i < query_Graph.graph.size(); i++)
+      query += String.format(",id(a%d)", i);
+    return query;
+  }
+
+  public static String getMatchRangePredicateString(Query_Graph query_Graph) {
+    String query = "";
+    int i = 0;
+    for (; i < query_Graph.graph.size(); i++) {
+      if (query_Graph.spa_predicate[i] != null) {
+        MyRectangle qRect = query_Graph.spa_predicate[i];
+        query += String.format("%f <= a%d.%s <= %f ", qRect.min_x, i, lon_name, qRect.max_x);
+        query += String.format("and %f <= a%d.%s <= %f", qRect.min_y, i, lat_name, qRect.max_y);
+        i++;
+        break;
+      }
+    }
+    for (; i < query_Graph.graph.size(); i++) {
+      if (query_Graph.spa_predicate[i] != null) {
+        MyRectangle qRect = query_Graph.spa_predicate[i];
+        query += String.format(" and %f <= a%d.%s <= %f ", qRect.min_x, i, lon_name, qRect.max_x);
+        query += String.format("and %f <= a%d.%s <= %f", qRect.min_y, i, lat_name, qRect.max_y);
+      }
+    }
+    return query;
+  }
+
   public static String getLimit(int limit) {
     return limit == -1 ? "" : String.format("limit %d", limit);
   }
@@ -72,37 +106,19 @@ public class CypherEncoder {
   public static String formCypherQuery(Query_Graph query_Graph, int limit,
       Explain_Or_Profile explain_Or_Profile) {
     String query = getMatchPrefix(explain_Or_Profile) + " ";
+    query += getMatchGraphSkeletonString(query_Graph);
 
-    // label
-    query += getMatchNodeLabelString(query_Graph);
-
-    // edge
-    query += getMatchEdgeString(query_Graph);
-
-    // spatial predicate
-    int i = 0;
-    for (; i < query_Graph.graph.size(); i++) {
-      if (query_Graph.spa_predicate[i] != null) {
-        MyRectangle qRect = query_Graph.spa_predicate[i];
-        query += String.format(" where %f <= a%d.%s <= %f ", qRect.min_x, i, lon_name, qRect.max_x);
-        query += String.format("and %f <= a%d.%s <= %f", qRect.min_y, i, lat_name, qRect.max_y);
-        i++;
-        break;
-      }
-    }
-    for (; i < query_Graph.graph.size(); i++) {
-      if (query_Graph.spa_predicate[i] != null) {
-        MyRectangle qRect = query_Graph.spa_predicate[i];
-        query += String.format(" and %f <= a%d.%s <= %f ", qRect.min_x, i, lon_name, qRect.max_x);
-        query += String.format("and %f <= a%d.%s <= %f", qRect.min_y, i, lat_name, qRect.max_y);
-      }
+    // where range predicate
+    String rangePredicateString = getMatchRangePredicateString(query_Graph);
+    Util.println(rangePredicateString);
+    if (rangePredicateString != "") {
+      query += " where " + rangePredicateString;
     }
 
     // return
-    query += " return id(a0)";
-    for (i = 1; i < query_Graph.graph.size(); i++)
-      query += String.format(",id(a%d)", i);
+    query += " " + getMatchReturnString(query_Graph);
 
+    // limit
     if (limit != -1) {
       query += " " + getLimit(limit);
     }
