@@ -225,9 +225,9 @@ public class Naive_Neo4j_Match {
     return query;
   }
 
-  public List<Long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) {
+  public List<long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) {
     iniLogVariables();
-    List<Long[]> res = new LinkedList<>();
+    List<long[]> res = new LinkedList<>();
     ArrayList<Integer> pos = new ArrayList<>();
     for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
       if (query_Graph.Has_Spa_Predicate[i])
@@ -244,7 +244,7 @@ public class Naive_Neo4j_Match {
       // OwnMethods.Print(row);
       long id1 = (long) row.get(String.format("id(a%d)", pos.get(0)));
       long id2 = (long) row.get(String.format("id(a%d)", pos.get(1)));
-      Long[] pair = new Long[] {id1, id2};
+      long[] pair = new long[] {id1, id2};
       res.add(pair);
       result_count++;
     }

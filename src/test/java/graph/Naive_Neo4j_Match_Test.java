@@ -1,9 +1,6 @@
 package graph;
 
-import static org.junit.Assert.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.AfterClass;
@@ -11,12 +8,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.Result;
 import commons.Config;
-import commons.Entity;
-import commons.MyRectangle;
-import commons.OwnMethods;
 import commons.Config.Explain_Or_Profile;
 import commons.Config.system;
-import scala.util.control.Exception;
+import commons.MyRectangle;
+import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Util;
 
@@ -188,7 +183,7 @@ public class Naive_Neo4j_Match_Test {
     OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
     Util.println(query_Graph);
     long start = System.currentTimeMillis();
-    List<Long[]> res = naive_Neo4j_Match.LAGAQ_Join(query_Graph, distance);
+    List<long[]> res = naive_Neo4j_Match.LAGAQ_Join(query_Graph, distance);
     long time = System.currentTimeMillis() - start;
     Util.println("distance: " + distance);
     Util.println("total time: " + time);
