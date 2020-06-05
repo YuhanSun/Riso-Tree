@@ -191,12 +191,14 @@ public class RisoTreeQueryPNTest {
 
   @Test
   public void queryKNNtest() {
-    RisoTreeQueryPN risoTreeQueryPN =
-        new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
+    // RisoTreeQueryPN risoTreeQueryPN =
+    // new RisoTreeQueryPN(db_path, dataset, graph_pos_map_list, MAX_HOPNUM);
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(db_path);
+    RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOPNUM);
 
-    int K = 5;
+    int K = 1;
     try {
-      ArrayList<Long> resultIDs = risoTreeQueryPN.LAGAQ_KNN(query_Graph, K);
+      List<long[]> resultIDs = risoTreeQueryPN.LAGAQ_KNN(query_Graph, K);
       Util.println(resultIDs);
       Util.println(risoTreeQueryPN.visit_spatial_object_count);
       Util.println(risoTreeQueryPN.page_hit_count);
@@ -217,6 +219,8 @@ public class RisoTreeQueryPNTest {
     LinkedList<String> paths = new LinkedList<String>();
     paths.add("PN_27_1000");
     boolean result = RisoTreeQueryPN.checkPaths(node, paths);
+    tx.success();
+    tx.close();
     Util.println(result);
   }
 

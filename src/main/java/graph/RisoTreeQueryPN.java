@@ -34,12 +34,14 @@ import commons.MyPoint;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
+import commons.QueryUtil;
 import commons.Query_Graph;
 import commons.Query_Graph.LabelType;
 import commons.RTreeUtility;
 import commons.RisoTreeUtil;
 import commons.Util;
 import cypher.middleware.CypherDecoder;
+import cypher.middleware.CypherEncoder;
 import knn.Element;
 import knn.KNNComparator;
 import knn.NodeAndRec;
@@ -2614,52 +2616,21 @@ public class RisoTreeQueryPN {
   public static String formQuery_KNN(Query_Graph query_Graph, int limit,
       Explain_Or_Profile explain_Or_Profile, int pos, Long id) {
     String query = "";
-    switch (explain_Or_Profile) {
-      case Profile:
-        query += "profile match ";
-        break;
-      case Explain:
-        query += "explain match ";
-        break;
-      case Nothing:
-        query += "match ";
-        break;
-    }
+    query += CypherEncoder.getMatchPrefix(explain_Or_Profile);
+    query += " ";
+    query += CypherEncoder.getMatchGraphSkeletonString(query_Graph);
 
-    // label
-    if (pos == 0)
-      query += "(a0)";
-    else
-      query += String.format("(a0:GRAPH_%d)", query_Graph.label_list[0]);
-    for (int i = 1; i < query_Graph.graph.size(); i++) {
-      if (pos == i)
-        query += String.format(",(a%d)", i);
-      else
-        query += String.format(",(a%d:GRAPH_%d)", i, query_Graph.label_list[i]);
-    }
-
-    // edge
-    for (int i = 0; i < query_Graph.graph.size(); i++) {
-      for (int j = 0; j < query_Graph.graph.get(i).size(); j++) {
-        int neighbor = query_Graph.graph.get(i).get(j);
-        if (neighbor > i)
-          query += String.format(",(a%d)-[:%s]-(a%d)", i, graphLinkLabelName, neighbor);
-      }
-    }
-
-    query += " where\n";
+    query += "\n where\n";
 
     // id
     query += String.format(" (id(a%d)=%d", pos, id);
     query += ")\n";
 
     // return
-    query += " return id(a0)";
-    for (int i = 1; i < query_Graph.graph.size(); i++)
-      query += String.format(",id(a%d)", i);
+    query += "\n return " + CypherEncoder.getMatchReturnString(query_Graph);
 
     if (limit != -1)
-      query += String.format(" limit %d", limit);
+      query += " " + CypherEncoder.getLimit(limit);
 
     return query;
   }
@@ -2670,126 +2641,129 @@ public class RisoTreeQueryPN {
    * @param query_Graph
    * @param K
    */
-  public ArrayList<Long> LAGAQ_KNN(Query_Graph query_Graph, int K) {
+  public List<long[]> LAGAQ_KNN(Query_Graph query_Graph, int K) throws Exception {
     visit_spatial_object_count = 0;
     queue_time = 0;
     check_paths_time = 0;
     get_iterator_time = 0;
     iterate_time = 0;
     page_hit_count = 0;
-    try {
-      ArrayList<Long> resultIDs = new ArrayList<Long>();
-      HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
-      if (spaPathsMap.size() != 1)
-        throw new Exception(
-            String.format("The number of anchor vertex in the LAGAQ-KNN query is %d rather than 1!",
-                spaPathsMap.size()));
+    List<long[]> resultIDs = new ArrayList<long[]>();
+    HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
+    if (spaPathsMap.size() != 1)
+      throw new Exception(
+          String.format("The number of anchor vertex in the LAGAQ-KNN query is %d rather than 1!",
+              spaPathsMap.size()));
 
-      LinkedList<String> paths = new LinkedList<String>();
-      MyPoint queryLoc = null;
-      int querySpatialVertexID = 0;
-      for (int i : spaPathsMap.keySet()) {
-        querySpatialVertexID = i;
-        MyRectangle queryRect = query_Graph.spa_predicate[i];
-        queryLoc = new MyPoint(queryRect.min_x, queryRect.min_y);
-        for (int j : spaPathsMap.get(i).keySet())
-          for (String path : spaPathsMap.get(i).get(j))
-            paths.add(path);
-        break;
-      }
-      // OwnMethods.Print(paths);
-
-      long start = System.currentTimeMillis();
-      Transaction tx = dbservice.beginTx();
-      Node root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
-      // if ( checkPaths(root_node, paths) == false)
-      // {
-      // tx.success();
-      // tx.close();
-      // return resultIDs;
-      // }
-
-      PriorityQueue<Element> queue = new PriorityQueue<Element>(100, new KNNComparator());
-      queue.add(new Element(root_node, 0));
-
-      while (resultIDs.size() < K && queue.isEmpty() == false) {
-        Element element = queue.poll();
-        Node node = element.node;
-        // Tree non-leaf node
-        if (node.hasRelationship(Labels.RTreeRel.RTREE_CHILD, Direction.OUTGOING)) {
-          Iterable<Relationship> rels =
-              node.getRelationships(Labels.RTreeRel.RTREE_CHILD, Direction.OUTGOING);
-          for (Relationship relationship : rels) {
-            Node child = relationship.getEndNode();
-            long start1 = System.currentTimeMillis();
-            if (child.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)) {
-              if (checkPaths(child, paths) == false) {
-                check_paths_time += System.currentTimeMillis() - start1;
-                continue;
-              }
-              check_paths_time += System.currentTimeMillis() - start1;
-            }
-            double[] bbox = (double[]) child.getProperty("bbox");
-            MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
-            queue.add(new Element(child, Util.distance(queryLoc, MBR)));
-
-          }
-        }
-        // tree leaf node
-        else if (node.hasRelationship(Labels.RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)) {
-          Iterable<Relationship> rels =
-              node.getRelationships(Labels.RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
-          for (Relationship relationship : rels) {
-            Node geom = relationship.getEndNode();
-            Object object = geom.getProperty(lon_name);
-            if (object == null)
-              throw new Exception(
-                  String.format("Node %d does not have %s property", geom.getId(), lon_name));
-            else {
-              double lon = (Double) object;
-              double lat = (Double) geom.getProperty(lat_name);
-              queue.add(new Element(geom, Util.distance(queryLoc, new MyPoint(lon, lat))));
-            }
-          }
-        }
-        // spatial object
-        else if (Neo4jGraphUtility.isNodeSpatial(node)) {
-          visit_spatial_object_count++;
-          long id = node.getId();
-          // OwnMethods.Print(id);
-          queue_time += System.currentTimeMillis() - start;
-
-          start = System.currentTimeMillis();
-          String query =
-              formQuery_KNN(query_Graph, 1, Explain_Or_Profile.Profile, querySpatialVertexID, id);
-          Result result = dbservice.execute(query);
-          get_iterator_time += System.currentTimeMillis() - start;
-
-          start = System.currentTimeMillis();
-          if (result.hasNext()) {
-            result.next();
-            resultIDs.add(id);
-            // OwnMethods.Print(String.format("%d, %f", id, element.distance));
-          }
-          iterate_time += System.currentTimeMillis() - start;
-          start = System.currentTimeMillis();
-
-          ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
-          page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-          // OwnMethods.Print(planDescription);
-        } else
-          throw new Exception(
-              String.format("Node %d does not affiliate to any type!", node.getId()));
-      }
-
-      queue_time += System.currentTimeMillis() - start;
-      return resultIDs;
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.exit(-1);
+    LinkedList<String> paths = new LinkedList<String>();
+    MyPoint queryLoc = null;
+    int querySpatialVertexID = 0;
+    for (int i : spaPathsMap.keySet()) {
+      querySpatialVertexID = i;
+      MyRectangle queryRect = query_Graph.spa_predicate[i];
+      queryLoc = new MyPoint(queryRect.min_x, queryRect.min_y);
+      for (int j : spaPathsMap.get(i).keySet())
+        for (String path : spaPathsMap.get(i).get(j))
+          paths.add(path);
+      break;
     }
-    return null;
+    // OwnMethods.Print(paths);
+
+    String[] columnNames = CypherEncoder.getReturnColumnNames(query_Graph);
+
+    long start = System.currentTimeMillis();
+    Transaction tx = dbservice.beginTx();
+    Node root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
+    // if ( checkPaths(root_node, paths) == false)
+    // {
+    // tx.success();
+    // tx.close();
+    // return resultIDs;
+    // }
+
+    PriorityQueue<Element> queue = new PriorityQueue<Element>(100, new KNNComparator());
+    queue.add(new Element(root_node, 0));
+
+    boolean reachKCount = false;
+    while (!reachKCount && !queue.isEmpty()) {
+      Element element = queue.poll();
+      Node node = element.node;
+      // Tree non-leaf node
+      if (node.hasRelationship(Labels.RTreeRel.RTREE_CHILD, Direction.OUTGOING)) {
+        Iterable<Relationship> rels =
+            node.getRelationships(Labels.RTreeRel.RTREE_CHILD, Direction.OUTGOING);
+        for (Relationship relationship : rels) {
+          Node child = relationship.getEndNode();
+          long start1 = System.currentTimeMillis();
+          if (child.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)) {
+            if (checkPaths(child, paths) == false) {
+              check_paths_time += System.currentTimeMillis() - start1;
+              continue;
+            }
+            check_paths_time += System.currentTimeMillis() - start1;
+          }
+          double[] bbox = (double[]) child.getProperty("bbox");
+          MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
+          queue.add(new Element(child, Util.distance(queryLoc, MBR)));
+
+        }
+      }
+      // tree leaf node
+      else if (node.hasRelationship(Labels.RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)) {
+        Iterable<Relationship> rels =
+            node.getRelationships(Labels.RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
+        for (Relationship relationship : rels) {
+          Node geom = relationship.getEndNode();
+          Object object = geom.getProperty(lon_name);
+          if (object == null)
+            throw new Exception(
+                String.format("Node %d does not have %s property", geom.getId(), lon_name));
+          else {
+            double lon = (Double) object;
+            double lat = (Double) geom.getProperty(lat_name);
+            queue.add(new Element(geom, Util.distance(queryLoc, new MyPoint(lon, lat))));
+          }
+        }
+      }
+      // spatial object
+      else if (Neo4jGraphUtility.isNodeSpatial(node)) {
+        visit_spatial_object_count++;
+        long id = node.getId();
+        // OwnMethods.Print(id);
+        queue_time += System.currentTimeMillis() - start;
+
+        start = System.currentTimeMillis();
+        String query =
+            formQuery_KNN(query_Graph, K - resultIDs.size(), Explain_Or_Profile.Profile,
+                querySpatialVertexID, id);
+        Result result = dbservice.execute(query);
+        get_iterator_time += System.currentTimeMillis() - start;
+
+        start = System.currentTimeMillis();
+        while (result.hasNext()) {
+          Map<String, Object> row = result.next();
+          long[] ids = QueryUtil.getResultRowInArray(columnNames, row);
+          resultIDs.add(ids);
+          // OwnMethods.Print(String.format("%d, %f", id, element.distance));
+          if (resultIDs.size() == K) {
+            reachKCount = true;
+            break;
+          }
+        }
+        iterate_time += System.currentTimeMillis() - start;
+        start = System.currentTimeMillis();
+
+        ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+        page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+        // OwnMethods.Print(planDescription);
+      } else
+        throw new Exception(String.format("Node %d does not affiliate to any type!", node.getId()));
+    }
+
+    queue_time += System.currentTimeMillis() - start;
+    tx.success();
+    tx.close();
+    return resultIDs;
   }
 
   /**
