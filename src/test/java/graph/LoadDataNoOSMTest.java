@@ -1,6 +1,8 @@
 package graph;
 
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,6 +10,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import commons.Config;
+import commons.ReadWriteUtil;
 import commons.Enums;
 import commons.Enums.system;
 import commons.Util;
@@ -101,6 +104,27 @@ public class LoadDataNoOSMTest {
 
     tx.success();
     tx.close();
+  }
+
+  @Test
+  public void readSpatialNodesPNTest() throws Exception {
+    String dir = "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt";
+    String path = dir + "\\spatialNodesZeroOneHopPN.txt";
+    List<Map<String, int[]>> spatialNodesPN = LoadDataNoOSM.readSpatialNodesPN(path);
+    int index = 0;
+    int id = -1;
+    for (Map<String, int[]> pn : spatialNodesPN) {
+      id++;
+      if (pn == null) {
+        continue;
+      }
+      ReadWriteUtil.WriteFile(dir + "\\temp.txt", true, id + "\n");
+      ReadWriteUtil.WriteFile(dir + "\\temp.txt", true, pn.toString() + "\n");
+      index++;
+      if (index == 10) {
+        return;
+      }
+    }
   }
 
 }
