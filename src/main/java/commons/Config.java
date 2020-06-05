@@ -2,7 +2,7 @@ package commons;
 
 public class Config {
   public static enum system {
-    Ubuntu, Windows
+    Ubuntu, Windows, MacOS
   }
 
   public static enum Explain_Or_Profile {
@@ -36,8 +36,8 @@ public class Config {
 
   // attention here, these settings change a lot
   private String neo4j_version = "neo4j-community-3.1.1";
-  private system operatingSystem = system.Windows;
-  private String dataset = Datasets.wikidata_100.name();
+  private system operatingSystem = system.MacOS;
+  private String dataset = Datasets.Yelp_100.name();
 
   private int MAX_HOPNUM = 2;
   private int MAX_HMBR_HOPNUM = 3;
