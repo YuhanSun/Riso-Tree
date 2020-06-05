@@ -25,9 +25,10 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config;
-import commons.Config.Explain_Or_Profile;
-import commons.Config.system;
 import commons.Entity;
+import commons.Enums;
+import commons.Enums.Explain_Or_Profile;
+import commons.Enums.system;
 import commons.GraphUtil;
 import commons.Labels.GraphLabel;
 import commons.Labels.OSMRelation;
@@ -54,7 +55,7 @@ public class Prepare {
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static int MAX_HOPNUM = config.getMaxHopNum();
   static int nonspatial_label_count = config.getNonSpatialLabelCount();
 
@@ -107,7 +108,7 @@ public class Prepare {
     queryGraphDir = String.format("%s/query_graph/%s/", queryDir, dataset);
     // center_id_path = String.format("%s/spa_predicate/%s/%s_centerids.txt", queryDir, dataset,
     // dataset);
-    systemName = system.Ubuntu;
+    systemName = Enums.system.Ubuntu;
   }
 
   static void initParameters() {
@@ -651,7 +652,7 @@ public class Prepare {
             centerIds.remove(centerId);
             break;
           }
-          String query = CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing);
+          String query = CypherEncoder.formCypherQuery(query_Graph, -1, Enums.Explain_Or_Profile.Nothing);
           Util.println(query);
           queries.add(query);
           break;

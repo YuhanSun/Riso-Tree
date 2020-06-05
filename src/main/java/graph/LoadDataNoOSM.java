@@ -31,9 +31,10 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.Config;
-import commons.Config.Datasets;
-import commons.Config.system;
 import commons.Entity;
+import commons.Enums;
+import commons.Enums.Datasets;
+import commons.Enums.system;
 import commons.GraphUtil;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
@@ -65,7 +66,7 @@ public class LoadDataNoOSM {
   private static final Logger LOGGER = Logger.getLogger(LoadDataNoOSM.class.getName());
 
   static void iniParametersServer() {
-    dataset = Config.Datasets.Patents_100_random_20.name();
+    dataset = Enums.Datasets.Patents_100_random_20.name();
     dbPath = dir + "/neo4j-community-3.1.1/data/databases/graph.db";
     graphPath = dir + "/graph.txt";
     entityPath = dir + "/entity.txt";

@@ -5,14 +5,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import commons.Config;
-import commons.Config.system;
+import commons.Enums;
+import commons.Enums.system;
 import commons.Query_Graph;
 import commons.Util;
 
 public class ExperimentLabelCount {
 
   static Config config = new Config();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static String querygraphDir, dataDir;
 
   public static List<Integer> labelCountList = Arrays.asList(10, 25, 50);
@@ -72,7 +73,7 @@ public class ExperimentLabelCount {
    * of the query graph
    */
   public static void convertQueryGraph() {
-    String oriDataset = Config.Datasets.Gowalla_100.name();
+    String oriDataset = Enums.Datasets.Gowalla_100.name();
     String oriQueryGraphPath = querygraphDir + oriDataset + "\\5.txt";
     // OwnMethods.Print(query_Graphs.size());
     for (int labelCount : labelCountList) {

@@ -16,6 +16,8 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import osm.OSM_Utility;
 import commons.Config;
+import commons.Enums;
+import commons.Enums.system;
 import commons.Labels.OSMRelation;
 import commons.Labels;
 import commons.MyRectangle;
@@ -23,7 +25,6 @@ import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
 import commons.Util;
-import commons.Config.system;
 
 /**
  * Implements the SpatialFirst approach in the paper
@@ -319,7 +320,7 @@ public class SpatialFirst {
     dataset_test = "Gowalla";
 
     Config config = new Config();
-    system systemName = config.getSystemName();
+    Enums.system systemName = config.getSystemName();
     String neo4jVersion = config.GetNeo4jVersion();
     switch (systemName) {
       case Ubuntu:

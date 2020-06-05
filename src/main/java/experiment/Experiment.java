@@ -8,7 +8,7 @@ import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.*;
-import commons.Config.system;
+import commons.Enums.system;
 import graph.*;
 
 /**
@@ -22,7 +22,7 @@ public class Experiment {
   public Config config;
   public String dataset;
   public String version;
-  public system systemName;
+  public Enums.system systemName;
   public String password;
   public int MAX_HOPNUM;
 
@@ -79,9 +79,9 @@ public class Experiment {
 
   public void initializeParametersServer() {
     TEST_FORMAT = false;
-    dataset = Config.Datasets.wikidata_100.name();
+    dataset = Enums.Datasets.wikidata_100.name();
     version = config.GetNeo4jVersion();
-    systemName = system.Ubuntu;
+    systemName = Enums.system.Ubuntu;
     db_path = dir + "/neo4j-community-3.1.1/data/databases/graph.db";
     entityPath = dir + "/entity.txt";
     graph_pos_map_path = dir + "/node_map_RTree.txt";
@@ -145,7 +145,7 @@ public class Experiment {
       // experiment.experimentCount = 3;
       // experiment.Neo4j_Naive(10, 0);
 
-      config.setDatasetName(Config.Datasets.Yelp_100.name());
+      config.setDatasetName(Enums.Datasets.Yelp_100.name());
 
       for (int hopNum = 0; hopNum >= 0; hopNum--)
       // int hopNum = 2;

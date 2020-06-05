@@ -38,7 +38,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.strtree.GeometryItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
-import commons.Config.ClearCacheMethod;
 import commons.Query_Graph.LabelType;
 
 
@@ -1264,7 +1263,7 @@ public class OwnMethods {
     Thread.sleep(millisec);
   }
 
-  public static String clearCache(String password, ClearCacheMethod method) throws Exception {
+  public static String clearCache(String password, Enums.ClearCacheMethod method) throws Exception {
     switch (method) {
       case SINGLE:
         return ClearCache(password);

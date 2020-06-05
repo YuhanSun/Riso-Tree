@@ -3,9 +3,10 @@ package experiment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import commons.Config;
+import commons.Enums;
+import commons.Enums.system;
 import commons.OwnMethods;
 import commons.Util;
-import commons.Config.system;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
 
@@ -13,7 +14,7 @@ public class ConstructionTime {
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static int MAX_HOPNUM = config.getMaxHopNum();
   static int nonspatial_label_count = config.getNonSpatialLabelCount();
 
@@ -54,8 +55,8 @@ public class ConstructionTime {
   }
 
   static void initParametersServer() {
-    systemName = Config.system.Ubuntu;
-    dataset = Config.Datasets.wikidata_100.name();
+    systemName = Enums.system.Ubuntu;
+    dataset = Enums.Datasets.wikidata_100.name();
     String dir = "/hdd2/data/ysun138/RisoTree/" + dataset;
     MAX_HOPNUM = config.getMaxHopNum();
     db_path = dir + "/neo4j-community-3.1.1/data/databases/graph.db";
@@ -90,10 +91,10 @@ public class ConstructionTime {
     try {
 
       ArrayList<String> dataset_a =
-          new ArrayList<String>(Arrays.asList(Config.Datasets.Patents_100_random_80.name(),
-              Config.Datasets.Patents_100_random_60.name(),
-              Config.Datasets.Patents_100_random_40.name(),
-              Config.Datasets.Patents_100_random_20.name()));
+          new ArrayList<String>(Arrays.asList(Enums.Datasets.Patents_100_random_80.name(),
+              Enums.Datasets.Patents_100_random_60.name(),
+              Enums.Datasets.Patents_100_random_40.name(),
+              Enums.Datasets.Patents_100_random_20.name()));
       // ArrayList<String> dataset_a = new
       // ArrayList<String>(Arrays.asList(Config.Datasets.Gowalla_50.name()));
 
@@ -129,7 +130,7 @@ public class ConstructionTime {
           // Config.Datasets.go_uniprot_100_random_80.name()
           // Config.Datasets.Gowalla_100.name(),
           // Config.Datasets.foursquare_100.name()
-          Config.Datasets.Yelp_100.name()));
+          Enums.Datasets.Yelp_100.name()));
 
       String resultDir = "D:\\Google_Drive\\Experiment_Result\\Riso-Tree";
       String resultPath = resultDir + "\\constructionTimeDataset.txt";

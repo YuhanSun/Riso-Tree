@@ -2,17 +2,18 @@ package experiment;
 
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import commons.Config.ClearCacheMethod;
-import commons.Config.ExperimentMethod;
+import commons.Enums;
+import commons.Enums.ClearCacheMethod;
+import commons.Enums.ExperimentMethod;
 import commons.ReadWriteUtil;
 import commons.Util;
 
 public class Alpha {
 
   public static void alphaExperiment(String dbPaths, String dataset, int MAX_HOP, String queryPath,
-      int queryCount, String password, boolean clearCache, ClearCacheMethod clearCacheMethod,
+      int queryCount, String password, boolean clearCache, Enums.ClearCacheMethod clearCacheMethod,
       String outputPath) throws Exception {
-    ExperimentMethod method = ExperimentMethod.RISOTREE;
+    Enums.ExperimentMethod method = Enums.ExperimentMethod.RISOTREE;
     String[] dbPathsList = dbPaths.split(",");
     Util.checkPathExist(dbPathsList);
     String header = ExperimentUtil.getHeader(method);

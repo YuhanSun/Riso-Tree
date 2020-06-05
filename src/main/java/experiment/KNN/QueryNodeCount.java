@@ -6,12 +6,13 @@ import java.util.HashMap;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Entity;
+import commons.Enums;
+import commons.Enums.Datasets;
+import commons.Enums.system;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Util;
-import commons.Config.Datasets;
-import commons.Config.system;
 import graph.RisoTreeQueryPN;
 import graph.SpatialFirst_List;
 
@@ -20,7 +21,7 @@ public class QueryNodeCount {
   public Config config;
   public String dataset;
   public String version;
-  public system systemName;
+  public Enums.system systemName;
   public String password;
   public int MAX_HOPNUM;
 
@@ -118,7 +119,7 @@ public class QueryNodeCount {
     // datasets.add(Datasets.Patents_100_random_80.name());
     // datasets.add(Datasets.foursquare_100.name());
     // datasets.add(Datasets.go_uniprot_100_random_80.name());
-    datasets.add(Datasets.wikidata_100.name());
+    datasets.add(Enums.Datasets.wikidata_100.name());
 
     QueryNodeCount queryNodeCount = new QueryNodeCount();
     for (String dataset : datasets) {

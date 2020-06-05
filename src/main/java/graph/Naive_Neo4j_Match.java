@@ -9,7 +9,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import commons.Config;
-import commons.Config.Explain_Or_Profile;
+import commons.Enums;
+import commons.Enums.Explain_Or_Profile;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.QueryUtil;
@@ -186,7 +187,7 @@ public class Naive_Neo4j_Match {
   }
 
   public String formQueryJoin(Query_Graph query_Graph, ArrayList<Integer> pos, double distance,
-      Explain_Or_Profile explain_Or_Profile) {
+      Enums.Explain_Or_Profile explain_Or_Profile) {
     String query = "";
     switch (explain_Or_Profile) {
       case Profile:
@@ -235,7 +236,7 @@ public class Naive_Neo4j_Match {
     for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
       if (query_Graph.Has_Spa_Predicate[i])
         pos.add(i);
-    String query = formQueryJoin(query_Graph, pos, distance, Explain_Or_Profile.Profile);
+    String query = formQueryJoin(query_Graph, pos, distance, Enums.Explain_Or_Profile.Profile);
     Util.println(query);
     Transaction tx = neo4j_API.graphDb.beginTx();
     long start = System.currentTimeMillis();
@@ -261,7 +262,7 @@ public class Naive_Neo4j_Match {
     return res;
   }
 
-  public static String formQueryKNN(Query_Graph query_Graph, Explain_Or_Profile explain_Or_Profile,
+  public static String formQueryKNN(Query_Graph query_Graph, Enums.Explain_Or_Profile explain_Or_Profile,
       int K)
       throws Exception {
     String query = CypherEncoder.getMatchPrefix(explain_Or_Profile);
@@ -289,7 +290,7 @@ public class Naive_Neo4j_Match {
   public List<long[]> LAGAQ_KNN(Query_Graph query_Graph, int K) throws Exception {
     iniLogVariables();
     List<long[]> res = new ArrayList<>();
-    String query = formQueryKNN(query_Graph, Explain_Or_Profile.Profile, K);
+    String query = formQueryKNN(query_Graph, Enums.Explain_Or_Profile.Profile, K);
     Util.println(query);
     String[] columnNames = CypherEncoder.getReturnColumnNames(query_Graph);
     Transaction tx = neo4j_API.graphDb.beginTx();

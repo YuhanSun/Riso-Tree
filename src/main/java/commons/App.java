@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.cypher.internal.frontend.v3_4.ast.Query;
 import org.neo4j.cypher.internal.frontend.v3_4.ast.SingleQuery;
 import org.neo4j.cypher.internal.frontend.v3_4.ast.Statement;
@@ -24,7 +25,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.strtree.STRtree;
-import commons.Config.system;
 import commons.Labels.GraphLabel;
 import graph.SpatialFirst;
 import osm.OSM_Utility;
@@ -48,7 +48,7 @@ public class App {
   static MyRectangle queryRectangle;
 
   public static void initVariablesForTest() {
-    system systemName = config.getSystemName();
+    Enums.system systemName = config.getSystemName();
     String neo4jVersion = config.GetNeo4jVersion();
     switch (systemName) {
       case Ubuntu:
@@ -211,10 +211,14 @@ public class App {
     // RelationshipType type = RTreeRelationshipTypes.RTREE_CHILD;
     // Util.println(type.equals(RTreeRelationshipTypes.RTREE_CHILD));
     // ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-    String path = App.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    Util.println(path);
+    // String path = App.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    // Util.println(path);
 
     // classLoader.getParent().classLoader.getResource(".");
+    MutableBoolean[] mutableBooleans = new MutableBoolean[3];
+    for (MutableBoolean mutableBoolean : mutableBooleans) {
+      Util.println(String.format("%s", mutableBoolean));
+    }
 
   }
 

@@ -6,12 +6,13 @@ import java.util.HashMap;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Entity;
+import commons.Enums;
+import commons.Enums.Datasets;
+import commons.Enums.system;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Util;
-import commons.Config.Datasets;
-import commons.Config.system;
 import graph.RisoTreeQueryPN;
 import graph.SpatialFirst_List;
 
@@ -26,7 +27,7 @@ public class KCount {
   public Config config;
   public String dataset;
   public String version;
-  public system systemName;
+  public Enums.system systemName;
   public String password;
   public int MAX_HOPNUM;
 
@@ -129,7 +130,7 @@ public class KCount {
       // datasets.add(Datasets.Patents_100_random_80.name());
       // datasets.add(Datasets.Gowalla_100.name());
       // datasets.add(Datasets.go_uniprot_100_random_80.name());
-      datasets.add(Datasets.wikidata_100.name());
+      datasets.add(Enums.Datasets.wikidata_100.name());
 
       KCount kCount = new KCount();
       for (String dataset : datasets) {

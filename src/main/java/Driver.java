@@ -6,8 +6,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import commons.Config;
-import commons.Config.ClearCacheMethod;
-import commons.Config.ExperimentMethod;
+import commons.Enums.ClearCacheMethod;
+import commons.Enums.ExperimentMethod;
 import commons.GraphUtil;
 import commons.Util;
 import dataprocess.Wikidata;
@@ -62,6 +62,7 @@ public class Driver {
     alphaExperiment, // alpha
     selectivityExperiment, // selectivity
     selectivityExperimentSingleMethod,
+    knnCount,
 
     /**
      * add experiment

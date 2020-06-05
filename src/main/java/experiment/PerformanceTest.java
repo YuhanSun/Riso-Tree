@@ -10,7 +10,8 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
-import commons.Config.system;
+import commons.Enums;
+import commons.Enums.system;
 import commons.OwnMethods;
 import commons.Util;
 
@@ -19,7 +20,7 @@ public class PerformanceTest {
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static String password = config.getPassword();
 
   static String db_path;

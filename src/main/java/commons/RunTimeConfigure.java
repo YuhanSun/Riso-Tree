@@ -1,6 +1,6 @@
 package commons;
 
-import commons.Config.ClearCacheMethod;
+import commons.Enums.ClearCacheMethod;
 
 public class RunTimeConfigure {
   public static final String dataset = "foursquare_100";
@@ -20,7 +20,7 @@ public class RunTimeConfigure {
   public static final int queryCount = 9;
 
   public static final boolean clearCache = false;
-  public static final ClearCacheMethod clearMethod = ClearCacheMethod.DOUBLE;
+  public static final Enums.ClearCacheMethod clearMethod = Enums.ClearCacheMethod.DOUBLE;
   public static final String password = "syh19910205";
 
 }

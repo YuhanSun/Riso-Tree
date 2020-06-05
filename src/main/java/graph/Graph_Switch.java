@@ -21,6 +21,8 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.Config;
+import commons.Enums;
+import commons.Enums.system;
 import commons.Labels;
 import commons.OwnMethods;
 import commons.RTreeUtility;
@@ -29,7 +31,6 @@ import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.OSMLabel;
 import commons.Labels.OSMRelation;
-import commons.Config.system;
 import commons.GraphUtil;
 import osm.OSM_Utility;
 
@@ -47,7 +48,7 @@ public class Graph_Switch {
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static String lon_name = config.GetLongitudePropertyName();
   static String lat_name = config.GetLatitudePropertyName();
   static String graphLinkLabelName = Labels.GraphRel.GRAPH_LINK.name();

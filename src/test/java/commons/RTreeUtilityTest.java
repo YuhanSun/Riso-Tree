@@ -8,14 +8,14 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import commons.Config.system;
+import commons.Enums.system;
 
 public class RTreeUtilityTest {
 
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static int MAX_HOPNUM = config.getMaxHopNum();
 
   static String db_path, graph_pos_map_path;

@@ -13,9 +13,10 @@ import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
-import commons.Config.ClearCacheMethod;
-import commons.Config.ExperimentMethod;
-import commons.Config.system;
+import commons.Enums.ClearCacheMethod;
+import commons.Enums.Datasets;
+import commons.Enums.ExperimentMethod;
+import commons.Enums.system;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
@@ -91,12 +92,12 @@ public class ExperimentSpaceSelectivity {
         break;
     }
 
-    if (dataset.equals(Config.Datasets.Gowalla_100.name())
-        || dataset.equals(Config.Datasets.foursquare_100.name())) {
+    if (dataset.equals(Datasets.Gowalla_100.name())
+        || dataset.equals(Datasets.foursquare_100.name())) {
       area = 1;
       factor = 50;
     } else {
-      if (dataset.equals(Config.Datasets.go_uniprot_100_random_80.name()))
+      if (dataset.equals(Datasets.go_uniprot_100_random_80.name()))
         area = 1;
       else {
         area = 10;
@@ -124,13 +125,12 @@ public class ExperimentSpaceSelectivity {
   public static void Query() {
     int nodeCount = 10, queryIndex = 0;
 
-    ArrayList<String> dataset_a =
-        new ArrayList<String>(Arrays.asList(Config.Datasets.Gowalla_100.name(),
-            Config.Datasets.foursquare_100.name(), Config.Datasets.Patents_100_random_80.name(),
-            Config.Datasets.go_uniprot_100_random_80.name()));
+    ArrayList<String> dataset_a = new ArrayList<String>(
+        Arrays.asList(Datasets.Gowalla_100.name(), Datasets.foursquare_100.name(),
+            Datasets.Patents_100_random_80.name(), Datasets.go_uniprot_100_random_80.name()));
 
     for (String dataset : dataset_a)
-    // String dataset = Config.Datasets.foursquare_100.name();
+    // String dataset = Datasets.foursquare_100.name();
     {
       Config config = new Config();
       config.setDatasetName(dataset);
@@ -148,7 +148,7 @@ public class ExperimentSpaceSelectivity {
       // PN
       // for ( int hopNum = 0; hopNum <= 2; hopNum++)
       // {
-      // if (dataset.equals(Config.Datasets.go_uniprot_100_random_80) && hopNum == 2)
+      // if (dataset.equals( Datasets.go_uniprot_100_random_80) && hopNum == 2)
       // continue;
       // config.setMAXHOPNUM(hopNum);
       // ExperimentSpaceSelectivity experimentSpaceSelectivity = new
@@ -169,9 +169,9 @@ public class ExperimentSpaceSelectivity {
 
   public void generateRandomCenterLocation() {
     ArrayList<String> dataset_a =
-        new ArrayList<String>(Arrays.asList(Config.Datasets.Patents_100_random_80.name(),
-            Config.Datasets.go_uniprot_100_random_80.name(), Config.Datasets.Gowalla_100.name(),
-            Config.Datasets.foursquare_100.name()));
+        new ArrayList<String>(Arrays.asList(Datasets.Patents_100_random_80.name(),
+            Datasets.go_uniprot_100_random_80.name(), Datasets.Gowalla_100.name(),
+            Datasets.foursquare_100.name()));
     ArrayList<MyRectangle> totalRange_a = new ArrayList<MyRectangle>(
         Arrays.asList(new MyRectangle(0, 0, 1000, 1000), new MyRectangle(0, 0, 1000, 1000),
             new MyRectangle(-180, -90, 180, 90), new MyRectangle(-180, -90, 180, 90)));
@@ -215,9 +215,9 @@ public class ExperimentSpaceSelectivity {
    */
   public void generateQueryRectangleForSpaceSelectivityMeter() {
     ArrayList<String> dataset_a =
-        new ArrayList<String>(Arrays.asList(Config.Datasets.Patents_100_random_80.name(),
-            Config.Datasets.go_uniprot_100_random_80.name(), Config.Datasets.Gowalla_100.name(),
-            Config.Datasets.foursquare_100.name()));
+        new ArrayList<String>(Arrays.asList(Datasets.Patents_100_random_80.name(),
+            Datasets.go_uniprot_100_random_80.name(), Datasets.Gowalla_100.name(),
+            Datasets.foursquare_100.name()));
     ArrayList<MyRectangle> totalRange_a = new ArrayList<MyRectangle>(
         Arrays.asList(new MyRectangle(0, 0, 1000, 1000), new MyRectangle(0, 0, 1000, 1000),
             new MyRectangle(-180, -90, 180, 90), new MyRectangle(-180, -90, 180, 90)));
@@ -226,12 +226,12 @@ public class ExperimentSpaceSelectivity {
         String dataset = dataset_a.get(i);
         MyRectangle total_range = totalRange_a.get(i);
 
-        if (dataset.equals(Config.Datasets.Gowalla_100.name())
-            || dataset.equals(Config.Datasets.foursquare_100.name())) {
+        if (dataset.equals(Datasets.Gowalla_100.name())
+            || dataset.equals(Datasets.foursquare_100.name())) {
           area = 1;
           factor = 50;
         } else {
-          if (dataset.equals(Config.Datasets.go_uniprot_100_random_80.name()))
+          if (dataset.equals(Datasets.go_uniprot_100_random_80.name()))
             area = 1;
           else {
             area = 10;
@@ -311,9 +311,9 @@ public class ExperimentSpaceSelectivity {
    */
   public static void generateQueryRectangleForSpaceSelectivityDegree() {
     ArrayList<String> dataset_a =
-        new ArrayList<String>(Arrays.asList(Config.Datasets.Patents_100_random_80.name(),
-            Config.Datasets.go_uniprot_100_random_80.name(), Config.Datasets.Gowalla_100.name(),
-            Config.Datasets.foursquare_100.name()));
+        new ArrayList<String>(Arrays.asList(Datasets.Patents_100_random_80.name(),
+            Datasets.go_uniprot_100_random_80.name(), Datasets.Gowalla_100.name(),
+            Datasets.foursquare_100.name()));
     ArrayList<MyRectangle> totalRange_a = new ArrayList<MyRectangle>(
         Arrays.asList(new MyRectangle(0, 0, 1000, 1000), new MyRectangle(0, 0, 1000, 1000),
             new MyRectangle(-180, -90, 180, 90), new MyRectangle(-180, -90, 180, 90)));

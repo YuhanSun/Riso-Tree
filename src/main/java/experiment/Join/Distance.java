@@ -7,12 +7,13 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.impl.transaction.log.entry.CheckPoint;
 import commons.Config;
 import commons.Entity;
+import commons.Enums;
+import commons.Enums.Datasets;
+import commons.Enums.system;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Util;
-import commons.Config.Datasets;
-import commons.Config.system;
 import graph.Naive_Neo4j_Match;
 import graph.RisoTreeQueryPN;
 import graph.SpatialFirst_List;
@@ -22,7 +23,7 @@ public class Distance {
   public Config config;
   public String dataset;
   public String version;
-  public system systemName;
+  public Enums.system systemName;
   public String password;
   public int MAX_HOPNUM;
 
@@ -127,7 +128,7 @@ public class Distance {
     // distanceList.add(0.000001);
     try {
       // String dataset = Datasets.Patents_100_random_80.name();
-      String dataset = Datasets.wikidata_100.name();
+      String dataset = Enums.Datasets.wikidata_100.name();
       Distance distanceExperiment = new Distance();
       distanceExperiment.config.setDatasetName(dataset);
       distanceExperiment.initializeParameters();

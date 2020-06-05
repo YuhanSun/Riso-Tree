@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import commons.Config;
-import commons.Config.system;
+import commons.Enums;
+import commons.Enums.system;
 import commons.GraphUtil;
 import commons.OwnMethods;
 
@@ -16,7 +17,7 @@ public class DataProcess {
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static int MAX_HOPNUM = config.getMaxHopNum();
   static int nonspatial_label_count = config.getNonSpatialLabelCount();
 

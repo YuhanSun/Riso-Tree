@@ -12,13 +12,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import com.vividsolutions.jts.index.strtree.STRtree;
-import commons.Config.system;
+import commons.Enums.system;
 
 public class UtilityTest {
 
   static Config config = new Config();
   static String dataset = config.getDatasetName();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static String entityPath;
   static String homeDir = null;
 

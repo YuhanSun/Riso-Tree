@@ -8,7 +8,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import commons.Config;
-import commons.Config.system;
+import commons.Enums;
+import commons.Enums.system;
 import commons.Util;
 
 public class LoadDataNoOSMTest {
@@ -16,7 +17,7 @@ public class LoadDataNoOSMTest {
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
 
   static String db_path, graph_pos_map_path;
   static String querygraphDir, spaPredicateDir;

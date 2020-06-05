@@ -6,8 +6,9 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
-import commons.Config.ClearCacheMethod;
-import commons.Config.ExperimentMethod;
+import commons.Enums;
+import commons.Enums.ClearCacheMethod;
+import commons.Enums.ExperimentMethod;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.ReadWriteUtil;
@@ -33,8 +34,8 @@ public class ExperimentUtil {
    * @throws Exception
    */
   public static List<ResultRecord> runExperiment(String dbPath, String dataset,
-      ExperimentMethod method, int MAX_HOP, String queryPath, int queryCount, String password,
-      boolean clearCache, ClearCacheMethod clearCacheMethod, String outputPath) throws Exception {
+      Enums.ExperimentMethod method, int MAX_HOP, String queryPath, int queryCount, String password,
+      boolean clearCache, Enums.ClearCacheMethod clearCacheMethod, String outputPath) throws Exception {
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
     queries = queries.subList(0, queryCount);
     int queryId = -1;
@@ -68,7 +69,7 @@ public class ExperimentUtil {
    * @throws Exception
    */
   private static ResultRecord runExperiment(GraphDatabaseService service, String dataset,
-      ExperimentMethod method, String query, int MAX_HOP) throws Exception {
+      Enums.ExperimentMethod method, String query, int MAX_HOP) throws Exception {
     ResultRecord record = null;
     ExecutionPlanDescription planDescription = null;
     switch (method) {
@@ -98,7 +99,7 @@ public class ExperimentUtil {
     return record;
   }
 
-  public static String getOutputResult(ResultRecord record, ExperimentMethod method) {
+  public static String getOutputResult(ResultRecord record, Enums.ExperimentMethod method) {
     String string = "";
     switch (method) {
       case NAIVE:
@@ -137,7 +138,7 @@ public class ExperimentUtil {
     return string;
   }
 
-  public static void outputDetailResult(List<ResultRecord> records, ExperimentMethod method,
+  public static void outputDetailResult(List<ResultRecord> records, Enums.ExperimentMethod method,
       String outputPath) throws Exception {
     FileWriter writer = Util.getFileWriter(outputPath, true);
     for (int i = 0; i < records.size(); i++) {
@@ -154,7 +155,7 @@ public class ExperimentUtil {
     writer.close();
   }
 
-  public static String getAverageResultOutput(List<ResultRecord> records, ExperimentMethod method) {
+  public static String getAverageResultOutput(List<ResultRecord> records, Enums.ExperimentMethod method) {
     String string = "";
     switch (method) {
       case NAIVE:
@@ -193,7 +194,7 @@ public class ExperimentUtil {
     return string;
   }
 
-  public static String getHeader(ExperimentMethod method) {
+  public static String getHeader(Enums.ExperimentMethod method) {
     switch (method) {
       case NAIVE:
         return StringUtils.joinWith("\t", "runTime", "pageHit", "getIteratorTime", "iterateTime",
@@ -211,8 +212,8 @@ public class ExperimentUtil {
   }
 
   public static void runExperimentQueryPathList(String dbPath, String dataset,
-      ExperimentMethod method, int MAX_HOP, String queryPaths, int queryCount, String password,
-      boolean clearCache, ClearCacheMethod clearCacheMethod, String outputPath) throws Exception {
+      Enums.ExperimentMethod method, int MAX_HOP, String queryPaths, int queryCount, String password,
+      boolean clearCache, Enums.ClearCacheMethod clearCacheMethod, String outputPath) throws Exception {
     Util.checkPathExist(dbPath);
     String header = getHeader(method);
     ReadWriteUtil.WriteFile(outputPath, true, "queryPath\t" + header + "\n");

@@ -1,7 +1,8 @@
 package cypher.middleware;
 
 import commons.Config;
-import commons.Config.Explain_Or_Profile;
+import commons.Enums;
+import commons.Enums.Explain_Or_Profile;
 import commons.MyRectangle;
 import commons.Query_Graph;
 import commons.Util;
@@ -11,7 +12,7 @@ public class CypherEncoder {
   public static String lon_name = new Config().GetLongitudePropertyName();
   public static String lat_name = new Config().GetLatitudePropertyName();
 
-  public static String getMatchPrefix(Explain_Or_Profile explain_Or_Profile) {
+  public static String getMatchPrefix(Enums.Explain_Or_Profile explain_Or_Profile) {
     switch (explain_Or_Profile) {
       case Profile:
         return "profile match";
@@ -110,7 +111,7 @@ public class CypherEncoder {
    * @return
    */
   public static String formCypherQuery(Query_Graph query_Graph, int limit,
-      Explain_Or_Profile explain_Or_Profile) {
+      Enums.Explain_Or_Profile explain_Or_Profile) {
     String query = getMatchPrefix(explain_Or_Profile) + " ";
     query += getMatchGraphSkeletonString(query_Graph);
 

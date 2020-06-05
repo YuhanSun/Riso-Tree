@@ -17,7 +17,8 @@ import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
-import commons.Config.system;
+import commons.Enums;
+import commons.Enums.system;
 import commons.Labels.OSMLabel;
 import commons.Labels.RTreeRel;
 import commons.Util;
@@ -27,7 +28,7 @@ public class OSM_UtilityTest {
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static int MAX_HOPNUM = config.getMaxHopNum();
   static int nonspatial_label_count = config.getNonSpatialLabelCount();
 

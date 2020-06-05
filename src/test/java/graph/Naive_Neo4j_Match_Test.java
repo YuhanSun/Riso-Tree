@@ -10,8 +10,9 @@ import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import commons.Config;
-import commons.Config.Explain_Or_Profile;
-import commons.Config.system;
+import commons.Enums;
+import commons.Enums.Explain_Or_Profile;
+import commons.Enums.system;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
@@ -24,7 +25,7 @@ public class Naive_Neo4j_Match_Test {
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
 
   static String db_path;
   static String queryDirectory, querygraphDir, spaPredicateDir;
@@ -190,7 +191,7 @@ public class Naive_Neo4j_Match_Test {
       if (query_Graph.Has_Spa_Predicate[i])
         pos.add(i);
     String query =
-        naive_Neo4j_Match.formQueryJoin(query_Graph, pos, distance, Explain_Or_Profile.Profile);
+        naive_Neo4j_Match.formQueryJoin(query_Graph, pos, distance, Enums.Explain_Or_Profile.Profile);
     Util.println(query);
   }
 
@@ -198,7 +199,7 @@ public class Naive_Neo4j_Match_Test {
   public void formQueryKNNTest() throws Exception {
     Query_Graph query_Graph = TestUtils.getExampleGraph();
     int K = 5;
-    String query = Naive_Neo4j_Match.formQueryKNN(query_Graph, Explain_Or_Profile.Profile, K);
+    String query = Naive_Neo4j_Match.formQueryKNN(query_Graph, Enums.Explain_Or_Profile.Profile, K);
     Util.println(query);
   }
 

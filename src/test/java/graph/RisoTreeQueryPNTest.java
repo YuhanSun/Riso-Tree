@@ -16,8 +16,9 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
-import commons.Config.Explain_Or_Profile;
-import commons.Config.system;
+import commons.Enums;
+import commons.Enums.Explain_Or_Profile;
+import commons.Enums.system;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
@@ -30,7 +31,7 @@ public class RisoTreeQueryPNTest {
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static int MAX_HOPNUM = config.getMaxHopNum();
 
   static String db_path, entityPath, graph_pos_map_path;
@@ -248,7 +249,7 @@ public class RisoTreeQueryPNTest {
     idPair[1] = (long) 200;
 
     String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1,
-        Explain_Or_Profile.Profile);
+        Enums.Explain_Or_Profile.Profile);
     Util.println(query);
   }
 

@@ -19,12 +19,13 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.Config;
 import commons.Entity;
+import commons.Enums;
+import commons.Enums.system;
 import commons.GraphUtil;
 import commons.Labels;
 import commons.OwnMethods;
 import commons.RTreeUtility;
 import commons.Util;
-import commons.Config.system;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.RTreeRel;
@@ -39,7 +40,7 @@ import osm.OSM_Utility;
 public class LoadDataGeneral {
 
   static Config config = new Config();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static String version = config.GetNeo4jVersion();
   static String dataset = config.getDatasetName();
   static String lon_name = config.GetLongitudePropertyName();

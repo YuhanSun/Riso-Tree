@@ -16,8 +16,9 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
-import commons.Config.Datasets;
 import commons.DrawRectangles;
+import commons.Enums;
+import commons.Enums.Datasets;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.RTreeUtility;
@@ -80,7 +81,7 @@ public class DrawRectanglesFrame extends JFrame {
       // Drive/Projects/tmp/risotree/Yelp/neo4j-community-3.1.1/data/databases/graph.db";
       // GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);
 
-      String dataset = Datasets.Patents_100_random_80.name();
+      String dataset = Enums.Datasets.Patents_100_random_80.name();
       String dir = "D:\\temp\\Patents";
       String dbPath = dir + "\\neo4j-community-3.1.1\\data\\databases\\graph.db";
       GraphDatabaseService databaseService = Neo4jGraphUtility.getDatabaseService(dbPath);

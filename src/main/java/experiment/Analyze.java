@@ -22,8 +22,9 @@ import org.neo4j.graphdb.Transaction;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config;
-import commons.Config.system;
 import commons.Entity;
+import commons.Enums;
+import commons.Enums.system;
 import commons.ExecutionPlanDescriptionUtil;
 import commons.ExecutionPlanDescriptionUtil.PlanExecutionType;
 import commons.GraphUtil;
@@ -49,15 +50,15 @@ public class Analyze {
   private static final Logger logger = Logger.getLogger(Analyze.class.getName());
 
   static Config config = new Config();
-  static system systemName;
+  static Enums.system systemName;
   static String version, dataset, lon_name, lat_name;
   static int nonspatial_label_count;
 
   static String dbPath, entityPath, mapPath, graphPath, labelListPath, hmbrPath;
   static ArrayList<String> dataset_a =
-      new ArrayList<String>(Arrays.asList(Config.Datasets.Gowalla_100.name(),
-          Config.Datasets.foursquare_100.name(), Config.Datasets.Patents_100_random_80.name(),
-          Config.Datasets.go_uniprot_100_random_80.name()));
+      new ArrayList<String>(Arrays.asList(Enums.Datasets.Gowalla_100.name(),
+          Enums.Datasets.foursquare_100.name(), Enums.Datasets.Patents_100_random_80.name(),
+          Enums.Datasets.go_uniprot_100_random_80.name()));
 
   // static ArrayList<Entity> entities;
 

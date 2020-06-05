@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.strtree.STRtree;
-import commons.Config.Explain_Or_Profile;
+import commons.Enums.Explain_Or_Profile;
 import cypher.middleware.CypherDecoder;
 import cypher.middleware.CypherEncoder;
 import dataprocess.Wikidata;
@@ -92,7 +92,7 @@ public class OwnMethodsTest {
     // }
     Util.println(query_Graph.toString());
     String cypherQueryString =
-        CypherEncoder.formCypherQuery(query_Graph, -1, Explain_Or_Profile.Nothing);
+        CypherEncoder.formCypherQuery(query_Graph, -1, Enums.Explain_Or_Profile.Nothing);
     Util.println(cypherQueryString);
 
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);

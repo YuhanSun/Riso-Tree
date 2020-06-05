@@ -24,7 +24,8 @@ import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.ArrayUtil;
 import commons.Config;
-import commons.Config.system;
+import commons.Enums.Datasets;
+import commons.Enums.system;
 import commons.GraphUtil;
 import commons.Labels.RTreeRel;
 import commons.Neo4jGraphUtility;
@@ -68,8 +69,8 @@ public class Construct_RisoTree {
 
 
   static void initParametersServer() {
-    systemName = Config.system.Ubuntu;
-    dataset = Config.Datasets.wikidata_100.name();
+    systemName = system.Ubuntu;
+    dataset = Datasets.wikidata_100.name();
     String dir = "/hdd2/data/ysun138/RisoTree/" + dataset;
     MAX_HOPNUM = config.getMaxHopNum();
     db_path = dir + "/neo4j-community-3.1.1/data/databases/graph.db";

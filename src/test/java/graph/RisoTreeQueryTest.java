@@ -8,18 +8,19 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.Result;
 import commons.Config;
+import commons.Enums;
+import commons.Enums.system;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.Util;
-import commons.Config.system;
 
 public class RisoTreeQueryTest {
 
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
 
   static String db_path, graph_pos_map_path;
   static String querygraphDir, spaPredicateDir;

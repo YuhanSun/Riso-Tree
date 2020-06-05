@@ -22,13 +22,14 @@ import org.neo4j.graphdb.Transaction;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config;
 import commons.Entity;
+import commons.Enums;
+import commons.Enums.Explain_Or_Profile;
+import commons.Enums.system;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
 import commons.Util;
-import commons.Config.Explain_Or_Profile;
-import commons.Config.system;
 import commons.Labels.OSMRelation;
 import net.sf.geographiclib.Pair;
 
@@ -37,7 +38,7 @@ public class SpatialFirst_ListTest {
   static Config config = new Config();
   static String dataset = config.getDatasetName();
   static String version = config.GetNeo4jVersion();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static int MAX_HOPNUM = config.getMaxHopNum();
 
   static String db_path, entityPath, graph_pos_map_path;
@@ -189,7 +190,7 @@ public class SpatialFirst_ListTest {
           .getSingleRelationship(RTreeRelationshipTypes.RTREE_REFERENCE, Direction.INCOMING)
           .getStartNode();
 
-      String query = spatialFirstlist.formSubgraphQuery(query_Graph, -1, Explain_Or_Profile.Profile,
+      String query = spatialFirstlist.formSubgraphQuery(query_Graph, -1, Enums.Explain_Or_Profile.Profile,
           spa_predicates, pos, id, NL_hopnum, node);
       Util.println(query);
 

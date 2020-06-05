@@ -22,7 +22,7 @@ import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.unsafe.batchinsert.BatchInserter;
 import org.neo4j.unsafe.batchinsert.BatchInserters;
 import commons.*;
-import commons.Config.system;
+import commons.Enums.system;
 import commons.Labels.GraphLabel;
 import commons.Labels.GraphRel;
 import commons.Labels.OSMLabel;
@@ -39,7 +39,7 @@ import osm.OSM_Utility;
 public class LoadData {
 
   static Config config = new Config();
-  static system systemName = config.getSystemName();
+  static Enums.system systemName = config.getSystemName();
   static String version = config.GetNeo4jVersion();
   static String dataset = config.getDatasetName();
   static String lon_name = config.GetLongitudePropertyName();
