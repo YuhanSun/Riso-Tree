@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.AfterClass;
@@ -17,8 +18,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Enums;
-import commons.Enums.ArrayList;
-import commons.Enums.system;
 import commons.Labels;
 import commons.Labels.RTreeRel;
 import commons.Util;
@@ -65,7 +64,7 @@ public class ConstructRisoTreeTest {
 
   @Test
   public void constructPNTimeTest() throws Exception {
-    Enums.ArrayList<Long> constructTime = Construct_RisoTree.constructPNTime();
+    ArrayList<Long> constructTime = Construct_RisoTree.constructPNTime();
     Util.println(constructTime);
   }
 
@@ -159,7 +158,7 @@ public class ConstructRisoTreeTest {
 
   @Test
   public void readContainIDMapTest() throws Exception {
-    HashMap<Long, Enums.ArrayList<Integer>> containIDMap =
+    HashMap<Long, ArrayList<Integer>> containIDMap =
         Construct_RisoTree.readContainIDMap(containIDPath);
     for (long key : containIDMap.keySet()) {
       Util.println(String.format("%d:%s", key, containIDMap.get(key).toString()));
