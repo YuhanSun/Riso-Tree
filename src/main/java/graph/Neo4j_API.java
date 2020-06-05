@@ -1,16 +1,15 @@
 package graph;
 
-import java.io.File;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import commons.Neo4jGraphUtility;
 
 public class Neo4j_API {
 
   public GraphDatabaseService graphDb;
 
   public Neo4j_API(String dbpath) {
-    graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(dbpath));
+    graphDb = Neo4jGraphUtility.getDatabaseService(dbpath);
   }
 
   public Neo4j_API(GraphDatabaseService service) {
