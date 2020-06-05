@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
@@ -18,8 +20,11 @@ import commons.Util;
 
 public class MaintenanceTest {
 
-  private String dbPath =
-      "D:\\Ubuntu_shared\\GeoMinHop\\data\\Yelp_100\\neo4j-community-3.1.1_Yelp_100_withPN\\data\\databases\\graph.db";
+  // private String dbPath =
+  // "D:\\Ubuntu_shared\\GeoMinHop\\data\\Yelp_100\\neo4j-community-3.1.1_Yelp_100_withPN\\data\\databases\\graph.db";
+  String dbPath =
+      "D:\\Project_Data\\wikidata-20180308-truthy-BETA.nt\\neo4j-community-3.4.12_Gleenes_1.0_40_new_version\\data\\databases\\graph.db";
+
   private GraphDatabaseService dbservice = null;
 
   @Before
@@ -32,6 +37,44 @@ public class MaintenanceTest {
     if (dbservice != null) {
       dbservice.shutdown();
     }
+  }
+
+  @Test
+  public void concatenatePnNamesTest() {
+    assertEquals(MaintenanceUtil.concatenatePnNames("PN_a", "PN_b_c"), "PN_a_b_c");
+  }
+
+  @Test
+  public void getReversePnNameTest() {
+    assertEquals(MaintenanceUtil.getReversePnName("PN_1_10"), "PN_10_1");
+    assertEquals(MaintenanceUtil.getReversePnName("PN_1_10_3"), "PN_3_10_1");
+    assertEquals(MaintenanceUtil.getReversePnName("PN_a_b_c_d"), "PN_d_c_b_a");
+    assertEquals(MaintenanceUtil.getReversePnName("PN_1"), "PN_1");
+
+  }
+
+  @Test
+  public void getPNGeneralTest() {
+    int nodeCount = 1000000;
+    Transaction tx = dbservice.beginTx();
+    int bound = 1;
+    Random random = new Random();
+    long id = random.nextInt(nodeCount);
+    Util.println("id: " + id);
+    Node source = dbservice.getNodeById(id);
+    Util.println(source.getLabels());
+    Map<String, Set<Node>> pns = MaintenanceUtil.getPNGeneral(dbservice, source, bound);
+    Util.println(pns);
+
+    id = random.nextInt(nodeCount);
+    Util.println("id: " + id);
+    source = dbservice.getNodeById(id);
+    Util.println(source.getLabels());
+    pns = MaintenanceUtil.getPNGeneral(dbservice, source, 2);
+    Util.println(pns);
+
+    tx.success();
+    tx.close();
   }
 
   @Test
@@ -100,17 +143,6 @@ public class MaintenanceTest {
   public void getReversePropertyNameTest() {
     String[] labelStrings = new String[] {"0", "10", "1"};
     assertTrue(MaintenanceUtil.getReversePropertyName(labelStrings).equals("PN_1_10_0"));
-  }
-
-  @Test
-  public void getReversePnNameTest() {
-    String pnName;
-
-    pnName = "PN_0";
-    assertTrue(MaintenanceUtil.getReversePnName(pnName).equals("PN_0"));
-
-    pnName = "PN_0_1";
-    assertTrue(MaintenanceUtil.getReversePnName(pnName).equals("PN_1_0"));
   }
 
 }
