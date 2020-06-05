@@ -11,8 +11,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import commons.Config;
 import commons.Enums;
-import commons.Enums.Explain_Or_Profile;
-import commons.Enums.system;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
@@ -208,7 +206,7 @@ public class Naive_Neo4j_Match_Test {
 
   @Test
   public void LAGAQ_JoinTest() {
-    // double distance = 0.00001;
+    double distance = 0.00001;
     Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
     OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
     Util.println(query_Graph);
