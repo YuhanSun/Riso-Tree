@@ -80,12 +80,12 @@ public class WikiRisoTreeQueryPNTest {
     // and 25.202411 <= a0.lat <= 25.339609 return id(a0),id(a1),id(a2),id(a3),id(a4)";
 
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
-    String query = queries.get(1);
+    String query = queries.get(0);
     logger.info(query);
 
     // Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
     // long start = System.currentTimeMillis();
-    // naive_Neo4j_Match.queryWithIgnore(query);
+    // naive_Neo4j_Match.query(query);
     // Util.println("time: " + (System.currentTimeMillis() - start));
     // Util.println("result count: " + naive_Neo4j_Match.result_count);
     // Util.println("page hit: " + naive_Neo4j_Match.page_access);
@@ -103,6 +103,17 @@ public class WikiRisoTreeQueryPNTest {
     Util.println("result count: " + risoTreeQueryPN.result_count);
     Util.println("page hit: " + risoTreeQueryPN.page_hit_count);
     Util.println(risoTreeQueryPN.planDescription);
+
+    // service.shutdown();
+    // service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    //
+    // Util.println("spatial first:");
+    // SpatialFirst_List spatialFirst_List = new SpatialFirst_List(service, dataset);
+    // spatialFirst_List.query_Block(query);
+    // Util.println(spatialFirst_List.run_time);
+    // Util.println(spatialFirst_List.range_query_time);
+    // Util.println(spatialFirst_List.result_count);
+    // Util.println(spatialFirst_List.page_hit_count);
 
     // if (naive_Neo4j_Match.result_count != risoTreeQueryPN.result_count) {
     // throw new RuntimeException("result count mismatch!");
