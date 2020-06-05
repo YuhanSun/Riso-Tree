@@ -2,6 +2,7 @@ package commons;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Query_Graph {
 
@@ -137,8 +138,34 @@ public class Query_Graph {
       if (p_labelDistribution.get(key) != labelDistribution.get(key))
         return false;
     }
-
     return true;
+  }
 
+
+  /**
+   * Get all the spatial predicates.
+   *
+   * @return A map <graph_node_id, rectangle>.
+   */
+  public Map<Integer, MyRectangle> getSpatialPredicates() {
+    Map<Integer, MyRectangle> spa_predicates = new HashMap<>();
+    for (int i = 0; i < Has_Spa_Predicate.length; i++) {
+      if (Has_Spa_Predicate[i] && this.spa_predicate[i] != null) {
+        spa_predicates.put(i, this.spa_predicate[i]);
+      }
+    }
+    return spa_predicates;
+  }
+
+  /**
+   * Convert label type from int to string.
+   */
+  public void convertFromIntToStringLabel() {
+    labelType = LabelType.STRING;
+    label_list_string = new String[graph.size()];
+    for (int i = 0; i < label_list.length; i++) {
+      label_list_string[i] = String.valueOf(label_list[i]);
+    }
+    label_list = null;
   }
 }
