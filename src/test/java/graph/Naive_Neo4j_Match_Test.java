@@ -58,8 +58,11 @@ public class Naive_Neo4j_Match_Test {
         break;
       case Windows:
         String dataDirectory = "D:\\Ubuntu_shared\\GeoMinHop\\data";
-        db_path = String.format("%s\\%s\\%s_%s\\data\\databases\\graph.db", dataDirectory, dataset,
-            version, dataset);
+        // db_path = String.format("%s\\%s\\%s_%s\\data\\databases\\graph.db", dataDirectory,
+        // dataset,
+        // version, dataset);
+        db_path =
+            "D:\\Project_Data\\RisoTree\\Yelp_100\\neo4j-community-3.4.12_Gleenes_1.0_-1_new_version\\data\\databases\\graph.db";
         entityPath = String.format("D:\\Ubuntu_shared\\GeoMinHop\\data\\%s\\entity.txt", dataset);
         querygraphDir =
             String.format("D:\\Google_Drive\\Projects\\risotree\\query\\query_graph\\%s", dataset);
@@ -83,7 +86,7 @@ public class Naive_Neo4j_Match_Test {
       default:
         break;
     }
-    iniQueryInput();
+    // iniQueryInput();
   }
 
   @AfterClass
@@ -205,7 +208,7 @@ public class Naive_Neo4j_Match_Test {
 
   @Test
   public void LAGAQ_JoinTest() {
-    double distance = 0.00001;
+    // double distance = 0.00001;
     Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
     OwnMethods.convertQueryGraphForJoinRandom(query_Graph);
     Util.println(query_Graph);

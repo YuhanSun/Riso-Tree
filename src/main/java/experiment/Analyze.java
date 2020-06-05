@@ -2,6 +2,7 @@ package experiment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,10 +14,8 @@ import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import com.vividsolutions.jts.geom.Envelope;
@@ -114,63 +113,93 @@ public class Analyze {
     // getSpatialEntityCount();
     // get2HopNeighborCount();
     // filterOnLabelReductionFactorAnalysis();
-    getNeighborDistribution();
+    // getNeighborDistribution();
+    getSecondHopLabelAverageDegree();
+    // test();
   }
 
-
-  public static void getSecondHopLabelAverageDegree() {
+  public static void test() {
     String labelString = "hill";
-    Label label = Label.label(labelString);
-    String query =
-        String.format("match (a0:`%s`),(a1),(a0)--(a1) return DISTINCT LABELS(a1) as label",
-            labelString);
     dbPath = RunTimeConfigure.dbPath;
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    long sumCount = Neo4jGraphUtility.getInAndOutEdgeCount(service, labelString);
+    long nodeCount = Neo4jGraphUtility.getLabelCount(service, labelString);
+    double averageDegree = (double) sumCount / nodeCount;
+    Util.println(sumCount);
+    Util.println(nodeCount);
+    Util.println(averageDegree);
+  }
+
+  public static void getSecondHopLabelAverageDegree() {
+    String labelString = "river";
+    String query = String.format(
+        "match (a0:`%s`),(a1),(a0)--(a1) return DISTINCT LABELS(a1) as label, id(a0) as id",
+        labelString);
+    dbPath = RunTimeConfigure.dbPath;
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
+    Transaction tx = service.beginTx();
     Result result = service.execute(query);
+
+    List<String> outputList = new LinkedList<>();
+    HashMap<String, Long> intermediateNodeCountMap = new HashMap<>();
+    HashMap<String, Long> intermediateEdgeCountMap = new HashMap<>();
+
+    // Compute real average degree.
     long sumCount = Neo4jGraphUtility.getInAndOutEdgeCount(service, labelString);
     long nodeCount = Neo4jGraphUtility.getLabelCount(service, labelString);
     double averageDegree = (double) sumCount / nodeCount;
 
-    List<String> outputList = new LinkedList<>();
-    HashSet<String> visistedLabelStrings = new HashSet<>();
+    long logCount = nodeCount / 10;
+    long idx = 0;
+
     while (result.hasNext()) {
+      idx++;
+      if (idx % logCount == 0) {
+        Util.println(idx);
+      }
       Map<String, Object> row = result.next();
-      Util.println(row.toString());
+      // Util.println(row.toString());
+      int edgeCount = 0;
+      long id = (long) (row.get("id"));
+      Node secondNode = service.getNodeById(id);
+      Iterable<Relationship> secondRelationsIterable = secondNode.getRelationships();
+      for (Iterator<Relationship> iterator = secondRelationsIterable.iterator(); iterator
+          .hasNext(); iterator.next()) {
+        edgeCount++;
+      }
+      // Util.println(edgeCount);
       ArrayList<?> neighborLabels = (ArrayList<?>) row.get("label");
       for (Object neighborLabel : neighborLabels) {
-        if (visistedLabelStrings.contains(neighborLabel.toString())) {
-          continue;
-        } else {
-          visistedLabelStrings.add(neighborLabel.toString());
-        }
-        ResourceIterator<Node> nodeIterator =
-            service.findNodes(Label.label(neighborLabel.toString()));
-        int edgeCount = 0;
-        int intermediateNodeCount = 0;
-        while (nodeIterator.hasNext()) {
-          Node firstNode = nodeIterator.next();
-          Iterable<Relationship> relationsIterable = firstNode.getRelationships();
-          for (Relationship firstRelationship : relationsIterable) {
-            Node secondNode = firstRelationship.getOtherNode(firstNode);
-            if (secondNode.hasLabel(label)) {
-              intermediateNodeCount++;
-              Iterable<Relationship> secondRelationsIterable = secondNode.getRelationships();
-              for (Iterator<Relationship> iterator = secondRelationsIterable.iterator(); iterator
-                  .hasNext();) {
-                edgeCount++;
-              }
-            }
-          }
-        }
-        String line = String.format("%s,%d,%d,%s", neighborLabel, intermediateNodeCount, edgeCount,
-            String.valueOf((double) edgeCount / intermediateNodeCount));
-        Util.println(line);
-        outputList.add(line);
+        String neighborLabelString = neighborLabel.toString();
+        intermediateNodeCountMap.put(neighborLabelString,
+            intermediateNodeCountMap.getOrDefault(neighborLabelString, (long) 0) + 1);
+        intermediateEdgeCountMap.put(neighborLabelString,
+            intermediateEdgeCountMap.getOrDefault(neighborLabelString, (long) 0) + edgeCount);
       }
     }
+    tx.success();
+    tx.close();
+
+    // Util.println(String.format("average degree: %s", Double.valueOf(averageDegree)));
+    Util.println(sumCount);
+    Util.println(nodeCount);
+    Util.println(averageDegree);
     service.shutdown();
-    ReadWriteUtil.WriteFile("D:\\temp\\two_hop_cardinality.txt", false, outputList);
-    Util.println(String.format("average degree: %s", Double.valueOf(averageDegree)));
+
+    String outputPath = String.format("D:\\temp\\two_hop_cardinality_%s.txt", labelString);
+    // ReadWriteUtil.WriteFile(outputPath, false, "first node label,connected second node count,"
+    // + "edges count connected to second node,average expansion ratio\n");
+    for (String string : intermediateEdgeCountMap.keySet()) {
+      long intermediateNodeCount = intermediateNodeCountMap.get(string);
+      long intermediateEdgeCount = intermediateEdgeCountMap.get(string);
+      String line =
+          String.format("%s,%d,%d,%s", string, intermediateNodeCount, intermediateEdgeCount,
+              String.valueOf((double) intermediateEdgeCount / intermediateNodeCount));
+      // Util.println(line);
+      outputList.add(line);
+    }
+    ReadWriteUtil.WriteFile(outputPath, false, outputList);
+
   }
 
   public static void getNeighborDistribution() {
