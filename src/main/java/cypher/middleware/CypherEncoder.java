@@ -62,11 +62,17 @@ public class CypherEncoder {
     return getMatchNodeLabelString(query_Graph) + getMatchEdgeString(query_Graph);
   }
 
+  public static String[] getReturnColumnNames(Query_Graph query_Graph) {
+    String[] columnNames = new String[query_Graph.graph.size()];
+    for (int i = 0; i < columnNames.length; i++) {
+      columnNames[i] = String.format("id(a%d)", i);
+    }
+    return columnNames;
+  }
+
   public static String getMatchReturnString(Query_Graph query_Graph) {
-    String query = "return id(a0)";
-    for (int i = 1; i < query_Graph.graph.size(); i++)
-      query += String.format(",id(a%d)", i);
-    return query;
+    String[] columeNames = getReturnColumnNames(query_Graph);
+    return String.join(",", columeNames);
   }
 
   public static String getMatchRangePredicateString(Query_Graph query_Graph) {
@@ -116,7 +122,7 @@ public class CypherEncoder {
     }
 
     // return
-    query += " " + getMatchReturnString(query_Graph);
+    query += " return " + getMatchReturnString(query_Graph);
 
     // limit
     if (limit != -1) {
