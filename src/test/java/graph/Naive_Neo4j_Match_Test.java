@@ -1,18 +1,22 @@
 package graph;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import commons.Config;
 import commons.Config.Explain_Or_Profile;
 import commons.Config.system;
 import commons.MyRectangle;
+import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.Query_Graph;
+import commons.TestUtils;
 import commons.Util;
 
 public class Naive_Neo4j_Match_Test {
@@ -23,12 +27,13 @@ public class Naive_Neo4j_Match_Test {
   static system systemName = config.getSystemName();
 
   static String db_path;
-  static String querygraphDir, spaPredicateDir;
+  static String queryDirectory, querygraphDir, spaPredicateDir;
 
-  static int nodeCount = 3, query_id = 0, rectID = 2;
+  static int nodeCount = 5, query_id = 0, rectID = 2;
   // static int name_suffix = 1280;//Gowalla 0.001
-  static int name_suffix = 575;// wikidata_100 0.0001
+  // static int name_suffix = 575;// wikidata_100 0.0001
   // static int name_suffix = 57;//wikidata_100 0.00001
+  static int name_suffix = 7744;// Yelp_100
   static String entityPath, querygraph_path, queryrectCenterPath, queryrect_path;
 
   // query input
@@ -62,6 +67,18 @@ public class Naive_Neo4j_Match_Test {
         querygraph_path = String.format("%s\\%d.txt", querygraphDir, nodeCount);
         queryrectCenterPath = String.format("%s\\%s_centerids.txt", spaPredicateDir, dataset);
         queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
+        break;
+      case MacOS:
+        db_path =
+            "/Users/yuhansun/Documents/data/Yelp/neo4j-community-3.4.12_Gleenes_1.0_-1_new_version/data/databases/graph.db";
+        queryDirectory = "/Users/yuhansun/Google_Drive/Projects/risotree/query";
+        querygraphDir =
+            String.format("%s/query_graph/%s", queryDirectory, dataset);
+        spaPredicateDir = String.format("%s/spa_predicate/%s", queryDirectory, dataset);
+        querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
+        queryrectCenterPath = String.format("%s/%s_centerids.txt", spaPredicateDir, dataset);
+        queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
+        break;
       default:
         break;
     }
@@ -75,7 +92,7 @@ public class Naive_Neo4j_Match_Test {
     ArrayList<Query_Graph> queryGraphs = Util.ReadQueryGraph_Spa(querygraph_path, query_id + 1);
     query_Graph = queryGraphs.get(query_id);
 
-    // ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
+    ArrayList<MyRectangle> queryrect = OwnMethods.ReadQueryRectangle(queryrect_path);
     //
     // ArrayList<Integer> centerIDs = OwnMethods.readIntegerArray(queryrectCenterPath);
     // ArrayList<Entity> entities = OwnMethods.ReadEntity(entityPath);
@@ -86,12 +103,13 @@ public class Naive_Neo4j_Match_Test {
     // queryrect.add(new MyRectangle(entity.lon, entity.lat, entity.lon, entity.lat));
     // }
 
-    // MyRectangle rectangle = queryrect.get(0);
-    // int j = 0;
-    // for ( ; j < query_Graph.graph.size(); j++)
-    // if(query_Graph.Has_Spa_Predicate[j])
-    // break;
-    // query_Graph.spa_predicate[j] = rectangle;
+    // Use the rectangle to initialize the first spatial predicate in the query graph.
+    MyRectangle rectangle = queryrect.get(0);
+    int j = 0;
+    for (; j < query_Graph.graph.size(); j++)
+      if (query_Graph.Has_Spa_Predicate[j])
+        break;
+    query_Graph.spa_predicate[j] = rectangle;
   }
 
   @Test
@@ -177,6 +195,14 @@ public class Naive_Neo4j_Match_Test {
   }
 
   @Test
+  public void formQueryKNNTest() throws Exception {
+    Query_Graph query_Graph = TestUtils.getExampleGraph();
+    int K = 5;
+    String query = Naive_Neo4j_Match.formQueryKNN(query_Graph, Explain_Or_Profile.Profile, K);
+    Util.println(query);
+  }
+
+  @Test
   public void LAGAQ_JoinTest() {
     double distance = 0.00001;
     Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
@@ -192,5 +218,48 @@ public class Naive_Neo4j_Match_Test {
     Util.println("result count: " + naive_Neo4j_Match.result_count);
     Util.println("result count: " + res.size());
     naive_Neo4j_Match.neo4j_API.ShutDown();
+  }
+
+  @Test
+  public void LAGAQ_KNNTest() throws Exception {
+    Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
+    query_Graph.convertFromIntToStringLabel();
+    Util.println(query_Graph);
+    int k = 10;
+    long start = System.currentTimeMillis();
+    List<long[]> res = naive_Neo4j_Match.LAGAQ_KNN(query_Graph, k);
+    for (long[] ids : res) {
+      Util.println(Arrays.toString(ids));
+    }
+
+    // String query =
+    // "profile match (a0:`74`),(a1:`1`),(a2:`67`),(a0)--(a1),(a1)--(a2) return
+    // id(a0),id(a1),id(a2)";
+    // String query =
+    // "match (n) return n limit 100";
+    // GraphDatabaseService service = naive_Neo4j_Match.neo4j_API.graphDb;
+    // Result result = service.execute(query);
+    // Util.println("result: " + result);
+    // while (result.hasNext()) {
+    // Util.println(result.next());
+    // }
+    long time = System.currentTimeMillis() - start;
+    Util.println("K: " + k);
+    Util.println("total time: " + time);
+    Util.println("get iterator time: " + naive_Neo4j_Match.get_iterator_time);
+    Util.println("iterate time: " + naive_Neo4j_Match.iterate_time);
+    Util.println("result count: " + naive_Neo4j_Match.result_count);
+    Util.println("result count: " + res.size());
+    naive_Neo4j_Match.neo4j_API.ShutDown();
+    
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(db_path);
+    RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, 2);
+    start = System.currentTimeMillis();
+    res = risoTreeQueryPN.LAGAQ_KNN(query_Graph, k);
+    for (long[] ids : res) {
+      Util.println(Arrays.toString(ids));
+    }
+    Util.println("total time:" + (System.currentTimeMillis() - start));
+    risoTreeQueryPN.dbservice.shutdown();
   }
 }

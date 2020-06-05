@@ -12,8 +12,10 @@ import commons.Config;
 import commons.Config.Explain_Or_Profile;
 import commons.MyRectangle;
 import commons.OwnMethods;
+import commons.QueryUtil;
 import commons.Query_Graph;
 import commons.Util;
+import cypher.middleware.CypherEncoder;
 
 /**
  * this class is graphfirst approach, spatial predicate is checked during graph search. (spatial
@@ -24,8 +26,9 @@ import commons.Util;
  */
 public class Naive_Neo4j_Match {
 
-  public String lon_name;
-  public String lat_name;
+  public static Config config = new Config();
+  public static String lon_name = config.GetLongitudePropertyName();
+  public static String lat_name = config.GetLatitudePropertyName();
 
   // neo4j graphdb service
   public Neo4j_API neo4j_API;
@@ -246,6 +249,58 @@ public class Naive_Neo4j_Match {
       long id2 = (long) row.get(String.format("id(a%d)", pos.get(1)));
       long[] pair = new long[] {id1, id2};
       res.add(pair);
+      result_count++;
+    }
+    iterate_time += System.currentTimeMillis() - start;
+
+    ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+    page_access = OwnMethods.GetTotalDBHits(planDescription);
+
+    tx.success();
+    tx.close();
+    return res;
+  }
+
+  public static String formQueryKNN(Query_Graph query_Graph, Explain_Or_Profile explain_Or_Profile,
+      int K)
+      throws Exception {
+    String query = CypherEncoder.getMatchPrefix(explain_Or_Profile);
+    query += " " + CypherEncoder.getMatchGraphSkeletonString(query_Graph);
+    query += " return " + CypherEncoder.getMatchReturnString(query_Graph);
+
+    Map<Integer, MyRectangle> spatialPredicates = query_Graph.getSpatialPredicates();
+    if (spatialPredicates.size() != 1) {
+      throw new Exception(
+          String.format("Query graph should have exactly ONE spatial predicate, rather than %d",
+              spatialPredicates.size()));
+    }
+    int spatialPredicateIndex = spatialPredicates.keySet().iterator().next();
+    MyRectangle queryRectangle = spatialPredicates.get(spatialPredicateIndex);
+    query += String.format(" order by (a%d.%s - %f)*(a%d.%s - %f)", spatialPredicateIndex,
+        lon_name, queryRectangle.min_x, spatialPredicateIndex, lon_name, queryRectangle.min_x);
+    query += String.format(" + (a%d.%s - %f)*(a%d.%s - %f)", spatialPredicateIndex, lat_name,
+        queryRectangle.min_y, spatialPredicateIndex, lat_name, queryRectangle.min_y);
+
+    query += " limit " + K;
+
+    return query;
+  }
+
+  public List<long[]> LAGAQ_KNN(Query_Graph query_Graph, int K) throws Exception {
+    iniLogVariables();
+    List<long[]> res = new ArrayList<>();
+    String query = formQueryKNN(query_Graph, Explain_Or_Profile.Profile, K);
+    Util.println(query);
+    String[] columnNames = CypherEncoder.getReturnColumnNames(query_Graph);
+    Transaction tx = neo4j_API.graphDb.beginTx();
+    long start = System.currentTimeMillis();
+    Result result = neo4j_API.graphDb.execute(query);
+    get_iterator_time += System.currentTimeMillis() - start;
+    start = System.currentTimeMillis();
+    while (result.hasNext()) {
+      Map<String, Object> row = result.next();
+      long[] ids = QueryUtil.getResultRowInArray(columnNames, row);
+      res.add(ids);
       result_count++;
     }
     iterate_time += System.currentTimeMillis() - start;
