@@ -1,6 +1,7 @@
 package graph;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import commons.Config;
 import commons.Enums;
-import commons.Enums.Explain_Or_Profile;
+import commons.Enums.QueryStatistic;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.QueryUtil;
@@ -39,12 +40,12 @@ public class Naive_Neo4j_Match {
   String maxx_name;
   String maxy_name;
 
-  public int query_node_count;
-
   public long run_time, get_iterator_time, iterate_time;
   public long result_count = 0;
   public long page_access;
   public ExecutionPlanDescription planDescription;
+
+  Map<QueryStatistic, Object> queryStatisticMap = new HashMap<>();
 
   public static boolean outputResult = false;
 
@@ -97,8 +98,8 @@ public class Naive_Neo4j_Match {
    * @param query
    */
   public void query(String query) {
-    long sumStart = System.currentTimeMillis();
     iniLogVariables();
+    long sumStart = System.currentTimeMillis();
     query = "profile " + query;
     long start = System.currentTimeMillis();
     Result result = neo4j_API.graphDb.execute(query);
@@ -116,6 +117,7 @@ public class Naive_Neo4j_Match {
     planDescription = result.getExecutionPlanDescription();
     page_access = OwnMethods.GetTotalDBHits(planDescription);
     run_time = System.currentTimeMillis() - sumStart;
+    setQueryStatisticMap();
   }
 
   // public Result Explain_SubgraphMatch_Spa_API(Query_Graph query_Graph, int limit)//use neo4j
@@ -188,33 +190,8 @@ public class Naive_Neo4j_Match {
 
   public String formQueryJoin(Query_Graph query_Graph, ArrayList<Integer> pos, double distance,
       Enums.Explain_Or_Profile explain_Or_Profile) {
-    String query = "";
-    switch (explain_Or_Profile) {
-      case Profile:
-        query += "profile match ";
-        break;
-      case Explain:
-        query += "explain match ";
-        break;
-      case Nothing:
-        query += "match ";
-        break;
-    }
-
-    // label
-    query += String.format("(a0:GRAPH_%d)", query_Graph.label_list[0]);
-    for (int i = 1; i < query_Graph.graph.size(); i++) {
-      query += String.format(",(a%d:GRAPH_%d)", i, query_Graph.label_list[i]);
-    }
-
-    // edge
-    for (int i = 0; i < query_Graph.graph.size(); i++) {
-      for (int j = 0; j < query_Graph.graph.get(i).size(); j++) {
-        int neighbor = query_Graph.graph.get(i).get(j);
-        if (neighbor > i)
-          query += String.format(",(a%d)--(a%d)", i, neighbor);
-      }
-    }
+    String query = CypherEncoder.getMatchPrefix(explain_Or_Profile);
+    query += " " + CypherEncoder.getMatchGraphSkeletonString(query_Graph);
 
     query += " where ";
     // spatial predicate
@@ -231,11 +208,13 @@ public class Naive_Neo4j_Match {
 
   public List<long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) {
     iniLogVariables();
+    long sumStart = System.currentTimeMillis();
     List<long[]> res = new LinkedList<>();
     ArrayList<Integer> pos = new ArrayList<>();
-    for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++)
+    for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
       if (query_Graph.Has_Spa_Predicate[i])
         pos.add(i);
+    }
     String query = formQueryJoin(query_Graph, pos, distance, Enums.Explain_Or_Profile.Profile);
     Util.println(query);
     Transaction tx = neo4j_API.graphDb.beginTx();
@@ -259,6 +238,8 @@ public class Naive_Neo4j_Match {
 
     tx.success();
     tx.close();
+    run_time = System.currentTimeMillis() - sumStart;
+    setQueryStatisticMap();
     return res;
   }
 
@@ -288,6 +269,7 @@ public class Naive_Neo4j_Match {
   }
 
   public List<long[]> LAGAQ_KNN(Query_Graph query_Graph, int K) throws Exception {
+    long sumStart = System.currentTimeMillis();
     iniLogVariables();
     List<long[]> res = new ArrayList<>();
     String query = formQueryKNN(query_Graph, Enums.Explain_Or_Profile.Profile, K);
@@ -311,6 +293,8 @@ public class Naive_Neo4j_Match {
 
     tx.success();
     tx.close();
+    run_time += System.currentTimeMillis() - sumStart;
+    setQueryStatisticMap();
     return res;
   }
 
@@ -320,5 +304,14 @@ public class Naive_Neo4j_Match {
     iterate_time = 0;
     result_count = 0;
     page_access = 0;
+    queryStatisticMap = new HashMap<>();
+  }
+
+  private void setQueryStatisticMap() {
+    queryStatisticMap.put(QueryStatistic.run_time, run_time);
+    queryStatisticMap.put(QueryStatistic.page_hit_count, page_access);
+    queryStatisticMap.put(QueryStatistic.get_iterator_time, get_iterator_time);
+    queryStatisticMap.put(QueryStatistic.iterate_time, iterate_time);
+    queryStatisticMap.put(QueryStatistic.result_count, result_count);
   }
 }
