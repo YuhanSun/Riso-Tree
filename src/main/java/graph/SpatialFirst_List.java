@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
@@ -18,12 +19,13 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Enums;
-import commons.Enums.Explain_Or_Profile;
-import commons.Enums.system;
+import commons.Enums.QueryStatistic;
+import commons.Enums.QueryType;
 import commons.Labels;
 import commons.Labels.RTreeRel;
 import commons.MyPoint;
 import commons.MyRectangle;
+import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
@@ -54,25 +56,39 @@ public class SpatialFirst_List {
   public static String graphLinkLabelName = Labels.GraphRel.GRAPH_LINK.name();
   public static Enums.system systemName = config.getSystemName();
 
-  // query statistics
+  // query statistics >>
   public long run_time;
-  public long range_query_time;
   public long get_iterator_time;
   public long iterate_time;
-  public long overlap_leaf_count;
-  public long candidate_count;
   public long result_count;
   public long page_hit_count;
 
-  // for knn query track
+  // LAGAQ-range query track >>
+  public long range_query_time;
+  public long overlap_leaf_count;
+  public long candidate_count;
+
+  // LAGAQ-knn query track >>
+  /**
+   * Spatial index search time.
+   */
   public long queue_time;
   public int visit_spatial_object_count;
 
-  // for join track
+  // LAGAQ-join track >>
+  /**
+   * The number of id pairs that satisfy the join predicate.
+   */
   public long join_result_count;
+  /**
+   * The time of searching the spatial index.
+   */
   public long join_time;
 
+
   public ExecutionPlanDescription planDescription;
+
+  public Map<QueryStatistic, Object> queryStatisticMap = new HashMap<>();
 
   /**
    * 
@@ -94,6 +110,25 @@ public class SpatialFirst_List {
   public void shutdown() {
     dbservice.shutdown();
   }
+
+  /**
+   * Set all tracking variables to 0.
+   */
+  private void clearTrackingVariables() {
+    run_time = 0;
+    range_query_time = 0;
+    get_iterator_time = 0;
+    iterate_time = 0;
+    overlap_leaf_count = 0;
+    candidate_count = 0;
+    result_count = 0;
+    page_hit_count = 0;
+    queue_time = 0;
+    visit_spatial_object_count = 0;
+    join_result_count = 0;
+    join_time = 0;
+  }
+
 
   public static int[][] Ini_Minhop(Query_Graph query_Graph) {
     int query_node_count = query_Graph.graph.size();
@@ -206,8 +241,8 @@ public class SpatialFirst_List {
    * @return
    */
   public String formSubgraphQuery(Query_Graph query_Graph, int limit,
-      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates, int pos,
-      long id, HashMap<Integer, Integer> NL_hopnum, Node node) {
+      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates,
+      int pos, long id, HashMap<Integer, Integer> NL_hopnum, Node node) {
     String query = "";
     switch (explain_Or_Profile) {
       case Profile:
@@ -283,18 +318,14 @@ public class SpatialFirst_List {
   }
 
   /**
-   * for each spatial vertex run a cypher query using NL_list
+   * For each spatial vertex, run a cypher query using NL_list. (Not used)
    * 
    * @param query_Graph
    * @param limit
    */
   public void query(Query_Graph query_Graph, int limit) {
     try {
-      range_query_time = 0;
-      get_iterator_time = 0;
-      iterate_time = 0;
-      result_count = 0;
-      page_hit_count = 0;
+      clearTrackingVariables();
 
       long start = System.currentTimeMillis();
       Transaction tx = dbservice.beginTx();
@@ -410,8 +441,8 @@ public class SpatialFirst_List {
    * @return
    */
   public String formSubgraphQuery_Block_New(Query_Graph query_Graph, int limit,
-      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates, int pos,
-      ArrayList<Long> ids) {
+      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates,
+      int pos, ArrayList<Long> ids) {
     String query = "";
     switch (explain_Or_Profile) {
       case Profile:
@@ -495,8 +526,8 @@ public class SpatialFirst_List {
    * @return
    */
   public String formSubgraphQuery_Block(Query_Graph query_Graph, int limit,
-      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates, int pos,
-      ArrayList<Long> ids, HashMap<Integer, Integer> NL_hopnum, Node node) {
+      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates,
+      int pos, ArrayList<Long> ids, HashMap<Integer, Integer> NL_hopnum, Node node) {
     String query = "";
     switch (explain_Or_Profile) {
       case Profile:
@@ -593,22 +624,6 @@ public class SpatialFirst_List {
     return query;
   }
 
-
-  public void initializeTrack() {
-    run_time = 0;
-    range_query_time = 0;
-    get_iterator_time = 0;
-    iterate_time = 0;
-    overlap_leaf_count = 0;
-    candidate_count = 0;
-    result_count = 0;
-    page_hit_count = 0;
-    queue_time = 0;
-    visit_spatial_object_count = 0;
-    join_result_count = 0;
-    join_time = 0;
-  }
-
   public void query_Block(String query) throws Exception {
     Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
     query_Block(query_Graph, -1);
@@ -623,8 +638,8 @@ public class SpatialFirst_List {
    */
   public void query_Block(Query_Graph query_Graph, int limit) {
     try {
-      initializeTrack();
-      long start = System.currentTimeMillis();
+      clearTrackingVariables();
+      long totalStart = System.currentTimeMillis();
       Transaction tx = dbservice.beginTx();
 
       int[][] min_hop = Ini_Minhop(query_Graph);
@@ -686,8 +701,8 @@ public class SpatialFirst_List {
           start_1 = System.currentTimeMillis();
           // String query = formSubgraphQuery_Block(query_Graph, limit, Explain_Or_Profile.Profile,
           // spa_predicates, min_pos, ids, NL_hopnum, rtree_node);
-          String query = formSubgraphQuery_Block_New(query_Graph, limit, Enums.Explain_Or_Profile.Profile,
-              spa_predicates, min_pos, ids);
+          String query = formSubgraphQuery_Block_New(query_Graph, limit,
+              Enums.Explain_Or_Profile.Profile, spa_predicates, min_pos, ids);
           Util.println(query);
 
           Result result = dbservice.execute(query);
@@ -711,7 +726,8 @@ public class SpatialFirst_List {
 
       tx.success();
       tx.close();
-      run_time += System.currentTimeMillis() - start;
+      run_time += System.currentTimeMillis() - totalStart;
+      setQueryStatistics(QueryType.LAGAQ_RANGE);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -725,11 +741,8 @@ public class SpatialFirst_List {
    * @param K
    */
   public ArrayList<Long> LAGAQ_KNN(Query_Graph query_Graph, int K) {
-    visit_spatial_object_count = 0;
-    queue_time = 0;
-    get_iterator_time = 0;
-    iterate_time = 0;
-    page_hit_count = 0;
+    clearTrackingVariables();
+    long totalStart = System.currentTimeMillis();
     try {
       ArrayList<Long> resultIDs = new ArrayList<Long>();
       MyPoint queryLoc = null;
@@ -783,7 +796,7 @@ public class SpatialFirst_List {
           }
         }
         // spatial object
-        else if (node.hasLabel(Labels.GraphLabel.GRAPH_1)) {
+        else if (Neo4jGraphUtility.isNodeSpatial(node)) {
           visit_spatial_object_count++;
           long id = node.getId();
           // OwnMethods.Print(id);
@@ -791,8 +804,8 @@ public class SpatialFirst_List {
           queue_time += System.currentTimeMillis() - start;
 
           start = System.currentTimeMillis();
-          String query = RisoTreeQueryPN.formQuery_KNN(query_Graph, 1, Enums.Explain_Or_Profile.Profile,
-              querySpatialVertexID, id);
+          String query = RisoTreeQueryPN.formQuery_KNN(query_Graph, 1,
+              Enums.Explain_Or_Profile.Profile, querySpatialVertexID, id);
           Result result = dbservice.execute(query);
           get_iterator_time += System.currentTimeMillis() - start;
 
@@ -815,6 +828,9 @@ public class SpatialFirst_List {
       queue_time += System.currentTimeMillis() - start;
       tx.success();
       tx.close();
+      run_time = System.currentTimeMillis() - totalStart;
+      result_count = resultIDs.size();
+      setQueryStatistics(QueryType.LAGAQ_KNN);
       return resultIDs;
 
     } catch (Exception e) {
@@ -888,11 +904,8 @@ public class SpatialFirst_List {
 
   public List<Long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) {
     try {
-      join_result_count = 0;
-      join_time = 0;
-      get_iterator_time = 0;
-      iterate_time = 0;
-      page_hit_count = 0;
+      clearTrackingVariables();
+      long totalStart = System.currentTimeMillis();
 
       List<Long[]> resultPairs = new LinkedList<Long[]>();
 
@@ -935,11 +948,41 @@ public class SpatialFirst_List {
       }
       tx.success();
       tx.close();
+      run_time = System.currentTimeMillis() - totalStart;
+      result_count = resultPairs.size();
+      setQueryStatistics(QueryType.LAGAQ_JOIN);
       return resultPairs;
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
     }
     return null;
+  }
+
+  private void setQueryStatistics(QueryType queryType) throws Exception {
+    queryStatisticMap = new HashMap<>();
+    queryStatisticMap.put(QueryStatistic.run_time, run_time);
+    queryStatisticMap.put(QueryStatistic.page_hit_count, page_hit_count);
+    queryStatisticMap.put(QueryStatistic.get_iterator_time, get_iterator_time);
+    queryStatisticMap.put(QueryStatistic.iterate_time, iterate_time);
+    queryStatisticMap.put(QueryStatistic.graph_time, get_iterator_time + iterate_time);
+    queryStatisticMap.put(QueryStatistic.result_count, result_count);
+
+    switch (queryType) {
+      case LAGAQ_RANGE:
+        queryStatisticMap.put(QueryStatistic.spatial_time, range_query_time);
+        queryStatisticMap.put(QueryStatistic.candidate_count, candidate_count);
+        break;
+      case LAGAQ_JOIN:
+        queryStatisticMap.put(QueryStatistic.spatial_time, join_time);
+        queryStatisticMap.put(QueryStatistic.candidate_count, join_result_count);
+        break;
+      case LAGAQ_KNN:
+        queryStatisticMap.put(QueryStatistic.spatial_time, queue_time);
+        queryStatisticMap.put(QueryStatistic.candidate_count, visit_spatial_object_count);
+        break;
+      default:
+        throw new Exception(queryType + " does not exist!");
+    }
   }
 }
