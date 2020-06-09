@@ -307,6 +307,10 @@ public class Naive_Neo4j_Match {
     queryStatisticMap = new HashMap<>();
   }
 
+  public Map<QueryStatistic, Object> getQueryStatisticMap() {
+    return queryStatisticMap;
+  }
+
   private void setQueryStatisticMap() {
     queryStatisticMap.put(QueryStatistic.run_time, run_time);
     queryStatisticMap.put(QueryStatistic.page_hit_count, page_access);

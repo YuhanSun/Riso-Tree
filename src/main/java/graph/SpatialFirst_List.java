@@ -959,6 +959,10 @@ public class SpatialFirst_List {
     return null;
   }
 
+  public Map<QueryStatistic, Object> getQueryStatisticMap() {
+    return queryStatisticMap;
+  }
+
   private void setQueryStatistics(QueryType queryType) throws Exception {
     queryStatisticMap = new HashMap<>();
     queryStatisticMap.put(QueryStatistic.run_time, run_time);
