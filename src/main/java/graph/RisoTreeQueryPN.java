@@ -28,7 +28,6 @@ import org.neo4j.graphdb.Transaction;
 import commons.ArrayUtil;
 import commons.Config;
 import commons.Enums;
-import commons.Enums.Explain_Or_Profile;
 import commons.Labels;
 import commons.Labels.RTreeRel;
 import commons.MyPoint;
@@ -76,25 +75,24 @@ public class RisoTreeQueryPN {
   String maxx_name = config.GetRectCornerName()[2];
   String maxy_name = config.GetRectCornerName()[3];
 
-  // query statistics
+  // shared query statistics for range, join, knn queries
   public long run_time;
-  public long range_query_time;
   public long get_iterator_time;
   public long iterate_time;
+  public long result_count;
+  public long page_hit_count;
+  public long check_paths_time;
+
+  // LAGAQ-Range
+  public long range_query_time;
   public long set_label_time;
   public long remove_label_time;
 
-  public long result_count;
-  public long page_hit_count;
   public long overlap_leaf_node_count;
   public long candidate_count;
+
   public String logPath;
   public ExecutionPlanDescription planDescription;
-
-  // for range, knn and join
-  public long check_paths_time;
-  // public long has_relation_time;
-  // public long has_relation_time_addition;
 
   // for knn query track
   public long queue_time;
@@ -399,8 +397,8 @@ public class RisoTreeQueryPN {
    * @return
    */
   public String formSubgraphQuery(Query_Graph query_Graph, int limit,
-      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates, int pos,
-      ArrayList<Long> ids) {
+      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates,
+      int pos, ArrayList<Long> ids) {
     String query = "";
     switch (explain_Or_Profile) {
       case Profile:
@@ -495,8 +493,8 @@ public class RisoTreeQueryPN {
    * @return
    */
   public String formSubgraphQuery_ForSpatialFirst_Block(Query_Graph query_Graph, int limit,
-      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates, int pos,
-      ArrayList<Long> ids, HashMap<Integer, Integer> NL_hopnum, Node node) {
+      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates,
+      int pos, ArrayList<Long> ids, HashMap<Integer, Integer> NL_hopnum, Node node) {
     String query = "";
     switch (explain_Or_Profile) {
       case Profile:
@@ -1862,6 +1860,9 @@ public class RisoTreeQueryPN {
     page_hit_count = 0;
     overlap_leaf_node_count = 0;
     candidate_count = 0;
+
+    visit_spatial_object_count = 0;
+    queue_time = 0;
   }
 
   /**
@@ -2341,8 +2342,9 @@ public class RisoTreeQueryPN {
    * @return
    */
   public String formSubgraphQuery_ForSpatialFirst_Block_HMBR(Query_Graph query_Graph, int limit,
-      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates, int pos,
-      ArrayList<Long> ids, HashMap<Integer, Integer> NL_hopnum, Node node, int[][] min_hop_array) {
+      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates,
+      int pos, ArrayList<Long> ids, HashMap<Integer, Integer> NL_hopnum, Node node,
+      int[][] min_hop_array) {
     String query = "";
     switch (explain_Or_Profile) {
       case Profile:
@@ -2476,8 +2478,8 @@ public class RisoTreeQueryPN {
    * @return
    */
   public String formSubgraphQuery_HMBR(Query_Graph query_Graph, int limit,
-      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates, int pos,
-      ArrayList<Long> ids, int[][] min_hop_array) {
+      Enums.Explain_Or_Profile explain_Or_Profile, HashMap<Integer, MyRectangle> spa_predicates,
+      int pos, ArrayList<Long> ids, int[][] min_hop_array) {
     String query = "";
     switch (explain_Or_Profile) {
       case Profile:
@@ -2643,12 +2645,7 @@ public class RisoTreeQueryPN {
    * @param K
    */
   public List<long[]> LAGAQ_KNN(Query_Graph query_Graph, int K) throws Exception {
-    visit_spatial_object_count = 0;
-    queue_time = 0;
-    check_paths_time = 0;
-    get_iterator_time = 0;
-    iterate_time = 0;
-    page_hit_count = 0;
+    long sumStart = System.currentTimeMillis();
     List<long[]> resultIDs = new ArrayList<long[]>();
     HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
     if (spaPathsMap.size() != 1)
@@ -2668,13 +2665,15 @@ public class RisoTreeQueryPN {
           paths.add(path);
       break;
     }
-    // OwnMethods.Print(paths);
 
     String[] columnNames = CypherEncoder.getReturnColumnNames(query_Graph);
 
     long start = System.currentTimeMillis();
     Transaction tx = dbservice.beginTx();
     Node root_node = RTreeUtility.getRTreeRoot(dbservice, dataset);
+    /**
+     * If root node does not have label paths, these codes will not be used.
+     */
     // if ( checkPaths(root_node, paths) == false)
     // {
     // tx.success();
@@ -2734,9 +2733,8 @@ public class RisoTreeQueryPN {
         queue_time += System.currentTimeMillis() - start;
 
         start = System.currentTimeMillis();
-        String query =
-            formQuery_KNN(query_Graph, K - resultIDs.size(), Enums.Explain_Or_Profile.Profile,
-                querySpatialVertexID, id);
+        String query = formQuery_KNN(query_Graph, K - resultIDs.size(),
+            Enums.Explain_Or_Profile.Profile, querySpatialVertexID, id);
         Result result = dbservice.execute(query);
         get_iterator_time += System.currentTimeMillis() - start;
 
@@ -2764,6 +2762,7 @@ public class RisoTreeQueryPN {
     queue_time += System.currentTimeMillis() - start;
     tx.success();
     tx.close();
+    run_time = System.currentTimeMillis() - sumStart;
     return resultIDs;
   }
 
@@ -3000,8 +2999,9 @@ public class RisoTreeQueryPN {
               id_pos_list.add(graph_pos_map_list[id]);
               index++;
               if (index == 500) {
-                String query = formSubgraphQuery_HMBR(query_Graph, -1, Enums.Explain_Or_Profile.Profile,
-                    spa_predicates, min_NL_neighbor_id, id_pos_list, min_hop_array);
+                String query =
+                    formSubgraphQuery_HMBR(query_Graph, -1, Enums.Explain_Or_Profile.Profile,
+                        spa_predicates, min_NL_neighbor_id, id_pos_list, min_hop_array);
                 if (outputQuery) {
                   Util.println(query);
                   OwnMethods.WriteFile(logPath, true, query + "\n");
@@ -3040,8 +3040,9 @@ public class RisoTreeQueryPN {
             }
 
             if (id_pos_list.size() != 0) {
-              String query = formSubgraphQuery_HMBR(query_Graph, -1, Enums.Explain_Or_Profile.Profile,
-                  spa_predicates, min_NL_neighbor_id, id_pos_list, min_hop_array);
+              String query =
+                  formSubgraphQuery_HMBR(query_Graph, -1, Enums.Explain_Or_Profile.Profile,
+                      spa_predicates, min_NL_neighbor_id, id_pos_list, min_hop_array);
 
               if (outputQuery) {
                 Util.println(query);
