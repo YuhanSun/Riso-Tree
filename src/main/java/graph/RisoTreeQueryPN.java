@@ -2746,7 +2746,7 @@ public class RisoTreeQueryPN {
         iterate_time += System.currentTimeMillis() - start;
         start = System.currentTimeMillis();
 
-        ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+        planDescription = result.getExecutionPlanDescription();
         page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
         // OwnMethods.Print(planDescription);
       } else
@@ -3655,7 +3655,7 @@ public class RisoTreeQueryPN {
         iterate_time += System.currentTimeMillis() - start;
         start = System.currentTimeMillis();
 
-        ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+        planDescription = result.getExecutionPlanDescription();
         page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
       }
       result_count = resultPairs.size();

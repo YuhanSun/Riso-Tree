@@ -818,7 +818,7 @@ public class SpatialFirst_List {
           iterate_time += System.currentTimeMillis() - start;
           start = System.currentTimeMillis();
 
-          ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+          this.planDescription = result.getExecutionPlanDescription();
           page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
         } else
           throw new Exception(
@@ -943,7 +943,7 @@ public class SpatialFirst_List {
         iterate_time += System.currentTimeMillis() - start;
         start = System.currentTimeMillis();
 
-        ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+        planDescription = result.getExecutionPlanDescription();
         page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
       }
       tx.success();
