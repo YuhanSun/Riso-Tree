@@ -30,7 +30,7 @@ public class Enums {
   }
 
   public static enum QueryStatistic {
-    range_query_time, check_path_time, get_iterator_time, iterate_time, set_label_time, remove_label_time, result_count, overlap_leaf_node_count, candidate_count, run_time, page_hit_count, check_paths_time, queue_time, visit_spatial_object_count, join_result_count, join_time, check_overlap_time, /////
+    check_path_time, get_iterator_time, iterate_time, set_label_time, remove_label_time, result_count, overlap_leaf_node_count, candidate_count, run_time, page_hit_count, check_paths_time, visit_spatial_object_count, check_overlap_time, /////
     spatial_time, graph_time, overlap_object_count,
   }
 
