@@ -2,15 +2,20 @@ package experiment;
 
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
 import commons.Enums;
-import commons.Enums.ClearCacheMethod;
 import commons.Enums.ExperimentMethod;
+import commons.Enums.QueryStatistic;
+import commons.Enums.QueryType;
+import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
+import commons.Query_Graph;
 import commons.ReadWriteUtil;
 import commons.Util;
 import graph.Naive_Neo4j_Match;
@@ -35,7 +40,8 @@ public class ExperimentUtil {
    */
   public static List<ResultRecord> runExperiment(String dbPath, String dataset,
       Enums.ExperimentMethod method, int MAX_HOP, String queryPath, int queryCount, String password,
-      boolean clearCache, Enums.ClearCacheMethod clearCacheMethod, String outputPath) throws Exception {
+      boolean clearCache, Enums.ClearCacheMethod clearCacheMethod, String outputPath)
+      throws Exception {
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
     queries = queries.subList(0, queryCount);
     int queryId = -1;
@@ -155,7 +161,8 @@ public class ExperimentUtil {
     writer.close();
   }
 
-  public static String getAverageResultOutput(List<ResultRecord> records, Enums.ExperimentMethod method) {
+  public static String getAverageResultOutput(List<ResultRecord> records,
+      Enums.ExperimentMethod method) {
     String string = "";
     switch (method) {
       case NAIVE:
@@ -212,8 +219,9 @@ public class ExperimentUtil {
   }
 
   public static void runExperimentQueryPathList(String dbPath, String dataset,
-      Enums.ExperimentMethod method, int MAX_HOP, String queryPaths, int queryCount, String password,
-      boolean clearCache, Enums.ClearCacheMethod clearCacheMethod, String outputPath) throws Exception {
+      Enums.ExperimentMethod method, int MAX_HOP, String queryPaths, int queryCount,
+      String password, boolean clearCache, Enums.ClearCacheMethod clearCacheMethod,
+      String outputPath) throws Exception {
     Util.checkPathExist(dbPath);
     String header = getHeader(method);
     ReadWriteUtil.WriteFile(outputPath, true, "queryPath\t" + header + "\n");
@@ -224,6 +232,115 @@ public class ExperimentUtil {
       String string = getAverageResultOutput(records, method);
       ReadWriteUtil.WriteFile(outputPath, true,
           StringUtils.joinWith("\t", queryPath, string) + "\n");
+    }
+  }
+
+  /**
+   * Get the query statistics to be tracked for given query type and method.
+   *
+   * @param queryType
+   * @param method
+   * @return
+   * @throws Exception
+   */
+  public static List<QueryStatistic> getQueryStatistics(QueryType queryType,
+      ExperimentMethod method)
+      throws Exception {
+    switch (method) {
+      case NAIVE:
+        return new ArrayList<>(Arrays.asList(QueryStatistic.run_time, QueryStatistic.page_hit_count,
+            QueryStatistic.get_iterator_time, QueryStatistic.iterate_time,
+            QueryStatistic.result_count));
+      case SPATIAL_FIRST:
+        return getQueryStatisticsSpatialFirst(queryType);
+      case RISOTREE:
+        return getQueryStatisticsRisoTreePN(queryType);
+      default:
+        throw new Exception(method + " is unknown method!");
+    }
+  }
+
+  public static List<QueryStatistic> getQueryStatisticsSpatialFirst(QueryType queryType)
+      throws Exception {
+    List<QueryStatistic> queryStatisticList =
+        new LinkedList<>(Arrays.asList(QueryStatistic.run_time, QueryStatistic.page_hit_count,
+            QueryStatistic.spatial_time, QueryStatistic.graph_time,
+            QueryStatistic.get_iterator_time, QueryStatistic.iterate_time));
+    switch (queryType) {
+      case LAGAQ_RANGE:
+        queryStatisticList.add(QueryStatistic.overlap_leaf_node_count);
+        break;
+      case LAGAQ_JOIN:
+        break;
+      case LAGAQ_KNN:
+        break;
+      default:
+        throw new Exception(queryType + " is unknown query type!");
+    }
+    queryStatisticList.add(QueryStatistic.candidate_count);
+    queryStatisticList.add(QueryStatistic.result_count);
+    return queryStatisticList;
+  }
+
+  public static List<QueryStatistic> getQueryStatisticsRisoTreePN(QueryType queryType)
+      throws Exception {
+    List<QueryStatistic> queryStatisticList =
+        new LinkedList<>(Arrays.asList(QueryStatistic.run_time, QueryStatistic.page_hit_count,
+            QueryStatistic.spatial_time, QueryStatistic.check_path_time, QueryStatistic.graph_time,
+            QueryStatistic.get_iterator_time, QueryStatistic.iterate_time));
+    switch (queryType) {
+      case LAGAQ_RANGE:
+        queryStatisticList.add(QueryStatistic.set_label_time);
+        queryStatisticList.add(QueryStatistic.remove_label_time);
+        queryStatisticList.add(QueryStatistic.overlap_leaf_node_count);
+        break;
+      case LAGAQ_JOIN:
+        queryStatisticList.add(QueryStatistic.check_overlap_time);
+        break;
+      case LAGAQ_KNN:
+        break;
+      default:
+        throw new Exception(queryType + " is unknown query type!");
+    }
+    queryStatisticList.add(QueryStatistic.candidate_count);
+    queryStatisticList.add(QueryStatistic.result_count);
+    return queryStatisticList;
+  }
+
+  /**
+   * Get the partial header of the experiment output.
+   *
+   * @param queryStatistics
+   * @return
+   */
+  public static List<String> getQueryStatisticsStrings(List<QueryStatistic> queryStatistics) {
+    List<String> queryStatisticStrings = new ArrayList<>(queryStatistics.size());
+    for (QueryStatistic queryStatistic : queryStatistics) {
+      queryStatisticStrings.add(queryStatistic.toString());
+    }
+    return queryStatisticStrings;
+  }
+
+  /**
+   * Add the given query rectangle into the query graph. The graph should have exact one spatial
+   * predicate. It can be used for LAGAQ-Range and LAGAQ-KNN.
+   *
+   * @param query_Graph
+   * @param queryRectangle
+   * @throws Exception
+   */
+  public static void combineQueryGraphWithSpatialPredicate(Query_Graph query_Graph,
+      MyRectangle queryRectangle) throws Exception {
+    int spatialPredicateCount = 0;
+    for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
+      if (query_Graph.Has_Spa_Predicate[i]) {
+        spatialPredicateCount++;
+        query_Graph.spa_predicate[i] = queryRectangle;
+      }
+    }
+    if (spatialPredicateCount != 1) {
+      throw new Exception("query graph should have exact ONE spatial predicate but it has "
+          + spatialPredicateCount);
     }
   }
 }
