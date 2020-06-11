@@ -142,6 +142,27 @@ public class ReadWriteUtil {
   }
 
   /**
+   * Skip the line starting with {@code skipFlag}.
+   *
+   * @param filepath
+   * @param skipFlag
+   * @return
+   * @throws Exception
+   */
+  public static List<String> readFileAllLines(String filepath, String skipFlag) throws Exception {
+    List<String> lines = new LinkedList<>();
+    BufferedReader reader = Util.getBufferedReader(filepath);
+    String line = null;
+    while ((line = reader.readLine()) != null) {
+      if (line.startsWith(skipFlag)) {
+        continue;
+      }
+      lines.add(line);
+    }
+    return lines;
+  }
+
+  /**
    * write map to file
    * 
    * @param filename
