@@ -450,8 +450,8 @@ public class KCount {
 
       ExperimentUtil.outputDetailResult(records, method, detailPath);
 
-      String string = ExperimentUtil.getAverageResultOutput(records, method);
-      ReadWriteUtil.WriteFile(avgPath, true, StringUtils.joinWith("\t", queryPath, string) + "\n");
+      String string = ExperimentUtil.getAverageResultOutput(records, queryStatistics);
+      ReadWriteUtil.WriteFile(avgPath, true, StringUtils.joinWith("\t", KValue, string) + "\n");
     }
 
     ReadWriteUtil.WriteFile(detailPath, true, "\n");

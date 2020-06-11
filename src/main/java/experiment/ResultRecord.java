@@ -19,7 +19,7 @@ public class ResultRecord {
    */
   public Enums.ExperimentMethod experimentMethod;
   public Enums.QueryType queryType;
-  
+
 
   public Map<QueryStatistic, Object> statisticsMap;
 
@@ -59,9 +59,10 @@ public class ResultRecord {
     string += String.format("overlap_leaf_node_count: %d\n", overlap_leaf_node_count);
     string += String.format("candidate_count: %d\n", candidate_count);
 
+    string += "\n";
     string += "Query Statistics Map:\n";
     for (QueryStatistic queryStatistic : statisticsMap.keySet()) {
-      string += String.format("%s: %d\n", queryStatistic, statisticsMap.get(queryStatistic));
+      string += String.format("%s: %d", queryStatistic, statisticsMap.get(queryStatistic));
     }
     return string;
   }
@@ -172,10 +173,12 @@ public class ResultRecord {
 
 
   /////////////////////////////////////////////////////////////////////////////////////////
-  public ResultRecord(QueryType queryType, ExperimentMethod method, Map<QueryStatistic, Object> queryStatisticsMap) {
+  public ResultRecord(QueryType queryType, ExperimentMethod method,
+      Map<QueryStatistic, Object> queryStatisticsMap, ExecutionPlanDescription planDescription) {
     this.queryType = queryType;
     this.experimentMethod = method;
     this.statisticsMap = queryStatisticsMap;
+    this.planDescription = planDescription;
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////

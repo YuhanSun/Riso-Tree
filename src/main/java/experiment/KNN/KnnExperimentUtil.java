@@ -88,21 +88,21 @@ public class KnnExperimentUtil {
         naive_Neo4j_Match.LAGAQ_KNN(query, k);
         planDescription = naive_Neo4j_Match.planDescription;
         record = new ResultRecord(QueryType.LAGAQ_KNN, ExperimentMethod.NAIVE,
-            naive_Neo4j_Match.getQueryStatisticMap());
+            naive_Neo4j_Match.getQueryStatisticMap(), naive_Neo4j_Match.planDescription);
         break;
       case SPATIAL_FIRST:
         SpatialFirst_List spatialFirst_List = new SpatialFirst_List(service, dataset);
         spatialFirst_List.LAGAQ_KNN(query, k);
         planDescription = spatialFirst_List.planDescription;
         record = new ResultRecord(QueryType.LAGAQ_KNN, ExperimentMethod.SPATIAL_FIRST,
-            spatialFirst_List.getQueryStatisticMap());
+            spatialFirst_List.getQueryStatisticMap(), spatialFirst_List.planDescription);
         break;
       case RISOTREE:
         RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOP);
         risoTreeQueryPN.LAGAQ_KNN(query, k);
         planDescription = risoTreeQueryPN.planDescription;
         record = new ResultRecord(QueryType.LAGAQ_KNN, ExperimentMethod.RISOTREE,
-            risoTreeQueryPN.getQueryStatisticMap());
+            risoTreeQueryPN.getQueryStatisticMap(), risoTreeQueryPN.planDescription);
         break;
       default:
         throw new RuntimeException(String.format("method %s does not exist!", method));

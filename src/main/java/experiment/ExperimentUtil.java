@@ -244,8 +244,7 @@ public class ExperimentUtil {
    * @throws Exception
    */
   public static List<QueryStatistic> getQueryStatistics(QueryType queryType,
-      ExperimentMethod method)
-      throws Exception {
+      ExperimentMethod method) throws Exception {
     switch (method) {
       case NAIVE:
         return new ArrayList<>(Arrays.asList(QueryStatistic.run_time, QueryStatistic.page_hit_count,
@@ -322,6 +321,71 @@ public class ExperimentUtil {
   }
 
   /**
+   * Write the content of a list of records. The content includes a tsv table and the execution
+   * plan.
+   *
+   * @param records
+   * @param queryStatistics
+   * @param outputPath
+   * @throws Exception
+   */
+  public static void outputDetailResult(List<ResultRecord> records,
+      List<QueryStatistic> queryStatistics, String outputPath) throws Exception {
+    FileWriter writer = Util.getFileWriter(outputPath, true);
+    // Output the tsv table.
+    for (int i = 0; i < records.size(); i++) {
+      ResultRecord record = records.get(i);
+      writer.write(String.format("%d\t%s\n", i, getOutputResult(record, queryStatistics)));
+    }
+    // Output the detail for each record.
+    for (int i = 0; i < records.size(); i++) {
+      ResultRecord record = records.get(i);
+      writer.write("id  " + i + ":\n");
+      writer.write(record.toString() + "\n");
+      writer.write(String.format("%s\n", record.planDescription));
+    }
+    writer.write("\n");
+    writer.close();
+  }
+
+  /**
+   * Get the string of the record which will be part of the output table line. Corresponding values
+   * will be extracted according to the given {@code queryStatics}.
+   *
+   * @param record
+   * @param queryStatistics
+   * @return
+   */
+  public static String getOutputResult(ResultRecord record, List<QueryStatistic> queryStatistics) {
+    String string = "";
+    for (int i = 0; i < queryStatistics.size(); i++) {
+      if (i == 0) {
+        string += record.statisticsMap.get(queryStatistics.get(i)).toString();
+      } else {
+        string += "\t" + record.statisticsMap.get(queryStatistics.get(i)).toString();
+      }
+    }
+    return string;
+  }
+
+  public static String getAverageResultOutput(List<ResultRecord> records,
+      List<QueryStatistic> queryStatistics) {
+    List<String> averageList = new ArrayList<>(queryStatistics.size());
+    for (QueryStatistic queryStatistic : queryStatistics) {
+      averageList.add(String.valueOf(getAverage(records, queryStatistic)));
+    }
+    return String.join("\t", averageList);
+  }
+
+  public static long getAverage(List<ResultRecord> records, QueryStatistic queryStatistic) {
+    long sum = 0;
+    for (ResultRecord record : records) {
+      sum += Long.parseLong(record.statisticsMap.get(queryStatistic).toString());
+    }
+    return sum / records.size();
+  }
+
+  /**
    * Add the given query rectangle into the query graph. The graph should have exact one spatial
    * predicate. It can be used for LAGAQ-Range and LAGAQ-KNN.
    *
@@ -343,4 +407,5 @@ public class ExperimentUtil {
           + spatialPredicateCount);
     }
   }
+
 }
