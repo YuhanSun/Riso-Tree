@@ -361,7 +361,7 @@ public class ExperimentUtil {
   public static String getOutputResult(ResultRecord record, List<QueryStatistic> queryStatistics)
       throws Exception {
     List<String> valueList = new ArrayList<>(queryStatistics.size());
-    Map<QueryStatistic, Object> statisticMap = record.statisticsMap;
+    Map<QueryStatistic, Object> statisticMap = record.statisticMap;
     for (QueryStatistic queryStatistic : queryStatistics) {
       if (!statisticMap.containsKey(queryStatistic)) {
         throw new Exception(queryStatistic + " does not exist in record!");
@@ -384,7 +384,7 @@ public class ExperimentUtil {
       throws Exception {
     long sum = 0;
     for (ResultRecord record : records) {
-      Map<QueryStatistic, Object> statisticMap = record.statisticsMap;
+      Map<QueryStatistic, Object> statisticMap = record.statisticMap;
       if (!statisticMap.containsKey(queryStatistic)) {
         throw new Exception(queryStatistic + " does not exist in record!");
       }

@@ -21,7 +21,7 @@ public class ResultRecord {
   public Enums.QueryType queryType;
 
 
-  public Map<QueryStatistic, Object> statisticsMap;
+  public Map<QueryStatistic, Object> statisticMap;
 
   public long runTime;
   public long pageHit;
@@ -61,8 +61,8 @@ public class ResultRecord {
 
     string += "\n";
     string += "Query Statistics Map:\n";
-    for (QueryStatistic queryStatistic : statisticsMap.keySet()) {
-      string += String.format("%s: %d\n", queryStatistic, statisticsMap.get(queryStatistic));
+    for (QueryStatistic queryStatistic : statisticMap.keySet()) {
+      string += String.format("%s: %d\n", queryStatistic, statisticMap.get(queryStatistic));
     }
     return string;
   }
@@ -177,7 +177,7 @@ public class ResultRecord {
       Map<QueryStatistic, Object> queryStatisticsMap, ExecutionPlanDescription planDescription) {
     this.queryType = queryType;
     this.experimentMethod = method;
-    this.statisticsMap = queryStatisticsMap;
+    this.statisticMap = queryStatisticsMap;
     this.planDescription = planDescription;
   }
 
