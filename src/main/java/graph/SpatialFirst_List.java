@@ -975,6 +975,7 @@ public class SpatialFirst_List {
     switch (queryType) {
       case LAGAQ_RANGE:
         queryStatisticMap.put(QueryStatistic.spatial_time, range_query_time);
+        queryStatisticMap.put(QueryStatistic.overlap_leaf_node_count, overlap_leaf_count);
         queryStatisticMap.put(QueryStatistic.candidate_count, candidate_count);
         break;
       case LAGAQ_JOIN:
