@@ -3704,6 +3704,7 @@ public class RisoTreeQueryPN {
     queryStatisticMap.put(QueryStatistic.iterate_time, iterate_time);
     queryStatisticMap.put(QueryStatistic.graph_time, get_iterator_time + iterate_time);
     queryStatisticMap.put(QueryStatistic.result_count, result_count);
+    queryStatisticMap.put(QueryStatistic.check_path_time, check_paths_time);
 
     switch (queryType) {
       case LAGAQ_RANGE:
