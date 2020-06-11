@@ -18,6 +18,7 @@ import experiment.ExperimentSpaceSelectivity;
 import experiment.MaintenanceExperiment;
 import experiment.MaxPNSize;
 import experiment.Prepare;
+import experiment.KNN.KCount;
 import graph.Construct_RisoTree;
 import graph.LoadDataNoOSM;
 
@@ -61,8 +62,8 @@ public class Driver {
     maxPNSizeRisoTreeQuery, maxPNSizeRisoTreeQueryMultiple, // query
     alphaExperiment, // alpha
     selectivityExperiment, // selectivity
-    selectivityExperimentSingleMethod,
-    knnCount,
+    selectivityExperimentSingleMethod, //
+    KCountExperimentSingleMethod, // KNN k count
 
     /**
      * add experiment
@@ -135,6 +136,7 @@ public class Driver {
   private static final String method = "method";
   private static final String clearCache = "clearCache";
   private static final String clearCacheMethod = "clearCacheMethod";
+  private static final String KCountListStr = "KCountListStr";// knn
 
   private static final String ratio = "ratio";
   private static final String edgePath = "edgePath";
@@ -191,6 +193,8 @@ public class Driver {
     options.addOption(method, "method", true, "experiment method");
     options.addOption(clearCache, "clearCache", true, "whether to clear the cache or not");
     options.addOption(clearCacheMethod, "clearCacheMethod", true, "clearCacheMethod");
+    options.addOption(KCountListStr, "KCountListStr", true, "KCountListStr"); // knn
+
 
     options.addOption(ratio, "ratio", true, "sampling ratio");
     options.addOption(edgePath, "edgePath", true, "edge path");
@@ -442,6 +446,16 @@ public class Driver {
                 cmd.getOptionValue(dataset), Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
                 cmd.getOptionValue(queryPath), Integer.parseInt(cmd.getOptionValue(queryCount)),
                 cmd.getOptionValue(password), Boolean.parseBoolean(cmd.getOptionValue(clearCache)),
+                ClearCacheMethod.valueOf(cmd.getOptionValue(clearCacheMethod)),
+                cmd.getOptionValue(outputPath));
+            break;
+          case KCountExperimentSingleMethod:
+            KCount.KCountExperimentSingleMethod(
+                ExperimentMethod.valueOf(cmd.getOptionValue(method)), cmd.getOptionValue(dbPath),
+                cmd.getOptionValue(dataset), Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
+                cmd.getOptionValue(KCountListStr), cmd.getOptionValue(queryPath),
+                Integer.parseInt(cmd.getOptionValue(queryCount)), cmd.getOptionValue(password),
+                Boolean.parseBoolean(cmd.getOptionValue(clearCache)),
                 ClearCacheMethod.valueOf(cmd.getOptionValue(clearCacheMethod)),
                 cmd.getOptionValue(outputPath));
             break;
