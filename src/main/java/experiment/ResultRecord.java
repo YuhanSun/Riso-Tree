@@ -62,7 +62,7 @@ public class ResultRecord {
     string += "\n";
     string += "Query Statistics Map:\n";
     for (QueryStatistic queryStatistic : statisticsMap.keySet()) {
-      string += String.format("%s: %d", queryStatistic, statisticsMap.get(queryStatistic));
+      string += String.format("%s: %d\n", queryStatistic, statisticsMap.get(queryStatistic));
     }
     return string;
   }

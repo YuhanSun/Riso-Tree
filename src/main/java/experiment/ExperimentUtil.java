@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -355,21 +356,23 @@ public class ExperimentUtil {
    * @param record
    * @param queryStatistics
    * @return
+   * @throws Exception
    */
-  public static String getOutputResult(ResultRecord record, List<QueryStatistic> queryStatistics) {
-    String string = "";
-    for (int i = 0; i < queryStatistics.size(); i++) {
-      if (i == 0) {
-        string += record.statisticsMap.get(queryStatistics.get(i)).toString();
-      } else {
-        string += "\t" + record.statisticsMap.get(queryStatistics.get(i)).toString();
+  public static String getOutputResult(ResultRecord record, List<QueryStatistic> queryStatistics)
+      throws Exception {
+    List<String> valueList = new ArrayList<>(queryStatistics.size());
+    Map<QueryStatistic, Object> statisticMap = record.statisticsMap;
+    for (QueryStatistic queryStatistic : queryStatistics) {
+      if (!statisticMap.containsKey(queryStatistic)) {
+        throw new Exception(queryStatistic + " does not exist in record!");
       }
+      valueList.add(statisticMap.get(queryStatistic).toString());
     }
-    return string;
+    return String.join("\t", valueList);
   }
 
   public static String getAverageResultOutput(List<ResultRecord> records,
-      List<QueryStatistic> queryStatistics) {
+      List<QueryStatistic> queryStatistics) throws Exception {
     List<String> averageList = new ArrayList<>(queryStatistics.size());
     for (QueryStatistic queryStatistic : queryStatistics) {
       averageList.add(String.valueOf(getAverage(records, queryStatistic)));
@@ -377,10 +380,15 @@ public class ExperimentUtil {
     return String.join("\t", averageList);
   }
 
-  public static long getAverage(List<ResultRecord> records, QueryStatistic queryStatistic) {
+  public static long getAverage(List<ResultRecord> records, QueryStatistic queryStatistic)
+      throws Exception {
     long sum = 0;
     for (ResultRecord record : records) {
-      sum += Long.parseLong(record.statisticsMap.get(queryStatistic).toString());
+      Map<QueryStatistic, Object> statisticMap = record.statisticsMap;
+      if (!statisticMap.containsKey(queryStatistic)) {
+        throw new Exception(queryStatistic + " does not exist in record!");
+      }
+      sum += Long.parseLong(statisticMap.get(queryStatistic).toString());
     }
     return sum / records.size();
   }

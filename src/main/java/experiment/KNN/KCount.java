@@ -448,7 +448,7 @@ public class KCount {
           queryPath, Integer.parseInt(KValue), queryCount, password, clearCache, clearCacheMethod,
           avgPath);
 
-      ExperimentUtil.outputDetailResult(records, method, detailPath);
+      ExperimentUtil.outputDetailResult(records, queryStatistics, detailPath);
 
       String string = ExperimentUtil.getAverageResultOutput(records, queryStatistics);
       ReadWriteUtil.WriteFile(avgPath, true, StringUtils.joinWith("\t", KValue, string) + "\n");
