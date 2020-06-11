@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
+import commons.Config;
 import commons.Enums;
 import commons.Enums.ExperimentMethod;
 import commons.Enums.QueryType;
@@ -38,7 +39,7 @@ public class KnnExperimentUtil {
       Enums.ExperimentMethod method, int MAX_HOP, String queryPath, int KValue, int queryCount,
       String password, boolean clearCache, Enums.ClearCacheMethod clearCacheMethod,
       String outputPath) throws Exception {
-    List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
+    List<String> queries = ReadWriteUtil.readFileAllLines(queryPath, Config.SKIPFLAG);
     queries = queries.subList(0, queryCount);
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
     List<Query_Graph> queryGraphs = new ArrayList<>(queries.size());

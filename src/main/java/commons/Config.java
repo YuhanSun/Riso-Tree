@@ -32,6 +32,8 @@ public class Config {
   public final static int graphNodeCount = 47116657;
   public final static int logInterval = 5000000;
 
+  public final static String SKIPFLAG = "//";
+
   public void setDatasetName(String pName) {
     this.dataset = pName;
   }
