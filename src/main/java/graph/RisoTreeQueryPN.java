@@ -28,6 +28,8 @@ import org.neo4j.graphdb.Transaction;
 import commons.ArrayUtil;
 import commons.Config;
 import commons.Enums;
+import commons.Enums.QueryStatistic;
+import commons.Enums.QueryType;
 import commons.Labels;
 import commons.Labels.RTreeRel;
 import commons.MyPoint;
@@ -102,6 +104,8 @@ public class RisoTreeQueryPN {
   public long join_result_count;
   public long join_time;
   public long check_overlap_time;
+
+  public Map<QueryStatistic, Object> queryStatisticMap = new HashMap<>();
 
   // test control variables
   public static final boolean outputLevelInfo = true;
@@ -616,10 +620,8 @@ public class RisoTreeQueryPN {
       }
     }
 
-    long start = System.currentTimeMillis();
     // queryWithIgnore(query, query_Graph);
     queryWithIgnoreNewLabel(query, query_Graph);
-    run_time += System.currentTimeMillis() - start;
   }
 
   /**
@@ -678,7 +680,7 @@ public class RisoTreeQueryPN {
    * @throws Exception
    */
   public void query(String query) throws Exception {
-    iniLogParams();
+    clearTrackingVariables();
     Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, dbservice);
     queryWithIgnore(query, query_Graph);
   }
@@ -692,7 +694,8 @@ public class RisoTreeQueryPN {
    * @throws Exception
    */
   public void queryWithIgnoreNewLabel(String query, Query_Graph query_Graph) throws Exception {
-    iniLogParams();
+    clearTrackingVariables();
+    long totalStart = System.currentTimeMillis();
     this.query_Graph = query_Graph;
     Transaction tx = dbservice.beginTx();
     Map<Integer, Collection<Long>> candidateSets = getCandidateSetWithIgnore(query_Graph);
@@ -723,6 +726,8 @@ public class RisoTreeQueryPN {
     recoverLabel(candidateSets, query_Graph.nodeVariables);
     tx.success();
     tx.close();
+    run_time = System.currentTimeMillis() - totalStart;
+    setQueryStatistics(QueryType.LAGAQ_RANGE);
   }
 
   /**
@@ -893,7 +898,7 @@ public class RisoTreeQueryPN {
    * @throws Exception
    */
   public void queryWithIgnore(String query, Query_Graph query_Graph) throws Exception {
-    iniLogParams();
+    clearTrackingVariables();
     Transaction tx = dbservice.beginTx();
     Map<Integer, Collection<Long>> candidateSets = getCandidateSetWithIgnore(query_Graph);
 
@@ -933,6 +938,7 @@ public class RisoTreeQueryPN {
     }
     tx.success();
     tx.close();
+    setQueryStatistics(QueryType.LAGAQ_RANGE);
   }
 
   /**
@@ -1848,23 +1854,6 @@ public class RisoTreeQueryPN {
 
 
 
-  private void iniLogParams() {
-    Util.println("Initialize variables for query");
-    range_query_time = 0;
-    check_paths_time = 0;
-    set_label_time = 0;
-    remove_label_time = 0;
-    get_iterator_time = 0;
-    iterate_time = 0;
-    result_count = 0;
-    page_hit_count = 0;
-    overlap_leaf_node_count = 0;
-    candidate_count = 0;
-
-    visit_spatial_object_count = 0;
-    queue_time = 0;
-  }
-
   /**
    * Does not consider condition that area of query rectangle is 0. If so, such function cannot make
    * the correct decision.
@@ -1874,7 +1863,7 @@ public class RisoTreeQueryPN {
    */
   public void Query(Query_Graph query_Graph, int limit) {
     try {
-      iniLogParams();
+      clearTrackingVariables();
       String logWriteLine = "";
 
       // <spa_id, rectangle> all query rectangles
@@ -1978,6 +1967,7 @@ public class RisoTreeQueryPN {
           Util.println("No result satisfy the query.");
           tx.success();
           tx.close();
+          setQueryStatistics(QueryType.LAGAQ_RANGE);
           return;
         }
 
@@ -2228,6 +2218,7 @@ public class RisoTreeQueryPN {
                 OwnMethods.WriteFile(logPath, true, planDescription.toString() + "\n");
               }
             }
+            setQueryStatistics(QueryType.LAGAQ_RANGE);
             return;
           } else // if spatial predicate is more selective
           {
@@ -2310,6 +2301,7 @@ public class RisoTreeQueryPN {
             }
             tx.success();
             tx.close();
+            setQueryStatistics(QueryType.LAGAQ_RANGE);
             return;
           }
         }
@@ -2320,7 +2312,8 @@ public class RisoTreeQueryPN {
       }
       tx.success();
       tx.close();
-
+      setQueryStatistics(QueryType.LAGAQ_RANGE);
+      return;
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
@@ -2645,6 +2638,7 @@ public class RisoTreeQueryPN {
    * @param K
    */
   public List<long[]> LAGAQ_KNN(Query_Graph query_Graph, int K) throws Exception {
+    clearTrackingVariables();
     long sumStart = System.currentTimeMillis();
     List<long[]> resultIDs = new ArrayList<long[]>();
     HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
@@ -2763,6 +2757,8 @@ public class RisoTreeQueryPN {
     tx.success();
     tx.close();
     run_time = System.currentTimeMillis() - sumStart;
+    result_count = resultIDs.size();
+    setQueryStatistics(QueryType.LAGAQ_KNN);
     return resultIDs;
   }
 
@@ -3615,15 +3611,8 @@ public class RisoTreeQueryPN {
 
   public List<Long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) {
     try {
-      join_result_count = 0;
-      join_time = 0;
-      check_paths_time = 0;
-      // has_relation_time = 0;
-      // has_relation_time_addition = 0;
-      get_iterator_time = 0;
-      iterate_time = 0;
-      page_hit_count = 0;
-
+      clearTrackingVariables();
+      long totalStart = System.currentTimeMillis();
       List<Long[]> resultPairs = new LinkedList<Long[]>();
 
       int count = 0;
@@ -3670,11 +3659,71 @@ public class RisoTreeQueryPN {
         page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
       }
       result_count = resultPairs.size();
+      run_time = System.currentTimeMillis() - totalStart;
+      setQueryStatistics(QueryType.LAGAQ_JOIN);
       return resultPairs;
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(-1);
     }
     return null;
+  }
+
+  private void clearTrackingVariables() {
+    Util.println("Clear variables for tracking by setting to 0.");
+    run_time = 0;
+    page_hit_count = 0;
+    get_iterator_time = 0;
+    iterate_time = 0;
+    result_count = 0;
+    check_paths_time = 0;
+
+    range_query_time = 0;
+    set_label_time = 0;
+    remove_label_time = 0;
+    overlap_leaf_node_count = 0;
+    candidate_count = 0;
+
+    queue_time = 0;
+    visit_spatial_object_count = 0;
+
+    join_result_count = 0;
+    join_time = 0;
+    check_overlap_time = 0;
+  }
+
+  public Map<QueryStatistic, Object> getQueryStatisticMap() {
+    return queryStatisticMap;
+  }
+
+  private void setQueryStatistics(QueryType queryType) throws Exception {
+    queryStatisticMap = new HashMap<>();
+    queryStatisticMap.put(QueryStatistic.run_time, run_time);
+    queryStatisticMap.put(QueryStatistic.page_hit_count, page_hit_count);
+    queryStatisticMap.put(QueryStatistic.get_iterator_time, get_iterator_time);
+    queryStatisticMap.put(QueryStatistic.iterate_time, iterate_time);
+    queryStatisticMap.put(QueryStatistic.graph_time, get_iterator_time + iterate_time);
+    queryStatisticMap.put(QueryStatistic.result_count, result_count);
+
+    switch (queryType) {
+      case LAGAQ_RANGE:
+        queryStatisticMap.put(QueryStatistic.spatial_time, range_query_time);
+        queryStatisticMap.put(QueryStatistic.set_label_time, set_label_time);
+        queryStatisticMap.put(QueryStatistic.remove_label_time, remove_label_time);
+        queryStatisticMap.put(QueryStatistic.overlap_leaf_node_count, overlap_leaf_node_count);
+        queryStatisticMap.put(QueryStatistic.candidate_count, candidate_count);
+        break;
+      case LAGAQ_JOIN:
+        queryStatisticMap.put(QueryStatistic.spatial_time, join_time);
+        queryStatisticMap.put(QueryStatistic.candidate_count, join_result_count);
+        queryStatisticMap.put(QueryStatistic.check_overlap_time, check_overlap_time);
+        break;
+      case LAGAQ_KNN:
+        queryStatisticMap.put(QueryStatistic.spatial_time, queue_time);
+        queryStatisticMap.put(QueryStatistic.candidate_count, visit_spatial_object_count);
+        break;
+      default:
+        throw new Exception(queryType + " does not exist!");
+    }
   }
 }
