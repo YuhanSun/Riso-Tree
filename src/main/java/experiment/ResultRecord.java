@@ -2,13 +2,27 @@ package experiment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.neo4j.graphdb.ExecutionPlanDescription;
+import commons.Enums;
+import commons.Enums.ExperimentMethod;
+import commons.Enums.QueryStatistic;
+import commons.Enums.QueryType;
 import commons.Util;
 import graph.Naive_Neo4j_Match;
 import graph.RisoTreeQueryPN;
 import graph.SpatialFirst_List;
 
 public class ResultRecord {
+  /**
+   * Define what this record is used for.>>
+   */
+  public Enums.ExperimentMethod experimentMethod;
+  public Enums.QueryType queryType;
+  
+
+  public Map<QueryStatistic, Object> statisticsMap;
+
   public long runTime;
   public long pageHit;
 
@@ -45,6 +59,10 @@ public class ResultRecord {
     string += String.format("overlap_leaf_node_count: %d\n", overlap_leaf_node_count);
     string += String.format("candidate_count: %d\n", candidate_count);
 
+    string += "Query Statistics Map:\n";
+    for (QueryStatistic queryStatistic : statisticsMap.keySet()) {
+      string += String.format("%s: %d\n", queryStatistic, statisticsMap.get(queryStatistic));
+    }
     return string;
   }
 
@@ -152,6 +170,13 @@ public class ResultRecord {
         risoTreeQueryPN.planDescription);
   }
 
+
+  /////////////////////////////////////////////////////////////////////////////////////////
+  public ResultRecord(QueryType queryType, ExperimentMethod method, Map<QueryStatistic, Object> queryStatisticsMap) {
+    this.queryType = queryType;
+    this.experimentMethod = method;
+    this.statisticsMap = queryStatisticsMap;
+  }
 
   /////////////////////////////////////////////////////////////////////////////////////////
   public static long getRunTimeAvg(List<ResultRecord> resultRecords) {
