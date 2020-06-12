@@ -2,7 +2,7 @@
 ./package.sh
 
 dir="/hdd/code/yuhansun"
-K_count_list="1,3,9,27"
+kValue="1,3,9,27"
 
 dataset="Yelp_100"
 # selectivity_list="0.0001 0.001 0.01 0.1"
@@ -11,11 +11,14 @@ selectivity=0.0001
 # dataset="Gowalla_100"
 #dataset="foursquare_100"
 # selectivity_list="0.000001 0.00001 0.0001 0.001"
+selectivity=0.000001
+
 MAX_HOPNUM=2
 
 #dataset="wikidata"
 #MAX_HOPNUM=1
 #selectivity_list="0.000001 0.00001 0.0001 0.001"
+selectivity=0.000001
 
 run_spatial=1
 run_risotree=1
@@ -26,7 +29,7 @@ maxPNSize="-1"
 alpha=1.0
 
 query_size=5
-query_count=5
+query_count=50
 
 password="syhSYH.19910205"
 data_dir="${dir}/data/${dataset}"
@@ -72,7 +75,7 @@ java -Xmx100g -jar ${jar_path} \
 	-dp ${db_path} \
 	-d ${dataset} \
 	-MAX_HOPNUM ${MAX_HOPNUM} \
-	-KCountListStr ${K_count_list}	\
+	-kValue ${kValue}	\
 	-queryPath ${query_path} \
 	-queryCount ${query_count} \
 	-password ${password}	\
@@ -105,7 +108,7 @@ if [ $run_risotree == 1 ];	then
 		-dp ${db_path} \
 		-d ${dataset} \
 		-MAX_HOPNUM ${MAX_HOPNUM} \
-		-KCountListStr ${K_count_list}	\
+		-kValue ${kValue}	\
 		-queryPath ${query_path} \
 		-queryCount ${query_count} \
 		-password ${password}	\
@@ -138,7 +141,7 @@ if [ $run_naive == 1 ];	then
 		-dp ${db_path} \
 		-d ${dataset} \
 		-MAX_HOPNUM ${MAX_HOPNUM} \
-		-KCountListStr ${K_count_list}	\
+		-kValue ${kValue}	\
 		-queryPath ${query_path} \
 		-queryCount ${query_count} \
 		-password ${password}	\
