@@ -2,17 +2,24 @@ package experiment.KNN;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Entity;
 import commons.Enums;
-import commons.Enums.Datasets;
-import commons.Enums.system;
+import commons.Enums.ClearCacheMethod;
+import commons.Enums.ExperimentMethod;
+import commons.Enums.QueryStatistic;
+import commons.Enums.QueryType;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
+import commons.ReadWriteUtil;
 import commons.Util;
+import experiment.ExperimentSpaceSelectivity;
+import experiment.ExperimentUtil;
+import experiment.ResultRecord;
 import graph.RisoTreeQueryPN;
 import graph.SpatialFirst_List;
 
@@ -376,6 +383,60 @@ public class QueryNodeCount {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  /**
+   * This is the entry from the Driver. Write the header and result info (both detail and avg).
+   *
+   * @param method
+   * @param dbPath
+   * @param dataset
+   * @param MAX_HOP
+   * @param KValueListString
+   * @param queryPath
+   * @param queryCount
+   * @param password
+   * @param clearCache
+   * @param clearCacheMethod
+   * @param outputDir
+   * @throws Exception
+   */
+  public static void multiQueryPathsSingleMethod(ExperimentMethod method, String dbPath,
+      String dataset, int MAX_HOP, int kValue, String queryPaths, int queryCount, String password,
+      boolean clearCache, ClearCacheMethod clearCacheMethod, String outputDir) throws Exception {
+    String[] queryPathList = queryPaths.split(",");
+    Util.checkPathExist(queryPathList);
+    Util.checkPathExist(dbPath);
+
+    String avgPath = ExperimentSpaceSelectivity.getAvgOutputPath(outputDir, method);
+    String detailPath = ExperimentSpaceSelectivity.getDetailOutputPath(outputDir, method);
+
+    ReadWriteUtil.WriteFile(avgPath, true,
+        String.format(
+            "dbPath:%s, queryCount:%d, MAX_HOP:%d, kValue:%d, clearCache:%s, ClearCacheMethod:%s",
+            dbPath, queryCount, MAX_HOP, kValue, clearCache, clearCacheMethod));
+    List<QueryStatistic> queryStatistics =
+        ExperimentUtil.getQueryStatistics(QueryType.LAGAQ_KNN, method);
+    List<String> queryStatisticStrings = ExperimentUtil.getQueryStatisticsStrings(queryStatistics);
+    String header = String.join("\t", queryStatisticStrings);
+    ReadWriteUtil.WriteFile(avgPath, true, "query_path\t" + header + "\n");
+
+    for (String queryPath : queryPathList) {
+      ReadWriteUtil.WriteFile(detailPath, true, "query_path: " + queryPath + "\n");
+      ReadWriteUtil.WriteFile(detailPath, true, "id\t" + header + "\n");
+
+      List<ResultRecord> records = KnnExperimentUtil.runExperiment(dbPath, dataset, method, MAX_HOP,
+          queryPath, kValue, queryCount, password, clearCache, clearCacheMethod,
+          avgPath);
+
+      ExperimentUtil.outputDetailResult(records, queryStatistics, detailPath);
+
+      String string = ExperimentUtil.getAverageResultOutput(records, queryStatistics);
+      ReadWriteUtil.WriteFile(avgPath, true, StringUtils.joinWith("\t", queryPath, string) + "\n");
+    }
+
+    ReadWriteUtil.WriteFile(detailPath, true, "\n");
+    ReadWriteUtil.WriteFile(avgPath, true, "\n");
   }
 
 }
