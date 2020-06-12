@@ -432,8 +432,9 @@ public class KCount {
     String detailPath = ExperimentSpaceSelectivity.getDetailOutputPath(outputDir, method);
 
     ReadWriteUtil.WriteFile(avgPath, true,
-        ExperimentSpaceSelectivity.getRunningArgs(dbPath, MAX_HOP, queryCount, clearCache,
-            clearCacheMethod) + "\n");
+        String.format(
+            "dbPath:%s, queryPath:%s, queryCount:%d, MAX_HOP:%d, clearCache:%s, ClearCacheMethod:%s",
+            dbPath, queryPath, queryCount, MAX_HOP, clearCache, clearCacheMethod));
     List<QueryStatistic> queryStatistics =
         ExperimentUtil.getQueryStatistics(QueryType.LAGAQ_KNN, method);
     List<String> queryStatisticStrings = ExperimentUtil.getQueryStatisticsStrings(queryStatistics);
