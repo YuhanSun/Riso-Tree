@@ -1,19 +1,22 @@
 package experiment.Join;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.kernel.impl.transaction.log.entry.CheckPoint;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import commons.Config;
-import commons.Entity;
 import commons.Enums;
-import commons.Enums.Datasets;
-import commons.Enums.system;
+import commons.Enums.ClearCacheMethod;
+import commons.Enums.ExperimentMethod;
+import commons.Enums.QueryStatistic;
+import commons.Enums.QueryType;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
+import commons.ReadWriteUtil;
 import commons.Util;
+import experiment.ExperimentSpaceSelectivity;
+import experiment.ExperimentUtil;
+import experiment.ResultRecord;
 import graph.Naive_Neo4j_Match;
 import graph.RisoTreeQueryPN;
 import graph.SpatialFirst_List;
@@ -191,8 +194,8 @@ public class Distance {
           OwnMethods.ClearCache(password);
           Thread.currentThread();
           Thread.sleep(5000);
-          Util.println(String.format(
-              "initialize SpatialFirst_List with dbpath: %s\n dataset: %s\n", db_path, dataset));
+          Util.println(String.format("initialize SpatialFirst_List with dbpath: %s\n dataset: %s\n",
+              db_path, dataset));
           SpatialFirst_List spatialFirstList =
               new SpatialFirst_List(db_path, dataset, graph_pos_map_list);
 
@@ -366,6 +369,44 @@ public class Distance {
       e.printStackTrace();
       System.exit(-1);
     }
+  }
+
+  public static void joinDistanceSingleMethod(ExperimentMethod method, String dbPath,
+      String dataset, int MAX_HOP, String distanceListString, String queryPath, int queryCount,
+      String password, boolean clearCache, ClearCacheMethod clearCacheMethod, String outputDir)
+      throws Exception {
+    Util.checkPathExist(queryPath);
+    Util.checkPathExist(dbPath);
+    String[] distanceList = distanceListString.split(",");
+
+    String avgPath = ExperimentSpaceSelectivity.getAvgOutputPath(outputDir, method);
+    String detailPath = ExperimentSpaceSelectivity.getDetailOutputPath(outputDir, method);
+
+    ReadWriteUtil.WriteFile(avgPath, true, String.format(
+        "dbPath:%s, queryPath:%s, queryCount:%d, MAX_HOP:%d, clearCache:%s, ClearCacheMethod:%s",
+        dbPath, queryPath, queryCount, MAX_HOP, clearCache, clearCacheMethod));
+    List<QueryStatistic> queryStatistics =
+        ExperimentUtil.getQueryStatistics(QueryType.LAGAQ_JOIN, method);
+    List<String> queryStatisticStrings = ExperimentUtil.getQueryStatisticsStrings(queryStatistics);
+    String header = String.join("\t", queryStatisticStrings);
+    ReadWriteUtil.WriteFile(avgPath, true, "distance\t" + header + "\n");
+
+    for (String distance : distanceList) {
+      ReadWriteUtil.WriteFile(detailPath, true, "distance = " + distance + "\n");
+      ReadWriteUtil.WriteFile(detailPath, true, "id\t" + header + "\n");
+
+      List<ResultRecord> records = JoinExperimentUtil.runExperiment(dbPath, dataset, method,
+          MAX_HOP, queryPath, Double.parseDouble(distance), queryCount, password, clearCache,
+          clearCacheMethod, avgPath);
+
+      ExperimentUtil.outputDetailResult(records, queryStatistics, detailPath);
+
+      String string = ExperimentUtil.getAverageResultOutput(records, queryStatistics);
+      ReadWriteUtil.WriteFile(avgPath, true, StringUtils.joinWith("\t", distance, string) + "\n");
+    }
+
+    ReadWriteUtil.WriteFile(detailPath, true, "\n");
+    ReadWriteUtil.WriteFile(avgPath, true, "\n");
   }
 
 }

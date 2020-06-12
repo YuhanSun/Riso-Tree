@@ -18,6 +18,7 @@ import experiment.ExperimentSpaceSelectivity;
 import experiment.MaintenanceExperiment;
 import experiment.MaxPNSize;
 import experiment.Prepare;
+import experiment.Join.Distance;
 import experiment.KNN.KCount;
 import experiment.KNN.QueryNodeCount;
 import graph.Construct_RisoTree;
@@ -66,6 +67,7 @@ public class Driver {
     selectivityExperimentSingleMethod, //
     KCountExperimentSingleMethod, // KNN k count
     multiQueryPathsSingleMethod, // kNN multiple query paths
+    joinDistanceSingleMethod, // Join distance
 
     /**
      * add experiment
@@ -139,6 +141,7 @@ public class Driver {
   private static final String clearCache = "clearCache";
   private static final String clearCacheMethod = "clearCacheMethod";
   private static final String kValue = "kValue";// knn
+  private static final String joinDistance = "joinDistance";// Join
 
   private static final String ratio = "ratio";
   private static final String edgePath = "edgePath";
@@ -196,7 +199,7 @@ public class Driver {
     options.addOption(clearCache, "clearCache", true, "whether to clear the cache or not");
     options.addOption(clearCacheMethod, "clearCacheMethod", true, "clearCacheMethod");
     options.addOption(kValue, "kValue", true, "kValue"); // knn
-
+    options.addOption(joinDistance, "joinDistance", true, "joinDistance"); // knn
 
     options.addOption(ratio, "ratio", true, "sampling ratio");
     options.addOption(edgePath, "edgePath", true, "edge path");
@@ -468,6 +471,15 @@ public class Driver {
                 Integer.parseInt(cmd.getOptionValue(kValue)), cmd.getOptionValue(queryPath),
                 Integer.parseInt(cmd.getOptionValue(queryCount)), cmd.getOptionValue(password),
                 Boolean.parseBoolean(cmd.getOptionValue(clearCache)),
+                ClearCacheMethod.valueOf(cmd.getOptionValue(clearCacheMethod)),
+                cmd.getOptionValue(outputPath));
+            break;
+          case joinDistanceSingleMethod:
+            Distance.joinDistanceSingleMethod(ExperimentMethod.valueOf(cmd.getOptionValue(method)),
+                cmd.getOptionValue(dbPath), cmd.getOptionValue(dataset),
+                Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)), cmd.getOptionValue(joinDistance),
+                cmd.getOptionValue(queryPath), Integer.parseInt(cmd.getOptionValue(queryCount)),
+                cmd.getOptionValue(password), Boolean.parseBoolean(cmd.getOptionValue(clearCache)),
                 ClearCacheMethod.valueOf(cmd.getOptionValue(clearCacheMethod)),
                 cmd.getOptionValue(outputPath));
             break;
