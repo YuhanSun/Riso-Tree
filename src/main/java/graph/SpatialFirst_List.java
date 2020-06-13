@@ -774,6 +774,9 @@ public class SpatialFirst_List {
               node.getRelationships(Labels.RTreeRel.RTREE_CHILD, Direction.OUTGOING);
           for (Relationship relationship : rels) {
             Node child = relationship.getEndNode();
+            if (!child.hasProperty(BBoxName)) {
+              throw new Exception(String.format("Node %s does not have bbox", child));
+            }
             double[] bbox = (double[]) child.getProperty(BBoxName);
             MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
             queue.add(new Element(child, Util.distance(queryLoc, MBR)));
@@ -785,15 +788,13 @@ public class SpatialFirst_List {
               node.getRelationships(Labels.RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
           for (Relationship relationship : rels) {
             Node geom = relationship.getEndNode();
-            Object object = geom.getProperty(lon_name);
-            if (object == null)
+            if (!geom.hasProperty(lon_name)) {
               throw new Exception(
                   String.format("Node %d does not have %s property", geom.getId(), lon_name));
-            else {
-              double lon = (Double) object;
-              double lat = (Double) geom.getProperty(lat_name);
-              queue.add(new Element(geom, Util.distance(queryLoc, new MyPoint(lon, lat))));
             }
+            double lon = (Double) geom.getProperty(lon_name);
+            double lat = (Double) geom.getProperty(lat_name);
+            queue.add(new Element(geom, Util.distance(queryLoc, new MyPoint(lon, lat))));
           }
         }
         // spatial object
