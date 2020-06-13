@@ -26,8 +26,8 @@ split_mode="Gleenes"
 maxPNSize="-1"
 alpha=1.0
 
-query_size_list="3,4,5,6"
-query_count=50
+query_size_list="3 4 5 6"
+query_count=10
 
 password="syhSYH.19910205"
 data_dir="${dir}/data/${dataset}"
