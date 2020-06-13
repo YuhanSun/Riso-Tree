@@ -2641,23 +2641,29 @@ public class RisoTreeQueryPN {
     clearTrackingVariables();
     long sumStart = System.currentTimeMillis();
     List<long[]> resultIDs = new ArrayList<long[]>();
+
+    Map<Integer, MyRectangle> spatialPredicatesMap = query_Graph.getSpatialPredicates();
+    if (spatialPredicatesMap.size() != 1) {
+      throw new Exception(String.format("query graph has %d spatial predicates rather than 1!",
+          spatialPredicatesMap.size()));
+    }
+    int querySpatialVertexID = spatialPredicatesMap.keySet().iterator().next();
+    MyRectangle queryRectangle = spatialPredicatesMap.get(querySpatialVertexID);
+    MyPoint queryLoc = new MyPoint(queryRectangle.min_x, queryRectangle.min_y);
+    Label kNNLabel = Label.label(query_Graph.getLabel(querySpatialVertexID));
+
     HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
-    if (spaPathsMap.size() != 1)
+    if (spaPathsMap.size() != 1) {
       throw new Exception(
           String.format("The number of anchor vertex in the LAGAQ-KNN query is %d rather than 1!",
               spaPathsMap.size()));
-
+    }
     LinkedList<String> paths = new LinkedList<String>();
-    MyPoint queryLoc = null;
-    int querySpatialVertexID = 0;
-    for (int i : spaPathsMap.keySet()) {
-      querySpatialVertexID = i;
-      MyRectangle queryRect = query_Graph.spa_predicate[i];
-      queryLoc = new MyPoint(queryRect.min_x, queryRect.min_y);
-      for (int j : spaPathsMap.get(i).keySet())
-        for (String path : spaPathsMap.get(i).get(j))
-          paths.add(path);
-      break;
+    int i = spaPathsMap.keySet().iterator().next();
+    for (int j : spaPathsMap.get(i).keySet()) {
+      for (String path : spaPathsMap.get(i).get(j)) {
+        paths.add(path);
+      }
     }
 
     String[] columnNames = CypherEncoder.getReturnColumnNames(query_Graph);
@@ -2708,6 +2714,9 @@ public class RisoTreeQueryPN {
             node.getRelationships(Labels.RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
         for (Relationship relationship : rels) {
           Node geom = relationship.getEndNode();
+          if (!geom.hasLabel(kNNLabel)) {
+            continue;
+          }
           Object object = geom.getProperty(lon_name);
           if (object == null)
             throw new Exception(
@@ -2723,7 +2732,6 @@ public class RisoTreeQueryPN {
       else if (Neo4jGraphUtility.isNodeSpatial(node)) {
         visit_spatial_object_count++;
         long id = node.getId();
-        // OwnMethods.Print(id);
         queue_time += System.currentTimeMillis() - start;
 
         start = System.currentTimeMillis();
