@@ -168,4 +168,15 @@ public class Query_Graph {
     }
     label_list = null;
   }
+
+  public String getLabel(int idx) throws Exception {
+    switch (labelType) {
+      case INT:
+        return "GRAPH_" + label_list[idx];
+      case STRING:
+        return label_list_string[idx];
+      default:
+        throw new Exception(labelType + " does not exist!");
+    }
+  }
 }
