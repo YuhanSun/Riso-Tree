@@ -413,7 +413,7 @@ public class QueryNodeCount {
 
     ReadWriteUtil.WriteFile(avgPath, true,
         String.format(
-            "dbPath:%s, queryCount:%d, MAX_HOP:%d, kValue:%d, clearCache:%s, ClearCacheMethod:%s",
+            "dbPath:%s, queryCount:%d, MAX_HOP:%d, kValue:%d, clearCache:%s, ClearCacheMethod:%s\n",
             dbPath, queryCount, MAX_HOP, kValue, clearCache, clearCacheMethod));
     List<QueryStatistic> queryStatistics =
         ExperimentUtil.getQueryStatistics(QueryType.LAGAQ_KNN, method);
@@ -426,8 +426,7 @@ public class QueryNodeCount {
       ReadWriteUtil.WriteFile(detailPath, true, "id\t" + header + "\n");
 
       List<ResultRecord> records = KnnExperimentUtil.runExperiment(dbPath, dataset, method, MAX_HOP,
-          queryPath, kValue, queryCount, password, clearCache, clearCacheMethod,
-          avgPath);
+          queryPath, kValue, queryCount, password, clearCache, clearCacheMethod, avgPath);
 
       ExperimentUtil.outputDetailResult(records, queryStatistics, detailPath);
 

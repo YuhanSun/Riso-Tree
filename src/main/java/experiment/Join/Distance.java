@@ -383,7 +383,7 @@ public class Distance {
     String detailPath = ExperimentSpaceSelectivity.getDetailOutputPath(outputDir, method);
 
     ReadWriteUtil.WriteFile(avgPath, true, String.format(
-        "dbPath:%s, queryPath:%s, queryCount:%d, MAX_HOP:%d, clearCache:%s, ClearCacheMethod:%s",
+        "dbPath:%s, queryPath:%s, queryCount:%d, MAX_HOP:%d, clearCache:%s, ClearCacheMethod:%s\n",
         dbPath, queryPath, queryCount, MAX_HOP, clearCache, clearCacheMethod));
     List<QueryStatistic> queryStatistics =
         ExperimentUtil.getQueryStatistics(QueryType.LAGAQ_JOIN, method);
