@@ -756,7 +756,7 @@ public class SpatialFirst_List {
       int querySpatialVertexID = spatialPredicatesMap.keySet().iterator().next();
       MyRectangle queryRectangle = spatialPredicatesMap.get(querySpatialVertexID);
       queryLoc = new MyPoint(queryRectangle.min_x, queryRectangle.min_y);
-      String kNNLabel = query_Graph.getLabel(querySpatialVertexID);
+      Label kNNLabel = Label.label(query_Graph.getLabel(querySpatialVertexID));
 
       long start = System.currentTimeMillis();
       Transaction tx = dbservice.beginTx();
@@ -791,6 +791,9 @@ public class SpatialFirst_List {
             if (!geom.hasProperty(lon_name)) {
               throw new Exception(String.format("Node %d does not have %s", geom, lon_name));
             }
+            if (!geom.hasLabel(kNNLabel)) {
+              continue;
+            }
             double lon = (Double) geom.getProperty(lon_name);
             double lat = (Double) geom.getProperty(lat_name);
             queue.add(new Element(geom, Util.distance(queryLoc, new MyPoint(lon, lat))));
@@ -799,10 +802,6 @@ public class SpatialFirst_List {
         // spatial object
         else if (Neo4jGraphUtility.isNodeSpatial(node)) {
           visit_spatial_object_count++;
-          if (!node.hasLabel(Label.label(kNNLabel))) {
-            queue_time += System.currentTimeMillis() - start;
-            continue;
-          }
           long id = node.getId();
 
           queue_time += System.currentTimeMillis() - start;
