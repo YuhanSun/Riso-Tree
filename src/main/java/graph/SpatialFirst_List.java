@@ -12,6 +12,7 @@ import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Result;
@@ -746,17 +747,16 @@ public class SpatialFirst_List {
     long totalStart = System.currentTimeMillis();
     try {
       ArrayList<Long> resultIDs = new ArrayList<Long>();
-      MyPoint queryLoc = null;
-      int querySpatialVertexID = 0;
-
-      for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
-        if (query_Graph.Has_Spa_Predicate[i]) {
-          querySpatialVertexID = i;
-          MyRectangle queryRect = query_Graph.spa_predicate[i];
-          queryLoc = new MyPoint(queryRect.min_x, queryRect.min_y);
-          break;
-        }
+      Map<Integer, MyRectangle> spatialPredicatesMap = query_Graph.getSpatialPredicates();
+      if (spatialPredicatesMap.size() != 1) {
+        throw new Exception(String.format("query graph has %d spatial predicates rather than 1!",
+            spatialPredicatesMap.size()));
       }
+      MyPoint queryLoc = null;
+      int querySpatialVertexID = spatialPredicatesMap.keySet().iterator().next();
+      MyRectangle queryRectangle = spatialPredicatesMap.get(querySpatialVertexID);
+      queryLoc = new MyPoint(queryRectangle.min_x, queryRectangle.min_y);
+      String kNNLabel = query_Graph.getLabel(querySpatialVertexID);
 
       long start = System.currentTimeMillis();
       Transaction tx = dbservice.beginTx();
@@ -799,8 +799,11 @@ public class SpatialFirst_List {
         // spatial object
         else if (Neo4jGraphUtility.isNodeSpatial(node)) {
           visit_spatial_object_count++;
+          if (!node.hasLabel(Label.label(kNNLabel))) {
+            queue_time += System.currentTimeMillis() - start;
+            continue;
+          }
           long id = node.getId();
-          // OwnMethods.Print(id);
 
           queue_time += System.currentTimeMillis() - start;
 
