@@ -775,7 +775,7 @@ public class SpatialFirst_List {
           for (Relationship relationship : rels) {
             Node child = relationship.getEndNode();
             if (!child.hasProperty(BBoxName)) {
-              throw new Exception(String.format("Node %s does not have bbox", child));
+              throw new Exception(String.format("Node %s does not have %s", child, BBoxName));
             }
             double[] bbox = (double[]) child.getProperty(BBoxName);
             MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
@@ -790,7 +790,7 @@ public class SpatialFirst_List {
             Node geom = relationship.getEndNode();
             if (!geom.hasProperty(lon_name)) {
               throw new Exception(
-                  String.format("Node %d does not have %s property", geom.getId(), lon_name));
+                  String.format("Node %d does not have %s", geom, lon_name));
             }
             double lon = (Double) geom.getProperty(lon_name);
             double lat = (Double) geom.getProperty(lat_name);
