@@ -789,8 +789,7 @@ public class SpatialFirst_List {
           for (Relationship relationship : rels) {
             Node geom = relationship.getEndNode();
             if (!geom.hasProperty(lon_name)) {
-              throw new Exception(
-                  String.format("Node %d does not have %s", geom, lon_name));
+              throw new Exception(String.format("Node %d does not have %s", geom, lon_name));
             }
             double lon = (Double) geom.getProperty(lon_name);
             double lat = (Double) geom.getProperty(lat_name);
