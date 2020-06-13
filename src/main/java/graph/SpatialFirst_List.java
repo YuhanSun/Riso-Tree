@@ -55,6 +55,7 @@ public class SpatialFirst_List {
   public static int MAX_HOPNUM = config.getMaxHopNum();
   public static String graphLinkLabelName = Labels.GraphRel.GRAPH_LINK.name();
   public static Enums.system systemName = config.getSystemName();
+  public final static String BBoxName = config.BBoxName;
 
   // query statistics >>
   public long run_time;
@@ -197,8 +198,8 @@ public class SpatialFirst_List {
         LinkedList<Node> overlap_MBR_list = new LinkedList<Node>();
 
         for (Node node : cur_list) {
-          if (node.hasProperty("bbox")) {
-            double[] bbox = (double[]) node.getProperty("bbox");
+          if (node.hasProperty(BBoxName)) {
+            double[] bbox = (double[]) node.getProperty(BBoxName);
             MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
             if (query_rectangle.intersect(MBR) != null) {
               overlap_MBR_list.add(node);
@@ -374,7 +375,7 @@ public class SpatialFirst_List {
         for (Relationship relationship : rels) {
           start_1 = System.currentTimeMillis();
           Node geom = relationship.getEndNode();
-          double[] bbox = (double[]) geom.getProperty("bbox");
+          double[] bbox = (double[]) geom.getProperty(BBoxName);
           MyRectangle bbox_rect = new MyRectangle(bbox);
           if (min_queryRectangle.intersect(bbox_rect) != null) {
             located_in_count++;
@@ -687,7 +688,7 @@ public class SpatialFirst_List {
         ArrayList<Long> ids = new ArrayList<Long>();
         for (Relationship relationship : rels) {
           Node geom = relationship.getEndNode();
-          double[] bbox = (double[]) geom.getProperty("bbox");
+          double[] bbox = (double[]) geom.getProperty(BBoxName);
           MyRectangle bbox_rect = new MyRectangle(bbox);
           if (min_queryRectangle.intersect(bbox_rect) != null) {
             located_in_count++;
@@ -773,7 +774,7 @@ public class SpatialFirst_List {
               node.getRelationships(Labels.RTreeRel.RTREE_CHILD, Direction.OUTGOING);
           for (Relationship relationship : rels) {
             Node child = relationship.getEndNode();
-            double[] bbox = (double[]) child.getProperty("bbox");
+            double[] bbox = (double[]) child.getProperty(BBoxName);
             MyRectangle MBR = new MyRectangle(bbox[0], bbox[1], bbox[2], bbox[3]);
             queue.add(new Element(child, Util.distance(queryLoc, MBR)));
           }
