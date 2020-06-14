@@ -792,6 +792,11 @@ public class SpatialFirst_List {
               throw new Exception(String.format("Node %d does not have %s", geom, lon_name));
             }
             if (!geom.hasLabel(kNNLabel)) {
+              Util.println("Node %s does not have label %s");
+              Iterable<Label> labels = geom.getLabels();
+              for (Label label : labels) {
+                Util.println(label);
+              }
               continue;
             }
             double lon = (Double) geom.getProperty(lon_name);
