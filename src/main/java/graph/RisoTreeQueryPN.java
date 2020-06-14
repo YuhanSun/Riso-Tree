@@ -2735,9 +2735,9 @@ public class RisoTreeQueryPN {
             node.getRelationships(Labels.RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
         for (Relationship relationship : rels) {
           Node geom = relationship.getEndNode();
-          if (!geom.hasLabel(kNNLabel)) {
-            continue;
-          }
+          // if (!geom.hasLabel(kNNLabel)) {
+          // continue;
+          // }
           Object object = geom.getProperty(lon_name);
           if (object == null)
             throw new Exception(
