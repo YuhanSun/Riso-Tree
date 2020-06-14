@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.logging.Logger;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.ExecutionPlanDescription;
@@ -91,6 +92,8 @@ public class SpatialFirst_List {
   public ExecutionPlanDescription planDescription;
 
   public Map<QueryStatistic, Object> queryStatisticMap = new HashMap<>();
+
+  private static final Logger LOGGER = Logger.getLogger(SpatialFirst_List.class.getName());
 
   /**
    * 
@@ -792,10 +795,10 @@ public class SpatialFirst_List {
               throw new Exception(String.format("Node %d does not have %s", geom, lon_name));
             }
             if (!geom.hasLabel(kNNLabel)) {
-              Util.println("Node %s does not have label %s");
+              LOGGER.info("Node %s does not have label %s");
               Iterable<Label> labels = geom.getLabels();
               for (Label label : labels) {
-                Util.println(label);
+                LOGGER.info(label.toString());
               }
               continue;
             }
