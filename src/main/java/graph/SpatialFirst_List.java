@@ -795,14 +795,14 @@ public class SpatialFirst_List {
             if (!geom.hasProperty(lon_name)) {
               throw new Exception(String.format("Node %d does not have %s", geom, lon_name));
             }
-            if (!geom.hasLabel(kNNLabel)) {
-              LOGGER.info("Node %s does not have label %s");
-              Iterable<Label> labels = geom.getLabels();
-              for (Label label : labels) {
-                LOGGER.info(label.toString());
-              }
-              continue;
-            }
+            // if (!geom.hasLabel(kNNLabel)) {
+            // LOGGER.info("Node %s does not have label %s");
+            // Iterable<Label> labels = geom.getLabels();
+            // for (Label label : labels) {
+            // LOGGER.info(label.toString());
+            // }
+            // continue;
+            // }
             double lon = (Double) geom.getProperty(lon_name);
             double lat = (Double) geom.getProperty(lat_name);
             queue.add(new Element(geom, Util.distance(queryLoc, new MyPoint(lon, lat))));
