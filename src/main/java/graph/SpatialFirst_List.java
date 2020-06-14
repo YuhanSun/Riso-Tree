@@ -760,6 +760,7 @@ public class SpatialFirst_List {
       MyRectangle queryRectangle = spatialPredicatesMap.get(querySpatialVertexID);
       queryLoc = new MyPoint(queryRectangle.min_x, queryRectangle.min_y);
       Label kNNLabel = Label.label(query_Graph.getLabel(querySpatialVertexID));
+      Util.println(kNNLabel.toString());
 
       long start = System.currentTimeMillis();
       Transaction tx = dbservice.beginTx();
