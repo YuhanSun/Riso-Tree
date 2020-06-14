@@ -2599,6 +2599,27 @@ public class RisoTreeQueryPN {
     return true;
   }
 
+
+  /**
+   * Check a node covers all the paths
+   * 
+   * @param node It has to be a node in RisoTree. It cannot be a spatial object.
+   * @param paths
+   * @return
+   */
+  public static boolean checkPaths(Node node, Set<String> paths) {
+    int coverCount = 0;
+    for (String key : node.getAllProperties().keySet()) {
+      if (paths.contains(key)) {
+        coverCount++;
+        if (coverCount == paths.size()) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   /**
    * form the cypher query for MBR block
    * 
@@ -2658,7 +2679,7 @@ public class RisoTreeQueryPN {
           String.format("The number of anchor vertex in the LAGAQ-KNN query is %d rather than 1!",
               spaPathsMap.size()));
     }
-    LinkedList<String> paths = new LinkedList<String>();
+    Set<String> paths = new HashSet<String>();
     int i = spaPathsMap.keySet().iterator().next();
     for (int j : spaPathsMap.get(i).keySet()) {
       for (String path : spaPathsMap.get(i).get(j)) {
