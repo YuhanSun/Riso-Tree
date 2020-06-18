@@ -205,7 +205,7 @@ public class Naive_Neo4j_Match_Test {
   }
 
   @Test
-  public void LAGAQ_JoinTest() {
+  public void LAGAQ_JoinTest() throws Exception {
     double distance = 0.00001;
     Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(db_path);
     OwnMethods.convertQueryGraphForJoinRandom(query_Graph);

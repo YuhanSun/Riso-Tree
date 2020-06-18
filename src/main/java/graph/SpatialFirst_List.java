@@ -929,9 +929,10 @@ public class SpatialFirst_List {
           pos.add(i);
         }
       }
-      if (count != 2)
+      if (count != 2) {
         throw new Exception(String
             .format("Number of query graph spatial predicate is " + "%d, it should be 2!", count));
+      }
 
       long start = System.currentTimeMillis();
       List<Long[]> idPairs = this.spatialJoinRTree(distance);

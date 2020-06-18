@@ -3652,9 +3652,10 @@ public class RisoTreeQueryPN {
           pos.add(i);
         }
       }
-      if (count != 2)
+      if (count != 2) {
         throw new Exception(String
             .format("Number of query graph spatial predicate is " + "%d, it should be 2!", count));
+      }
 
       HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
 
