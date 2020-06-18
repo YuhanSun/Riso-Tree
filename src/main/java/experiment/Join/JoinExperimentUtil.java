@@ -2,8 +2,10 @@ package experiment.Join;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import commons.Config;
 import commons.Enums;
 import commons.Enums.ExperimentMethod;
@@ -11,6 +13,7 @@ import commons.Enums.QueryType;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.Query_Graph;
+import commons.Query_Graph.LabelType;
 import commons.ReadWriteUtil;
 import commons.Util;
 import cypher.middleware.CypherDecoder;
@@ -20,6 +23,47 @@ import graph.RisoTreeQueryPN;
 import graph.SpatialFirst_List;
 
 public class JoinExperimentUtil {
+  /**
+   * Convert the one-predicate query graph to two-predicate Randomly pick up the next true spatial
+   * vertex. The query graph is for LAGAQ-join input.
+   *
+   * @param service
+   * @param query_Graph
+   * @return {@code false} means {@code query_Graph} cannot be converted to a query graph for
+   *         LAGAQ-join and {@code true} means it can.
+   * @throws Exception
+   */
+  public static boolean convertQueryGraphForJoinRandom(GraphDatabaseService service,
+      Query_Graph query_Graph) throws Exception {
+    if (!query_Graph.labelType.equals(LabelType.STRING)) {
+      throw new Exception(
+          query_Graph.labelType + " is not supported by convertQueryGraphForJoinRandom");
+    }
+    int nodeCount = query_Graph.graph.size();
+
+    int spaCount = 0;
+    for (int i = 0; i < nodeCount; i++)
+      if (query_Graph.label_list[i] == 1)
+        spaCount++;
+
+    if (spaCount <= 1) {
+      return false;
+    }
+
+    Random random = new Random();
+    while (true) {
+      int id = (int) (nodeCount * random.nextDouble());
+      if (query_Graph.Has_Spa_Predicate[id])
+        continue;
+
+      Label label = Label.label(query_Graph.label_list_string[id]);
+      if (Neo4jGraphUtility.isLabelSpatial(service, label)) {
+        query_Graph.Has_Spa_Predicate[id] = true;
+        return true;
+      }
+    }
+  }
+
   /**
    * Run experiment for a set of queries. Print the query id and each query.
    *
@@ -40,12 +84,24 @@ public class JoinExperimentUtil {
       int queryCount, String password, boolean clearCache, Enums.ClearCacheMethod clearCacheMethod,
       String outputPath) throws Exception {
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath, Config.SKIPFLAG);
-    queries = queries.subList(0, queryCount);
     GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
-    List<Query_Graph> queryGraphs = new ArrayList<>(queries.size());
+    List<Query_Graph> oriQueryGraphs = new ArrayList<>(queries.size());
     for (String query : queries) {
-      queryGraphs.add(CypherDecoder.getQueryGraph(query, service));
+      oriQueryGraphs.add(CypherDecoder.getQueryGraph(query, service));
     }
+    List<Query_Graph> queryGraphs = new ArrayList<>(queries.size());
+    for (Query_Graph query_Graph : oriQueryGraphs) {
+      if (JoinExperimentUtil.convertQueryGraphForJoinRandom(service, query_Graph)) {
+        queryGraphs.add(query_Graph);
+      }
+    }
+
+    if (queryGraphs.size() < queryCount) {
+      throw new Exception(
+          String.format("Only %d query graphs can be used for LAGAQ-join but %d are required!",
+              queryGraphs.size(), queryCount));
+    }
+    queryGraphs = queryGraphs.subList(0, queryCount);
     service.shutdown();
 
     int queryId = -1;
