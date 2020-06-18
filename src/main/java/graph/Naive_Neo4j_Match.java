@@ -206,14 +206,18 @@ public class Naive_Neo4j_Match {
     return query;
   }
 
-  public List<long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) {
+  public List<long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) throws Exception {
     iniLogVariables();
     long sumStart = System.currentTimeMillis();
     List<long[]> res = new LinkedList<>();
     ArrayList<Integer> pos = new ArrayList<>();
     for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
-      if (query_Graph.Has_Spa_Predicate[i])
+      if (query_Graph.Has_Spa_Predicate[i]) {
         pos.add(i);
+      }
+    }
+    if (pos.size() != 2) {
+      throw new Exception(String.format("query graph has %d spatial predicate!", pos.size()));
     }
     String query = formQueryJoin(query_Graph, pos, distance, Enums.Explain_Or_Profile.Profile);
     Util.println(query);
@@ -243,9 +247,8 @@ public class Naive_Neo4j_Match {
     return res;
   }
 
-  public static String formQueryKNN(Query_Graph query_Graph, Enums.Explain_Or_Profile explain_Or_Profile,
-      int K)
-      throws Exception {
+  public static String formQueryKNN(Query_Graph query_Graph,
+      Enums.Explain_Or_Profile explain_Or_Profile, int K) throws Exception {
     String query = CypherEncoder.getMatchPrefix(explain_Or_Profile);
     query += " " + CypherEncoder.getMatchGraphSkeletonString(query_Graph);
     query += " return " + CypherEncoder.getMatchReturnString(query_Graph);
@@ -258,8 +261,8 @@ public class Naive_Neo4j_Match {
     }
     int spatialPredicateIndex = spatialPredicates.keySet().iterator().next();
     MyRectangle queryRectangle = spatialPredicates.get(spatialPredicateIndex);
-    query += String.format(" order by (a%d.%s - %f)*(a%d.%s - %f)", spatialPredicateIndex,
-        lon_name, queryRectangle.min_x, spatialPredicateIndex, lon_name, queryRectangle.min_x);
+    query += String.format(" order by (a%d.%s - %f)*(a%d.%s - %f)", spatialPredicateIndex, lon_name,
+        queryRectangle.min_x, spatialPredicateIndex, lon_name, queryRectangle.min_x);
     query += String.format(" + (a%d.%s - %f)*(a%d.%s - %f)", spatialPredicateIndex, lat_name,
         queryRectangle.min_y, spatialPredicateIndex, lat_name, queryRectangle.min_y);
 
