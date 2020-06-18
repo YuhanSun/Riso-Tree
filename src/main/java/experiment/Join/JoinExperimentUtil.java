@@ -6,6 +6,7 @@ import java.util.Random;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.Transaction;
 import commons.Config;
 import commons.Enums;
 import commons.Enums.ExperimentMethod;
@@ -93,11 +94,15 @@ public class JoinExperimentUtil {
       oriQueryGraphs.add(CypherDecoder.getQueryGraph(query, service));
     }
     List<Query_Graph> queryGraphs = new ArrayList<>(queries.size());
+    Transaction tx = service.beginTx();
     for (Query_Graph query_Graph : oriQueryGraphs) {
       if (JoinExperimentUtil.convertQueryGraphForJoinRandom(service, query_Graph)) {
         queryGraphs.add(query_Graph);
       }
     }
+    tx.success();
+    tx.close();
+    service.shutdown();
 
     if (queryGraphs.size() < queryCount) {
       throw new Exception(
@@ -105,7 +110,6 @@ public class JoinExperimentUtil {
               queryGraphs.size(), queryCount));
     }
     queryGraphs = queryGraphs.subList(0, queryCount);
-    service.shutdown();
 
     int queryId = -1;
     List<ResultRecord> records = new ArrayList<>(queryCount);
