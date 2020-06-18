@@ -42,11 +42,14 @@ public class JoinExperimentUtil {
     int nodeCount = query_Graph.graph.size();
 
     int spaCount = 0;
-    for (int i = 0; i < nodeCount; i++)
-      if (query_Graph.label_list[i] == 1)
+    for (int i = 0; i < nodeCount; i++) {
+      Label label = Label.label(query_Graph.label_list_string[i]);
+      if (Neo4jGraphUtility.isLabelSpatial(service, label)) {
         spaCount++;
+      }
+    }
 
-    if (spaCount <= 1) {
+    if (spaCount < 2) {
       return false;
     }
 
