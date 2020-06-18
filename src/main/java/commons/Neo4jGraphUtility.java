@@ -5,9 +5,11 @@ import java.util.HashSet;
 import java.util.logging.Logger;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
@@ -16,6 +18,29 @@ public class Neo4jGraphUtility {
 
   private static final Logger LOGGER = Logger.getLogger(Neo4jGraphUtility.class.getName());
 
+  /**
+   * Check if a label is spatial by checking whether the first node found using {@code findNodes} is
+   * a spatial node or not. It is not an accurate logic but is enough for generating query graph for
+   * LAGAQ-join.
+   *
+   * @param node
+   * @return
+   */
+  public static boolean isLabelSpatial(GraphDatabaseService service, Label label) {
+    ResourceIterator<Node> nodeIterator = service.findNodes(label);
+    if (nodeIterator.hasNext()) {
+      Node node = nodeIterator.next();
+      return isNodeSpatial(node);
+    }
+    return false;
+  }
+
+  /**
+   * Check if a node is spatial by checking whether it has {@code latitude_property_name}.
+   *
+   * @param node
+   * @return
+   */
   public static boolean isNodeSpatial(Node node) {
     return node.hasProperty(Config.latitude_property_name);
   }
