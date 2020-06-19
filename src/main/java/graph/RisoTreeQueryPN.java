@@ -3193,31 +3193,9 @@ public class RisoTreeQueryPN {
   public static String formQueryLAGAQ_Join(Query_Graph query_Graph, ArrayList<Integer> pos,
       Long[] idPair, int limit, Enums.Explain_Or_Profile explain_Or_Profile) {
     String query = "";
-    switch (explain_Or_Profile) {
-      case Profile:
-        query += "profile match ";
-        break;
-      case Explain:
-        query += "explain match ";
-        break;
-      case Nothing:
-        query += "match ";
-        break;
-    }
-
-    // label
-    query += String.format("(a0:GRAPH_%d)", query_Graph.label_list[0]);
-    for (int i = 1; i < query_Graph.graph.size(); i++)
-      query += String.format(",(a%d:GRAPH_%d)", i, query_Graph.label_list[i]);
-
-    // edge
-    for (int i = 0; i < query_Graph.graph.size(); i++) {
-      for (int j = 0; j < query_Graph.graph.get(i).size(); j++) {
-        int neighbor = query_Graph.graph.get(i).get(j);
-        if (neighbor > i)
-          query += String.format(",(a%d)-[:%s]-(a%d)", i, graphLinkLabelName, neighbor);
-      }
-    }
+    query += CypherEncoder.getMatchPrefix(explain_Or_Profile);
+    query += " ";
+    query += CypherEncoder.getMatchGraphSkeletonString(query_Graph);
 
     query += " where\n";
 
