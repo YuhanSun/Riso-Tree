@@ -237,7 +237,7 @@ public class Naive_Neo4j_Match {
     }
     iterate_time += System.currentTimeMillis() - start;
 
-    ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+    planDescription = result.getExecutionPlanDescription();
     page_access = OwnMethods.GetTotalDBHits(planDescription);
 
     tx.success();
@@ -291,7 +291,7 @@ public class Naive_Neo4j_Match {
     }
     iterate_time += System.currentTimeMillis() - start;
 
-    ExecutionPlanDescription planDescription = result.getExecutionPlanDescription();
+    planDescription = result.getExecutionPlanDescription();
     page_access = OwnMethods.GetTotalDBHits(planDescription);
 
     tx.success();
