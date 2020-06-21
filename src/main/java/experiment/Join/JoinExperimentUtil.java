@@ -26,7 +26,8 @@ import graph.SpatialFirst_List;
 public class JoinExperimentUtil {
   /**
    * Convert the one-predicate query graph to two-predicate Randomly pick up the next true spatial
-   * vertex. The query graph is for LAGAQ-join input.
+   * vertex. The query graph is for LAGAQ-join input. This function is not used for experiment
+   * because it may lead to different runs with different query set.
    *
    * @param service
    * @param query_Graph
@@ -69,6 +70,51 @@ public class JoinExperimentUtil {
   }
 
   /**
+   * Convert the one-predicate query graph to two-predicate. Always pick up the second true spatial
+   * vertex. The query graph is for LAGAQ-join input.
+   *
+   * @param service
+   * @param query_Graph
+   * @return {@code false} means {@code query_Graph} cannot be converted to a query graph for
+   *         LAGAQ-join and {@code true} means it can.
+   * @throws Exception
+   */
+  public static boolean convertQueryGraphForJoinFixed(GraphDatabaseService service,
+      Query_Graph query_Graph) throws Exception {
+    if (!query_Graph.labelType.equals(LabelType.STRING)) {
+      throw new Exception(
+          query_Graph.labelType + " is not supported by convertQueryGraphForJoinRandom");
+    }
+    int nodeCount = query_Graph.graph.size();
+
+    int spaCount = 0;
+    for (int i = 0; i < nodeCount; i++) {
+      Label label = Label.label(query_Graph.label_list_string[i]);
+      if (Neo4jGraphUtility.isLabelSpatial(service, label)) {
+        spaCount++;
+      }
+    }
+
+    if (spaCount < 2) {
+      return false;
+    }
+
+
+    for (int id = 0; id < nodeCount; id++) {
+      if (query_Graph.Has_Spa_Predicate[id]) {
+        continue;
+      }
+
+      Label label = Label.label(query_Graph.label_list_string[id]);
+      if (Neo4jGraphUtility.isLabelSpatial(service, label)) {
+        query_Graph.Has_Spa_Predicate[id] = true;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Run experiment for a set of queries. Print the query id and each query.
    *
    * @param dbPath
@@ -96,7 +142,7 @@ public class JoinExperimentUtil {
     List<Query_Graph> queryGraphs = new ArrayList<>(queries.size());
     Transaction tx = service.beginTx();
     for (Query_Graph query_Graph : oriQueryGraphs) {
-      if (JoinExperimentUtil.convertQueryGraphForJoinRandom(service, query_Graph)) {
+      if (JoinExperimentUtil.convertQueryGraphForJoinFixed(service, query_Graph)) {
         queryGraphs.add(query_Graph);
       }
     }
