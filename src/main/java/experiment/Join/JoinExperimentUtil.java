@@ -152,21 +152,21 @@ public class JoinExperimentUtil {
         Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
         naive_Neo4j_Match.LAGAQ_Join(query, joinDistance);
         planDescription = naive_Neo4j_Match.planDescription;
-        record = new ResultRecord(QueryType.LAGAQ_KNN, ExperimentMethod.NAIVE,
+        record = new ResultRecord(QueryType.LAGAQ_JOIN, ExperimentMethod.NAIVE,
             naive_Neo4j_Match.getQueryStatisticMap(), naive_Neo4j_Match.planDescription);
         break;
       case SPATIAL_FIRST:
         SpatialFirst_List spatialFirst_List = new SpatialFirst_List(service, dataset);
         spatialFirst_List.LAGAQ_Join(query, joinDistance);
         planDescription = spatialFirst_List.planDescription;
-        record = new ResultRecord(QueryType.LAGAQ_KNN, ExperimentMethod.SPATIAL_FIRST,
+        record = new ResultRecord(QueryType.LAGAQ_JOIN, ExperimentMethod.SPATIAL_FIRST,
             spatialFirst_List.getQueryStatisticMap(), spatialFirst_List.planDescription);
         break;
       case RISOTREE:
         RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOP);
         risoTreeQueryPN.LAGAQ_Join(query, joinDistance);
         planDescription = risoTreeQueryPN.planDescription;
-        record = new ResultRecord(QueryType.LAGAQ_KNN, ExperimentMethod.RISOTREE,
+        record = new ResultRecord(QueryType.LAGAQ_JOIN, ExperimentMethod.RISOTREE,
             risoTreeQueryPN.getQueryStatisticMap(), risoTreeQueryPN.planDescription);
         break;
       default:
