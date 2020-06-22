@@ -17,8 +17,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Enums;
-import commons.Enums.Explain_Or_Profile;
-import commons.Enums.system;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
@@ -292,7 +290,8 @@ public class RisoTreeQueryPNTest {
 
       long start = System.currentTimeMillis();
       // List<Long[]> result = risoTreeQueryPN.spatialJoinRTree(distance, pos, spaPathsMap);
-      List<Long[]> result = risoTreeQueryPN.spatialJoinRTreeOverlap(distance, pos, spaPathsMap);
+      List<Long[]> result =
+          risoTreeQueryPN.spatialJoinRTreeOverlap(distance, pos, null, spaPathsMap);
       long time = System.currentTimeMillis() - start;
       Util.println("total time: " + time);
       Util.println("check path time: " + risoTreeQueryPN.check_paths_time);

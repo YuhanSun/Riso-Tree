@@ -3443,16 +3443,21 @@ public class RisoTreeQueryPN {
   }
 
   public List<Long[]> spatialJoinRTreeOverlap(double distance, ArrayList<Integer> pos,
+      ArrayList<Label> targetLabels,
       HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap) {
     LinkedList<String> leftpaths = new LinkedList<String>();
     LinkedList<String> rightpaths = new LinkedList<String>();
 
     // pos[0]--lp
     // pos[1]--rp
+    Label leftLabel = targetLabels.get(0);
+    Label rightLabel = targetLabels.get(1);
     HashMap<Integer, HashSet<String>> lp = spaPathsMap.get(pos.get(0));
-    for (int endID : lp.keySet())
-      for (String path : lp.get(endID))
+    for (int endID : lp.keySet()) {
+      for (String path : lp.get(endID)) {
         leftpaths.add(path);
+      }
+    }
 
     HashMap<Integer, HashSet<String>> rp = spaPathsMap.get(pos.get(1));
     for (int endID : rp.keySet())
@@ -3502,27 +3507,32 @@ public class RisoTreeQueryPN {
             rightChildern.add(new NodeAndRec(child, mbr));
         }
 
-        for (NodeAndRec leftChild : leftChildren)
-          for (NodeAndRec rightChild : rightChildern)
+        for (NodeAndRec leftChild : leftChildren) {
+          if (!leftChild.node.hasLabel(leftLabel)) {
+            continue;
+          }
+          for (NodeAndRec rightChild : rightChildern) {
+            if (!rightChild.node.hasLabel(rightLabel)) {
+              continue;
+            }
             if (Util.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
               long id1 = leftChild.node.getId();
               long id2 = rightChild.node.getId();
               if (id1 != id2)
                 result.add(new Long[] {id1, id2});
             }
-      } else {
+          }
+        }
+      } else { // this node is non-leaf
         Iterable<Relationship> rels =
             left.node.getRelationships(RTreeRel.RTREE_CHILD, Direction.OUTGOING);
-        long start = System.currentTimeMillis();
         Iterator<Relationship> iterator = rels.iterator();
         Node tempNode = iterator.next().getEndNode();
+        // flag means whether tempNode is a leaf node
         boolean flag = tempNode.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING);
-        // check_paths_time += System.currentTimeMillis() - start;
 
         // no path checking in this case
-        if (flag == false)
-        // if (isChildNodeLeaf(left.node) == false)
-        {
+        if (!flag) {
           for (Relationship relationship : rels) {
             Node child = relationship.getEndNode();
             MyRectangle mbr = RTreeUtility.getNodeMBR(child);
@@ -3624,10 +3634,12 @@ public class RisoTreeQueryPN {
 
       int count = 0;
       ArrayList<Integer> pos = new ArrayList<Integer>(2);
+      ArrayList<Label> targetLabels = new ArrayList<>(2);
       for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
         if (query_Graph.Has_Spa_Predicate[i] == true) {
-          count++;
           pos.add(i);
+          targetLabels.add(Label.label(query_Graph.getLabel(i)));
+          count++;
         }
       }
       if (count != 2) {
@@ -3640,7 +3652,7 @@ public class RisoTreeQueryPN {
       long start = System.currentTimeMillis();
       Util.println(pos);
       Util.println(spaPathsMap);
-      List<Long[]> idPairs = this.spatialJoinRTreeOverlap(distance, pos, spaPathsMap);
+      List<Long[]> idPairs = this.spatialJoinRTreeOverlap(distance, pos, targetLabels, spaPathsMap);
       // List<Long[]> idPairs = this.spatialJoinRTree(distance, pos, spaPathsMap);
       join_time = System.currentTimeMillis() - start;
       join_result_count = idPairs.size();
