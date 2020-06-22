@@ -3445,8 +3445,11 @@ public class RisoTreeQueryPN {
   public List<Long[]> spatialJoinRTreeOverlap(double distance, ArrayList<Integer> pos,
       ArrayList<Label> targetLabels,
       HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap) {
-    Set<String> leftpaths = new HashSet<>();
-    Set<String> rightpaths = new HashSet<>();
+    LinkedList<String> leftpaths = new LinkedList<>();
+    LinkedList<String> rightpaths = new LinkedList<>();
+
+    // Set<String> leftpaths = new HashSet<>();
+    // Set<String> rightpaths = new HashSet<>();
 
     // pos[0]--lp
     // pos[1]--rp
