@@ -2609,7 +2609,7 @@ public class RisoTreeQueryPN {
    */
   public static boolean checkPaths(Node node, Set<String> paths) {
     int coverCount = 0;
-    for (String key : node.getAllProperties().keySet()) {
+    for (String key : node.getPropertyKeys()) {
       if (paths.contains(key)) {
         coverCount++;
         if (coverCount == paths.size()) {
