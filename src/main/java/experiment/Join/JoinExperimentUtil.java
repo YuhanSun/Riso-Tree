@@ -99,7 +99,7 @@ public class JoinExperimentUtil {
       return false;
     }
 
-
+    int idx = 0;
     for (int id = 0; id < nodeCount; id++) {
       if (query_Graph.Has_Spa_Predicate[id]) {
         continue;
@@ -107,6 +107,10 @@ public class JoinExperimentUtil {
 
       Label label = Label.label(query_Graph.label_list_string[id]);
       if (Neo4jGraphUtility.isLabelSpatial(service, label)) {
+        if (idx == 0) {
+          idx++;
+          continue;
+        }
         query_Graph.Has_Spa_Predicate[id] = true;
         return true;
       }
