@@ -2573,7 +2573,7 @@ public class RisoTreeQueryPN {
 
   /**
    * Check a node covers all the paths
-   * 
+   *
    * @param node It has to be a node in RisoTree. It cannot be a spatial object.
    * @param paths
    * @return
@@ -3445,8 +3445,8 @@ public class RisoTreeQueryPN {
   public List<Long[]> spatialJoinRTreeOverlap(double distance, ArrayList<Integer> pos,
       ArrayList<Label> targetLabels,
       HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap) {
-    LinkedList<String> leftpaths = new LinkedList<String>();
-    LinkedList<String> rightpaths = new LinkedList<String>();
+    Set<String> leftpaths = new HashSet<>();
+    Set<String> rightpaths = new HashSet<>();
 
     // pos[0]--lp
     // pos[1]--rp
