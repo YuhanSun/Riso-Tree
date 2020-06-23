@@ -3698,6 +3698,7 @@ public class RisoTreeQueryPN {
     int i = -1;
     String query = "";
     for (Long[] idPair : idPairs) {
+      i++;
       if (i == 0) {
         query = formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
         continue;
