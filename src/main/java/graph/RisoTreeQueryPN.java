@@ -120,6 +120,8 @@ public class RisoTreeQueryPN {
   public static Boolean candidateComplete = null;
   public static Map<Integer, MutableBoolean[]> queryNodesComplete = null;
   public final static int candidateSetsSizeLimit = 2000;
+  public final static boolean joinBatch = true;
+  public final static int joinBatchSize = 50;
 
   public RisoTreeQueryPN(String db_path, String p_dataset, long[] p_graph_pos_map, int pMAXHOPNUM,
       boolean forceGraphFirst) {
@@ -3629,43 +3631,45 @@ public class RisoTreeQueryPN {
     return result;
   }
 
-  public List<Long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) {
-    try {
-      clearTrackingVariables();
-      long totalStart = System.currentTimeMillis();
-      List<Long[]> resultPairs = new LinkedList<Long[]>();
+  public List<Long[]> LAGAQ_Join(Query_Graph query_Graph, double distance) throws Exception {
+    clearTrackingVariables();
+    long totalStart = System.currentTimeMillis();
+    List<Long[]> resultPairs = new LinkedList<Long[]>();
 
-      int count = 0;
-      ArrayList<Integer> pos = new ArrayList<Integer>(2);
-      ArrayList<Label> targetLabels = new ArrayList<>(2);
-      for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
-        if (query_Graph.Has_Spa_Predicate[i] == true) {
-          pos.add(i);
-          targetLabels.add(Label.label(query_Graph.getLabel(i)));
-          count++;
-        }
+    int count = 0;
+    ArrayList<Integer> pos = new ArrayList<Integer>(2);
+    ArrayList<Label> targetLabels = new ArrayList<>(2);
+    for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
+      if (query_Graph.Has_Spa_Predicate[i] == true) {
+        pos.add(i);
+        targetLabels.add(Label.label(query_Graph.getLabel(i)));
+        count++;
       }
-      if (count != 2) {
-        throw new Exception(String
-            .format("Number of query graph spatial predicate is " + "%d, it should be 2!", count));
-      }
+    }
+    if (count != 2) {
+      throw new Exception(String
+          .format("Number of query graph spatial predicate is " + "%d, it should be 2!", count));
+    }
 
-      HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
+    HashMap<Integer, HashMap<Integer, HashSet<String>>> spaPathsMap = recognizePaths(query_Graph);
 
-      long start = System.currentTimeMillis();
-      Util.println(pos);
-      Util.println(spaPathsMap);
-      List<Long[]> idPairs = this.spatialJoinRTreeOverlap(distance, pos, targetLabels, spaPathsMap);
-      // List<Long[]> idPairs = this.spatialJoinRTree(distance, pos, spaPathsMap);
-      join_time = System.currentTimeMillis() - start;
-      join_result_count = idPairs.size();
-      Util.println("join time: " + join_time);
-      Util.println("join count: " + idPairs.size());
+    long start = System.currentTimeMillis();
+    Util.println(pos);
+    Util.println(spaPathsMap);
+    List<Long[]> idPairs = this.spatialJoinRTreeOverlap(distance, pos, targetLabels, spaPathsMap);
+    // List<Long[]> idPairs = this.spatialJoinRTree(distance, pos, spaPathsMap);
+    join_time = System.currentTimeMillis() - start;
+    join_result_count = idPairs.size();
+    Util.println("join time: " + join_time);
+    Util.println("candidate pairs count: " + idPairs.size());
 
+    if (joinBatch) {
+      batchJoin(query_Graph, pos, idPairs, resultPairs);
+    } else {
       for (Long[] idPair : idPairs) {
         start = System.currentTimeMillis();
-        String query = RisoTreeQueryPN.formQueryLAGAQ_Join(query_Graph, pos, idPair, 1,
-            Enums.Explain_Or_Profile.Profile);
+        String query =
+            formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Enums.Explain_Or_Profile.Profile);
         Result result = dbservice.execute(query);
         get_iterator_time += System.currentTimeMillis() - start;
 
@@ -3682,15 +3686,66 @@ public class RisoTreeQueryPN {
         page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
       }
       result_count = resultPairs.size();
-      run_time = System.currentTimeMillis() - totalStart;
-      setQueryStatistics(QueryType.LAGAQ_JOIN);
-      return resultPairs;
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.exit(-1);
     }
-    return null;
+    run_time = System.currentTimeMillis() - totalStart;
+    setQueryStatistics(QueryType.LAGAQ_JOIN);
+    return resultPairs;
   }
+
+  private void batchJoin(Query_Graph query_Graph, ArrayList<Integer> pos, List<Long[]> idPairs,
+      List<Long[]> resultPairs) {
+    int i = 0;
+    String query = "";
+    for (Long[] idPair : idPairs) {
+      if (i == 0) {
+        query = formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Enums.Explain_Or_Profile.Profile);
+        continue;
+      }
+      query += " UNION ALL "
+          + formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Enums.Explain_Or_Profile.Profile);
+      if (i == joinBatchSize) {
+        // runLAGAQJoin(query, resultPairs);
+        long start = System.currentTimeMillis();
+        Result result = dbservice.execute(query);
+        get_iterator_time += System.currentTimeMillis() - start;
+
+        start = System.currentTimeMillis();
+        while (result.hasNext()) {
+          result.next();
+          result_count++;
+          // resultPairs.add(idPair);
+          // OwnMethods.Print(String.format("%d, %f", id, element.distance));
+        }
+        iterate_time += System.currentTimeMillis() - start;
+        start = System.currentTimeMillis();
+
+        planDescription = result.getExecutionPlanDescription();
+        page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+
+        i = 0;
+        query = "";
+      }
+    }
+  }
+
+  // private void runLAGAQJoin(String query, List<Long[]> resultPairs) {
+  // long start = System.currentTimeMillis();
+  // Result result = dbservice.execute(query);
+  // get_iterator_time += System.currentTimeMillis() - start;
+  //
+  // start = System.currentTimeMillis();
+  // if (result.hasNext()) {
+  // result.next();
+  //// resultPairs.add(idPair);
+  // // OwnMethods.Print(String.format("%d, %f", id, element.distance));
+  // }
+  // iterate_time += System.currentTimeMillis() - start;
+  // start = System.currentTimeMillis();
+  //
+  // planDescription = result.getExecutionPlanDescription();
+  // page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+  //
+  // }
 
   private void clearTrackingVariables() {
     Util.println("Clear variables for tracking by setting to 0.");

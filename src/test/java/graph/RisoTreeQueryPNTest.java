@@ -356,7 +356,7 @@ public class RisoTreeQueryPNTest {
   }
 
   @Test
-  public void LAGAQ_JoinTest() {
+  public void LAGAQ_JoinTest() throws Exception {
     // query_Graph = new Query_Graph(3);
     // query_Graph.label_list[0] = 3;
     // query_Graph.label_list[1] = 1;
