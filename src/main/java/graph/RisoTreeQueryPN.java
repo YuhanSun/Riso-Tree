@@ -3694,9 +3694,10 @@ public class RisoTreeQueryPN {
 
   private void batchJoin(Query_Graph query_Graph, ArrayList<Integer> pos, List<Long[]> idPairs,
       List<Long[]> resultPairs) {
-    int i = 0;
+    int i = -1;
     String query = "";
     for (Long[] idPair : idPairs) {
+      i++;
       if (i == 0) {
         query = formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Enums.Explain_Or_Profile.Profile);
         continue;
