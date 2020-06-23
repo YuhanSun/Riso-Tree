@@ -28,6 +28,7 @@ import org.neo4j.graphdb.Transaction;
 import commons.ArrayUtil;
 import commons.Config;
 import commons.Enums;
+import commons.Enums.Explain_Or_Profile;
 import commons.Enums.QueryStatistic;
 import commons.Enums.QueryType;
 import commons.Labels;
@@ -3697,13 +3698,12 @@ public class RisoTreeQueryPN {
     int i = -1;
     String query = "";
     for (Long[] idPair : idPairs) {
-      i++;
       if (i == 0) {
-        query = formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Enums.Explain_Or_Profile.Profile);
+        query = formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
         continue;
       }
       query += " UNION ALL "
-          + formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Enums.Explain_Or_Profile.Profile);
+          + formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Nothing);
       if (i == joinBatchSize) {
         // runLAGAQJoin(query, resultPairs);
         long start = System.currentTimeMillis();
