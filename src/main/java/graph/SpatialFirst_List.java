@@ -852,7 +852,9 @@ public class SpatialFirst_List {
     return null;
   }
 
-  public List<Long[]> spatialJoinRTree(double distance) {
+  public List<Long[]> spatialJoinRTree(double distance, ArrayList<Label> targetLabels) {
+    Label leftLabel = targetLabels.get(0);
+    Label rightLabel = targetLabels.get(1);
     List<Long[]> result = new LinkedList<Long[]>();
     Queue<NodeAndRec[]> queue = new LinkedList<NodeAndRec[]>();
     Transaction tx = dbservice.beginTx();
@@ -888,14 +890,23 @@ public class SpatialFirst_List {
       }
 
       if (left.node.hasRelationship(RTreeRel.RTREE_REFERENCE, Direction.OUTGOING)) {
-        for (NodeAndRec leftChild : leftChildren)
-          for (NodeAndRec rightChild : rightChildern)
+        for (NodeAndRec leftChild : leftChildren) {
+          if (!leftChild.node.hasLabel(leftLabel)) {
+            continue;
+          }
+          for (NodeAndRec rightChild : rightChildern) {
+            if (!rightChild.node.hasLabel(rightLabel)) {
+              continue;
+            }
             if (Util.distance(leftChild.rectangle, rightChild.rectangle) <= distance) {
               long id1 = leftChild.node.getId();
               long id2 = rightChild.node.getId();
-              if (id1 != id2)
+              if (id1 != id2) {
                 result.add(new Long[] {id1, id2});
+              }
             }
+          }
+        }
       } else {
         for (NodeAndRec leftChild : leftChildren) {
           for (NodeAndRec rightChild : rightChildern) {
@@ -923,10 +934,12 @@ public class SpatialFirst_List {
 
       int count = 0;
       ArrayList<Integer> pos = new ArrayList<Integer>(2);
+      ArrayList<Label> targetLabels = new ArrayList<>(2);
       for (int i = 0; i < query_Graph.Has_Spa_Predicate.length; i++) {
         if (query_Graph.Has_Spa_Predicate[i] == true) {
-          count++;
           pos.add(i);
+          targetLabels.add(Label.label(query_Graph.getLabel(i)));
+          count++;
         }
       }
       if (count != 2) {
@@ -935,7 +948,7 @@ public class SpatialFirst_List {
       }
 
       long start = System.currentTimeMillis();
-      List<Long[]> idPairs = this.spatialJoinRTree(distance);
+      List<Long[]> idPairs = this.spatialJoinRTree(distance, targetLabels);
       join_time = System.currentTimeMillis() - start;
       join_result_count = idPairs.size();
 
