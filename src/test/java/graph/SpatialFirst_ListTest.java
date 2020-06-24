@@ -1,7 +1,5 @@
 package graph;
 
-import static org.junit.Assert.*;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,27 +9,20 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.cypher.internal.compiler.v2_3.docgen.plannerDocGen.idNameConverter;
-import org.neo4j.cypher.internal.compiler.v3_1.ast.rewriters.expandCallWhere;
-import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.neo4j.gis.spatial.rtree.RTreeRelationshipTypes;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import com.vividsolutions.jts.index.strtree.STRtree;
 import commons.Config;
 import commons.Entity;
 import commons.Enums;
-import commons.Enums.Explain_Or_Profile;
-import commons.Enums.system;
+import commons.Labels.OSMRelation;
 import commons.MyRectangle;
 import commons.OwnMethods;
 import commons.Query_Graph;
 import commons.RTreeUtility;
 import commons.Util;
-import commons.Labels.OSMRelation;
-import net.sf.geographiclib.Pair;
 
 public class SpatialFirst_ListTest {
 
@@ -246,7 +237,7 @@ public class SpatialFirst_ListTest {
       OwnMethods.ClearCache("syh19910205");
       // FileWriter writer = new FileWriter("D:\\temp\\output1.txt");
       long start = System.currentTimeMillis();
-      List<Long[]> result = spatialFirst_List.spatialJoinRTree(distance);
+      List<Long[]> result = spatialFirst_List.spatialJoinRTree(distance, null);
       Util.println(System.currentTimeMillis() - start);
       Util.println(result.size());
       spatialFirst_List.shutdown();
