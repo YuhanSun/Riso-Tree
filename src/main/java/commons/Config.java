@@ -32,6 +32,13 @@ public class Config {
   public final static int graphNodeCount = 47116657;
   public final static int logInterval = 5000000;
 
+  /**
+   * Used in LAGAQ-Join experiment. Convert the single spatial predicate query graph into join
+   * predicate with two spatial query vertex pair. The query vertex whose label size is less than
+   * this value will be skipped until two satisfying spatial query vertexes are found.
+   */
+  public final static int labelSizeFilterValue = 10000;
+
   public final static String SKIPFLAG = "//";
 
   public void setDatasetName(String pName) {

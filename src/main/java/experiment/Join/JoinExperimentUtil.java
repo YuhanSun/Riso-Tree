@@ -24,6 +24,8 @@ import graph.RisoTreeQueryPN;
 import graph.SpatialFirst_List;
 
 public class JoinExperimentUtil {
+  public final static int labelSizeFilterValue = Config.labelSizeFilterValue;
+
   /**
    * Convert the one-predicate query graph to two-predicate Randomly pick up the next true spatial
    * vertex. The query graph is for LAGAQ-join input. This function is not used for experiment
@@ -70,8 +72,8 @@ public class JoinExperimentUtil {
   }
 
   /**
-   * Convert the one-predicate query graph to two-predicate. Always pick up the second true spatial
-   * vertex. The query graph is for LAGAQ-join input.
+   * Convert the one-predicate query graph to two-predicate. The qualifying label cardinality should
+   * > {@code labelSizeFilterValue}.
    *
    * @param service
    * @param query_Graph
@@ -87,32 +89,37 @@ public class JoinExperimentUtil {
     }
     int nodeCount = query_Graph.graph.size();
 
+    // Clear all the spatial predicates
+    for (int i = 0; i < nodeCount; i++) {
+      query_Graph.Has_Spa_Predicate[i] = false;
+    }
+
+    // Validate the spatial query vertex count should > 2 and no 0-sized label like 'null'.
     int spaCount = 0;
     for (int i = 0; i < nodeCount; i++) {
       Label label = Label.label(query_Graph.label_list_string[i]);
+      if (Neo4jGraphUtility.getLabelCount(service, label.name()) == 0) {
+        return false;
+      }
       if (Neo4jGraphUtility.isLabelSpatial(service, label)) {
         spaCount++;
       }
     }
-
     if (spaCount < 2) {
       return false;
     }
 
-    int idx = 0;
+    // Find two spatial query vertexes that satisfy cardinality > labelSizeFilterValue
+    int foundCount = 0;
     for (int id = 0; id < nodeCount; id++) {
-      if (query_Graph.Has_Spa_Predicate[id]) {
-        continue;
-      }
-
       Label label = Label.label(query_Graph.label_list_string[id]);
-      if (Neo4jGraphUtility.isLabelSpatial(service, label)) {
-        if (idx == 0) {
-          idx++;
-          continue;
-        }
+      if (Neo4jGraphUtility.isLabelSpatial(service, label)
+          && Neo4jGraphUtility.getLabelCount(service, label.name()) > labelSizeFilterValue) {
         query_Graph.Has_Spa_Predicate[id] = true;
-        return true;
+        foundCount++;
+        if (foundCount == 2) {
+          return true;
+        }
       }
     }
     return false;
