@@ -37,7 +37,7 @@ public class Config {
    * predicate with two spatial query vertex pair. The query vertex whose label size is less than
    * this value will be skipped until two satisfying spatial query vertexes are found.
    */
-  public final static int labelSizeFilterValue = 10000;
+  public final static int labelSizeFilterValue = 1000;
 
   public final static String SKIPFLAG = "//";
 
