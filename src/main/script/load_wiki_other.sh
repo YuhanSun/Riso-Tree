@@ -1,8 +1,12 @@
 #!/bin/bash
+# This script is used to load other datasets except for wikidata. The difference is that edges do not have label. 
+# So the edges are loaded using a different function. graphPropertyEdgePath is not used here. 
+
 ./package.sh
 
-dataset="Yelp_100"
+dataset="Yelp_110"
 MAX_HOPNUM=2
+db_dir_name="neo4j-community-3.4.12_node_edges"
 
 # server
 dir="/hdd/code/yuhansun"
@@ -20,18 +24,24 @@ code_dir="${dir}/code"
 # code_dir="D:/Google_Drive/Projects/github_code"
 # db_path="D:/Neo4jData/neo4jDatabases/database-0c3f32e4-025a-4a22-a4cd-a9b979a9adf8/installation-3.4.9/data/databases/graph.db"
 
+# copy the empty neo4j db folder to the target location
+source_dir="/hdd/code/yuhansun/data/neo4j_versions/neo4j-community-3.4.12_ip_modified/"
+target_dir="${data_dir}/${db_dir_name}"
+[ ! -d $source_dir ] && echo "Copy failed!" && echo "$source_dir does not exist!" && exit 1
+[ -d $target_dir ] && echo "Copy failed!" && echo "$target_dir already exists!" && exit 1
+cp -a $source_dir $target_dir
 
 # server setup
-db_path="${data_dir}/neo4j-community-3.4.12_node_edges/data/databases/graph.db"
+db_path="${data_dir}/${db_dir_name}/data/databases/graph.db"
 
 
 graph_path="${data_dir}/graph.txt"
 entity_path="${data_dir}/entity.txt"
 label_path="${data_dir}/graph_label.txt"
 entityStringLabelMapPath="${data_dir}/entity_string_label.txt"
-graphPropertyEdgePath="${data_dir}/graph_property_edge.txt"
-propertyMapPath="${data_dir}/property_map.txt"
-spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
+# graphPropertyEdgePath="${data_dir}/graph_property_edge.txt"
+# propertyMapPath="${data_dir}/property_map.txt"
+# spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN.txt"
 
 jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 java -Xmx100g -jar ${jar_path} -h
