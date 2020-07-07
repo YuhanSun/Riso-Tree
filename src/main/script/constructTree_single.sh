@@ -42,13 +42,13 @@ cp -a $source_dir $target_dir
 
 # Generate the 0-1 hop pn for spatial nodes
 java -Xmx100g -jar ${jar_path} \
--f wikigenerateZeroOneHopPNForSpatialNodes \
--gp ${graph_path} \
--lp ${label_path} \
--ep ${entity_path} \
--entityStringLabelMapPath ${entityStringLabelMapPath} \
--maxPNSize -1 \
--outputPath ${spatialNodePNPath}
+	-f wikigenerateZeroOneHopPNForSpatialNodes \
+	-gp ${graph_path} \
+	-lp ${label_path} \
+	-ep ${entity_path} \
+	-entityStringLabelMapPath ${entityStringLabelMapPath} \
+	-maxPNSize "-1" \
+	-outputPath ${spatialNodePNPath}
 
 # Load graph nodes.
 java -Xmx100g -jar ${jar_path} -f wikidataLoadGraph \
