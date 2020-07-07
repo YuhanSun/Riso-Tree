@@ -10,6 +10,7 @@ import commons.Enums.ClearCacheMethod;
 import commons.Enums.ExperimentMethod;
 import commons.GraphUtil;
 import commons.Util;
+import dataprocess.OtherDatasets;
 import dataprocess.Wikidata;
 import experiment.Alpha;
 import experiment.Analyze;
@@ -55,6 +56,11 @@ public class Driver {
     wikiConstructRTree, wikiConstructPNTime, //
     wikiConstructPNTimeSingleHop, wikiLoadPN, wikiLoadAllHopPN, //
     wikiConstructPNTimeSingleHopNoGraphDb,
+
+    /**
+     * expand spatial label
+     */
+    spatialLabelRelabel,
 
     /**
      * experiment
@@ -127,6 +133,9 @@ public class Driver {
   private static final String input1 = "input1";
   private static final String input2 = "input2";
 
+  // Expand spatial label
+  private static final String newlabelListString = "newlabelListString";
+
   // Experiment
   private static final String labelCount = "labelCount"; // for single-label graph
   private static final String nodeCount = "nodeCount";
@@ -182,6 +191,9 @@ public class Driver {
     options.addOption(inputPath, "inputPath", true, "The input path for analyze");
     options.addOption(input1, "inputPath1", true, "The input 1 for analyze");
     options.addOption(input2, "inputPath2", true, "The input 2 for analyze");
+
+    // Expand spatial label
+    options.addOption(newlabelListString, "newlabelListString", true, "new labels for spatial");
 
     // Experiment
     options.addOption(labelCount, "labelCount", true,
@@ -400,6 +412,11 @@ public class Driver {
             Construct_RisoTree.wikiLoadAllHopPN(cmd.getOptionValue(PNPathAndPrefix),
                 cmd.getOptionValue(hopListStr), cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(containIDPath));
+            break;
+          // expand spatial label
+          case spatialLabelRelabel:
+            OtherDatasets.spatialLabelRelabel(cmd.getOptionValue(inputPath),
+                cmd.getOptionValue(newlabelListString), cmd.getOptionValue(outputPath));
             break;
           // experiment
           case singleLabelListToLabelGraph:
