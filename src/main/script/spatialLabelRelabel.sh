@@ -13,6 +13,6 @@ output_path="${data_dir}/graph_label.txt"
 
 java -Xmx100g -jar ${jar_path} \
 	-f wikiConstructRTree \
-	-input_path $input_path \
-	-output_path $output_path \
+	-inputPath $input_path \
+	-outputPath $output_path \
 	-newlabelListString "102,103,104,105,106,107,108,109,110,111"
