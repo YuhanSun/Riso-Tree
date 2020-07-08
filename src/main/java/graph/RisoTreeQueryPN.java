@@ -121,7 +121,7 @@ public class RisoTreeQueryPN {
   public static Boolean candidateComplete = null;
   public static Map<Integer, MutableBoolean[]> queryNodesComplete = null;
   public final static int candidateSetsSizeLimit = 2000;
-  public final static boolean joinBatch = true;
+  public final static boolean joinBatch = false;
   public final static int joinBatchSize = 500;
 
   public RisoTreeQueryPN(String db_path, String p_dataset, long[] p_graph_pos_map, int pMAXHOPNUM,
