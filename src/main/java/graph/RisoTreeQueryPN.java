@@ -3671,7 +3671,7 @@ public class RisoTreeQueryPN {
         start = System.currentTimeMillis();
         String query =
             formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Enums.Explain_Or_Profile.Profile);
-        LOGGER.info(query);
+        // LOGGER.info(query);
         Result result = dbservice.execute(query);
         get_iterator_time += System.currentTimeMillis() - start;
 
@@ -3701,7 +3701,7 @@ public class RisoTreeQueryPN {
       List<Long[]> curIdPairs = idPairs.subList(i, Math.min(idPairs.size(), i + joinBatchSize));
       String query =
           formQueryLAGAQ_Join_Batch(query_Graph, pos, curIdPairs, Explain_Or_Profile.Profile);
-      LOGGER.info(query);
+      // LOGGER.info(query);
       long start = System.currentTimeMillis();
       Result result = dbservice.execute(query);
       get_iterator_time += System.currentTimeMillis() - start;
