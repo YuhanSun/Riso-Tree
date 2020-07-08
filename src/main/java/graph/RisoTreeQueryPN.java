@@ -121,8 +121,8 @@ public class RisoTreeQueryPN {
   public static Boolean candidateComplete = null;
   public static Map<Integer, MutableBoolean[]> queryNodesComplete = null;
   public final static int candidateSetsSizeLimit = 2000;
-  public final static boolean joinBatch = false;
-  public final static int joinBatchSize = 50;
+  public final static boolean joinBatch = true;
+  public final static int joinBatchSize = 500;
 
   public RisoTreeQueryPN(String db_path, String p_dataset, long[] p_graph_pos_map, int pMAXHOPNUM,
       boolean forceGraphFirst) {
@@ -3671,6 +3671,7 @@ public class RisoTreeQueryPN {
         start = System.currentTimeMillis();
         String query =
             formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Enums.Explain_Or_Profile.Profile);
+        LOGGER.info(query);
         Result result = dbservice.execute(query);
         get_iterator_time += System.currentTimeMillis() - start;
 
@@ -3693,42 +3694,67 @@ public class RisoTreeQueryPN {
     return resultPairs;
   }
 
-  private void batchJoin(Query_Graph query_Graph, ArrayList<Integer> pos, List<Long[]> idPairs,
+  public void batchJoin(Query_Graph query_Graph, ArrayList<Integer> pos, List<Long[]> idPairs,
       List<Long[]> resultPairs) {
     int i = 0;
-    String query = "";
-    for (Long[] idPair : idPairs) {
-      if (i == 0) {
-        query = formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
-        i++;
-        continue;
+    while (true) {
+      List<Long[]> curIdPairs = idPairs.subList(i, Math.min(idPairs.size(), i + joinBatchSize));
+      String query =
+          formQueryLAGAQ_Join_Batch(query_Graph, pos, curIdPairs, Explain_Or_Profile.Profile);
+      LOGGER.info(query);
+      long start = System.currentTimeMillis();
+      Result result = dbservice.execute(query);
+      get_iterator_time += System.currentTimeMillis() - start;
+
+      start = System.currentTimeMillis();
+      while (result.hasNext()) {
+        result.next();
+        result_count++;
       }
-      query += " UNION ALL "
-          + formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Nothing);
-      i++;
-      if (i == joinBatchSize) {
-        // runLAGAQJoin(query, resultPairs);
-        long start = System.currentTimeMillis();
-        Result result = dbservice.execute(query);
-        get_iterator_time += System.currentTimeMillis() - start;
+      iterate_time += System.currentTimeMillis() - start;
+      start = System.currentTimeMillis();
 
-        start = System.currentTimeMillis();
-        while (result.hasNext()) {
-          result.next();
-          result_count++;
-          // resultPairs.add(idPair);
-          // OwnMethods.Print(String.format("%d, %f", id, element.distance));
-        }
-        iterate_time += System.currentTimeMillis() - start;
-        start = System.currentTimeMillis();
+      planDescription = result.getExecutionPlanDescription();
+      page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
 
-        planDescription = result.getExecutionPlanDescription();
-        page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
-
-        i = 0;
-        query = "";
+      i = i + joinBatchSize;
+      if (i >= idPairs.size()) {
+        break;
       }
+
     }
+    // for (Long[] idPair : idPairs) {
+    // if (i == 0) {
+    // query = formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Profile);
+    // i++;
+    // continue;
+    // }
+    // query += " UNION ALL "
+    // + formQueryLAGAQ_Join(query_Graph, pos, idPair, 1, Explain_Or_Profile.Nothing);
+    // i++;
+    // if (i == joinBatchSize) {
+    // // runLAGAQJoin(query, resultPairs);
+    // long start = System.currentTimeMillis();
+    // Result result = dbservice.execute(query);
+    // get_iterator_time += System.currentTimeMillis() - start;
+    //
+    // start = System.currentTimeMillis();
+    // while (result.hasNext()) {
+    // result.next();
+    // result_count++;
+    // // resultPairs.add(idPair);
+    // // OwnMethods.Print(String.format("%d, %f", id, element.distance));
+    // }
+    // iterate_time += System.currentTimeMillis() - start;
+    // start = System.currentTimeMillis();
+    //
+    // planDescription = result.getExecutionPlanDescription();
+    // page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
+    //
+    // i = 0;
+    // query = "";
+    // }
+    // }
   }
 
   // private void runLAGAQJoin(String query, List<Long[]> resultPairs) {
@@ -3749,6 +3775,29 @@ public class RisoTreeQueryPN {
   // page_hit_count += OwnMethods.GetTotalDBHits(planDescription);
   //
   // }
+
+  public static String formQueryLAGAQ_Join_Batch(Query_Graph query_Graph, ArrayList<Integer> pos,
+      List<Long[]> curIdPairs, Explain_Or_Profile explain_Or_Profile) {
+    String query = "";
+    query += CypherEncoder.getMatchPrefix(explain_Or_Profile);
+    query += " ";
+    query += CypherEncoder.getMatchGraphSkeletonString(query_Graph);
+
+    query += " where\n";
+    for (int i = 0; i < curIdPairs.size(); i++) {
+      long id1 = curIdPairs.get(i)[0].longValue();
+      long id2 = curIdPairs.get(i)[1].longValue();
+      if (i == 0) {
+        query += String.format("id(a%d)=%d and id(a%d)=%d", pos.get(0), id1, pos.get(1), id2);
+      } else {
+        query += String.format(" or id(a%d)=%d and id(a%d)=%d", pos.get(0), id1, pos.get(1), id2);
+      }
+    }
+
+    query += String.format(" return distinct id(a%d), id(a%d)", pos.get(0), pos.get(1));
+
+    return query;
+  }
 
   private void clearTrackingVariables() {
     Util.println("Clear variables for tracking by setting to 0.");

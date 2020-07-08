@@ -17,10 +17,12 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Enums;
+import commons.Enums.Explain_Or_Profile;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
 import commons.Query_Graph;
+import commons.TestUtils;
 import commons.Util;
 import cypher.middleware.CypherDecoder;
 
@@ -93,6 +95,17 @@ public class RisoTreeQueryPNTest {
         querygraph_path = String.format("%s\\%d.txt", querygraphDir, nodeCount);
         queryrectCenterPath = String.format("%s\\%s_centerids.txt", spaPredicateDir, dataset);
         queryrect_path = String.format("%s\\queryrect_%d.txt", spaPredicateDir, name_suffix);
+        break;
+      case MacOS:
+        db_path =
+            "/Users/yuhansun/Documents/data/Yelp/neo4j-community-3.4.12_Gleenes_1.0_-1_new_version/data/databases/graph.db";
+        String queryDirectory = "/Users/yuhansun/Google_Drive/Projects/risotree/query";
+        querygraphDir = String.format("%s/query_graph/%s", queryDirectory, dataset);
+        spaPredicateDir = String.format("%s/spa_predicate/%s", queryDirectory, dataset);
+        querygraph_path = String.format("%s/%d.txt", querygraphDir, nodeCount);
+        queryrectCenterPath = String.format("%s/%s_centerids.txt", spaPredicateDir, dataset);
+        queryrect_path = String.format("%s/queryrect_%d.txt", spaPredicateDir, name_suffix);
+        break;
       default:
         break;
     }
@@ -394,5 +407,32 @@ public class RisoTreeQueryPNTest {
     Util.println(result.size());
 
     risoTreeQueryPN.dbservice.shutdown();
+  }
+
+  @Test
+  public void batchJoinTest() {
+    Query_Graph query_Graph = TestUtils.getExampleGraph();
+    ArrayList<Integer> pos = new ArrayList<>(Arrays.asList(0, 1));
+    List<Long[]> idPairs = new ArrayList<>(1000);
+    for (int i = 0; i < 1000; i++) {
+      idPairs.add(new Long[] {(long) 2 * i, (long) (2 * i + 1)});
+    }
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(db_path);
+    RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOPNUM);
+    List<Long[]> resultPairs = new ArrayList<>();
+    risoTreeQueryPN.batchJoin(query_Graph, pos, idPairs, resultPairs);
+    risoTreeQueryPN.dbservice.shutdown();
+  }
+
+  @Test
+  public void formQueryLAGAQ_Join_BatchTest() {
+    Query_Graph query_Graph = TestUtils.getExampleGraph();
+    ArrayList<Integer> pos = new ArrayList<>(Arrays.asList(0, 1));
+    List<Long[]> curIdPairs = new ArrayList<>(3);
+    for (int i = 0; i < 3; i++) {
+      curIdPairs.add(new Long[] {(long) 2 * i, (long) (2 * i + 1)});
+    }
+    Util.println(RisoTreeQueryPN.formQueryLAGAQ_Join_Batch(query_Graph, pos, curIdPairs,
+        Explain_Or_Profile.Profile));
   }
 }
