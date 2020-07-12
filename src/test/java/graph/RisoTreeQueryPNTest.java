@@ -11,13 +11,16 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import commons.Config;
 import commons.Enums;
+import commons.Enums.ExperimentMethod;
 import commons.Enums.Explain_Or_Profile;
+import commons.Enums.QueryType;
 import commons.MyRectangle;
 import commons.Neo4jGraphUtility;
 import commons.OwnMethods;
@@ -25,6 +28,7 @@ import commons.Query_Graph;
 import commons.TestUtils;
 import commons.Util;
 import cypher.middleware.CypherDecoder;
+import experiment.ResultRecord;
 
 public class RisoTreeQueryPNTest {
 
@@ -98,7 +102,7 @@ public class RisoTreeQueryPNTest {
         break;
       case MacOS:
         db_path =
-            "/Users/yuhansun/Documents/data/Yelp/neo4j-community-3.4.12_Gleenes_1.0_-1_new_version/data/databases/graph.db";
+            "/Users/yuhansun/Documents/data/wikidata/neo4j-community-3.4.12_Gleenes_1.0_-1_new_version/data/databases/graph.db";
         String queryDirectory = "/Users/yuhansun/Google_Drive/Projects/risotree/query";
         querygraphDir = String.format("%s/query_graph/%s", queryDirectory, dataset);
         spaPredicateDir = String.format("%s/spa_predicate/%s", queryDirectory, dataset);
@@ -199,6 +203,25 @@ public class RisoTreeQueryPNTest {
     Util.println("located in count:" + risoTreeQueryPN.candidate_count);
 
     risoTreeQueryPN.dbservice.shutdown();
+  }
+
+  @Test
+  public void queryWithIgnoreTest() throws Exception {
+    GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(db_path);
+    RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOPNUM);
+    String query =
+        "match (a0:`primary school`),(a1:`member state of the United Nations`),(a2:`primary school`),(a0)--(a1),(a1)--(a2) where 31.631370 <= a0.lon <= 32.492519 and 1.448870 <= a0.lat <= 2.310019 return id(a0),id(a1),id(a2)";
+    // "match (a0:`cultural heritage ensemble`),(a1:`member state of the United
+    // Nations`),(a2:`architectural structure`),(a0)--(a1),(a1)--(a2) where 10.112599 <= a0.lon <=
+    // 10.222879 and 49.821570 <= a0.lat <= 49.931850 return id(a0),id(a1),id(a2)";
+    // "match (a0:`1`),(a1:`88`),(a2:`1`),(a0)--(a1),(a1)--(a2) where -111.926920 <= a0.lon <=
+    // -111.925709 and 33.489552 <= a0.lat <= 33.490763 return id(a0),id(a1),id(a2)";
+    risoTreeQueryPN.queryWithIgnore(query);
+    ExecutionPlanDescription planDescription = risoTreeQueryPN.planDescription;
+    ResultRecord record = new ResultRecord(QueryType.LAGAQ_RANGE, ExperimentMethod.RISOTREE,
+        risoTreeQueryPN.getQueryStatisticMap(), planDescription);
+    Util.println(record);
+    Util.println(planDescription);
   }
 
   @Test
