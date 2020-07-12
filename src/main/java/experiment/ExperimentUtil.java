@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 import org.neo4j.graphdb.GraphDatabaseService;
+import commons.Config;
 import commons.Enums;
 import commons.Enums.ExperimentMethod;
 import commons.Enums.QueryStatistic;
@@ -43,7 +44,7 @@ public class ExperimentUtil {
       Enums.ExperimentMethod method, int MAX_HOP, String queryPath, int queryCount, String password,
       boolean clearCache, Enums.ClearCacheMethod clearCacheMethod, String outputPath)
       throws Exception {
-    List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
+    List<String> queries = ReadWriteUtil.readFileAllLines(queryPath, Config.SKIPFLAG);
     queries = queries.subList(0, queryCount);
     int queryId = -1;
     List<ResultRecord> records = new ArrayList<>();
