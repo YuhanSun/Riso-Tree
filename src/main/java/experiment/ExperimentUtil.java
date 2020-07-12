@@ -98,7 +98,8 @@ public class ExperimentUtil {
         RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOP);
         risoTreeQueryPN.queryWithIgnore(query);
         planDescription = risoTreeQueryPN.planDescription;
-        record = new ResultRecord(risoTreeQueryPN);
+        record = new ResultRecord(QueryType.LAGAQ_RANGE, ExperimentMethod.RISOTREE,
+            risoTreeQueryPN.getQueryStatisticMap(), risoTreeQueryPN.planDescription);
         break;
       default:
         throw new RuntimeException(String.format("method %s does not exist!", method));
