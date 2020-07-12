@@ -45,6 +45,7 @@ import commons.RisoTreeUtil;
 import commons.Util;
 import cypher.middleware.CypherDecoder;
 import cypher.middleware.CypherEncoder;
+import cypher.middleware.CypherUtil;
 import knn.Element;
 import knn.KNNComparator;
 import knn.NodeAndRec;
@@ -637,6 +638,7 @@ public class RisoTreeQueryPN {
    */
   public String formQueryWithIgnoreNewLabelCombined(String query,
       Map<Integer, Collection<Long>> candidateSets, Query_Graph query_Graph) {
+    query = CypherUtil.removeWhere(query);
     String queryAfterRewrite = null;
     if (completeStrategyUsed) {
       if (candidateComplete == null) {
@@ -677,7 +679,7 @@ public class RisoTreeQueryPN {
   }
 
   /**
-   * Use the id-in way to rewrite the query.
+   * Use the id-in way to rewrite the query. Currently not used.
    *
    * @param query
    * @throws Exception
@@ -717,6 +719,8 @@ public class RisoTreeQueryPN {
       }
     }
 
+    tx.success();
+    tx.close();
     printCandidateSets(candidateSets);
 
     setNewLabel(candidateSets, query_Graph.nodeVariables);
@@ -724,6 +728,8 @@ public class RisoTreeQueryPN {
         formQueryWithIgnoreNewLabelCombined(query, candidateSets, query_Graph);
     Util.println("query after rewrite: \n" + queryAfterRewrite);
 
+
+    tx = dbservice.beginTx();
     runAndTrackTime(queryAfterRewrite);
 
     recoverLabel(candidateSets, query_Graph.nodeVariables);
@@ -870,6 +876,7 @@ public class RisoTreeQueryPN {
    */
   private void setNewLabel(Map<Integer, Collection<Long>> candidateSets, String[] nodeVariables) {
     long start = System.currentTimeMillis();
+    Transaction tx = dbservice.beginTx();
     for (int queryNodeId : candidateSets.keySet()) {
       String nodeVariableName = nodeVariables[queryNodeId];
       for (long neo4jId : candidateSets.get(queryNodeId)) {
@@ -877,6 +884,8 @@ public class RisoTreeQueryPN {
         node.addLabel(Label.label(nodeVariableName));
       }
     }
+    tx.success();
+    tx.close();
     set_label_time += System.currentTimeMillis() - start;
   }
 
