@@ -84,13 +84,15 @@ public class ExperimentUtil {
         Naive_Neo4j_Match naive_Neo4j_Match = new Naive_Neo4j_Match(service);
         naive_Neo4j_Match.query(query);
         planDescription = naive_Neo4j_Match.planDescription;
-        record = new ResultRecord(naive_Neo4j_Match);
+        record = new ResultRecord(QueryType.LAGAQ_RANGE, ExperimentMethod.NAIVE,
+            naive_Neo4j_Match.getQueryStatisticMap(), naive_Neo4j_Match.planDescription);
         break;
       case SPATIAL_FIRST:
         SpatialFirst_List spatialFirst_List = new SpatialFirst_List(service, dataset);
         spatialFirst_List.query_Block(query);
         planDescription = spatialFirst_List.planDescription;
-        record = new ResultRecord(spatialFirst_List);
+        record = new ResultRecord(QueryType.LAGAQ_RANGE, ExperimentMethod.SPATIAL_FIRST,
+            spatialFirst_List.getQueryStatisticMap(), spatialFirst_List.planDescription);
         break;
       case RISOTREE:
         RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOP);
