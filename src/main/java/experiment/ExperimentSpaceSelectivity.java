@@ -725,7 +725,7 @@ public class ExperimentSpaceSelectivity {
     ReadWriteUtil.WriteFile(avgPath, true,
         getRunningArgs(dbPath, MAX_HOP, queryCount, clearCache, clearCacheMethod) + "\n");
     List<QueryStatistic> queryStatistics =
-        ExperimentUtil.getQueryStatistics(QueryType.LAGAQ_JOIN, method);
+        ExperimentUtil.getQueryStatistics(QueryType.LAGAQ_RANGE, method);
     List<String> queryStatisticStrings = ExperimentUtil.getQueryStatisticsStrings(queryStatistics);
     String header = String.join("\t", queryStatisticStrings);
     ReadWriteUtil.WriteFile(avgPath, true, "queryPath\t" + header + "\n");
