@@ -16,6 +16,8 @@ import commons.Config;
 import commons.Enums.ClearCacheMethod;
 import commons.Enums.Datasets;
 import commons.Enums.ExperimentMethod;
+import commons.Enums.QueryStatistic;
+import commons.Enums.QueryType;
 import commons.Enums.system;
 import commons.MyRectangle;
 import commons.OwnMethods;
@@ -722,7 +724,10 @@ public class ExperimentSpaceSelectivity {
 
     ReadWriteUtil.WriteFile(avgPath, true,
         getRunningArgs(dbPath, MAX_HOP, queryCount, clearCache, clearCacheMethod) + "\n");
-    String header = ExperimentUtil.getHeader(method);
+    List<QueryStatistic> queryStatistics =
+        ExperimentUtil.getQueryStatistics(QueryType.LAGAQ_JOIN, method);
+    List<String> queryStatisticStrings = ExperimentUtil.getQueryStatisticsStrings(queryStatistics);
+    String header = String.join("\t", queryStatisticStrings);
     ReadWriteUtil.WriteFile(avgPath, true, "queryPath\t" + header + "\n");
 
     for (String queryPath : queryPathsList) {
@@ -732,9 +737,9 @@ public class ExperimentSpaceSelectivity {
       List<ResultRecord> records = ExperimentUtil.runExperiment(dbPath, dataset, method, MAX_HOP,
           queryPath, queryCount, password, clearCache, clearCacheMethod, avgPath);
 
-      ExperimentUtil.outputDetailResult(records, method, detailPath);
+      ExperimentUtil.outputDetailResult(records, queryStatistics, detailPath);
 
-      String string = ExperimentUtil.getAverageResultOutput(records, method);
+      String string = ExperimentUtil.getAverageResultOutput(records, queryStatistics);
       ReadWriteUtil.WriteFile(avgPath, true, StringUtils.joinWith("\t", queryPath, string) + "\n");
     }
 
