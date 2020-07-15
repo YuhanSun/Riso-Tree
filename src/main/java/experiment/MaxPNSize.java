@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.neo4j.graphdb.GraphDatabaseService;
 import commons.Neo4jGraphUtility;
-import commons.Query_Graph;
 import commons.ReadWriteUtil;
 import commons.Util;
-import cypher.middleware.CypherDecoder;
 import graph.RisoTreeQueryPN;
 
 public class MaxPNSize {
@@ -97,10 +95,11 @@ public class MaxPNSize {
 
   public static ResultRecord risoTreeQuery(String query, RisoTreeQueryPN risoTreeQueryPN)
       throws Exception {
-    Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, risoTreeQueryPN.dbservice);
-    long start = System.currentTimeMillis();
-    risoTreeQueryPN.queryWithIgnoreNewLabel(query, query_Graph);
-    long runTime = System.currentTimeMillis() - start;
+    risoTreeQueryPN.queryWithIgnore(query);
+    // Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, risoTreeQueryPN.dbservice);
+    // long start = System.currentTimeMillis();
+    // risoTreeQueryPN.queryWithIgnoreNewLabel(query, query_Graph);
+    long runTime = risoTreeQueryPN.run_time;
     return new ResultRecord(runTime, risoTreeQueryPN.page_hit_count);
   }
 
