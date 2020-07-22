@@ -23,7 +23,9 @@ do
 	avg_path="${output_dir}/RISOTREE_avg.tsv"
 	detail_path="${output_dir}/RISOTREE_detail.txt"
 	echo "${time}" >> ${avg_path}
+	echo "global clear cache" >> ${avg_path}
 	echo "${time}" >> ${detail_path}
+	echo "global clear cache" >> ${detail_path}
 
 	# alpha=1.0
 	# split_mode="Gleenes"
