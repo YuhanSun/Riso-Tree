@@ -58,6 +58,7 @@ do
 			-password ${password} \
 			-clearCache ${clear_cache} \
 			-clearCacheMethod ${clear_cache_method} \
-			-outputPath ${output_path}
+			-outputPath ${output_path} \
+			>> ${log_path}
 	done
 done
