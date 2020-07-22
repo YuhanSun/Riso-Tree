@@ -6,6 +6,7 @@ password="syhSYH.19910205"
 clear_cache="true"
 clear_cache_method="DOUBLE"
 
+source ./utility.sh
 
 # for dataset in "Yelp_100" "Gowalla_100" "foursquare_100"
 for dataset in "foursquare_100"
@@ -14,6 +15,12 @@ do
 	data_dir="${dir}/data/${dataset}"
 	code_dir="${dir}/code"
 	result_dir="${dir}/result"
+	time=$(get_time)
+	log_path="${result_dir}/${dataset}_log_${time}.txt"
+	avg_path="${result_dir}/RISOTREE_avg.tsv"
+	detail_path="${result_dir}/RISOTREE_detail.txt"
+	echo "${time}" >> ${avg_path}
+	echo "${time}" >> ${detail_path}
 
 	# alpha=1.0
 	# split_mode="Gleenes"
