@@ -2,7 +2,11 @@
 ./package.sh
 
 dir="/hdd/code/yuhansun"
+result_dir="${dir}/result"
+maxPNSize_result_dir="${result_dir}/Riso-Tree/maxPNSizeRisoTreeQuery"
+code_dir="${dir}/code"
 password="syhSYH.19910205"
+
 clear_cache="true"
 clear_cache_method="DOUBLE"
 
@@ -11,14 +15,13 @@ source ./utility.sh
 # for dataset in "Yelp_100" "Gowalla_100" "foursquare_100"
 for dataset in "foursquare_100"
 do
-
 	data_dir="${dir}/data/${dataset}"
-	code_dir="${dir}/code"
-	result_dir="${dir}/result"
+	output_dir="${maxPNSize_result_dir}/${dataset}"
+	mkdir -p ${output_dir}
 	time=$(get_time)
-	log_path="${result_dir}/${dataset}_log_${time}.txt"
-	avg_path="${result_dir}/RISOTREE_avg.tsv"
-	detail_path="${result_dir}/RISOTREE_detail.txt"
+	log_path="${output_dir}/${dataset}_log_${time}.txt"
+	avg_path="${output_dir}/RISOTREE_avg.tsv"
+	detail_path="${output_dir}/RISOTREE_detail.txt"
 	echo "${time}" >> ${avg_path}
 	echo "${time}" >> ${detail_path}
 
@@ -44,10 +47,6 @@ do
 	for selectivity in 0.001
 	do
 		query_path="${query_dir}/${node_count}_${selectivity}"
-
-		output_path="${result_dir}/Riso-Tree/maxPNSizeRisoTreeQuery/${dataset}"
-		mkdir -p ${output_path}
-
 		jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
 		# split_mode="Gleenes"
@@ -65,7 +64,7 @@ do
 			-password ${password} \
 			-clearCache ${clear_cache} \
 			-clearCacheMethod ${clear_cache_method} \
-			-outputPath ${output_path} \
+			-outputPath ${output_dir} \
 			>> ${log_path}
 	done
 done
