@@ -42,7 +42,7 @@ public class ExperimentUtil {
    */
   public static List<ResultRecord> runExperiment(String dbPath, String dataset,
       Enums.ExperimentMethod method, int MAX_HOP, String queryPath, int queryCount, String password,
-      boolean clearCache, Enums.ClearCacheMethod clearCacheMethod, String outputPath)
+      boolean clearCache, Enums.ClearCacheMethod clearCacheMethod)
       throws Exception {
     List<String> queries = ReadWriteUtil.readFileAllLines(queryPath, Config.SKIPFLAG);
     queries = queries.subList(0, queryCount);
@@ -233,7 +233,7 @@ public class ExperimentUtil {
     String[] queryPathList = queryPaths.split(",");
     for (String queryPath : queryPathList) {
       List<ResultRecord> records = runExperiment(dbPath, dataset, method, MAX_HOP, queryPath,
-          queryCount, password, clearCache, clearCacheMethod, outputPath);
+          queryCount, password, clearCache, clearCacheMethod);
       String string = getAverageResultOutput(records, method);
       ReadWriteUtil.WriteFile(outputPath, true,
           StringUtils.joinWith("\t", queryPath, string) + "\n");

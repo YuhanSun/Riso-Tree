@@ -697,7 +697,7 @@ public class ExperimentSpaceSelectivity {
 
         String outputPath = getAvgOutputPath(outputDir, method);
         List<ResultRecord> records = ExperimentUtil.runExperiment(dbPath, dataset, method, MAX_HOP,
-            queryPath, queryCount, password, clearCache, clearCacheMethod, outputPath);
+            queryPath, queryCount, password, clearCache, clearCacheMethod);
 
         ExperimentUtil.outputDetailResult(records, method, detailPath);
 
@@ -735,7 +735,7 @@ public class ExperimentSpaceSelectivity {
       ReadWriteUtil.WriteFile(detailPath, true, "id\t" + header + "\n");
 
       List<ResultRecord> records = ExperimentUtil.runExperiment(dbPath, dataset, method, MAX_HOP,
-          queryPath, queryCount, password, clearCache, clearCacheMethod, avgPath);
+          queryPath, queryCount, password, clearCache, clearCacheMethod);
 
       ExperimentUtil.outputDetailResult(records, queryStatistics, detailPath);
 
