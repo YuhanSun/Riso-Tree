@@ -2,7 +2,12 @@ package experiment;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
+import commons.Enums.ClearCacheMethod;
+import commons.Enums.ExperimentMethod;
+import commons.Enums.QueryStatistic;
+import commons.Enums.QueryType;
 import commons.Neo4jGraphUtility;
 import commons.ReadWriteUtil;
 import commons.Util;
@@ -17,35 +22,49 @@ public class MaxPNSize {
 
 
   public static void maxPNSizeRisoTreeQueryMultiple(String dbPathsStr, String dataset,
-      int MAX_HOPNUM, String queryPath, int queryCount, String outputPath) throws Exception {
+      int MAX_HOPNUM, String queryPath, int queryCount, String password, boolean clearCache,
+      ClearCacheMethod clearCacheMethod, String outputDir) throws Exception {
     String[] dbPaths = dbPathsStr.split(",");
     Util.checkPathExist(dbPaths);
 
-    List<String> queries = ReadWriteUtil.readFileAllLines(queryPath);
-    List<String> queriesSlice = queries.subList(0, queryCount - 1);
+    String detailPath = getDetailOutputPath(outputDir, ExperimentMethod.RISOTREE);
+    String avgPath = getAvgOutputPath(outputDir, ExperimentMethod.RISOTREE);
 
-    String outputDetailPath = outputPath + "_details.csv";
-    String outputAvgPath = outputPath + "_avg.csv";
-    ReadWriteUtil.WriteFile(outputAvgPath, true, String.format("%s\t%d\n", queryPath, queryCount));
-
+    ReadWriteUtil.WriteFile(avgPath, true,
+        getRunningArgs(queryPath, MAX_HOPNUM, queryCount, clearCache, clearCacheMethod) + "\n");
+    List<QueryStatistic> queryStatistics =
+        ExperimentUtil.getQueryStatistics(QueryType.LAGAQ_RANGE, ExperimentMethod.RISOTREE);
+    List<String> queryStatisticStrings = ExperimentUtil.getQueryStatisticsStrings(queryStatistics);
+    String header = String.join("\t", queryStatisticStrings);
+    ReadWriteUtil.WriteFile(avgPath, true, "dbPath\t" + header + "\n");
     for (String dbPath : dbPaths) {
-      Util.checkPathExist(dbPath);
-      ReadWriteUtil.WriteFile(outputDetailPath, true, String.format("%s\n%s\n", dbPath, queryPath));
-      GraphDatabaseService service = Neo4jGraphUtility.getDatabaseService(dbPath);
-      RisoTreeQueryPN risoTreeQueryPN = new RisoTreeQueryPN(service, dataset, MAX_HOPNUM);
-      List<ResultRecord> resultRecords = new ArrayList<>(queryCount);
-      for (String query : queriesSlice) {
-        ResultRecord resultRecord = risoTreeQuery(query, risoTreeQueryPN);
-        resultRecords.add(resultRecord);
-        ReadWriteUtil.WriteFile(outputDetailPath, true,
-            String.format("%d\t%d\n", resultRecord.runTime, resultRecord.pageHit));
-      }
-      ReadWriteUtil.WriteFile(outputAvgPath, true, String.format("%s\t%d\t%d\n", dbPath,
-          ResultRecord.getRunTimeAvg(resultRecords), ResultRecord.getPageHitAvg(resultRecords)));
-      ReadWriteUtil.WriteFile(outputDetailPath, true, "\n");
+      ReadWriteUtil.WriteFile(detailPath, true, queryPath + "\n");
+      ReadWriteUtil.WriteFile(detailPath, true, "id\t" + header + "\n");
+      List<ResultRecord> records =
+          ExperimentUtil.runExperiment(dbPath, dataset, ExperimentMethod.RISOTREE, MAX_HOPNUM,
+              queryPath, queryCount, password, clearCache, clearCacheMethod);
+      ExperimentUtil.outputDetailResult(records, queryStatistics, detailPath);
+
+      String string = ExperimentUtil.getAverageResultOutput(records, queryStatistics);
+      ReadWriteUtil.WriteFile(avgPath, true, StringUtils.joinWith("\t", dbPath, string) + "\n");
     }
-    ReadWriteUtil.WriteFile(outputDetailPath, true, "\n");
-    ReadWriteUtil.WriteFile(outputAvgPath, true, "\n");
+    ReadWriteUtil.WriteFile(detailPath, true, "\n");
+    ReadWriteUtil.WriteFile(avgPath, true, "\n");
+  }
+
+  public static String getAvgOutputPath(String outputDir, ExperimentMethod method) {
+    return String.format("%s/%s_avg.tsv", outputDir, method.toString());
+  }
+
+  public static String getDetailOutputPath(String outputDir, ExperimentMethod method) {
+    return String.format("%s/%s_detail.txt", outputDir, method.toString());
+  }
+
+  public static String getRunningArgs(String queryPath, int MAX_HOP, int queryCount,
+      boolean clearCache, ClearCacheMethod clearCacheMethod) {
+    return String.format(
+        "queryPath:%s, MAX_HOP:%d, queryCount:%d, clearCache:%s, ClearCacheMethod:%s", queryPath,
+        MAX_HOP, queryCount, clearCache, clearCacheMethod);
   }
 
   /**
@@ -99,8 +118,8 @@ public class MaxPNSize {
     // Query_Graph query_Graph = CypherDecoder.getQueryGraph(query, risoTreeQueryPN.dbservice);
     // long start = System.currentTimeMillis();
     // risoTreeQueryPN.queryWithIgnoreNewLabel(query, query_Graph);
-    long runTime = risoTreeQueryPN.run_time;
-    return new ResultRecord(runTime, risoTreeQueryPN.page_hit_count);
+    return new ResultRecord(QueryType.LAGAQ_RANGE, ExperimentMethod.RISOTREE,
+        risoTreeQueryPN.getQueryStatisticMap(), risoTreeQueryPN.planDescription);
   }
 
 }

@@ -2,9 +2,13 @@
 ./package.sh
 
 dir="/hdd/code/yuhansun"
+password="syhSYH.19910205"
+clear_cache="true"
+clear_cache_method="DOUBLE"
 
-for dataset in "Yelp_100" "Gowalla_100" "foursquare_100"
-# dataset="Yelp_100"
+
+# for dataset in "Yelp_100" "Gowalla_100" "foursquare_100"
+for dataset in "foursquare_100"
 do
 
 	data_dir="${dir}/data/${dataset}"
@@ -26,14 +30,16 @@ do
 	# labelStrMapPath="${data_dir}/entity_string_label.txt"
 
 	query_dir="${dir}/result/query/${dataset}"
-	node_count=4
-	query_count=100
+	node_count=3
+	query_count=50
 	# for selectivity in 0.000001 0.00001 0.0001 0.001 0.01
-	for selectivity in 0.01 0.001 0.0001 0.00001 0.000001
+	# for selectivity in 0.01 0.001 0.0001 0.00001 0.000001
+	for selectivity in 0.001
 	do
 		query_path="${query_dir}/${node_count}_${selectivity}"
 
-		output_path="${result_dir}/Riso-Tree/maxPNSizeRisoTreeQuery"
+		output_path="${result_dir}/Riso-Tree/maxPNSizeRisoTreeQuery/${dataset}"
+		mkdir -p ${output_path}
 
 		jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
 
@@ -49,6 +55,9 @@ do
 			-MAX_HOPNUM 2 \
 			-queryPath ${query_path} \
 			-queryCount ${query_count} \
+			-password ${password} \
+			-clearCache ${clear_cache} \
+			-clearCacheMethod ${clear_cache_method} \
 			-outputPath ${output_path}
 	done
 done

@@ -443,6 +443,8 @@ public class Driver {
             MaxPNSize.maxPNSizeRisoTreeQueryMultiple(cmd.getOptionValue(dbPath),
                 cmd.getOptionValue(dataset), Integer.parseInt(cmd.getOptionValue(MAX_HOPNUM)),
                 cmd.getOptionValue(queryPath), Integer.parseInt(cmd.getOptionValue(queryCount)),
+                cmd.getOptionValue(password), Boolean.parseBoolean(cmd.getOptionValue(clearCache)),
+                ClearCacheMethod.valueOf(cmd.getOptionValue(clearCacheMethod)),
                 cmd.getOptionValue(outputPath));
             break;
           case alphaExperiment:
