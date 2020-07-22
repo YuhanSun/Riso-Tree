@@ -37,8 +37,11 @@ public class MaxPNSize {
     List<String> queryStatisticStrings = ExperimentUtil.getQueryStatisticsStrings(queryStatistics);
     String header = String.join("\t", queryStatisticStrings);
     ReadWriteUtil.WriteFile(avgPath, true, "dbPath\t" + header + "\n");
+
+    ReadWriteUtil.WriteFile(detailPath, true, queryPath + "\n\n");
+
     for (String dbPath : dbPaths) {
-      ReadWriteUtil.WriteFile(detailPath, true, queryPath + "\n");
+      ReadWriteUtil.WriteFile(detailPath, true, dbPath + "\n");
       ReadWriteUtil.WriteFile(detailPath, true, "id\t" + header + "\n");
       List<ResultRecord> records =
           ExperimentUtil.runExperiment(dbPath, dataset, ExperimentMethod.RISOTREE, MAX_HOPNUM,
