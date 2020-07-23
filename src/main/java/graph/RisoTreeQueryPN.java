@@ -624,8 +624,8 @@ public class RisoTreeQueryPN {
       }
     }
 
-    // queryWithIgnore(query, query_Graph);
-    queryWithIgnoreNewLabel(query, query_Graph);
+    queryWithIgnore(query, query_Graph);
+    // queryWithIgnoreNewLabel(query, query_Graph);
   }
 
   /**
@@ -911,6 +911,7 @@ public class RisoTreeQueryPN {
    */
   public void queryWithIgnore(String query, Query_Graph query_Graph) throws Exception {
     clearTrackingVariables();
+    long totalStart = System.currentTimeMillis();
     Transaction tx = dbservice.beginTx();
     Map<Integer, Collection<Long>> candidateSets = getCandidateSetWithIgnore(query_Graph);
 
@@ -950,6 +951,7 @@ public class RisoTreeQueryPN {
     }
     tx.success();
     tx.close();
+    run_time = System.currentTimeMillis() - totalStart;
     setQueryStatistics(QueryType.LAGAQ_RANGE);
   }
 
