@@ -1013,7 +1013,7 @@ public class RisoTreeQueryPN {
       if (string.isEmpty()) {
         string += String.format("id(%s) in %s", variable, ids);
       } else {
-        string += String.format(" or id(%s) in %s", variable, ids);
+        string += String.format(" and id(%s) in %s", variable, ids);
       }
     }
     return string;
