@@ -27,8 +27,8 @@ public class MaxPNSize {
     String[] dbPaths = dbPathsStr.split(",");
     Util.checkPathExist(dbPaths);
 
-    String detailPath = getDetailOutputPath(outputDir, ExperimentMethod.RISOTREE);
-    String avgPath = getAvgOutputPath(outputDir, ExperimentMethod.RISOTREE);
+    String detailPath = getDetailOutputPath(outputDir, dataset, ExperimentMethod.RISOTREE);
+    String avgPath = getAvgOutputPath(outputDir, dataset, ExperimentMethod.RISOTREE);
 
     ReadWriteUtil.WriteFile(avgPath, true,
         getRunningArgs(queryPath, MAX_HOPNUM, queryCount, clearCache, clearCacheMethod) + "\n");
@@ -55,12 +55,13 @@ public class MaxPNSize {
     ReadWriteUtil.WriteFile(avgPath, true, "\n");
   }
 
-  public static String getAvgOutputPath(String outputDir, ExperimentMethod method) {
-    return String.format("%s/%s_avg.tsv", outputDir, method.toString());
+  public static String getAvgOutputPath(String outputDir, String dataset, ExperimentMethod method) {
+    return String.format("%s/%s_%s_avg.tsv", outputDir, dataset, method.toString());
   }
 
-  public static String getDetailOutputPath(String outputDir, ExperimentMethod method) {
-    return String.format("%s/%s_detail.txt", outputDir, method.toString());
+  public static String getDetailOutputPath(String outputDir, String dataset,
+      ExperimentMethod method) {
+    return String.format("%s/%s_%s_detail.txt", outputDir, dataset, method.toString());
   }
 
   public static String getRunningArgs(String queryPath, int MAX_HOP, int queryCount,
