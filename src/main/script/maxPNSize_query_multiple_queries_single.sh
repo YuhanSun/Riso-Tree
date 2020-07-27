@@ -7,13 +7,13 @@ maxPNSize_result_dir="${result_dir}/Riso-Tree/maxPNSizeRisoTreeQuery"
 code_dir="${dir}/code"
 password="syhSYH.19910205"
 
-clear_cache="true"
+clear_cache="false"
 clear_cache_method="DOUBLE"
 
 source ./utility.sh
 
-# for dataset in "Yelp_100" "Gowalla_100" "foursquare_100"
-for dataset in "foursquare_100"
+for dataset in "Yelp_100" "Gowalla_100" "foursquare_100" "wikidata"
+# for dataset in "foursquare_100"
 do
 	data_dir="${dir}/data/${dataset}"
 	output_dir="${maxPNSize_result_dir}/${dataset}"
@@ -42,11 +42,18 @@ do
 	# labelStrMapPath="${data_dir}/entity_string_label.txt"
 
 	query_dir="${dir}/result/query/${dataset}"
-	node_count=3
+	node_count=2
 	query_count=50
+
+	if [ $dataset = "wikidata"];	then
+		selectivity_list_str="0.00001 0.0001"
+	else
+		selectivity_list_str="0.0001"
+	fi
+
 	# for selectivity in 0.000001 0.00001 0.0001 0.001 0.01
 	# for selectivity in 0.01 0.001 0.0001 0.00001 0.000001
-	for selectivity in 0.001
+	for selectivity in $selectivity_list_str
 	do
 		query_path="${query_dir}/${node_count}_${selectivity}"
 		jar_path="${code_dir}/Riso-Tree/target/Riso-Tree-0.0.1-SNAPSHOT.jar"
