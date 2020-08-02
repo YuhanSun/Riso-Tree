@@ -624,8 +624,8 @@ public class RisoTreeQueryPN {
       }
     }
 
-    queryWithIgnore(query, query_Graph);
-    // queryWithIgnoreNewLabel(query, query_Graph);
+    // queryWithIgnore(query, query_Graph);
+    queryWithIgnoreNewLabel(query, query_Graph);
   }
 
   /**
