@@ -1,9 +1,11 @@
 #!/bin/bash
 ./package.sh
+source ./utility.sh
 
-# dataset="wikidata"
-dataset="Gowalla_100"
-MAX_HOPNUM=2
+dataset="wikidata"
+# dataset="Gowalla_100"
+
+MAX_HOPNUM=$(get_MAX_HOPNUM $dataset)
 
 cur_dir="/hdd/code/yuhansun/data/${dataset}/add"
 backup_dir="${cur_dir}/backup"
