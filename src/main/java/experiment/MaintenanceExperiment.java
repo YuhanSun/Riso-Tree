@@ -312,10 +312,11 @@ public class MaintenanceExperiment {
       throws Exception {
     String line = String.valueOf(id);
     line += "\t" + edge.start + "\t" + edge.end;
-    
-    Map<MaintenanceStatistic, Object> maintenanceStatisticMap = maintenance.getMaintenanceStatisticMap();
-    for(MaintenanceStatistic maintenanceStatistic : MaintenanceUtil.getMaintenanceStatistic()) {
-      if (maintenanceStatisticMap.containsKey(maintenanceStatistic)) {
+
+    Map<MaintenanceStatistic, Object> maintenanceStatisticMap =
+        maintenance.getMaintenanceStatisticMap();
+    for (MaintenanceStatistic maintenanceStatistic : MaintenanceUtil.getMaintenanceStatistic()) {
+      if (!maintenanceStatisticMap.containsKey(maintenanceStatistic)) {
         throw new Exception(maintenanceStatistic + " does not exist in maintenanceStatisticMap!");
       }
       line += "\t" + maintenanceStatisticMap.get(maintenanceStatistic);
@@ -327,7 +328,7 @@ public class MaintenanceExperiment {
   private static String getAverageOutput(List<Map<MaintenanceStatistic, Object>> records)
       throws Exception {
     String result = "";
-    for(MaintenanceStatistic maintenanceStatistic : MaintenanceUtil.getMaintenanceStatistic()) {
+    for (MaintenanceStatistic maintenanceStatistic : MaintenanceUtil.getMaintenanceStatistic()) {
       result += maintenanceStatistic.name() + ": "
           + MaintenanceUtil.getAverage(records, maintenanceStatistic) + "\n";
     }
