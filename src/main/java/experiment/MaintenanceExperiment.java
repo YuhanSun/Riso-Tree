@@ -2,6 +2,7 @@ package experiment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -13,10 +14,12 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import commons.Edge;
+import commons.Enums.MaintenanceStatistic;
 import commons.GraphUtil;
 import commons.Neo4jGraphUtility;
 import commons.ReadWriteUtil;
 import commons.Util;
+import graph.MaintenanceUtil;
 import graph.RisoTreeMaintenance;
 
 public class MaintenanceExperiment {
@@ -247,9 +250,9 @@ public class MaintenanceExperiment {
     int safeCount = maintenance.safeNodes.size();
     List<Edge> edges = GraphUtil.readEdges(edgePath);
     List<Edge> testEdges = edges.subList(0, testCount);
-    List<ResultRecord> records = new ArrayList<>(testCount);
+    List<Map<MaintenanceStatistic, Object>> records = new ArrayList<>(testCount);
 
-    // Write header
+    // Write summary info
     String outputDetailPath = outputPath + "_details.csv";
     String outputAvgPath = outputPath + "_avg.csv";
     Util.println("output detail path: " + outputDetailPath);
@@ -260,42 +263,35 @@ public class MaintenanceExperiment {
     ReadWriteUtil.WriteFile(outputDetailPath, true,
         String.format("%s\t%s\t%d\n", dbPath, edgePath, testCount));
 
+    // Write header
+    String header = getHeaderString();
+    ReadWriteUtil.WriteFile(outputAvgPath, true, header + "\n");
+    ReadWriteUtil.WriteFile(outputDetailPath, true,
+        String.format("id   startID  endID  %s\n", header));
+
     Transaction tx = databaseService.beginTx();
     Util.println("test edges count: " + testEdges.size());
-    long totalTime = 0;
+    int id = 0;
     for (Edge edge : testEdges) {
       Util.println(edge);
-      long start = System.currentTimeMillis();
       maintenance.addEdge(edge.start, edge.end);
-      long time = System.currentTimeMillis() - start;
-      totalTime += time;
-      records.add(new ResultRecord(time, -1));
-      ReadWriteUtil.WriteFile(outputDetailPath, true, "" + time + "\n");
+      records.add(maintenance.getMaintenanceStatisticMap());
+      ReadWriteUtil.WriteFile(outputDetailPath, true,
+          getDetailOutputLine(id, edge, maintenance) + "\n");
+      id++;
     }
     long start = System.currentTimeMillis();
     tx.success();
     tx.close();
     long commitTime = System.currentTimeMillis() - start;
 
-    String outString = "";
-    outString += "total time: " + totalTime + "\n";
-    outString += "avg time: " + ResultRecord.getRunTimeAvg(records) + "\n";
-    outString += "getPNTime: " + maintenance.getPNTime + "\n";
-    outString += "convertIdTime: " + maintenance.convertIdTime + "\n";
-    outString += "updatePNTime: " + maintenance.updatePNTime + "\n";
-    outString += "updateSafeNodesTime: " + maintenance.updateSafeNodesTime + "\n";
-    outString += "getRTreeLeafNodeTime: " + maintenance.getRTreeLeafNodeTime + "\n";
-    outString += "updateLeafNodePNTime: " + maintenance.updateLeafNodePNTime + "\n";
-    outString += "updateLeafNodeTimeMap: " + maintenance.updateLeafNodeTimeMap + "\n";
-
-    outString += "createEdgeTime: " + maintenance.createEdgeTime + "\n";
+    String outString = getAverageOutput(records);
     outString += "commitTime: " + commitTime + "\n";
-
     outString += "safeCaseHappenCount: " + maintenance.safeCaseHappenCount + "\n";
     outString += "safe count before add: " + safeCount + "\n";
     outString += "safe count after add: " + maintenance.safeNodes.size() + "\n";
-    outString += "visited nodes count: " + maintenance.visitedNodeCount + "\n";
     outString += "update PN count: " + maintenance.updatePNCount + "\n";
+    outString += "updateLeafNodeTimeMap: " + maintenance.updateLeafNodeTimeMap + "\n";
     ReadWriteUtil.WriteFile(outputAvgPath, true, outString);
     if (safeNodesUsed) {
       maintenance.writeBackSafeNodes();
@@ -303,4 +299,38 @@ public class MaintenanceExperiment {
     databaseService.shutdown();
   }
 
+  private static String getHeaderString() {
+    List<MaintenanceStatistic> maintenanceStatistics = MaintenanceUtil.getMaintenanceStatistic();
+    List<String> strings = new LinkedList<>();
+    for (MaintenanceStatistic maintenanceStatistic : maintenanceStatistics) {
+      strings.add(maintenanceStatistic.name());
+    }
+    return String.join("\t", strings);
+  }
+
+  private static String getDetailOutputLine(int id, Edge edge, RisoTreeMaintenance maintenance)
+      throws Exception {
+    String line = String.valueOf(id);
+    line += "\t" + edge.start + "\t" + edge.end;
+    
+    Map<MaintenanceStatistic, Object> maintenanceStatisticMap = maintenance.getMaintenanceStatisticMap();
+    for(MaintenanceStatistic maintenanceStatistic : MaintenanceUtil.getMaintenanceStatistic()) {
+      if (maintenanceStatisticMap.containsKey(maintenanceStatistic)) {
+        throw new Exception(maintenanceStatistic + " does not exist in maintenanceStatisticMap!");
+      }
+      line += "\t" + maintenanceStatisticMap.get(maintenanceStatistic);
+    }
+
+    return line;
+  }
+
+  private static String getAverageOutput(List<Map<MaintenanceStatistic, Object>> records)
+      throws Exception {
+    String result = "";
+    for(MaintenanceStatistic maintenanceStatistic : MaintenanceUtil.getMaintenanceStatistic()) {
+      result += maintenanceStatistic.name() + ": "
+          + MaintenanceUtil.getAverage(records, maintenanceStatistic) + "\n";
+    }
+    return result;
+  }
 }

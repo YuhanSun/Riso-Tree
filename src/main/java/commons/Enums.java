@@ -34,4 +34,9 @@ public class Enums {
     spatial_time, graph_time, overlap_object_count,
   }
 
+  public static enum MaintenanceStatistic {
+    runTime, getPNTime, convertIdTime, updatePNTime, updateSafeNodesTime, getRTreeLeafNodeTime, updateLeafNodePNTime, createEdgeTime, commitTime
+//    outString += "updateLeafNodeTimeMap: " + maintenance.updateLeafNodeTimeMap + "\n";
+    , safeCaseHappenCount, safeCount, safeCountAfterExperiment, visitedNodeCount, updatePNCount
+  }
 }

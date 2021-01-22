@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import commons.Enums.MaintenanceStatistic;
 import commons.Labels;
 import commons.Neo4jGraphUtility;
 import commons.RTreeUtility;
@@ -31,6 +32,7 @@ public class RisoTreeMaintenance {
   String safeNodesPath;
   public Set<Long> safeNodes;
 
+  public long runTime = 0;
   public long getPNTime = 0;
   public long convertIdTime = 0;
   public long updatePNTime = 0;
@@ -40,6 +42,7 @@ public class RisoTreeMaintenance {
   public long createEdgeTime = 0;
 
   public Map<Long, Long> updateLeafNodeTimeMap = new HashMap<>();
+  Map<MaintenanceStatistic, Object> maintenanceStatisticMap = new HashMap<>();
 
   public int safeCaseHappenCount = 0;
   public int visitedNodeCount = 0;
@@ -59,6 +62,35 @@ public class RisoTreeMaintenance {
     this.databaseService = service;
   }
 
+  private void iniLogVariables() {
+    runTime = 0;
+    getPNTime = 0;
+    convertIdTime = 0;
+    updatePNTime = 0;
+    getRTreeLeafNodeTime = 0;
+    updateLeafNodePNTime = 0;
+    updateSafeNodesTime = 0;
+    createEdgeTime = 0;
+    visitedNodeCount = 0;
+    
+    maintenanceStatisticMap = new HashMap<>();
+  }
+
+  private void setMaintenanceStatisticMap() {
+    maintenanceStatisticMap.put(MaintenanceStatistic.runTime, runTime);
+    maintenanceStatisticMap.put(MaintenanceStatistic.getPNTime, getPNTime);
+    maintenanceStatisticMap.put(MaintenanceStatistic.convertIdTime, convertIdTime);
+    maintenanceStatisticMap.put(MaintenanceStatistic.updatePNTime, updatePNTime);
+    maintenanceStatisticMap.put(MaintenanceStatistic.getRTreeLeafNodeTime, getRTreeLeafNodeTime);
+    maintenanceStatisticMap.put(MaintenanceStatistic.updateLeafNodePNTime, updateLeafNodePNTime);
+    maintenanceStatisticMap.put(MaintenanceStatistic.updateSafeNodesTime, updateSafeNodesTime);
+    maintenanceStatisticMap.put(MaintenanceStatistic.createEdgeTime, createEdgeTime);
+  }
+
+  public Map<MaintenanceStatistic, Object> getMaintenanceStatisticMap() {
+    return maintenanceStatisticMap;
+  }
+
   private void readSafeNodes() throws Exception {
     List<String> arrayList = ReadWriteUtil.readFileAllLines(safeNodesPath);
     safeNodes = new HashSet<>();
@@ -68,10 +100,14 @@ public class RisoTreeMaintenance {
   }
 
   public void addEdge(long src, long trg) {
+    iniLogVariables();
+    long start = System.currentTimeMillis();
     addEdge(databaseService.getNodeById(src), databaseService.getNodeById(trg));
+    runTime += System.currentTimeMillis() - start;
+    setMaintenanceStatisticMap();
   }
 
-  public void addEdge(Node src, Node trg) {
+  private void addEdge(Node src, Node trg) {
     if (!safeNodes.contains(src.getId()) || !safeNodes.contains(trg.getId())) {
       addEdgeUpdateCase(src, trg);
     } else {

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -12,75 +13,34 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import commons.Config;
+import commons.Enums.MaintenanceStatistic;
 import commons.Neo4jGraphUtility;
 import commons.Util;
 
 public class MaintenanceUtil {
 
-  // static boolean addEdge(GraphDatabaseService dbservice, Node src, Node trg, int bound) {
-  // HashMap<String, HashSet<Node>> pathNeighborsSrc = getPN(dbservice, src, bound - 1);
-  // HashMap<String, HashSet<Node>> pathNeighborsTrg = getPN(dbservice, trg, bound - 1);
-  //
-  // for (String propertyName : pathNeighborsSrc.keySet()) {
-  // String[] labelList = propertyName.split("_");
-  // String endLabel = labelList[labelList.length - 1];
-  // // if the end label is 1 which indicates it is spatial
-  // if (endLabel.equals("1")) {
-  // int hopDist = labelList.length - 1;
-  // String prefix = getReversePropertyName(labelList);
-  // HashSet<Node> neighbors = pathNeighborsSrc.get(propertyName);
-  //
-  // List<String> usefulProperties = new ArrayList<>();
-  // for (String trgPropertyName : pathNeighborsTrg.keySet()) {
-  // String[] trgLabelList = trgPropertyName.split("_");
-  // if (trgLabelList.length <= bound - hopDist) {
-  // usefulProperties.add(trgPropertyName);
-  // }
-  // }
-  //
-  // if (usefulProperties.size() > 0) {
-  // HashSet<Node> leafNodes = new HashSet<>();
-  // for (Node node : neighbors) {
-  // Node leafNode = node.getSingleRelationship(RTreeRel.RTREE_REFERENCE, Direction.INCOMING)
-  // .getStartNode();
-  // leafNodes.add(leafNode);
-  // }
-  // for (Node leafNode : leafNodes) {
-  // for (String usefulProperty : usefulProperties) {
-  // String updateProperty = prefix + "_" + usefulProperty;
-  // TreeSet<Integer> updateList = new TreeSet<>();
-  // int[] neighborList = null;
-  // if (leafNode.hasProperty(updateProperty)) {
-  // neighborList = (int[]) leafNode.getProperty(updateProperty);
-  // TreeSet<Integer> addIds = new TreeSet<>();
-  // HashSet<Node> nodes = pathNeighborsTrg.get(usefulProperty);
-  // for (int id : neighborList) {
-  // updateList.add(id);
-  // }
-  // for (Node node : nodes) {
-  // updateList.add((int) node.getProperty("id"));
-  // }
-  // } else {
-  // neighborList = new int[0];
-  // }
-  //
-  // if (updateList.size() > neighborList.length) {
-  // int[] updateArray = new int[updateList.size()];
-  // int i = 0;
-  // for (int element : updateList) {
-  // updateArray[i] = element;
-  // i++;
-  // }
-  // leafNode.setProperty(updateProperty, updateArray);
-  // }
-  // }
-  // }
-  // }
-  //
-  // }
-  // }
-  // return true;
-  // }
+  public static <K> long getAverage(List<Map<K, Object>> records, K key)
+      throws Exception {
+    long sum = 0;
+    for (Map<K, Object> map : records) {
+      Object value = map.get(key);
+      if (!map.containsKey(key)) {
+        throw new Exception(key + " does not exist in record!");
+      }
+      sum += Long.parseLong(value.toString());
+    }
+    return sum / records.size();
+  }
+
+  public static List<MaintenanceStatistic> getMaintenanceStatistic() {
+    List<MaintenanceStatistic> maintenanceStatisticList =
+        new LinkedList<>(Arrays.asList(MaintenanceStatistic.runTime, MaintenanceStatistic.getPNTime,
+            MaintenanceStatistic.convertIdTime, MaintenanceStatistic.updatePNTime,
+            MaintenanceStatistic.updateSafeNodesTime, MaintenanceStatistic.getRTreeLeafNodeTime,
+            MaintenanceStatistic.updateLeafNodePNTime, MaintenanceStatistic.createEdgeTime,
+            MaintenanceStatistic.commitTime, MaintenanceStatistic.visitedNodeCount));
+    return maintenanceStatisticList;
+  }
 
   public static String attach(String left, String right) {
     return left + Config.PNSeparator + right;
