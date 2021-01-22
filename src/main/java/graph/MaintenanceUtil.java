@@ -19,8 +19,7 @@ import commons.Util;
 
 public class MaintenanceUtil {
 
-  public static <K> long getAverage(List<Map<K, Object>> records, K key)
-      throws Exception {
+  public static <K> long getAverage(List<Map<K, Object>> records, K key) throws Exception {
     long sum = 0;
     for (Map<K, Object> map : records) {
       Object value = map.get(key);
@@ -38,7 +37,7 @@ public class MaintenanceUtil {
             MaintenanceStatistic.convertIdTime, MaintenanceStatistic.updatePNTime,
             MaintenanceStatistic.updateSafeNodesTime, MaintenanceStatistic.getRTreeLeafNodeTime,
             MaintenanceStatistic.updateLeafNodePNTime, MaintenanceStatistic.createEdgeTime,
-            MaintenanceStatistic.commitTime, MaintenanceStatistic.visitedNodeCount));
+            MaintenanceStatistic.visitedNodeCount));
     return maintenanceStatisticList;
   }
 

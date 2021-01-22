@@ -85,6 +85,7 @@ public class RisoTreeMaintenance {
     maintenanceStatisticMap.put(MaintenanceStatistic.updateLeafNodePNTime, updateLeafNodePNTime);
     maintenanceStatisticMap.put(MaintenanceStatistic.updateSafeNodesTime, updateSafeNodesTime);
     maintenanceStatisticMap.put(MaintenanceStatistic.createEdgeTime, createEdgeTime);
+    maintenanceStatisticMap.put(MaintenanceStatistic.visitedNodeCount, visitedNodeCount);
   }
 
   public Map<MaintenanceStatistic, Object> getMaintenanceStatisticMap() {
