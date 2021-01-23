@@ -33,8 +33,8 @@ public class MaintenanceUtil {
 
   public static List<MaintenanceStatistic> getMaintenanceStatistic() {
     List<MaintenanceStatistic> maintenanceStatisticList =
-        new LinkedList<>(Arrays.asList(MaintenanceStatistic.runTime, MaintenanceStatistic.getPNTime,
-            MaintenanceStatistic.convertIdTime, MaintenanceStatistic.updatePNTime,
+        new LinkedList<>(Arrays.asList(MaintenanceStatistic.runTime, MaintenanceStatistic.getGraphNodePNTime,
+            MaintenanceStatistic.convertIdTime, MaintenanceStatistic.updatePNTimeTotal,
             MaintenanceStatistic.updateSafeNodesTime, MaintenanceStatistic.getRTreeLeafNodeTime,
             MaintenanceStatistic.updateLeafNodePNTime, MaintenanceStatistic.createEdgeTime,
             MaintenanceStatistic.visitedNodeCount));

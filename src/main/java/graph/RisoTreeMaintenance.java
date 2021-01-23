@@ -33,9 +33,9 @@ public class RisoTreeMaintenance {
   public Set<Long> safeNodes;
 
   public long runTime = 0;
-  public long getPNTime = 0;
+  public long getGraphNodePNTime = 0;
   public long convertIdTime = 0;
-  public long updatePNTime = 0;
+  public long updatePNTimeTotal = 0;
   public long getRTreeLeafNodeTime = 0;
   public long updateLeafNodePNTime = 0;
   public long updateSafeNodesTime = 0;
@@ -64,9 +64,9 @@ public class RisoTreeMaintenance {
 
   private void iniLogVariables() {
     runTime = 0;
-    getPNTime = 0;
+    getGraphNodePNTime = 0;
     convertIdTime = 0;
-    updatePNTime = 0;
+    updatePNTimeTotal = 0;
     getRTreeLeafNodeTime = 0;
     updateLeafNodePNTime = 0;
     updateSafeNodesTime = 0;
@@ -78,9 +78,9 @@ public class RisoTreeMaintenance {
 
   private void setMaintenanceStatisticMap() {
     maintenanceStatisticMap.put(MaintenanceStatistic.runTime, runTime);
-    maintenanceStatisticMap.put(MaintenanceStatistic.getPNTime, getPNTime);
+    maintenanceStatisticMap.put(MaintenanceStatistic.getGraphNodePNTime, getGraphNodePNTime);
     maintenanceStatisticMap.put(MaintenanceStatistic.convertIdTime, convertIdTime);
-    maintenanceStatisticMap.put(MaintenanceStatistic.updatePNTime, updatePNTime);
+    maintenanceStatisticMap.put(MaintenanceStatistic.updatePNTimeTotal, updatePNTimeTotal);
     maintenanceStatisticMap.put(MaintenanceStatistic.getRTreeLeafNodeTime, getRTreeLeafNodeTime);
     maintenanceStatisticMap.put(MaintenanceStatistic.updateLeafNodePNTime, updateLeafNodePNTime);
     maintenanceStatisticMap.put(MaintenanceStatistic.updateSafeNodesTime, updateSafeNodesTime);
@@ -125,7 +125,7 @@ public class RisoTreeMaintenance {
         MaintenanceUtil.getPNGeneral(databaseService, src, MAX_HOPNUM - 1);
     Map<String, Set<Node>> pathNeighborsTrg =
         MaintenanceUtil.getPNGeneral(databaseService, trg, MAX_HOPNUM - 1);
-    getPNTime += System.currentTimeMillis() - start;
+    getGraphNodePNTime += System.currentTimeMillis() - start;
 
     for (Set<Node> nodes : pathNeighborsSrc.values()) {
       visitedNodeCount += nodes.size();
@@ -203,7 +203,7 @@ public class RisoTreeMaintenance {
         }
       }
     }
-    updatePNTime += System.currentTimeMillis() - start;
+    updatePNTimeTotal += System.currentTimeMillis() - start;
     if (safeNodesUsed) {
       updateSafeNodes(pathNeighborsTrgSortedIds, MAX_HOPNUM - minDist);
     }

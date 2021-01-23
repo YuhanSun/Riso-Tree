@@ -35,7 +35,7 @@ public class Enums {
   }
 
   public static enum MaintenanceStatistic {
-    runTime, getPNTime, convertIdTime, updatePNTime, updateSafeNodesTime, getRTreeLeafNodeTime, updateLeafNodePNTime, createEdgeTime, commitTime
+    runTime, getGraphNodePNTime, convertIdTime, updatePNTimeTotal, updateSafeNodesTime, getRTreeLeafNodeTime, updateLeafNodePNTime, createEdgeTime, commitTime
 //    outString += "updateLeafNodeTimeMap: " + maintenance.updateLeafNodeTimeMap + "\n";
     , safeCaseHappenCount, safeCount, safeCountAfterExperiment, visitedNodeCount, updatePNCount
   }
