@@ -267,7 +267,7 @@ public class MaintenanceExperiment {
     String header = getHeaderString();
     ReadWriteUtil.WriteFile(outputAvgPath, true, header + "\n");
     ReadWriteUtil.WriteFile(outputDetailPath, true,
-        String.format("id   startID  endID  %s\n", header));
+        String.join("\t", "id", "startID", "endID", header) + "\n");
 
     Transaction tx = databaseService.beginTx();
     Util.println("test edges count: " + testEdges.size());
