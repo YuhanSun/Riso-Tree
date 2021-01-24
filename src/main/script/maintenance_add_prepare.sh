@@ -34,7 +34,7 @@ labelStrMapPath="${data_dir}/entity_string_label.txt"
 spatialNodePNPath="${data_dir}/spatialNodesZeroOneHopPN_-1.txt"
 graph_property_edge_path="${data_dir}/graph_property_edge.txt"
 
-# Create node_edges db if it does exist.
+# Create node_edges db if it does not exist.
 node_edges_db_dir="${data_dir}/neo4j-community-3.4.12_node_edges"
 if [ ! -d "$node_edges_db_dir" ];	then
 	node_edges_db_path="$node_edges_db_dir/data/databases/graph.db"
@@ -52,6 +52,7 @@ if [ ! -d "$node_edges_db_dir" ];	then
 			-gp ${graph_path}
 fi
 
+# Generate spatialNodesZeroOneHopPN_-1.txt file if it does not exist.
 if [ ! -f "$spatialNodePNPath" ];	then
 	java -Xmx100g -jar ${jar_path} \
 	-f wikigenerateZeroOneHopPNForSpatialNodes \
